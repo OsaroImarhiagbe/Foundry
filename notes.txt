@@ -1072,3 +1072,51 @@ View style={{ marginTop: 30, flexDirection: 'row', alignItems: 'center', justify
      next_item={item}
     />}
 
+    <View style={styles.container}>
+                <TouchableOpacity onPress={handleCancel}>
+                    <View style={styles.cancelContainer}>
+                    <Text style={styles.text}>Cancel</Text>
+                    </View>
+                </TouchableOpacity>
+                <TouchableOpacity onPress={handlePost}>
+                    <View style={styles.postContainer}>
+                      {loading ? 
+                        <ActivityIndicator  size='small' color='#fff'/>
+                        :<Text style={styles.text}>Post</Text> }
+                    </View>
+                </TouchableOpacity>
+            </View>
+            <View style={{flex:2,paddingLeft:22}}>
+            <Image
+                source={user?.profileImage || person}
+                placeholder={{blurhash}}
+                style={{height:hp(4.3), aspectRatio:1, borderRadius:100}}
+                transition={500}
+                />
+            </View>
+            <View style={{borderWidth:4,borderColor:'red'}}>
+            <TextInput
+              style={{borderWidth:4,borderColor:'red'}}
+                value={text}
+                onChangeText={setText}
+                numberOfLines={10}
+                multiline={true}
+                placeholder='Enter a post......'
+                placeholderTextColor='#ffffff'
+                />
+          </View>
+
+
+
+
+            {/* <FlatGrid
+                        itemDimension={150}
+                        data={skills}
+                        renderItem={({ item }) => 
+                          ( 
+                          <View style={{backgroundColor:'#252525',padding:30,borderRadius:25,}}>
+                            <Text style={{textAlign:'center'}}>{item}</Text>
+                            </View>
+                        )}
+                        /> */}
+

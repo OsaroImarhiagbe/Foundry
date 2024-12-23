@@ -7,20 +7,53 @@ import { useAuth } from '../authContext';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useNavigation } from '@react-navigation/native';
 import ReplyComponent from './ReplyComponent';
-import {collection,  onSnapshot, orderBy,query} from "firebase/firestore"; 
+import {collection,  onSnapshot, orderBy,query,runTransaction,doc} from "firebase/firestore"; 
 import {  db, } from '../../FireBase/FireBaseConfig';
 
-const CommentComponent = ({content,name,comment_id,post_id}) => {
+const CommentComponent = ({content,name,comment_id,post_id,count,date}) => {
     const [press,setIsPress] = useState(false)
-    const [count, setCount] = useState(0)
+    const [isloading,setLoading] = useState(false)
     const [showReply,setShowReply] = useState(false)
     const [reply,setReply] = useState([])
     const {user} = useAuth();
 
     const navigation = useNavigation();
 
-    const handleLike = () => {
-        setCount(count + 1)
+    const handleLike = async () => {
+      if(isloading) return
+
+      setLoading(true)
+      try{
+        const docRef = doc(db, 'posts',post_id,'comments',comment_id);;
+        await runTransaction(db,async (transaction)=>{
+          const doc = await transaction.get(docRef)
+          if (!doc.exists()) throw new Error ('Document doesnt exists');
+
+          const currentLikes = doc.data().like_count || 0
+          const likeBy = doc.data().liked_by || []
+          const hasliked = likeBy.includes(user.userId)
+
+          let newlike
+          let updatedLike
+
+          if(hasliked){
+            newlike = currentLikes - 1
+            updatedLike = likeBy.filter((id)=> id != user?.userId)
+          }else{
+            newlike = currentLikes + 1
+            updatedLike = [...likeBy,user.userId]
+          }
+          transaction.update(docRef,{
+            like_count:newlike,
+            liked_by:updatedLike
+          })
+        })
+      }catch(err){
+        console.log('error liking comment:',err)
+      }finally{
+        setLoading(false)
+      }
+  
     }
 
     useEffect(() => {
@@ -56,20 +89,18 @@ const CommentComponent = ({content,name,comment_id,post_id}) => {
     <View style={styles.imageText}>
     <Image
         style={{height:hp(4.3), aspectRatio:1, borderRadius:100}}
-        source={user?.profileImage}
-        placeholder={{blurhash}}
-        transition={500}/>
+        source={user?.profileUrl}
+        placeholder={{blurhash}}/>
     <View>
     <Text style={styles.userPost}>{name}</Text>
     <View style={styles.userLocationContainer}>
-    <Text style={styles.userTime}>Time</Text>
     <Text style={styles.userLocation}>Near Domain Street</Text>
     </View>
     </View>
     </View>
       <Text style={styles.postText}>{content}
       </Text>
-      {/* <Text style={styles.postDate}>{date}</Text> */}
+      <Text style={styles.postDate}>{date}</Text>
       <View style={styles.reactionContainer}>
     <TouchableHighlight
                  onShowUnderlay={() => setIsPress(true)}
@@ -86,7 +117,7 @@ const CommentComponent = ({content,name,comment_id,post_id}) => {
         <TouchableOpacity onPress={() => navigation.navigate('CommentReply',{comment_id,post_id})} style={styles.reactionIcon}>
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                 <MaterialCommunityIcons name="comment-processing-outline" size={20}/>
-                <Text style={styles.reactionText}>{count}</Text>
+                <Text style={styles.reactionText}>{reply.length}</Text>
             </View>
         </TouchableOpacity>
       </View>
@@ -94,7 +125,7 @@ const CommentComponent = ({content,name,comment_id,post_id}) => {
         <View style={styles.replycontainer}>
         <View style={{borderBottomWidth:0.5,width:25,borderColor:'#8a8a8a '}}/>
         <Text style={styles.replies}>
-              view {reply.length} replies</Text>
+              view replies</Text>
         </View>
       </TouchableOpacity>
       { showReply && reply.map((replies) => {
@@ -142,8 +173,8 @@ const styles = StyleSheet.create({
     userLocation:{
         fontFamily:'Helvetica-light',
         color:'#fff',
-        marginLeft:100,
         marginTop:5,
+        marginLeft:50,
         fontSize:10,
     },
     postContainer:{

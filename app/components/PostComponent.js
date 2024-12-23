@@ -1,4 +1,4 @@
-import React,{useState} from 'react'
+import React,{useState,useEffect} from 'react'
 import {View,StyleSheet,Text,TouchableOpacity,TouchableHighlight} from 'react-native'
 import { blurhash } from '../../utils/index'
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
@@ -7,18 +7,20 @@ import EvilIcons from 'react-native-vector-icons/EvilIcons'
 import { useAuth } from '../authContext';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useNavigation } from '@react-navigation/native';
-import { collection, runTransaction,doc } from "firebase/firestore";
+import {runTransaction,doc } from "firebase/firestore";
 import { db } from '../../FireBase/FireBaseConfig';
+import { useSelector} from 'react-redux';
 
-const PostComponent = ({content,date,name,id}) => {
+const PostComponent = ({content,date,name,id,url,count,comment_count}) => {
 
     const [press,setIsPress] = useState(false)
-    const [count, setCount] = useState(0)
     const [isloading,setLoading] = useState(false)
+    const profileImage = useSelector((state) => state.user.profileimg)
     const {user} = useAuth();
 
     const navigation = useNavigation();
 
+  
     const handleLike = async () => {
       if(isloading) return
 
@@ -47,7 +49,6 @@ const PostComponent = ({content,date,name,id}) => {
             like_count:newlike,
             liked_by:updatedLike
           })
-          setCount(newlike)
         })
       }catch(err){
         console.log('error liking comment:',err)
@@ -62,19 +63,29 @@ const PostComponent = ({content,date,name,id}) => {
     <View style={styles.imageText}>
     <Image
         style={{height:hp(4.3), aspectRatio:1, borderRadius:100}}
-        source={user?.profileImage}
+        source={profileImage}
         placeholder={{blurhash}}
-        transition={500}/>
+        cachePolicy='none'/>
     <View>
     <Text style={styles.userPost}>{name}</Text>
     <View style={styles.userLocationContainer}>
-    <Text style={styles.userTime}>Time</Text>
     <Text style={styles.userLocation}>Near Domain Street</Text>
     </View>
     </View>
     </View>
-      <Text style={styles.postText}>{content}
+    <View style={{marginTop:5}}>
+    <Text style={styles.postText}>{content} 
       </Text>
+    </View>
+    {url && 
+      <Image
+      source={url}
+      style={{width: wp(80),
+        height: hp(50),
+        alignSelf: 'center',
+        marginVertical: 10,
+        borderRadius:30}}
+      />}
       <Text style={styles.postDate}>{date}</Text>
       <View style={{borderBottomColor:'#8a8a8a',borderBottomWidth:0.5,marginTop:30}}></View>
       <View style={styles.reactionContainer}>
@@ -94,7 +105,7 @@ const PostComponent = ({content,date,name,id}) => {
         <TouchableOpacity onPress={() => navigation.navigate('Comment',{id})} style={styles.reactionIcon}>
           <View style={{ flexDirection: 'row', alignItems: 'center' }}>
             <MaterialCommunityIcons name="comment-processing-outline" size={20} color='#ffffff'/>
-            <Text style={styles.reactionText}>10</Text>
+            <Text style={styles.reactionText}>{comment_count}</Text>
           </View>
         </TouchableOpacity>
         <TouchableOpacity style={styles.reactionIcon}>
@@ -148,7 +159,7 @@ const styles = StyleSheet.create({
         fontFamily:'Helvetica-light',
         color:'#ffffff',
         marginTop:5,
-        marginLeft:100,
+        marginLeft:50,
         fontSize:10,
     },
     postContainer:{

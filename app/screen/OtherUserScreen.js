@@ -170,7 +170,7 @@ const OtherUserScreen = () => {
               <View style={{flexDirection:'row', justifyContent:'space-between',paddingLeft:20}}>
               <Image
                   style={{height:hp(10), aspectRatio:1, borderRadius:100,}}
-                  source={users?.profileImage}
+                  source={users?.profileUrl}
                   placeholder={{blurhash}}
                   transition={500}/>
                   <View style={{marginTop:20,flexDirection:'row', justifyContent:'space-evenly',paddingRight:20}}>
@@ -199,8 +199,7 @@ const OtherUserScreen = () => {
                   </View>
                   <View style={styles.aboutContainer}>
                     <View style={{flexDirection:'row', justifyContent:'space-around'}}>
-                      <SmallButton name='Post'/>
-                      <SmallButton name='Projects'/>
+                      <SmallButton name='Connect'/>
                       <TouchableOpacity onPress={() => navigation.navigate('Edit')}>
                         {!other_user_id &&  <SmallButton name='Edit Profile'/>}
                       </TouchableOpacity>

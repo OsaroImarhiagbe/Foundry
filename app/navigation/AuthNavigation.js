@@ -3,7 +3,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 import LoginScreen from '../screen/LoginScreen';
 import { lazy,Suspense } from 'react';
 import { ActivityIndicator } from 'react-native';
-
+import ProjectScreen from '../screen/ProjectScreen';
 const RegisterScreen = lazy(() => import('../screen/RegisterScreen'))
 const DrawerNavigation = lazy(() => import('./DrawerNavigation'))
 
@@ -61,6 +61,13 @@ const AuthNavigation = () => {
       options={{
         headerShown:false,
         gestureEnabled:false
+      }}/>
+        <Stack.Screen
+      name="ProjectScreen"
+      component={ProjectScreen}
+      options={{
+        headerShown:false,
+        presentation:'modal'
       }}/>
     </Stack.Navigator>
   )

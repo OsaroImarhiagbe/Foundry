@@ -121,8 +121,7 @@ const HomeScreen = () => {
           <TouchableOpacity onPress={() => console.log('text pressed')}><Text style={styles.linkText}>Code</Text></TouchableOpacity>
           <TouchableOpacity onPress={() => console.log('test pressed')}><Text style={styles.linkText}>Learning Path</Text></TouchableOpacity>
         </View>
-        <View style={styles.newcontainer}>
-    <Text style={styles.newsText}>Quick Topics</Text>
+        <View style={{padding:2}}>
     <FlatList
       data={DATA1}
      horizontal
@@ -133,13 +132,13 @@ const HomeScreen = () => {
         </Suspense>}
       ItemSeparatorComponent={Separator}/>
    </View>
-   {mount ? <ActivityIndicator size='Large' color='#fff'/> :  <FlatList
+   {mount ? <ActivityIndicator size='Large' color='#fff'/> : <FlatList
     data={memoPost}
     renderItem={({item}) => <Suspense fallback={<ActivityIndicator size='small' color='#000'/>}>
-      <PostComponent id={item.id} name={item.name} content={item.content} date={item.createdAt.toDate().toLocaleString()}/>
+      <PostComponent count={item.like_count} url={item.imageUrl} id={item.id} name={item.name} content={item.content} date={item.createdAt.toDate().toLocaleString()}comment_count={item.comment_count}/>
       </Suspense>}
     keyExtractor={(item)=> item.id}
-    />}
+    /> } 
 
     </View>
   )
@@ -159,9 +158,10 @@ const styles = StyleSheet.create({
       marginRight:20
     },
     link:{
-      marginVertical:20,
+      marginVertical:10,
       flexDirection:'row',
-      justifyContent:'space-evenly'
+      justifyContent:'space-evenly',
+      padding:10
     },
     messageContainer:{
       marginLeft:40
@@ -191,16 +191,6 @@ const styles = StyleSheet.create({
     color:color.white,
     fontSize:20,
     marginLeft:40
-  },
-  newcontainer:{
-    marginVertical:10,
-    padding:10,
-  },
-  newsText:{
-    fontSize:20,
-    fontFamily:'Helvetica-light',
-    color:'#ffffff',
-    marginBottom:10
   },
   updatecontainer:{
     padding:10

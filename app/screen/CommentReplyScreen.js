@@ -1,4 +1,4 @@
-import React,{useEffect,useState} from 'react'
+import React,{useState} from 'react'
 import {View,Text,StyleSheet,SafeAreaView,TextInput,Platform,Alert,ActivityIndicator,} from 'react-native'
 import {Image} from 'expo-image'
 import { blurhash } from '../../utils/index'
@@ -6,7 +6,7 @@ import { useAuth } from '../authContext'
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import CustomKeyboardView from '../components/CustomKeyboardView';
 import { TouchableOpacity } from 'react-native-gesture-handler'
-import {  addDoc, collection, doc, onSnapshot, orderBy, setDoc, Timestamp,query, getDoc} from "firebase/firestore"; 
+import {  addDoc, collection,Timestamp} from "firebase/firestore"; 
 import {  db, } from '../../FireBase/FireBaseConfig';
 import { useNavigation, useRoute  } from '@react-navigation/native';
 
@@ -42,8 +42,6 @@ const CommentReplyScreen = () => {
         console.error("Error with reply:", error);
       }
     };
-
-    // Handle the "Cancel" button with unsaved changes check
 const handleCancel = () => {
   if (hasUnsavedChanges) {
     Alert.alert(
@@ -54,12 +52,12 @@ const handleCancel = () => {
         {
           text: 'Discard',
           style: 'destructive',
-          onPress: () => navigation.goBack(), // Navigate only if user confirms
+          onPress: () => navigation.goBack(),
         },
       ]
     );
   } else {
-    navigation.goBack(); // No unsaved changes, navigate immediately
+    navigation.goBack();
   }
 }
   return (<CustomKeyboardView

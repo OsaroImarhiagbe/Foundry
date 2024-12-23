@@ -1,11 +1,11 @@
 import React,{lazy,Suspense,useEffect,useState} from 'react'
-import {View,Text,StyleSheet,FlatList,Platform,ScrollView, TextInput,TouchableOpacity, ActivityIndicator,KeyboardAvoidingView,SafeAreaView} from 'react-native'
+import {View,Text,StyleSheet,Platform,ScrollView, TextInput,TouchableOpacity, ActivityIndicator,KeyboardAvoidingView,} from 'react-native'
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import Feather from 'react-native-vector-icons/Feather';
-import { addDoc, collection,onSnapshot, Timestamp,query, getDocs,where,or,updateDoc} from "firebase/firestore"; 
+import { addDoc, collection,onSnapshot, Timestamp,query, getDocs,where,updateDoc,runTransaction,doc} from "firebase/firestore"; 
 import { db} from '../../FireBase/FireBaseConfig';
 import { useAuth } from '../authContext';
-import { useSelector,useDispatch } from 'react-redux';
+import {useDispatch } from 'react-redux';
 import { addComment } from '../features/PostandComments/socialSlice';
 import { useRoute } from '@react-navigation/native';
 import ChatRoomHeader from '../components/ChatRoomHeader';
@@ -24,7 +24,6 @@ const CommentScreen = () => {
   const [text,setText] = useState('')
   const dispatch = useDispatch()
   const navigation = useNavigation()
-  //const postIds = useSelector(state => state.social.posts.allIds);
   useEffect(() => {
     setLoading(true)
     setTimeout(() => {
@@ -53,7 +52,7 @@ const CommentScreen = () => {
     navigation.goBack();
   }
 
-  const handleSend = async () => { // will handle sending the comment to firebase, and parentId key and set value to postId ( id of post)
+  const handleSend = async () => {
     try{
       const commentMessageRef = collection(db,'posts',id,'comments')
       const newDoc = await addDoc(commentMessageRef,{
@@ -66,23 +65,25 @@ const CommentScreen = () => {
         id:newDoc.id
       })
       console.log('comment id:',newDoc.id)
-      dispatch(addComment({id:newDoc.id,postId:id,content:text})) // grab the new comment id add to redux store.
+      // dispatch(addComment({id:newDoc.id,postId:id,content:text}))
       setText('')
+      const postDocRef = doc(db,'posts',id)
+      await runTransaction(db,async (transaction)=>{
+        const doc = await transaction.get(postDocRef)
+        if (!doc.exists()) throw new Error('Doc does not exists!!')
+        const commentCount = doc.data().comment_count || 0 // Get the coun
+        transaction.update(postDocRef,{
+          comment_count:commentCount + 1
+        })
+      })
     }catch(e){
       console.log('Error:',e)
     }
   }
 const grabCurrentPost = async () => { 
-  /// grabbing the current comment can use postId to grab current comment from redux store
   try{
     const docRef = collection(db, 'posts')
-    // const postmessageRef = collection(docRef,)
-    const q = query(
-      docRef,
-      or(
-        where('id', '==', id)
-      )
-    );
+    const q = query(docRef,(where('id', '==', id)));
     const querySnapShot = await getDocs(q)
     let data = []
     querySnapShot.forEach(doc => {
@@ -109,13 +110,13 @@ const grabCurrentPost = async () => {
        <View>
         {currentComment.map((comment) => {
           return <Suspense key={comment.id} fallback={<ActivityIndicator size='small' color='#fff'/>}>
-            <PostComponent name={comment.name} content={comment.content}/>
+            <PostComponent url={comment.imageUrl} count={comment.like_count} name={comment.name} content={comment.content} comment_count={comment.comment_count} date={comment.createdAt.toDate().toLocaleString()}/>
           </Suspense>
         })}</View>
         {comments.map((comment) => {
          
           return <Suspense key={comment.id}  fallback={<ActivityIndicator size='small' color='#fff'/>}>
-                  <CommentComponent content={comment.content} name={comment.name} comment_id={comment.id} post_id={id}/>
+                  <CommentComponent count={comment.like_count} content={comment.content} name={comment.name} comment_id={comment.id} post_id={id} date={comment.createdAt.toDate().toLocaleString()}/>
             </Suspense>
         })}
         </ScrollView>
@@ -124,7 +125,7 @@ const grabCurrentPost = async () => {
          <View style={styles.messageInput}>
          <TextInput
          value={text}
-         onChangeText={(item) => setText(item)}
+         onChangeText={(text) => setText(text)}
          style={[styles.textinput,{fontSize:hp(1.5)}]}
            placeholder='Comment....'
            placeholderTextColor="#000"

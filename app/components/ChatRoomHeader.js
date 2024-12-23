@@ -16,7 +16,7 @@ import {
   } from 'react-native-popup-menu';
 import { MenuItems } from './CustomMenu';
 import Entypo from 'react-native-vector-icons/Entypo';
-
+import { useSelector} from 'react-redux';
 
 
   
@@ -29,6 +29,7 @@ const ChatRoomHeader = ({title,onPress,icon,onPress2,backgroundColor,icon2}) => 
     const { user,logout } = useAuth();
     const [isLoading, setLoading] = useState(false)
     const navigation = useNavigation();
+    const profileImage = useSelector((state) => state.user.profileimg)
 
     const Divider = () => {
         return (
@@ -75,9 +76,9 @@ const ChatRoomHeader = ({title,onPress,icon,onPress2,backgroundColor,icon2}) => 
         <View>
         <Image
         style={{height:hp(4.3), aspectRatio:1, borderRadius:100}}
-        source={user?.profileimage}
+        source={profileImage}
         placeholder={{blurhash}}
-        transition={500}/>
+        cachePolicy='none'/>
         </View>
       </MenuTrigger>
       <MenuOptions

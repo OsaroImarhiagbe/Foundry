@@ -1,139 +1,72 @@
-
-import {View, Text, StyleSheet, ScrollView, TouchableOpacity,Dimensions,ActivityIndicator,RefreshControl} from 'react-native'
+import {View, Text, StyleSheet, ScrollView, TouchableOpacity,Dimensions,ActivityIndicator,RefreshControl,Modal} from 'react-native'
 import {lazy,Suspense} from 'react'
 import color from '../../config/color';
 import { useNavigation } from '@react-navigation/native';
-import {useState, useEffect,useCallback} from 'react';
+import {useState, useEffect,useCallback,useRef} from 'react';
 import { useAuth } from '../authContext';
 import { Image } from 'expo-image';
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
-import { useRoute } from '@react-navigation/native';
-import AntDesign from 'react-native-vector-icons/AntDesign';
 import {db} from '../../FireBase/FireBaseConfig';
-import {getDoc,doc } from 'firebase/firestore';
+import {getDoc,doc, collection, onSnapshot,query,where } from 'firebase/firestore';
 import ChatRoomHeader from '../components/ChatRoomHeader';
 import SmallButton from '../components/SmallButton';
-import { FlatGrid} from 'react-native-super-grid'
 import FollowComponent from '../components/FollowComponent';
 import { blurhash } from '../../utils/index';
-import { useSelector } from 'react-redux';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+
 
 const { width, height } = Dimensions.get('window');
 const skills = ['Python','react','react native','Javascript','SQL','HTML/CSS','Linux','Django']
+
 const PostComponent = lazy(() => import('../components/PostComponent'))
 
-const Screen1 = () => {
-  return (
-    <ScrollView style={{backgroundColor:color.backgroundcolor}}>
-       <View style={{backgroundColor:color.backgroundcolor}}>
-                      <View style={{width,height}}>
-                      <View style={{paddingLeft:85,justifyContent:'center',alignItems:'flex-start'}}>
-                      </View>
-                      {skills.map((skill,index) => {
-                        return <Suspense key={index} fallback={<ActivityIndicator size='small' color='#000'/>}>
-                          <View style={{padding:10,paddingRight:20}}>
-                          <PostComponent/>
-                        </View>
-                          </Suspense>
-                      })}
-                     </View>
-                     </View>
-                     </ScrollView>
-  )
-   
-   
-}
-const Screen2 = () => {
-  return (
-    <View style={{flex:1,backgroundColor:color.backgroundcolor}}>
-                       <View style={{width,height}}>
-                      <View style={{paddingRight:120,justifyContent:'center',alignItems:'flex-end'}}>
-                      </View>
-                      <View style={{padding:10,paddingRight:50}}>
-                      <FlatGrid
-                        itemDimension={150}
-                        data={skills}
-                        renderItem={({ item }) => 
-                          ( 
-                          <View style={{backgroundColor:'#252525',padding:30,borderRadius:25,}}>
-                            <Text style={{textAlign:'center'}}>{item}</Text>
-                            </View>
-                        )}
-                        />
-                      </View>
-               </View>
-                     </View>
-  )
-}
+
+
 const Tab = createMaterialTopTabNavigator();
+const Stack = createNativeStackNavigator()
 
-const Navigation = () => {
-  return (
-    <View style={{ flex: 1, height: hp(100) }}>
-       <Tab.Navigator
-    screenOptions={{
-      headerShown:false,
-      swipeEnabled:true,
-      tabBarIndicatorStyle:{
-        backgroundColor:'#00BF63'
-      },
-      tabBarStyle:{
-        backgroundColor:color.backgroundcolor,
-      },
-      tabBarShowLabel:false
-    }}
-    >
-      <Tab.Screen
-        name='here'
-        component={Screen1}
-        options={{
-          tabBarIcon:() => (
-            <MaterialCommunityIcons name='home' color='#00bf63' size={25}
-            />),
-        }}
-        />
-         <Tab.Screen
-        name='here1'
-        component={Screen2}
-        options={{
-          lazy,
-          tabBarIcon:() => (
-            <MaterialCommunityIcons name='home' color='#00bf63' size={25}
-            />),
-        }}
-        />
-      </Tab.Navigator>
-    </View>
-   
-
-  )
-}
  
 const AccountScreen = () => {
 
   const [users, setUsers] = useState('')
   const [isloading,setLoading] = useState(false)
-
- 
+  const [posts,setPosts] = useState([])
+  const [modalVisible,setModalVisible] = useState(false)
 
   const { user } = useAuth();
   const navigation = useNavigation();
   console.log('account:',user)
   const isCurrentUser = user
   console.log('is current user',isCurrentUser)
-  const user_id = useSelector((state) => state.user.currentuserID)
-  //const other_user_id = useSelector((state)=>state.search.searchID)
   const [refreshing, setRefreshing] = useState(false);
   
-  const follow_items = [{count:500,content:'following'},{count:2000,content:'followers'},{count:100,content:'posts'}]
+  const follow_items = [{count:500,content:'following'},{count:2000,content:'followers'},{count:posts.length,content:'posts'}]
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
-    await fetchUser(); // Re-fetch user data
-    setRefreshing(false); // End refreshing state
+    await fetchUser();
+    setRefreshing(false);
   }, [user]);
+
+  useEffect(() => {
+    try{
+      const docRef = collection(db,'posts')
+      const q = query(docRef,where('name','==',user?.username))
+      const unsub = onSnapshot(q,(snapShot) => {
+        let data = []
+        snapShot.forEach(doc => {
+          data.push({...doc.data(),id:doc.id})
+        })
+        setPosts(data)
+      })
+    }catch(err){
+      console.log('error grabbing user post:',err)
+    }
+    
+  },[user])
 
   useEffect(() => {
     setLoading(true)
@@ -157,11 +90,39 @@ const AccountScreen = () => {
 
 
 
+  const Post = () => (
+    <ScrollView
+    scrollEnabled={true}
+     style={{flex:1,backgroundColor:color.backgroundcolor}}>
+      <View style={{flex:1,backgroundColor:color.backgroundcolor}}>
+      {posts.map((post) => (
+        <Suspense key={post.id} fallback={<ActivityIndicator size="small" color="#000" />}>
+          <View style={{padding: 10 }}>
+            <PostComponent count={post.like_count} url={post.imageUrl} id={post.id} name={post.name} content={post.content} date={post.createdAt.toDate().toLocaleString()} />
+          </View>
+        </Suspense>
+      ))}
+    </View>
+    </ScrollView>
+    
+  ); 
   
-
-
+  const Projects = () => (
+    <ScrollView style={{flex:1,backgroundColor:color.backgroundcolor}}>
+    <View style={{flex:1,backgroundColor:color.backgroundcolor,padding:50}}>
+      {skills.map((item, index) => (
+        <TouchableOpacity key={index} onPress={()=>navigation.navigate('ProjectScreen')}>
+           <View style={{ backgroundColor: '#252525', borderRadius: 25, padding: 20,marginBottom:10 }}>
+          <Text style={{ textAlign: 'center', color: '#fff' }}>{item}</Text>
+        </View>
+        </TouchableOpacity>
+      ))}
+    </View>
+    </ScrollView>
+  );
 
   return (
+  
     <View style={styles.screen}>
       <ChatRoomHeader 
         onPress={()=>navigation.navigate('Main')} 
@@ -169,31 +130,31 @@ const AccountScreen = () => {
         icon='keyboard-backspace' 
         onPress2={() => navigation.navigate('Message')}
         />
-        {isloading ? <ActivityIndicator size='large'color='#fff'/> :
-        <ScrollView
+      <ScrollView
+      scrollEnabled={true}
+        showsVerticalScrollIndicator={false}
+        style={styles.screen}
+        contentContainerStyle={{flexGrow:1}}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh}/>}
         >
         <View style={styles.profileContainer}>
           <View style={{flexDirection:'row', justifyContent:'space-between',paddingLeft:20}}>
           <Image
               style={{height:hp(10), aspectRatio:1, borderRadius:100,}}
-              source={user?.profileImage}
+              source={users.profileUrl}
               placeholder={{blurhash}}
-              transition={500}/>
-              <View style={{marginTop:20,flexDirection:'row', justifyContent:'space-evenly',paddingRight:20}}>
+              cachePolicy='none'/>
+              <View style={{marginTop:5,flexDirection:'row', justifyContent:'space-evenly',paddingRight:20}}>
               <Text style={{fontSize:30, color:'#fff'}}>  {
                     isCurrentUser ? (<Text style={styles.username}>@{users?.name}</Text>) 
                     : (<Text style={styles.username}>@{users?.username}</Text>)
                   }</Text>
-                  {!isCurrentUser && (
-              <TouchableOpacity style={{paddingLeft:20}}onPress={() => navigation.navigate('Chat',{userid:userId,name:users?.username})}>
-                <AntDesign name='message1' size={25} color='#00BF63'/>
-              </TouchableOpacity>)}
               </View>
               </View>
               <View style={{alignItems:'flex-end',flexDirection:'column',marginBottom:20,paddingRight:20}}>
               <Text style={styles.title}>{users.jobtitle}</Text>
               <Text style={styles.location}>Ann Arbor,MI</Text>
+              </View>
               </View>
               <View style={styles.textcontainer}>
                 <View style={{flexDirection:'column',alignItems:'stretch'}}>
@@ -206,54 +167,68 @@ const AccountScreen = () => {
               </View>
               <View style={styles.aboutContainer}>
                 <View style={{flexDirection:'row', justifyContent:'space-around'}}>
-                  <SmallButton name='Post'/>
-                  <SmallButton name='Projects'/>
+                  <SmallButton name='Something'/>
                   <TouchableOpacity onPress={() => navigation.navigate('Edit')}>
                     {isCurrentUser &&  <SmallButton name='Edit Profile'/>}
                   </TouchableOpacity>
                 </View>
                 </View>
-            
-                <Navigation/>
+                <View style={{flex: 1}}>
+                  <Tab.Navigator
+                screenOptions={{
+                  headerShown:false,
+                  swipeEnabled:true,
+                  tabBarIndicatorStyle:{
+                    backgroundColor:'#00BF63'
+                  },
+                  tabBarStyle:{
+                    backgroundColor:color.backgroundcolor,
+                  },
+                  tabBarShowLabel:false
+                }}
+                >
+                  <Tab.Screen
+                    name='Post'
+                    component={Post}
+                    options={{
+                      tabBarIcon:() => (
+                        <MaterialCommunityIcons name='post' color='#00bf63' size={25}
+                        />),
+                    }}
+                    />
+                    <Tab.Screen
+                    name='Projects'
+                    component={Projects}
+                    options={{
+                      lazy,
+                      tabBarIcon:() => (
+                        <MaterialIcons name='work' color='#00bf63' size={25}
+                        />),
+                    }}
+                    />
+                  </Tab.Navigator>
+                </View>
+                </ScrollView>
                 
-               
-        </View>
-        </ScrollView> 
-        }
-      
     </View>
-   
   )
 }
 
 const styles = StyleSheet.create({
   aboutContainer:{
     marginTop:10,
-    padding:10,
   },
   aboutText:{
     fontSize:15,
     fontWeight:'bold'
   },
   profileContainer:{
-    marginTop:20,
+    marginTop:10,
     padding:10,
   },
   screen:{
     backgroundColor:'#1F1F1F',
     flex:1
-  },
-  space:{
-    height:30
-  },
-  container:{
-    marginVertical:70,
-    padding:10,
-    flexDirection:'row',
-    },
-  container1:{
-      backgroundColor:color.white,
-       
   },
   text:{
     fontSize:12,
@@ -262,7 +237,7 @@ const styles = StyleSheet.create({
     padding:5
   },
   textcontainer:{
-    marginTop:10,
+    marginTop:5,
     padding:10,
   },
   username:{

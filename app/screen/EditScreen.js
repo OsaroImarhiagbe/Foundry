@@ -3,18 +3,18 @@ import { useState } from 'react';
 import ChatRoomHeader from '../components/ChatRoomHeader';
 import color from '../../config/color';
 import { useNavigation } from '@react-navigation/native';
-import AppTextInput from '../components/AppTextInput';
-import Button from '../components/Button';
 import { useAuth } from '../authContext';
 import { db} from '../../FireBase/FireBaseConfig';
 import { updateDoc,doc} from 'firebase/firestore';
-import { getAuth,updatePassword} from 'firebase/auth'
 import { Image } from 'expo-image';
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import { blurhash } from '../../utils/index';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import Feather from 'react-native-vector-icons/Feather';
-
+import * as ImagePicker from 'expo-image-picker';
+import axios from 'axios'
+import { useSelector,useDispatch } from 'react-redux';
+import { addImage } from '../features/user/userSlice';
 
 
   const Sections = [
@@ -115,18 +115,48 @@ const sections = [
 const EditScreen = () => {
 
     const navigation = useNavigation();
+    const [profileUrl,setProfileUrl] = useState(null)
+    const dispatch = useDispatch()
+    const profileImage = useSelector((state) => state.user.profileimg)
     const {user} = useAuth()
-    const currentuser = getAuth()
 
-
-   
-    
     const [form, setForm] = useState({
         darkMode:true,
         wifi:false,
         showCollaborators:true,
         accessibilityMode: false
     })
+
+    const pickImage = async () => {
+        try{
+            let results = await ImagePicker.launchImageLibraryAsync({
+                mediaTypes: ['images'],
+                allowsEditing:true,
+                quality:1
+              })
+            console.log('Image results:',results)
+            if(!results.canceled){
+                const formData = new FormData()
+                formData.append('file',{
+                    uri: results.assets[0].uri,
+                    type: "image/jpeg",
+                    name: "photo.jpg"
+                })
+            const uploadResponse = await axios.post('http://192.168.1.253:8000/api/profile_images/',formData,{headers:{'Content-Type':'multipart/form-data'}})
+            const docRef = doc(db,'users',user.userId)
+            await updateDoc(docRef,{
+                profileUrl:uploadResponse.data.file
+            })
+            setProfileUrl(uploadResponse.data.file)
+            dispatch(addImage({profileimg:uploadResponse.data.file}))
+            }else{
+                console.log('user cancelled the image picker.')
+            }
+        }catch(err){
+            console.log('Error picking image and uploading to s3:',err)
+        }
+        }
+      
   
   
 
@@ -148,12 +178,16 @@ const EditScreen = () => {
         <View style={{padding:40}}>
         <View style={{flexDirection:'row'}}>
         <Image
-            style={{height:hp(5), aspectRatio:1, borderRadius:100,}}
-            source={user?.profileImage}
+            style={{height:hp(5), aspectRatio:1, borderRadius:100}}
+            source={profileImage}
             placeholder={{blurhash}}
-            transition={500}/>
+            transition={500}
+            cachePolicy='none'/>
         <View style={{marginLeft:40,marginTop:10}}>
         <Text style={{color:'#fff',fontSize:20}}>Isa Kuhn</Text>
+        <TouchableOpacity style={{marginTop:5}} onPress={pickImage}>
+        <Text style={{color:'#fff',fontSize:12}}>Edit picture</Text>
+        </TouchableOpacity>
         </View>
         </View>
         <View style={{marginTop:40}}>
@@ -170,10 +204,10 @@ const EditScreen = () => {
                           <MaterialIcons name={icon} size={15} color="#ffffff" />
                               </View>
                               </View>
-                      <View style={{ paddingLeft: 10, flex: 1 }}>
-                      <Text style={{ fontSize: 18,color:'#fff' }}>@{name}</Text>
+                      <View style={{ paddingLeft: 10, flex: 1}}>
+                      <Text style={{ fontSize: 18,color:'#fff'}}>@{name}</Text>
                       <View style={{ marginTop: 3 }}>
-                      <Text style={{ fontSize: 12,color:'#fff' }}>{type}</Text>
+                      <Text style={{ fontSize: 12,color:'#fff'}}>{type}</Text>
                       </View>
                       </View>
                       <View style={{ backgroundColor: '#3b3b3b', borderRadius: 5, width: 30, padding: 5 }}>
@@ -206,8 +240,6 @@ const EditScreen = () => {
                             {type === 'toggle' && 
                             <Switch value={form[id]}
                             onValueChange={value => setForm({...form,[id]: value})}/>}
-
-
                             {type === 'link' && 
                             <View style={{ backgroundColor: '#3b3b3b', borderRadius: 5, width: 30, padding: 5 }}>
                                 <View style={{ alignItems: 'center' }}>
@@ -222,8 +254,6 @@ const EditScreen = () => {
                 </View>
             ))}
             </View>
-         
- 
         </View>
         </View>
         </ScrollView>

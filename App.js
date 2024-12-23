@@ -10,7 +10,8 @@ import AuthNavigation from './app/navigation/AuthNavigation';
 import { PersistGate } from 'redux-persist/integration/react';
 export default function App() {
 
-  const [loading,setLoading] = useState(true)
+  const [isloading,setLoading] = useState(true)
+
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -27,7 +28,7 @@ export default function App() {
       <MenuProvider>
           <AuthContextProvider>
         <NavigationContainer>
-          {loading ? <SplashScreen/> :   <AuthNavigation/>}
+          {isloading ? <SplashScreen/> :   <AuthNavigation/>}
       </NavigationContainer>
     </AuthContextProvider>
     <StatusBar style="light" />
@@ -37,6 +38,8 @@ export default function App() {
   
   );
 }
+
+
 
 
 
