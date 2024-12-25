@@ -13,10 +13,9 @@ import SmallButton from '../components/SmallButton';
 import FollowComponent from '../components/FollowComponent';
 import { blurhash } from '../../utils/index';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-
+import EvilIcons from 'react-native-vector-icons/EvilIcons';
 
 const { width, height } = Dimensions.get('window');
 const skills = ['Python','react','react native','Javascript','SQL','HTML/CSS','Linux','Django']
@@ -26,7 +25,7 @@ const PostComponent = lazy(() => import('../components/PostComponent'))
 
 
 const Tab = createMaterialTopTabNavigator();
-const Stack = createNativeStackNavigator()
+
 
  
 const AccountScreen = () => {
@@ -34,8 +33,6 @@ const AccountScreen = () => {
   const [users, setUsers] = useState('')
   const [isloading,setLoading] = useState(false)
   const [posts,setPosts] = useState([])
-  const [modalVisible,setModalVisible] = useState(false)
-
   const { user } = useAuth();
   const navigation = useNavigation();
   console.log('account:',user)
@@ -43,7 +40,7 @@ const AccountScreen = () => {
   console.log('is current user',isCurrentUser)
   const [refreshing, setRefreshing] = useState(false);
   
-  const follow_items = [{count:500,content:'following'},{count:2000,content:'followers'},{count:posts.length,content:'posts'}]
+  const follow_items = [{count:skills.length,content:'projects'},{count:users.connection,content:'connection'},{count:posts.length,content:'posts'}]
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
@@ -71,21 +68,26 @@ const AccountScreen = () => {
   useEffect(() => {
     setLoading(true)
     const fetchUser = async () => {
-      try{
-        const userDoc = doc(db,'users',user.userId)
-        const userDocRef = await getDoc(userDoc);
-        if(userDocRef.exists()){
-          setUsers(userDocRef.data())
+      const userDoc = doc(db,'users',user.userId)
+      const unsub = onSnapshot(userDoc,
+        (doc) =>{
+        if(doc.exists()){
+          setUsers(doc.data())
+        }else{
+          console.error(`No such document ${error}`)
         }
-        console.log('acc3:',userDocRef.data())
-      }catch(error){
-        console.error(`No such document ${error}`)
-      }finally{
-        setLoading(false)
-      }
-    }
-
+      },
+        (error)=>{
+          console.error(`No such document ${error}`)
+        }
+      );
+      return unsub
+    };
+       
     fetchUser()
+    return () => {
+      setLoading(false)
+    }
   },[])
 
 
@@ -112,7 +114,7 @@ const AccountScreen = () => {
     <View style={{flex:1,backgroundColor:color.backgroundcolor,padding:50}}>
       {skills.map((item, index) => (
         <TouchableOpacity key={index} onPress={()=>navigation.navigate('ProjectScreen')}>
-           <View style={{ backgroundColor: '#252525', borderRadius: 25, padding: 20,marginBottom:10 }}>
+           <View style={{ backgroundColor: '#252525', borderRadius: 25, padding: 30,marginBottom:10 }}>
           <Text style={{ textAlign: 'center', color: '#fff' }}>{item}</Text>
         </View>
         </TouchableOpacity>
@@ -153,7 +155,7 @@ const AccountScreen = () => {
               </View>
               <View style={{alignItems:'flex-end',flexDirection:'column',marginBottom:20,paddingRight:20}}>
               <Text style={styles.title}>{users.jobtitle}</Text>
-              <Text style={styles.location}>Ann Arbor,MI</Text>
+              <Text style={styles.location}><EvilIcons name='location' size={20}/> {users.location}</Text>
               </View>
               </View>
               <View style={styles.textcontainer}>
@@ -167,7 +169,7 @@ const AccountScreen = () => {
               </View>
               <View style={styles.aboutContainer}>
                 <View style={{flexDirection:'row', justifyContent:'space-around'}}>
-                  <SmallButton name='Something'/>
+                  <SmallButton name='Tags'/>
                   <TouchableOpacity onPress={() => navigation.navigate('Edit')}>
                     {isCurrentUser &&  <SmallButton name='Edit Profile'/>}
                   </TouchableOpacity>
@@ -208,8 +210,7 @@ const AccountScreen = () => {
                     />
                   </Tab.Navigator>
                 </View>
-                </ScrollView>
-                
+                </ScrollView> 
     </View>
   )
 }
@@ -255,16 +256,6 @@ const styles = StyleSheet.create({
     fontSize:15,
     color:'#fff',
     fontFamily:'Helvetica-light'
-  },
-  progressBarContainer: {
-    height: 2,
-    width: "100%",
-    backgroundColor: "#e0e0e0",
-    position: "absolute",
-  },
-  progressBar: {
-    height: "100%",
-    backgroundColor: '#00BF63',
   },
 
 

@@ -111,7 +111,7 @@ const ChatScreen = () => {
   return (
     <CustomKeyboardView
     inChat={true}
-      style={styles.container}
+    style={styles.container}
     >
       <ChatRoomHeader 
       title={item?.name}
@@ -153,8 +153,7 @@ const styles = StyleSheet.create({
   },
   messagesContainer: {
     flex: 1,
-    paddingBottom: 10,
-    padding:5 // Adjust this value according to your needs
+    padding:2
   },
   inputContainer: {
     flexDirection: 'row',
@@ -162,7 +161,7 @@ const styles = StyleSheet.create({
     alignItems:'center',
     marginRight:3,
     marginLeft:3,
-    paddingVertical:110
+    paddingBottom:70
   },
   messageInput: {
     flexDirection:'row',
@@ -175,10 +174,10 @@ const styles = StyleSheet.create({
   textinput:{
     flex:1,
     marginRight:2,
-    padding:5
+    padding:10
   },
   sendButton: {
-    padding: 5,
+    padding: 10,
     marginRight:1
   },
 });

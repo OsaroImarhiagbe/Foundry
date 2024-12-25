@@ -14,15 +14,23 @@
     ],
     "ios": {
       "supportsTablet": true,
-      "newArchEnabled":true
+      "newArchEnabled": true,
+      "bundleIdentifier": "com.yourname.devguides"
     },
     "android": {
-      "newArchEnabled":true,
+      "newArchEnabled": true,
       "adaptiveIcon": {
         "backgroundColor": "#ffffff"
       }
     },
-    "web": {
-    }
+    "web": {},
+    "plugins": [
+      [
+        "onesignal-expo-plugin",
+      {
+        "mode": "development"
+      }
+    ]
+    ]
   }
 }

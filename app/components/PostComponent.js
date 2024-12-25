@@ -26,7 +26,7 @@ const PostComponent = ({content,date,name,id,url,count,comment_count}) => {
 
       setLoading(true)
       try{
-        const docRef = doc(db, 'posts',id);;
+        const docRef = doc(db, 'posts',id);
         await runTransaction(db,async (transaction)=>{
           const doc = await transaction.get(docRef)
           if (!doc.exists()) throw new Error ('Document doesnt exists');
@@ -69,7 +69,6 @@ const PostComponent = ({content,date,name,id,url,count,comment_count}) => {
     <View>
     <Text style={styles.userPost}>{name}</Text>
     <View style={styles.userLocationContainer}>
-    <Text style={styles.userLocation}>Near Domain Street</Text>
     </View>
     </View>
     </View>

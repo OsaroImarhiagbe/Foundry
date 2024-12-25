@@ -94,7 +94,6 @@ const CommentComponent = ({content,name,comment_id,post_id,count,date}) => {
     <View>
     <Text style={styles.userPost}>{name}</Text>
     <View style={styles.userLocationContainer}>
-    <Text style={styles.userLocation}>Near Domain Street</Text>
     </View>
     </View>
     </View>

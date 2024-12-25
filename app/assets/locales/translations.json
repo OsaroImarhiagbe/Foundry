@@ -1,0 +1,43 @@
+{
+    "en": {
+      "welcome": "Welcome",
+      "goodbye": "Goodbye",
+      "login": "Login",
+      "signup": "Sign Up",
+      "profile": "Profile",
+      "settings": "Settings"
+    },
+    "es": {
+      "welcome": "Bienvenido",
+      "goodbye": "Adiós",
+      "login": "Iniciar sesión",
+      "signup": "Registrarse",
+      "profile": "Perfil",
+      "settings": "Configuraciones"
+    },
+    "fr": {
+      "welcome": "Bienvenue",
+      "goodbye": "Au revoir",
+      "login": "Se connecter",
+      "signup": "S'inscrire",
+      "profile": "Profil",
+      "settings": "Paramètres"
+    },
+    "de": {
+      "welcome": "Willkommen",
+      "goodbye": "Auf Wiedersehen",
+      "login": "Anmelden",
+      "signup": "Registrieren",
+      "profile": "Profil",
+      "settings": "Einstellungen"
+    },
+    "it": {
+      "welcome": "Benvenuto",
+      "goodbye": "Addio",
+      "login": "Accedi",
+      "signup": "Registrati",
+      "profile": "Profilo",
+      "settings": "Impostazioni"
+    }
+  }
+  

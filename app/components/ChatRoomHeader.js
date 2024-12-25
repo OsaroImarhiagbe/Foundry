@@ -41,7 +41,7 @@ const ChatRoomHeader = ({title,onPress,icon,onPress2,backgroundColor,icon2}) => 
       try{
         await logout();
         setTimeout(() => {
-          setLoading(false); // Set loading to false after some time (simulating successful login)
+          setLoading(false);
           navigation.navigate('Login')
           Alert.alert('Success!','you have logged out!!')
       }, 2000);

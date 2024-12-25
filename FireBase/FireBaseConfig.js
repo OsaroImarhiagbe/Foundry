@@ -19,6 +19,10 @@ const firebaseConfig = {
   measurementId: "G-4RK1QX2NH0",
 };
 
+// const realtimefirebaseConfig ={
+//   databaseURL: "https://devguides-1114d-default-rtdb.firebaseio.com/",
+// }
+
 // Initialize Firebase
 export const FIREBASE_APP = initializeApp(firebaseConfig);
 export const auth = initializeAuth(FIREBASE_APP,{

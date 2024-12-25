@@ -1119,4 +1119,10 @@ View style={{ marginTop: 30, flexDirection: 'row', alignItems: 'center', justify
                             </View>
                         )}
                         /> */}
-
+ "plugins": [
+      ["onesignal-expo-plugin",
+      {
+        "mode": "development"
+      }
+    ]
+    ]

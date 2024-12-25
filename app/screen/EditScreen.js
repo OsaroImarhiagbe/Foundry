@@ -1,4 +1,4 @@
-import {View,Text,StyleSheet, TouchableOpacity,FlatList,ScrollView,Switch} from 'react-native'
+import {View,Text,StyleSheet, TouchableOpacity,FlatList,ScrollView,Switch,Modal,Button} from 'react-native'
 import { useState } from 'react';
 import ChatRoomHeader from '../components/ChatRoomHeader';
 import color from '../../config/color';
@@ -15,8 +15,9 @@ import * as ImagePicker from 'expo-image-picker';
 import axios from 'axios'
 import { useSelector,useDispatch } from 'react-redux';
 import { addImage } from '../features/user/userSlice';
-
-
+import { Picker } from '@react-native-picker/picker';
+import { useTranslation } from 'react-i18next';
+import AsyncStorage from '@react-native-async-storage/async-storage';
   const Sections = [
     {
         header: 'Settings',
@@ -26,22 +27,14 @@ import { addImage } from '../features/user/userSlice';
                 icon:'globe', 
                 color:'orange',
                 label:'Language', 
-                type:'link'},
-            {
-                id:'darkMode',
-                icon:'moon',
-                color:'blue',
-                label:'Dark Mode',
-                type:'toggle'
+                type:'link',
+                screen:'LanguageScreen'
             },
             {
-                id:'Wifi',
-                icon:'wifi',
-                color:'blue',
-                label:'Use Wifi',
-                type:'toggle'
-            },
-            {icon:'navigation', color:'green',label:'Location', type:'link'},
+                icon:'navigation',
+                color:'green',
+                label:'Location', 
+                type:'link',},
             {
                 id:'showusers',
                 icon:'users',
@@ -62,8 +55,8 @@ import { addImage } from '../features/user/userSlice';
         header:'Help',
         icon:'help-circle',
         items:[
-            {icon:'flag', color:'grey',label:'Report Bug', type:'link'},
-            {icon:'mail', color:'blue',label:'Contact us', type:'link'},]
+            {icon:'flag', color:'grey',label:'Report Bug', type:'link',screen:'ReportBugScreen'},
+            {icon:'mail', color:'blue',label:'Contact us', type:'link',screen:'ContactUsScreen'},]
     },
 ];
 const sections = [
@@ -72,7 +65,7 @@ const sections = [
       items:[{
           id:1,
           icon:'person',
-          name:'Isa Kuhn',
+          name:'',
           type:'Username',
           screen:'EditUser',
           color:'#fff',
@@ -81,7 +74,7 @@ const sections = [
       {
           id:2,
           icon:'email',
-          name:'isakuhn@gmail.com',
+          name:'',
           type:'Email',
           screen:'EditEmail',
           color:'#fff',
@@ -90,7 +83,7 @@ const sections = [
       {
           id:3,
           icon:'phone',
-          name:'734-431-8504',
+          name:'',
           type:'Phone',
           screen:'EditPhone',
           color:'#fff',
@@ -99,7 +92,7 @@ const sections = [
       {
           id:4,
           icon:'work',
-          name:'Front-End Developer',
+          name:'',
           type:'Job title',
           screen:'EditJob',
           color:'#fff',
@@ -114,9 +107,11 @@ const sections = [
   
 const EditScreen = () => {
 
+    const {i18n,t} = useTranslation()
+    const [language, setLanguage] = useState('en');
     const navigation = useNavigation();
-    const [profileUrl,setProfileUrl] = useState(null)
     const dispatch = useDispatch()
+    const [modalVisible, setModalVisible] = useState(false);
     const profileImage = useSelector((state) => state.user.profileimg)
     const {user} = useAuth()
 
@@ -147,7 +142,6 @@ const EditScreen = () => {
             await updateDoc(docRef,{
                 profileUrl:uploadResponse.data.file
             })
-            setProfileUrl(uploadResponse.data.file)
             dispatch(addImage({profileimg:uploadResponse.data.file}))
             }else{
                 console.log('user cancelled the image picker.')
@@ -157,7 +151,12 @@ const EditScreen = () => {
         }
         }
       
-  
+    const handleLanguageChange = async (lang) => {
+            i18n.changeLanguage(lang);
+            setLanguage(lang);
+            await AsyncStorage.setItem('language',lang)
+            setModalVisible(false);
+          };
   
 
   return (
@@ -225,10 +224,10 @@ const EditScreen = () => {
                 <View key={header}>
                     <Text style={{color:'#fff',fontSize:20,marginBottom:10}}>{header}</Text>
 
-                    {items.map(({id, icon,color, label, type}) => (
+                    {items.map(({id, icon,color, label, type,screen}) => (
                         <TouchableOpacity
                             key={icon}
-                            onPress={() => console.log('pressed',label)}>
+                            onPress={label === 'Language' ? () => setModalVisible(true):() => navigation.navigate(screen)}>
                         <View style={styles.row}>
                             <View style={{ backgroundColor: '#3b3b3b', borderRadius: 5, width: 30, padding: 5 }}>
                                 <View style={{ alignItems: 'center' }} >
@@ -257,6 +256,29 @@ const EditScreen = () => {
         </View>
         </View>
         </ScrollView>
+             {/* Modal to display language options */}
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible}>
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Select Language</Text>
+            {/* Picker to select language */}
+            <Picker
+                selectedValue={language}
+                style={{width:250,borderRadius: 100,}}
+                onValueChange={handleLanguageChange}>
+                <Picker.Item color="#000" label="English" value="en" />
+                <Picker.Item color="#000" label="Spanish" value="es" />
+                <Picker.Item color="#000" label="French" value="fr" />
+                <Picker.Item color="#000" label="German" value="de" />
+                <Picker.Item color="#000" label="Italian" value="it" />
+                </Picker>
+            {/* <Button title="Close" onPress={() => setModalVisible(false)} /> */}
+          </View>
+        </View>
+      </Modal>
     </View>
   )
 }
@@ -277,6 +299,28 @@ const styles = StyleSheet.create({
         borderRadius:8,
 
     },
+    title: {
+        fontSize: 20,
+        marginBottom: 20,
+      },
+      modalOverlay: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+      },
+      modalContent: {
+        width: 300,
+        padding: 20,
+        backgroundColor: 'white',
+        borderRadius: 10,
+        alignItems: 'center',
+      },
+      modalTitle: {
+        fontSize: 18,
+        marginBottom: 10,
+      },
+    
 })
 
 export default EditScreen

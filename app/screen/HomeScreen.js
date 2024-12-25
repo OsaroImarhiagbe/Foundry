@@ -1,4 +1,4 @@
-import React,{useState,useEffect,lazy, Suspense,useMemo} from 'react'
+import React,{useState,useEffect,lazy, Suspense,useMemo,useCallback} from 'react'
 import {View, Text, StyleSheet,TouchableOpacity, FlatList, Platform,StatusBar, ActivityIndicator} from 'react-native'
 import color from '../../config/color';
 import javascript from '../assets/javascript.png';
@@ -11,7 +11,6 @@ import {  collection, onSnapshot, orderBy,query, } from "firebase/firestore";
 import {db} from '../../FireBase/FireBaseConfig';
 import { useDispatch} from 'react-redux';
 import { addId } from '../features/user/userSlice';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
 const PostComponent = lazy(() => import('../components/PostComponent'))
@@ -59,7 +58,7 @@ const HomeScreen = () => {
 
   const navigation = useNavigation();
   const dispatch = useDispatch()
-
+  const [refreshing, setRefreshing] = useState(false);
   const {user} = useAuth()
   const [post, setPost] = useState([])
   const [mount, setMount] = useState(false)
@@ -76,6 +75,13 @@ const HomeScreen = () => {
       
     return () => clearTimeout(timer)
   }, []); 
+
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await fetchPosts();
+    setRefreshing(false);
+  }, []);
   
 
   const memoPost = useMemo(() => {return post},[post])
@@ -132,14 +138,16 @@ const HomeScreen = () => {
         </Suspense>}
       ItemSeparatorComponent={Separator}/>
    </View>
-   {mount ? <ActivityIndicator size='Large' color='#fff'/> : <FlatList
+   {mount ? <View style={{flex:1,justifyContent:'center',alignItems:'center'}}> <ActivityIndicator size='Large' color='#fff'/></View>
+   : <FlatList
     data={memoPost}
+    onRefresh={onRefresh}
+    refreshing={refreshing}
     renderItem={({item}) => <Suspense fallback={<ActivityIndicator size='small' color='#000'/>}>
       <PostComponent count={item.like_count} url={item.imageUrl} id={item.id} name={item.name} content={item.content} date={item.createdAt.toDate().toLocaleString()}comment_count={item.comment_count}/>
       </Suspense>}
     keyExtractor={(item)=> item.id}
     /> } 
-
     </View>
   )
 }
