@@ -11,13 +11,15 @@ const color = {
     danger:"#E50000",
     lightblue: '#7ed957',
     Buttoncolor:'#040053',
-    textcolor:'#040053',
+    textcolor:'#fff',
+    textFont:'Helvetica-light',
     grey:'#D3D3D3',
     button:'#1ED7FE',
     button2:'#BBF2FA',
     grad1:'#003D9E',
     grad2:'#021253',
-    backgroundcolor:'#1f1f1f'
+    backgroundcolor:'#1f1f1f',
+    checkbox:'#8a8a8a'
 }
 
 export default color

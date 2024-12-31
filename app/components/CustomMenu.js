@@ -3,7 +3,7 @@ import {
   } from 'react-native-popup-menu';
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import { View,Text,StyleSheet } from 'react-native'
-
+import color from '../../config/color';
 export const MenuItems = ({text, action,value,icon}) => {
     return (
        
@@ -23,6 +23,7 @@ export const MenuItems = ({text, action,value,icon}) => {
 
 const styles = StyleSheet.create({
   text:{
-    fontWeight:'bold'
+    fontWeight:'400',
+    fontFamily:color.textFont
   }
 })

@@ -11,7 +11,7 @@ import {  collection, onSnapshot, orderBy,query, } from "firebase/firestore";
 import {db} from '../../FireBase/FireBaseConfig';
 import { useDispatch} from 'react-redux';
 import { addId } from '../features/user/userSlice';
-
+import { store } from '../store';
 
 const PostComponent = lazy(() => import('../components/PostComponent'))
 const Cards = lazy(() => import('../components/Cards'))
@@ -76,12 +76,13 @@ const HomeScreen = () => {
     return () => clearTimeout(timer)
   }, []); 
 
+  console.log('redux id:',store.getState().user.currentuserID)
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
     await fetchPosts();
     setRefreshing(false);
-  }, []);
+  }, [memoPost]);
   
 
   const memoPost = useMemo(() => {return post},[post])

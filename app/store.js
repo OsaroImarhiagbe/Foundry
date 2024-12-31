@@ -8,7 +8,7 @@ import { persistStore, persistReducer, FLUSH,
   PERSIST,
   PURGE,
   REGISTER, } from "redux-persist";
-import  messageidSlice  from './features/Message/messageidSlice';
+import  messageReducer  from './features/Message/messageidSlice';
 import { combineReducers,} from 'redux'
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -16,12 +16,12 @@ const rootReducer = combineReducers({
   social:socialReducer,
   user:userReducer,
   search:searchReducer,
-  message:messageidSlice,
+  message:messageReducer,
 })
 const persistConfig = {
   key: "root",
   storage:AsyncStorage,
-  whitelist:['message','user']
+  whitelist:['user','message']
 };
 const persistedReducer = persistReducer(persistConfig, rootReducer);
 export const store = configureStore({

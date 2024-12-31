@@ -88,7 +88,8 @@ const ChatRoomHeader = ({title,onPress,icon,onPress2,backgroundColor,icon2}) => 
                 marginTop:40,
                 marginLeft:-30,
                 borderCurve:'continuous',
-                backgroundColor:color.white
+                backgroundColor:color.white,
+                position:'relative'
             }
         }}
       
@@ -127,7 +128,8 @@ const styles = StyleSheet.create({
         overflow:'hidden',
         borderBottomLeftRadius:10,
         borderBottomRightRadius:10,
-        backgroundColor:'#252525'
+        backgroundColor:'#252525',
+        zIndex:10
 
     },
     text:{

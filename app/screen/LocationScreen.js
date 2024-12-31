@@ -6,6 +6,7 @@ import 'react-native-get-random-values';
 import {updateDoc,doc} from 'firebase/firestore';
 import { useAuth } from '../authContext';
 import { db } from '../../FireBase/FireBaseConfig';
+import {GoogleAPIKey} from "@env"
 const LocationScreen = () => {
     const {user} = useAuth()
 
@@ -26,7 +27,7 @@ const LocationScreen = () => {
         })
       }}
       query={{
-        key: 'AIzaSyBcwSphD8GHkAJC1Zu_trOHmpPTSJrxsGg',
+        key:GoogleAPIKey,
         language: 'en',
         type:'(cities)'
       }}

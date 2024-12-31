@@ -2,11 +2,12 @@ import React, {useState, useEffect,lazy,Suspense,useCallback} from 'react'
 import {View, Text, StyleSheet, Platform, StatusBar,ActivityIndicator,ScrollView,RefreshControl} from 'react-native'
 import color from '../../config/color';
 import {db } from '../../FireBase/FireBaseConfig';
-import { getDocs,query,where,doc,collection } from "firebase/firestore"; 
+import { getDocs,query,where,doc,collection,onSnapshot } from "firebase/firestore"; 
 import { useAuth } from '../authContext';
 import ChatRoomHeader from '../components/ChatRoomHeader';
 import { useNavigation } from '@react-navigation/native';
 import { useSelector } from 'react-redux';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 const ChatList = lazy(() => import('../../List/ChatList'))
 
 
@@ -19,45 +20,54 @@ const MessageScreen = () => {
   const [refreshing, setRefreshing] = useState(false);
   const list_of_ids = useSelector((state)=> state.message.messagesID)
 
-  const onRefresh = useCallback(async () => {
+  console.log('id is:',list_of_ids)
+  const onRefresh = useCallback(() => {
     setRefreshing(true);
-    await grabUser(); // Re-fetch user data
-    setRefreshing(false); // End refreshing state
+    grabUser(list_of_ids); 
+    setRefreshing(false); 
   }, [list_of_ids]);
 
   useEffect(() => {
-    if(user?.userId){
-      grabUser();
+    let unsub
+    const fetchUser = () => {
+      unsub = grabUser(list_of_ids)
     }
-  },[])
+
+    fetchUser()
+    return () => {if(unsub) unsub()}
+  },[list_of_ids])
+
+  const grabUser = (list_of_ids) => {
+    if (!list_of_ids || list_of_ids.length === 0) {
+      console.warn("list_of_ids is empty or undefined.");
+      setUsers([]); 
+      return;
+    }
+    const docRef = collection(db,'MessageID')
+    const q  = query(docRef, where('userId','!=',user.userId))
+    const unsub = onSnapshot(q,(snapShot) =>{
+      let data = []
+      snapShot.forEach(doc => {
+        data.push({...doc.data()})
+      })
+      setUsers(data)
+    },(err)=>{
+      console.error(`Failed to grab users: ${err.message}`)
+    })
+    return unsub
+  }
   
   const handlePress = () => {
     navigation.navigate('Main');
   }
+  // AsyncStorage.clear()
 
-  const grabUser = async () => {
-
-    try{
-
-          const docRef = collection(db,'MessageID')
-          const q  = query(docRef, where('userId','!=',user?.userId))
-          const querySnapShot = await getDocs(q)
-          let data = []
-          querySnapShot.forEach(doc => {
-            data.push({...doc.data()})
-          })
-          setUsers(data)
-        }catch(error){
-          console.error(`Failed to grab users: ${error}`)
-    
-        }
-
-  }
 
   return (
     <View style={styles.screen}>
       <ChatRoomHeader title='Message' onPress={handlePress} icon='keyboard-backspace' backgroundColor={color.button}/>
       <ScrollView
+      style={{flex:1}}
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh}/>}
       >
       <View style={styles.container}>
@@ -67,7 +77,9 @@ const MessageScreen = () => {
             <ChatList currentUser={user} otherusers={users}/>
         </Suspense>
        ): (<View>
-        <Text>Send a new message!</Text>
+        <View style={{justifyContent:'center',alignItems:'center',flex:1,marginTop:40}}>
+        <Text style={styles.text}>Send a new message!</Text>
+        </View>
        </View>)}
        </View>
     </View>
@@ -75,6 +87,7 @@ const MessageScreen = () => {
   </View>
   )
 }
+
 
 const styles = StyleSheet.create({
     screen:{
@@ -84,8 +97,8 @@ const styles = StyleSheet.create({
     },
     text:{
       color:'#fff',
-      fontWeight:'bold',
-      fontSize:15
+      fontSize:20,
+      fontFamily:'Helvetica-light'
       },
 })
 export default MessageScreen

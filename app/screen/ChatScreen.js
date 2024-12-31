@@ -15,14 +15,12 @@ import ChatRoomHeader from '../components/ChatRoomHeader';
 import { useNavigation } from '@react-navigation/native';
 import { useDispatch } from 'react-redux';
 import { addID } from '../features/Message/messageidSlice';
-
+import {store} from '../store';
 const ChatScreen = () => {
   const [messages, setMessages] = useState([]);
- 
-
   const route = useRoute();
   const { item,} = route.params;
-  const { user } = useAuth();//current user logged in
+  const { user } = useAuth();
 
   const navigation = useNavigation();
   const dispatch = useDispatch()
@@ -52,6 +50,7 @@ const ChatScreen = () => {
   
     if (roomId) {
       createRoom();
+      dispatch(addID(route.params.userid));
       const unsubscribe = loadMessages(roomId);
       return () => unsubscribe();
     }
@@ -61,11 +60,8 @@ const ChatScreen = () => {
 
   const createRoom = async () => {
     try{
-      const roomId = route?.params?.userid
-      ? getRoomID(user?.userId, route?.params?.userid)
-      : item?.userId
-      ? getRoomID(user?.userId, item?.userId)
-      : null;
+      
+      const roomId = route?.params?.userid ? getRoomID(user?.userId, route?.params?.userid) : item?.userId ? getRoomID(user?.userId, item?.userId) : null
       await setDoc(doc(db,'rooms',roomId),{
         roomId,
         createdAt: Timestamp.fromDate(new Date())
@@ -74,12 +70,12 @@ const ChatScreen = () => {
         userId:route?.params?.userid,
         name:recipentNamec
       })
-      dispatch(addID(route?.params?.userid))
     } catch (error) {
-      console.error("Error creating room:", error);
+      console.error("Error creating room:", error.message);
     }
   };
 
+  
 
   const handleSend = async () => {
     let message = textRef.current.trim();
@@ -114,7 +110,7 @@ const ChatScreen = () => {
     style={styles.container}
     >
       <ChatRoomHeader 
-      title={item?.name}
+      title={recipentNamec}
       backgroundColor={color.button} 
       icon='keyboard-backspace'
       onPress={() => navigation.goBack()}/>

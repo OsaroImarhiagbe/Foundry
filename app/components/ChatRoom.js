@@ -8,22 +8,26 @@ import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-nativ
 import { Image } from 'expo-image';
 import { getRoomID,formatDate } from '../../utils';
 import Swipeable from 'react-native-gesture-handler/ReanimatedSwipeable';
-import { useSelector } from 'react-redux';
+import { useDispatch} from 'react-redux';
+import {removeID} from '../features/Message/messageidSlice';
 
 const ChatRoom = ({next_item, onPress,User}) => {
 
   
  
 
-  const {user } = useAuth();
+    const {user } = useAuth();
+    const dispatch = useDispatch()
+
+
+  
  
     const [lastMessage, setLastMessage] = useState(undefined);
     useEffect(() => {
-        roomId = getRoomID(User?.userId,next_item?.userId)
+        const roomId = getRoomID(User?.userId,next_item?.userId)
         const docRef = doc(db,'rooms',roomId);
         const messageRef = collection(docRef,'messages')
         const q = query(messageRef, orderBy('createdAt','desc'));
-
         let unsub = onSnapshot(q, (snapshot) => {
           let allmessage = snapshot.docs.map(doc => {
             return doc.data()
@@ -54,15 +58,19 @@ const ChatRoom = ({next_item, onPress,User}) => {
 
       const handleDelete = async () => {
         try {
-          const messagesRef = collection(doc(db, 'rooms', roomId), 'messages');
+          const roomId = getRoomID(User?.userId,next_item?.userId)
+          const messagesRef = collection(db, 'rooms', roomId,'messages');
           const messagesSnapshot = await getDocs(messagesRef);
-
-          messagesSnapshot.forEach(async (messageDoc) => {
-                await deleteDoc(messageDoc.ref);
+          const docPromise = messagesSnapshot.docs.map((messageDoc) => {
+               deleteDoc(messageDoc.ref);
             });
+          await Promise.all(docPromise)
 
-          // Step 2: Delete the chat room document
-          await deleteDoc(doc(db, 'rooms', roomId));
+          const roomRef = doc(db,'rooms',roomId)
+          const messageID = doc(db,'MessageID',next_item.userId)
+          await deleteDoc(roomRef)
+          await deleteDoc(messageID)
+          dispatch(removeID(next_item.userId))
           console.log('Document deleted successfully');
         } catch (error) {
           console.error('Error deleting document: ', error);
@@ -93,7 +101,7 @@ const ChatRoom = ({next_item, onPress,User}) => {
           <Image
               style={{height:hp(4.3), aspectRatio:1, borderRadius:100}}
               placeholder={{blurhash}}
-              source={user?.profileImage}
+              source={next_item?.profileUrl}
               transition={500}/>
           </View>
          <View style={styles.detailsContainer}>

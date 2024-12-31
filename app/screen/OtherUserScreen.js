@@ -54,6 +54,10 @@ const OtherUserScreen = () => {
 
 
     useEffect(() => {
+      if(!posts || posts.length === 0){
+        setPosts([]) 
+        return;
+      } 
       try{
         const docRef = collection(db,'posts')
         const q = query(docRef,where('name','==',users?.username))
@@ -193,7 +197,8 @@ const OtherUserScreen = () => {
                   style={{height:hp(10), aspectRatio:1, borderRadius:100,}}
                   source={users?.profileUrl}
                   placeholder={{blurhash}}
-                  transition={500}/>
+                  cachePolicy='none'
+                  />
                   <View style={{marginTop:20,flexDirection:'row', justifyContent:'space-evenly',paddingRight:20}}>
                   <Text style={{fontSize:30, color:'#fff'}}>  {
                         other_user_id ? (<Text style={styles.username}>@{users?.username}</Text>) 

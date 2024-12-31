@@ -56,7 +56,7 @@ export default function App() {
 
     <I18nextProvider i18n={i18n}>
        <Provider store={store}>
-      <PersistGate loading={null} persistor={persistor}>
+      <PersistGate loading={isloading} persistor={persistor}>
       <MenuProvider>
           <AuthContextProvider>
         <NavigationContainer>

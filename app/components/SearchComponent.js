@@ -42,6 +42,7 @@ const styles = StyleSheet.create({
     },
     shadowOpacity: 1,
     shadowRadius: 4.65,
+    width:'85%'
 
     },
     textinput: {

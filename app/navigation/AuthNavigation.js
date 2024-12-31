@@ -10,6 +10,8 @@ const RegisterScreen = lazy(() => import('../screen/RegisterScreen'))
 const DrawerNavigation = lazy(() => import('./DrawerNavigation'))
 const ReportBugScreen = lazy(() => import('../screen/ReportBugScreen'))
 const ContactUsScreen = lazy(() => import('../screen/ContactUsScreen'))
+const ProjectEntryScreen = lazy(() => import('../screen/ProjectEntryScreen'))
+const SkillsScreen = lazy(() => import('../screen/SkillsScreen'))
 const RegisterScreenWrapper = (props) => {
   
     return (
@@ -47,11 +49,21 @@ const ContactUsScreenWrapper = (props) => {
 
   )
 }
-const LanguageScreenWrapper = (props) => {
+const SkillsScreenWrapper = (props) => {
   
   return (
     <Suspense fallback={<ActivityIndicator size='small' color='#fff'/>}>
-    <LanguageScreen/>
+    <SkillsScreen/>
+  </Suspense>
+
+  )
+}
+
+const ProjectEntryScreenWrapper = (props) => {
+  
+  return (
+    <Suspense fallback={<ActivityIndicator size='small' color='#fff'/>}>
+    <ProjectEntryScreen/>
   </Suspense>
 
   )
@@ -113,6 +125,20 @@ const AuthNavigation = () => {
         <Stack.Screen
       name="ContactUsScreen"
       component={ContactUsScreenWrapper}
+      options={{
+        headerShown:false,
+        presentation:'modal',
+      }}/>
+      <Stack.Screen
+      name="ProjectEntryScreen"
+      component={ProjectEntryScreenWrapper}
+      options={{
+        headerShown:false,
+        presentation:'modal',
+      }}/>
+       <Stack.Screen
+      name="SkillsScreen"
+      component={SkillsScreenWrapper}
       options={{
         headerShown:false,
         presentation:'modal',

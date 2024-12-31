@@ -136,7 +136,7 @@ const PostScreen = () => {
       </View>
       <View style={styles.textContainer}>
         <Image
-          source={user?.profileImage || person}
+          source={user?.profileImage || ''}
           placeholder={{blurhash}}
           style={[styles.profileImage,{height:hp(4.3), aspectRatio:1, borderRadius:100}]}
           transition={500}

@@ -33,20 +33,38 @@ const AccountScreen = () => {
   const [users, setUsers] = useState('')
   const [isloading,setLoading] = useState(false)
   const [posts,setPosts] = useState([])
+  const [projects,setProjects] = useState([])
   const { user } = useAuth();
   const navigation = useNavigation();
-  console.log('account:',user)
   const isCurrentUser = user
   console.log('is current user',isCurrentUser)
   const [refreshing, setRefreshing] = useState(false);
   
-  const follow_items = [{count:skills.length,content:'projects'},{count:users.connection,content:'connection'},{count:posts.length,content:'posts'}]
+  const follow_items = [{count:projects?.projects?.length,content:'projects'},{count:users.connection,content:'connection'},{count:posts.length,content:'posts'}]
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
     await fetchUser();
     setRefreshing(false);
   }, [user]);
+
+
+  useEffect(() => {
+    try{
+      const projectRef = collection(db,'projects')
+      const q = query(projectRef,where('id','==',user?.userId))
+      const unsub = onSnapshot(q,(snapShot) => {
+        let data = []
+        snapShot.forEach(doc => {
+          data.push({...doc.data(),id:doc.id})
+        })
+        setProjects(data)
+      })
+    }catch(err){
+      console.log('error grabbing user post:',err)
+    }
+    
+  },[user])
 
   useEffect(() => {
     try{
@@ -100,7 +118,7 @@ const AccountScreen = () => {
       {posts.map((post) => (
         <Suspense key={post.id} fallback={<ActivityIndicator size="small" color="#000" />}>
           <View style={{padding: 10 }}>
-            <PostComponent count={post.like_count} url={post.imageUrl} id={post.id} name={post.name} content={post.content} date={post.createdAt.toDate().toLocaleString()} />
+            <PostComponent count={post.like_count} url={post.imageUrl} id={post.id} name={post.name} content={post.content} date={post.createdAt.toDate().toLocaleString()} comment_count={post.comment_count} />
           </View>
         </Suspense>
       ))}
@@ -112,10 +130,10 @@ const AccountScreen = () => {
   const Projects = () => (
     <ScrollView style={{flex:1,backgroundColor:color.backgroundcolor}}>
     <View style={{flex:1,backgroundColor:color.backgroundcolor,padding:50}}>
-      {skills.map((item, index) => (
+      {skills.map((project, index) => (
         <TouchableOpacity key={index} onPress={()=>navigation.navigate('ProjectScreen')}>
            <View style={{ backgroundColor: '#252525', borderRadius: 25, padding: 30,marginBottom:10 }}>
-          <Text style={{ textAlign: 'center', color: '#fff' }}>{item}</Text>
+          <Text style={{ textAlign: 'center', color: '#fff' }}>{project?.projects?.project_name}</Text>
         </View>
         </TouchableOpacity>
       ))}
@@ -169,7 +187,9 @@ const AccountScreen = () => {
               </View>
               <View style={styles.aboutContainer}>
                 <View style={{flexDirection:'row', justifyContent:'space-around'}}>
-                  <SmallButton name='Tags'/>
+                  <TouchableOpacity onPress={() => navigation.navigate('SkillsScreen')}>
+                  <SmallButton name='Skills'/>
+                  </TouchableOpacity>
                   <TouchableOpacity onPress={() => navigation.navigate('Edit')}>
                     {isCurrentUser &&  <SmallButton name='Edit Profile'/>}
                   </TouchableOpacity>
