@@ -11,9 +11,12 @@ import { blurhash } from '../../utils';
 import CustomCheckBox from '../components/CustomCheckBox';
 import {View} from 'react-native'
 import color from '../../config/color'
+import { useDispatch} from 'react-redux';
+import { addSkills } from '../features/Skill/skillSlice';
 
 const SearchFilter = () => {
     const [searchSkills,setSearchSkills] = useState([])
+    const dispatch = useDispatch()
 
     useEffect(()=>{
         console.log('skill',searchSkills)
@@ -28,6 +31,7 @@ const SearchFilter = () => {
     const handleToggleSkill = (skill,isSelected) => {
         if(isSelected){
           setSearchSkills((prev)=>[...prev,skill])
+          dispatch(addSkills(skill))
         }else{
           setSearchSkills((prev) => prev.filter((s) =>  s !== skill))
         }

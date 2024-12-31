@@ -2,8 +2,6 @@ import React, { useState } from 'react';
 import { TouchableOpacity, View, Text, StyleSheet } from 'react-native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import color from '../../config/color';
-import {db} from '../../FireBase/FireBaseConfig';
-import {getDoc,doc, collection, onSnapshot,query,where } from 'firebase/firestore';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const CustomCheckBox = ({label,onSkillToggle}) => {

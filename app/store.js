@@ -2,6 +2,7 @@ import { configureStore } from '@reduxjs/toolkit'
 import socialReducer from './features/PostandComments/socialSlice'
 import userReducer from './features/user/userSlice';
 import searchReducer from './features/search/searchSlice';
+import skillReducer from './features/Skill/skillSlice';
 import { persistStore, persistReducer, FLUSH,
   REHYDRATE,
   PAUSE,
@@ -17,6 +18,7 @@ const rootReducer = combineReducers({
   user:userReducer,
   search:searchReducer,
   message:messageReducer,
+  skill:skillReducer
 })
 const persistConfig = {
   key: "root",

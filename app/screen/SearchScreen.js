@@ -6,9 +6,8 @@ import color from '../../config/color';
 import { userRef} from '../../FireBase/FireBaseConfig';
 import { getDocs,query,where } from "firebase/firestore"; 
 import { useNavigation } from '@react-navigation/native';
-import { useDispatch } from 'react-redux';
+import { useDispatch,useSelector } from 'react-redux';
 import { addsearchID } from '../features/search/searchSlice';
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import useDebounce from '../hooks/useDebounce';
 import SearchFilter from '../components/SearchFilter';
 const SearchScreen = () => {
@@ -18,6 +17,7 @@ const SearchScreen = () => {
   const [results, setResults] = useState([]);
   const [isloading,setLoading] = useState(false)
   const navigation = useNavigation();
+  const skills_array = useSelector((state) => state.skill.searchedSkills)
 
   const debouncedsearch = useDebounce(searchQuery,500)
   const dispatch = useDispatch()
@@ -36,7 +36,16 @@ const SearchScreen = () => {
     setLoading(true)
     if(searchQuery.trim() === '') return;
     try{
-      const q = query(userRef,where('username', '>=', searchQuery), where('username', '<=', searchQuery + '\uf8ff'))
+      if(skills_array.lenghth > 0){
+        const q = query(userRef,where('username', '>=', searchQuery),
+        where('username', '<=', searchQuery + '\uf8ff'),
+        where('skills','array-contains-any',skills_array))
+
+      }else{
+        const q = query(userRef,
+          where('username', '>=', searchQuery),
+          where('username', '<=', searchQuery + '\uf8ff'))
+      }
       const querySnapShot = await getDocs(q)
       let user = [];
       querySnapShot.forEach(doc => {

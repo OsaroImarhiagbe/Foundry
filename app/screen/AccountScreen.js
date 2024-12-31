@@ -2,12 +2,12 @@ import {View, Text, StyleSheet, ScrollView, TouchableOpacity,Dimensions,Activity
 import {lazy,Suspense} from 'react'
 import color from '../../config/color';
 import { useNavigation } from '@react-navigation/native';
-import {useState, useEffect,useCallback,useRef} from 'react';
+import {useState, useEffect,useCallback} from 'react';
 import { useAuth } from '../authContext';
 import { Image } from 'expo-image';
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import {db} from '../../FireBase/FireBaseConfig';
-import {getDoc,doc, collection, onSnapshot,query,where } from 'firebase/firestore';
+import {doc, collection, onSnapshot,query,where } from 'firebase/firestore';
 import ChatRoomHeader from '../components/ChatRoomHeader';
 import SmallButton from '../components/SmallButton';
 import FollowComponent from '../components/FollowComponent';
