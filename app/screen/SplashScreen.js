@@ -1,5 +1,5 @@
 import React,{useEffect,useState} from 'react';
-import { SafeAreaView, StyleSheet, Image, View, Text,Dimensions  } from 'react-native';
+import { StyleSheet, Image, View,Dimensions  } from 'react-native';
 import ProgressBar from 'react-native-progress/Bar';
 
 const { width } = Dimensions.get('window');
@@ -28,7 +28,7 @@ const SplashScreen = () => {
           <Image 
             source={require('../assets/DevGuide.png')}
             style={styles.image}
-            resizeMode="contain" // Adjust to maintain aspect ratio
+            resizeMode="contain" 
           />
             <View style={{justifyContent:'center',alignItems:'center'}}>
       <ProgressBar 
@@ -43,7 +43,7 @@ const SplashScreen = () => {
         <Image 
           source={require('../assets/People.png')}
           style={styles.footerImage}
-          resizeMode='contain'// Adjust to maintain aspect ratio
+          resizeMode='contain'
         />
       </View>
     </View>
@@ -58,7 +58,7 @@ const styles = StyleSheet.create({
   },
   headingContainer: {
     alignItems: 'center',
-    padding:10, // Center the content horizontally
+    padding:10,
   },
   image: {
     width: 170,
@@ -76,8 +76,8 @@ const styles = StyleSheet.create({
     right: 0,
   },
   footerImage: {
-    height: 535, // 80% of screen width
-    width: width * 0.8,  // 80% of screen width
+    height: 535,
+    width: width * 0.8
   },
   
 });

@@ -37,12 +37,12 @@ const SearchScreen = () => {
     if(searchQuery.trim() === '') return;
     try{
       if(skills_array.lenghth > 0){
-        const q = query(userRef,where('username', '>=', searchQuery),
+        q = query(userRef,where('username', '>=', searchQuery),
         where('username', '<=', searchQuery + '\uf8ff'),
         where('skills','array-contains-any',skills_array))
 
       }else{
-        const q = query(userRef,
+        q = query(userRef,
           where('username', '>=', searchQuery),
           where('username', '<=', searchQuery + '\uf8ff'))
       }
