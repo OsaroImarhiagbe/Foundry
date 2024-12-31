@@ -8,7 +8,7 @@ import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-nativ
 import { useRoute } from '@react-navigation/native';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import {db} from '../../FireBase/FireBaseConfig';
-import {getDoc,doc,runTransaction,collection,query,where,onSnapshot } from 'firebase/firestore';
+import {doc,runTransaction,collection,query,where,onSnapshot } from 'firebase/firestore';
 import ChatRoomHeader from '../components/ChatRoomHeader';
 import SmallButton from '../components/SmallButton';
 import FollowComponent from '../components/FollowComponent';
@@ -19,7 +19,6 @@ import { createMaterialTopTabNavigator } from '@react-navigation/material-top-ta
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import EvilIcons from 'react-native-vector-icons/EvilIcons';
-const { width, height } = Dimensions.get('window');
 const skills = ['Python','react','react native','Javascript','SQL','HTML/CSS','Linux','Django']
 const PostComponent = lazy(() => import('../components/PostComponent'))
 
@@ -289,7 +288,7 @@ const styles = StyleSheet.create({
         padding:10,
       },
       screen:{
-        backgroundColor:'#1F1F1F',
+        backgroundColor:color.backgroundcolor,
         flex:1
       },
       text:{
@@ -306,17 +305,17 @@ const styles = StyleSheet.create({
         fontSize:30,
         letterSpacing:1,
         fontWeight:'bold',
-       fontFamily:'Helvetica-light'
+       fontFamily:color.textFont
       },
       location:{
         fontSize:15,
-        color:'#fff',
-        fontFamily:'Helvetica-light'
+        color:color.textcolor,
+        fontFamily:color.textFont
       },
       title:{
         fontSize:15,
-        color:'#fff',
-        fontFamily:'Helvetica-light'
+        color:color.textcolor,
+        fontFamily:color.textFont
       },
     
     

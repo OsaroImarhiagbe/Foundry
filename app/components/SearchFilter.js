@@ -7,7 +7,6 @@ import {
   MenuTrigger,
 } from 'react-native-popup-menu';
 import { MenuItems } from '../components/CustomMenu';
-import { blurhash } from '../../utils';
 import CustomCheckBox from '../components/CustomCheckBox';
 import {View} from 'react-native'
 import color from '../../config/color'
