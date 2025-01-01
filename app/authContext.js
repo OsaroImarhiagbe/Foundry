@@ -38,6 +38,7 @@ export const AuthContextProvider = ({children}) => {
             }else{
                 setIsAuthenticated(false);
                 setUser(null)
+                await AsyncStorage.removeItem('authUser')
             }
         
         })
