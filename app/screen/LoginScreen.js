@@ -1,8 +1,8 @@
-import { SafeAreaView, View, StyleSheet,Text, Image, ActivityIndicator,Alert,Platform} from 'react-native'
+import { SafeAreaView, View, StyleSheet,Text, Image, ActivityIndicator,Alert} from 'react-native'
 import AppTextInput from '../components/AppTextInput'
 import color from '../../config/color'
 import Button from '../components/Button'
-import { useState, useEffect } from 'react'
+import { useState} from 'react'
 import * as Yup from 'yup';
 import { Formik} from 'formik';
 import { useAuth } from '../authContext'
@@ -19,13 +19,13 @@ const LoginScreen = ({navigation}) => {
     
     
     const LoginPress = async (values,{resetForm}) => {
-        setLoading(true); // Set loading to true when login button is pressed
+        setLoading(true);
         try{
             const response = await login(values.email, values.password)
             if(response){
                 setTimeout(() => {
                     setLoading(false);
-                    resetForm({values: ''}) // Set loading to false after some time (simulating successful login)
+                    resetForm({values: ''})
                     navigation.navigate('Drawer');
                     Alert.alert('Success!!', 'you have logged in!');
                 }, 2000); 
@@ -164,18 +164,18 @@ const styles = StyleSheet.create({
         fontSize:30,
         marginLeft:20,
         color:'#ffffff',
-        fontFamily:'Helvetica-light'
+        fontFamily:color.textFont
     },
     welcomeStext:{
         fontSize:30,
         color:'#7ed957',
-        fontFamily:'Helvetica-light'
+        fontFamily:color.textFont
         
     },
     welcomeLtext:{
         fontSize:15,
         color:'#ffffff',
-        fontFamily:'Helvetica-light'
+        fontFamily:color.textFont
     },
     welcomeHcontainer:{
         padding:8,
@@ -190,7 +190,7 @@ const styles = StyleSheet.create({
     errormessage:{
         color: color.danger,
         textAlign:'center',
-        fontFamily:'Helvetica-light'
+        fontFamily:color.textFont
     },
     container:{
         flex:1,
@@ -216,16 +216,16 @@ const styles = StyleSheet.create({
         alignSelf:'center'
     },
     text:{
-        color:'#8a8a8a',
+        color:color.grey,
         textAlign:'center',
         fontSize: 15,
-        fontFamily:'Helvetica-light'
+        fontFamily:color.textFont
     },
     text1:{
-        color:'#8a8a8a',
+        color:color.grey,
         fontSize: 15,
         marginLeft:10,
-        fontFamily:'Helvetica-light'
+        fontFamily:color.textFont
     },
     registercontainer:{
         marginTop:15

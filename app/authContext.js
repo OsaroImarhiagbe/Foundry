@@ -2,6 +2,7 @@ import React,{ createContext, useEffect, useState, useContext} from 'react'
 import { onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword,signOut,sendPasswordResetEmail } from 'firebase/auth';
 import { auth, db,} from '../FireBase/FireBaseConfig';
 import { doc, getDoc, setDoc} from 'firebase/firestore';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 export const AuthContext = createContext();
 
 export const AuthContextProvider = ({children}) => {
@@ -10,12 +11,30 @@ export const AuthContextProvider = ({children}) => {
     const [loading,setLoading] = useState(false)
     const [isAuthenticated, setIsAuthenticated] = useState(undefined)
 
+
+    useEffect(() =>{
+        const getAuthState = async () => {
+            const currentUser = await AsyncStorage.getItem('authUser')
+            if(currentUser){
+                const parseData = JSON.parse(currentUser)
+                setIsAuthenticated(true)
+                setUser(parseData)
+                updateUserData(parseData.uid)
+            }else{
+                setIsAuthenticated(false);
+                setUser(null)
+            }
+        }
+        getAuthState()
+    },[])
+
     useEffect(() => {
-        const unsub = onAuthStateChanged(auth, (user) => {
+        const unsub = onAuthStateChanged(auth, async (user) => {
             if(user){
                 setIsAuthenticated(true)
                 setUser(user)
                 updateUserData(user.uid);
+                await AsyncStorage.setItem('authUser',JSON.stringify(user))
             }else{
                 setIsAuthenticated(false);
                 setUser(null)
@@ -26,8 +45,8 @@ export const AuthContextProvider = ({children}) => {
     },[])
 
     const login = async (email,pasword) => {
+        setLoading(true)
         try{
-            setLoading(true)
             const response = await signInWithEmailAndPassword(auth, email,pasword)
             setLoading(false)
             return {success:true}
@@ -79,7 +98,7 @@ export const AuthContextProvider = ({children}) => {
     }
 
     return (
-        <AuthContext.Provider value={{user,isAuthenticated,login,register,logout,resetpassword}} >
+        <AuthContext.Provider value={{user,isAuthenticated,login,register,logout,resetpassword,updateUserData}} >
             {children}
         </AuthContext.Provider>
     )
