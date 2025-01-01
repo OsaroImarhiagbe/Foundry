@@ -35,8 +35,6 @@ export const AuthContextProvider = ({children}) => {
             setLoading(false)
             console.log(`Error:${error}`)
         }
-       
-
     }
 
     const logout = async () => {

@@ -13,7 +13,8 @@ const color = {
     Buttoncolor:'#040053',
     textcolor:'#fff',
     textFont:'Helvetica-light',
-    grey:'#D3D3D3',
+    lightgrey:'#D3D3D3',
+    grey:'#8a8a8a',
     button:'#1ED7FE',
     button2:'#BBF2FA',
     grad1:'#003D9E',
@@ -23,9 +24,3 @@ const color = {
 }
 
 export default color
-
-// light gray: #FAFAFA medium gray: #F6F7FB gray: #C5C5C7 #f57c00
-//#003D9E
-//#021253
-//#1ED7FE
-//#BBF2FA

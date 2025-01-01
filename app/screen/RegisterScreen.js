@@ -1,11 +1,11 @@
 import React, {useState} from 'react'
-import {SafeAreaView, View, Text,StyleSheet,Platform,StatusBar, TouchableOpacity,Alert, ActivityIndicator, Image} from 'react-native';
-import { Formik, Field, Form } from 'formik';
+import {View, Text,StyleSheet,Platform,StatusBar, TouchableOpacity,Alert, ActivityIndicator, Image} from 'react-native';
+import { Formik} from 'formik';
 import AppTextInput from '../components/AppTextInput';
 import color from '../../config/color';
 import Button from '../components/Button';
 import * as Yup from 'yup';
-import { useAuth,  } from '../authContext';
+import { useAuth} from '../authContext';
 import CustomKeyboardView from '../components/CustomKeyboardView';
 import { useNavigation } from '@react-navigation/native';
 
@@ -25,10 +25,10 @@ const RegisterScreen = () => {
             let response = await register(values.username, values.email, values.password)
             if(response){
                 setLoading((prev)=> !prev)
-                resetForm({values:initialValues})
                 navigation.navigate('Main')
                 Alert.alert('Success','You have registered!')
             }
+            resetForm({values:initialValues})
         }catch(error){
             setLoading(false)
             console.error(error)
@@ -36,10 +36,6 @@ const RegisterScreen = () => {
     }    
 
     const validationSchema = Yup.object().shape({
-        // name: Yup.string()
-        // .min(3, 'Too Short')
-        // .max(50, 'Too long')
-        // .required('Please enter your full name'),
         username: Yup.string()
         .min(8)
         .max(10)
@@ -209,7 +205,7 @@ const styles = StyleSheet.create({
     errormessage:{
         color: color.danger,
         textAlign:'center',
-        fontFamily:'Helvetica-light'
+        fontFamily:color.textFont
     },
     screen:{
         paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
@@ -220,7 +216,7 @@ const styles = StyleSheet.create({
         fontSize:25,
         textAlign:'center',
         color:'#ffffff',
-        fontFamily:'Helvetica-light'
+        fontFamily:color.textFont
 
     },
     headingcontainer:{
@@ -230,23 +226,23 @@ const styles = StyleSheet.create({
         textAlign:'center',
         marginTop:10,
         fontSize:15,
-        fontFamily:'Helvetica-light',
-        color:'#8a8a8a'
+        fontFamily:color.textFont,
+        color:color.grey
     },
     textContainer:{
         flexDirection:'row',
         alignSelf:'center'
     },
     text:{
-        color:'#8a8a8a',
+        color:color.grey,
         textAlign:'center',
         fontSize: 15,
-        fontFamily:'Helvetica-light'
+        fontFamily:color.textFont
     },
     text1:{
-        color:'#8a8a8a',
+        color:color.grey,
         fontSize: 15,
-        fontFamily:'Helvetica-light',
+        fontFamily:color.textFont,
         marginLeft:10
     },
 })
