@@ -15,11 +15,10 @@ export const AuthContextProvider = ({children}) => {
     useEffect(() =>{
         const getAuthState = async () => {
             const currentUser = await AsyncStorage.getItem('authUser')
-            if(currentUser){
-                const parseData = JSON.parse(currentUser)
+            if(currentUser !== null){
                 setIsAuthenticated(true)
-                setUser(parseData)
-                updateUserData(parseData.uid)
+                setUser(currentUser)
+                updateUserData(currentUser.uid)
             }else{
                 setIsAuthenticated(false);
                 setUser(null)
@@ -34,7 +33,8 @@ export const AuthContextProvider = ({children}) => {
                 setIsAuthenticated(true)
                 setUser(user)
                 updateUserData(user.uid);
-                await AsyncStorage.setItem('authUser',JSON.stringify(user))
+                const parseData = JSON.stringify(user)
+                await AsyncStorage.setItem('authUser',parseData)
             }else{
                 setIsAuthenticated(false);
                 setUser(null)
@@ -60,6 +60,7 @@ export const AuthContextProvider = ({children}) => {
     const logout = async () => {
         try{
             await signOut(auth);
+            AsyncStorage.removeItem('authUser')
             return {success:true,}
         }catch(error){
             return {success:false, message: error.message}

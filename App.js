@@ -11,7 +11,7 @@ import { PersistGate } from 'redux-persist/integration/react';
 import { I18nextProvider } from 'react-i18next';
 import i18n from './app/Language/i18n';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useNavigation } from '@react-navigation/native';
+
 
 export default function App() {
 
@@ -19,7 +19,7 @@ export default function App() {
   const [user, setUser] = useState(null)
   const [isAuthenticated, setIsAuthenticated] = useState(undefined)
 
-  const navigation = useNavigation()
+ 
 
 
   // useEffect(() => {
@@ -54,26 +54,11 @@ export default function App() {
     const timer = setTimeout(() => {
       setLoading(false)
 
-    },3000)
+    },4000)
     return () => clearTimeout(timer)
   },[])
 
-  useEffect(() =>{
-    const getAuthState = async () => {
-        const currentUser = await AsyncStorage.getItem('authUser')
-        if(currentUser){
-            const parseData = JSON.parse(currentUser)
-            setIsAuthenticated(true)
-            setUser(parseData)
-            updateUserData(parseData.uid)
-            navigation.navigate('Main')
-        }else{
-            setIsAuthenticated(false);
-            setUser(null)
-        }
-    }
-    getAuthState()
-},[])
+  
   return (
 
     <I18nextProvider i18n={i18n}>

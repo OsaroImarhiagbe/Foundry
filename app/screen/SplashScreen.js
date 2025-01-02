@@ -1,13 +1,14 @@
 import React,{useEffect,useState} from 'react';
 import { StyleSheet, Image, View,Dimensions  } from 'react-native';
 import ProgressBar from 'react-native-progress/Bar';
-
+import { useNavigation } from '@react-navigation/native';
 const { width } = Dimensions.get('window');
 
 
 const SplashScreen = () => {
 
     const [progress, setProgress] = useState(0);
+    const navigation = useNavigation()
 
   useEffect(() => {
     const timer = setInterval(() => {

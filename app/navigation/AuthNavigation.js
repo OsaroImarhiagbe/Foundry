@@ -1,17 +1,23 @@
-import React from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
 import LoginScreen from '../screen/LoginScreen';
-import { lazy,Suspense } from 'react';
+import { lazy,Suspense, useEffect,useState } from 'react';
 import { ActivityIndicator } from 'react-native';
 import ProjectScreen from '../screen/ProjectScreen';
 import LocationScreen from '../screen/LocationScreen';
-
+import { useNavigation } from '@react-navigation/native';
+import { auth} from '../../FireBase/FireBaseConfig';
+import {useAuth} from '../authContext'
+import AsyncStorage from '@react-native-async-storage/async-storage';
 const RegisterScreen = lazy(() => import('../screen/RegisterScreen'))
 const DrawerNavigation = lazy(() => import('./DrawerNavigation'))
 const ReportBugScreen = lazy(() => import('../screen/ReportBugScreen'))
 const ContactUsScreen = lazy(() => import('../screen/ContactUsScreen'))
 const ProjectEntryScreen = lazy(() => import('../screen/ProjectEntryScreen'))
 const SkillsScreen = lazy(() => import('../screen/SkillsScreen'))
+
+
+
+
 const RegisterScreenWrapper = (props) => {
   
     return (
@@ -69,6 +75,29 @@ const ProjectEntryScreenWrapper = (props) => {
   )
 }
 const AuthNavigation = () => {
+  const navigation = useNavigation()
+  const [user, setUser] = useState(null)
+  const [loading,setLoading] = useState(false)
+  const [isAuthenticated, setIsAuthenticated] = useState(undefined)
+
+  const {updateUserData} = useAuth()
+
+    useEffect(() =>{
+      const getAuthState = async () => {
+          const currentUser = await AsyncStorage.getItem('authUser')
+          if(currentUser !== null){
+              setIsAuthenticated(true)
+              setUser(currentUser)
+              updateUserData(currentUser.uid)
+              console.log(currentUser)
+                navigation.navigate('Drawer',{screen:'Home'})
+          }else{
+              setIsAuthenticated(false);
+              setUser(null)
+          }
+      }
+      getAuthState()
+  },[])
 
 
     const Stack = createStackNavigator()
@@ -76,8 +105,7 @@ const AuthNavigation = () => {
   return (
     <Stack.Navigator
     screenOptions={{
-    }}
-    initialRouteName='Login'>
+    }}>
       <Stack.Screen
         name="Login"
         component={LoginScreen}

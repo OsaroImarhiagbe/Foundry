@@ -67,7 +67,7 @@ const HomeScreen = () => {
 
   useEffect(() => { 
     setMount(true)
-    dispatch(addId({currentuserID:user.userId}))
+    // dispatch(addId({currentuserID:user.userId}))
     const timer = setTimeout(() => {
       setMount(false)
       fetchPosts();
