@@ -1,5 +1,5 @@
 import React,{useState,useEffect} from 'react'
-import {View, Text,StyleSheet,Platform,Keyboard,TouchableWithoutFeedback,ScrollView} from 'react-native'
+import {View, Text,StyleSheet,Platform,Keyboard,TouchableWithoutFeedback,TouchableOpacity} from 'react-native'
 import color from '../../config/color'
 import Autocomplete from 'react-native-autocomplete-input'
 import {db} from '../../FireBase/FireBaseConfig';
@@ -10,16 +10,10 @@ import {SkillsAPIKEY} from '@env'
 const SkillsScreen = () => {
     const [ query, setQuery ] = useState('');
     const [results,setResults] = useState([])
+    const [skills,setSkills] = useState([])
     const [isloading,setLoading] = useState(false)
 
-    // var myHeaders = new Headers();
-    // myHeaders.append("apikey", "O8E6hNsJY8OOCd2YO2rFSJwj3R843nw9");
-
-    // var requestOptions = {
-    // method: 'GET',
-    // redirect: 'follow',
-    // headers: myHeaders
-    // };
+  
 
     useEffect(() =>{
       
@@ -36,7 +30,6 @@ const SkillsScreen = () => {
                     "apikey": SkillsAPIKEY,
                     "redirect":'follow'
                 }})
-                console.log(res.data)
                 setResults(res.data || [])
             }catch(err){
                 console.log(`Error API:${err}`)
@@ -50,20 +43,11 @@ const SkillsScreen = () => {
         fetchSkills()
 
     },[query])
-    // var myHeaders = new Headers();
-    // myHeaders.append("apikey", "O8E6hNsJY8OOCd2YO2rFSJwj3R843nw9");
 
-    // var requestOptions = {
-    // method: 'GET',
-    // redirect: 'follow',
-    // headers: myHeaders
-    // };
 
-    // fetch(f`https://api.apilayer.com/skills?q=${query}`, requestOptions)
-    // .then(response => response.text())
-    // .then(result => console.log(result))
-    // .catch(error => console.log('error', error));
-
+    const handleSubmit = (item) => {
+        setSkills(item)
+    }
 
    
   return (
@@ -77,15 +61,24 @@ const SkillsScreen = () => {
       data={results}
       placeholder='Enter skills...'
       placeholderTextColor='#000'
-      containerStyle={{padding:10}}
+      containerStyle={{padding:30}}
       value={query}
       onChangeText={(text) => setQuery(text)}
-      renderItem={({ item }) => (
-        <TouchableOpacity onPress={() => setQuery(item.name)}>
-          <Text>{item.name}</Text>
-        </TouchableOpacity>)}
-    />
-
+      flatListProps={{
+        keyExtractor: (item) => Math.random(),
+        renderItem: ({ item }) => <TouchableOpacity onPress={() => handleSubmit(item)}>
+            <View style={{padding:5}}>
+            <Text style={{fontSize:20,fontFamily:color.textFont}}>{item}</Text>
+                </View></TouchableOpacity>
+      }}/>
+    </View>
+    <View style={{paddingTop:100}}>
+        <Text>Skills</Text>
+        <View>{skills.map((skill,index) => (
+            <View key={index}>
+                 <Text>{skill}</Text>
+                </View>
+        ))}</View>
     </View>
    </View>
     </TouchableWithoutFeedback>
