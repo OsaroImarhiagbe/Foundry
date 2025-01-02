@@ -83,6 +83,7 @@ const AuthNavigation = () => {
   const {updateUserData} = useAuth()
 
     useEffect(() =>{
+      setLoading(true)
       const getAuthState = async () => {
           const currentUser = await AsyncStorage.getItem('authUser')
           if(currentUser !== null){
@@ -90,10 +91,12 @@ const AuthNavigation = () => {
               setUser(currentUser)
               updateUserData(currentUser.uid)
               console.log(currentUser)
-                navigation.navigate('Drawer',{screen:'Home'})
+              navigation.navigate('Drawer',{screen:'Home'})
+              setLoading(false)
           }else{
               setIsAuthenticated(false);
               setUser(null)
+              setLoading(false)
           }
       }
       getAuthState()
