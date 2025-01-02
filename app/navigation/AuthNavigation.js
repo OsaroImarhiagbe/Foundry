@@ -14,10 +14,6 @@ const ReportBugScreen = lazy(() => import('../screen/ReportBugScreen'))
 const ContactUsScreen = lazy(() => import('../screen/ContactUsScreen'))
 const ProjectEntryScreen = lazy(() => import('../screen/ProjectEntryScreen'))
 const SkillsScreen = lazy(() => import('../screen/SkillsScreen'))
-
-
-
-
 const RegisterScreenWrapper = (props) => {
   
     return (
@@ -90,7 +86,6 @@ const AuthNavigation = () => {
               setIsAuthenticated(true)
               setUser(currentUser)
               updateUserData(currentUser.uid)
-              console.log(currentUser)
               navigation.navigate('Drawer',{screen:'Home'})
               setLoading(false)
           }else{
@@ -109,6 +104,7 @@ const AuthNavigation = () => {
     <Stack.Navigator
     screenOptions={{
     }}>
+      
       <Stack.Screen
         name="Login"
         component={LoginScreen}
@@ -117,7 +113,7 @@ const AuthNavigation = () => {
           gestureEnabled:false
           
         }}
-      />
+      /> 
       <Stack.Screen
       name="Register"
       component={RegisterScreenWrapper}

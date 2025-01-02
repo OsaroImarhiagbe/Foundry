@@ -160,7 +160,6 @@ const StackNavigation = () => {
   return (
     <Stack.Navigator
     screenOptions={{
-      gestureEnabled:false,
       unmountOnBlur: true,
     }}
     initialRouteName='Main'>
@@ -177,6 +176,7 @@ const StackNavigation = () => {
      component={MessageScreenWrapper}
      options={{
       headerShown:false,
+      gestureEnabled:false,
       unmountOnBlur: true,
      }}/>
       <Stack.Screen
@@ -276,7 +276,6 @@ const StackNavigation = () => {
       name='Comment'
       component={CommentScreenWrapper}
       options={{
-        gestureEnabled:false,
         headerShown:false,
         unmountOnBlur: true,
         presentation:'modal'

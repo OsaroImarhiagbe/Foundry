@@ -1,5 +1,5 @@
 import React,{ createContext, useEffect, useState, useContext} from 'react'
-import { onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword,signOut,sendPasswordResetEmail } from 'firebase/auth';
+import { onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword,signOut,sendPasswordResetEmail,sendEmailVerification } from 'firebase/auth';
 import { auth, db,} from '../FireBase/FireBaseConfig';
 import { doc, getDoc, setDoc} from 'firebase/firestore';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -87,8 +87,6 @@ export const AuthContextProvider = ({children}) => {
         }catch(e){
             console.log(e)
         }
-       
-
     }
     const updateUserData = async (userId) => {
         const docRef = doc(db,'users',userId)

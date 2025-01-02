@@ -60,7 +60,7 @@ const MessageScreen = () => {
   const handlePress = () => {
     navigation.navigate('Main');
   }
-  // AsyncStorage.clear()
+ 
 
 
   return (
