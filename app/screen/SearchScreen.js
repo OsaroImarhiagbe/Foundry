@@ -19,7 +19,7 @@ const SearchScreen = () => {
   const navigation = useNavigation();
   const skills_array = useSelector((state) => state.skill.searchedSkills)
 
-  const debouncedsearch = useDebounce(searchQuery,500)
+  const debouncedsearch = useDebounce(searchQuery,3000)
   const dispatch = useDispatch()
 
   useEffect(() => {
@@ -114,7 +114,7 @@ const styles = StyleSheet.create({
   userContainer:{
     padding:10,
     flexDirection:'row',
-    backgroundColor:color.backgroundcolor,
+    backgroundColor:'#00bf63',
     borderRadius:20
 
   },

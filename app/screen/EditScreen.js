@@ -256,7 +256,6 @@ const EditScreen = () => {
         </View>
         </View>
         </ScrollView>
-             {/* Modal to display language options */}
       <Modal
         animationType="slide"
         transparent={true}
@@ -264,7 +263,6 @@ const EditScreen = () => {
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
             <Text style={styles.modalTitle}>Select Language</Text>
-            {/* Picker to select language */}
             <Picker
                 selectedValue={language}
                 style={{width:250,borderRadius: 100,}}

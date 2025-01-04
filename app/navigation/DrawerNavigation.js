@@ -1,7 +1,5 @@
 import { createDrawerNavigator } from '@react-navigation/drawer';
 import color from '../../config/color';
-import StackNavigation from './StackNavigation';
-import ChatRoomHeader from '../components/ChatRoomHeader';
 import { useNavigation } from '@react-navigation/native';
 import { lazy,Suspense } from 'react';
 import { ActivityIndicator } from 'react-native';
@@ -46,17 +44,6 @@ const DrawerNavigation = ({route}) => {
         swipeEnabled:false
        
       }}/>
-    {/* <Drawer.Screen 
-    name="Settings" 
-    component={SettingsScreenWrapper}  
-    options={{ 
-      drawerLabel: 'Settings',
-      drawerLabelStyle:{
-        color:color.textcolor
-      },
-      drawerActiveTintColor:color.white,
-      swipeEnabled:false,
-      header: () => <ChatRoomHeader  icon='keyboard-backspace' onPress={handleBack} backgroundColor={color.button} title='Settings'/> }} /> */}
     </Drawer.Navigator>
 
   )

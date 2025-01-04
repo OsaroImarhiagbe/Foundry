@@ -86,10 +86,10 @@ const SkillsScreen = () => {
       }}/>
     </View>
     <View style={{paddingTop:100}}>
-        <Text>Skills</Text>
+        <Text style={styles.headingText}>Skills</Text>
         <View>{skills.map((skill,index) => (
             <View key={index}>
-                 <Text>{skill}</Text>
+                 <Text style={{color:color.textcolor}}>{skill}</Text>
                 </View>
         ))}</View>
     </View>
@@ -112,6 +112,9 @@ const styles = StyleSheet.create({
         fontFamily:color.textFont,
         fontSize:30
     },
+    inputContainer:{
+        marginBottom:40
+    }
 })
 
 export default SkillsScreen

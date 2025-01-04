@@ -36,6 +36,7 @@ const OtherUserScreen = () => {
     const [isloading,setLoading] = useState(false)
     const navigation = useNavigation();
     const [isPress,setPress] = useState(false)
+    const [projects,setProjects] = useState([])
     const [posts,setPosts] = useState([])
     let route = useRoute()
     const {user} = useAuth()
@@ -50,6 +51,25 @@ const OtherUserScreen = () => {
     await fetchUser();
     setRefreshing(false);
     }, [other_user_id]);
+
+
+
+    useEffect(() => {
+      try{
+        const projectRef = collection(db,'projects')
+        const q = query(projectRef,where('id','==',users?.userId))
+        const unsub = onSnapshot(q,(snapShot) => {
+          let data = []
+          snapShot.forEach(doc => {
+            data.push({...doc.data(),id:doc.id})
+          })
+          setProjects(data)
+        })
+        return () => unsub()
+      }catch(err){
+        console.log('error grabbing user projects:',err)
+      }
+    },[users])
 
 
     useEffect(() => {
@@ -67,12 +87,11 @@ const OtherUserScreen = () => {
           })
           setPosts(data)
         })
+        return () => unsub()
       }catch(err){
         console.log('error grabbing user post:',err)
       }
-
     },[users])
-
 
 
     useEffect(() => {
@@ -92,7 +111,7 @@ const OtherUserScreen = () => {
           }
         );
 
-        return unsub; 
+        return unsub;
       };
     
       fetchUser()
@@ -107,13 +126,15 @@ const OtherUserScreen = () => {
     scrollEnabled={true}
      style={{flex:1,backgroundColor:color.backgroundcolor}}>
       <View style={{flex:1,backgroundColor:color.backgroundcolor}}>
-      {posts.map((post) => (
-        <Suspense key={post.id} fallback={<ActivityIndicator size="small" color="#000" />}>
-          <View style={{padding: 10 }}>
-            <PostComponent count={post.like_count} url={post.imageUrl} id={post.id} name={post.name} content={post.content} date={post.createdAt.toDate().toLocaleString()} />
-          </View>
-        </Suspense>
-      ))}
+        {
+        posts && posts.length > 0 ? (
+            posts.map((post) => (
+              <Suspense key={post.id} fallback={<ActivityIndicator size="small" color="#000" />}>
+                <View style={{padding: 10 }}>
+                  <PostComponent count={post.like_count} url={post.imageUrl} id={post.id} name={post.name} content={post.content} date={post.createdAt.toDate().toLocaleString()} comment_count={post.comment_count} />
+                </View>
+              </Suspense>
+            ))) : <Text style={{ color: '#fff', textAlign: 'center', fontFamily:color.textFont,fontSize:20}}>No posts available</Text>}
     </View>
     </ScrollView>
     
@@ -122,13 +143,18 @@ const OtherUserScreen = () => {
   const Projects = () => (
     <ScrollView style={{flex:1,backgroundColor:color.backgroundcolor}}>
     <View style={{flex:1,backgroundColor:color.backgroundcolor,padding:50}}>
-      {skills.map((item, index) => (
-        <TouchableOpacity key={index} onPress={()=>navigation.navigate('ProjectScreen')}>
-           <View style={{ backgroundColor: '#252525', borderRadius: 25, padding: 30,marginBottom:10 }}>
-          <Text style={{ textAlign: 'center', color: '#fff' }}>{item}</Text>
-        </View>
-        </TouchableOpacity>
-      ))}
+      {
+        projects && projects.length > 0 ? (
+          projects.map((project, index) => (
+        
+          <TouchableOpacity key={index} onPress={()=>navigation.navigate('ProjectScreen')}>
+             <View style={{ backgroundColor: '#252525', borderRadius: 25, padding: 30,marginBottom:10 }}>
+            <Text style={{ textAlign: 'center', color: '#fff' }}>{project?.projects?.project_name}</Text>
+          </View>
+          </TouchableOpacity>
+        ))) : <Text style={{ color: '#fff', textAlign: 'center', fontFamily:color.textFont,fontSize:20}}>No projects available</Text>
+      }
+      
     </View>
     </ScrollView>
   );

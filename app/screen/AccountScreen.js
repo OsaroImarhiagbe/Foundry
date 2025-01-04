@@ -18,7 +18,6 @@ import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import EvilIcons from 'react-native-vector-icons/EvilIcons';
 
 const { width, height } = Dimensions.get('window');
-const skills = ['Python','react','react native','Javascript','SQL','HTML/CSS','Linux','Django']
 
 const PostComponent = lazy(() => import('../components/PostComponent'))
 
@@ -60,6 +59,7 @@ const AccountScreen = () => {
         })
         setProjects(data)
       })
+      return () => unsub()
     }catch(err){
       console.log('error grabbing user post:',err)
     }
@@ -77,6 +77,7 @@ const AccountScreen = () => {
         })
         setPosts(data)
       })
+      return () => unsub()
     }catch(err){
       console.log('error grabbing user post:',err)
     }
@@ -115,13 +116,15 @@ const AccountScreen = () => {
     scrollEnabled={true}
      style={{flex:1,backgroundColor:color.backgroundcolor}}>
       <View style={{flex:1,backgroundColor:color.backgroundcolor}}>
-      {posts.map((post) => (
-        <Suspense key={post.id} fallback={<ActivityIndicator size="small" color="#000" />}>
-          <View style={{padding: 10 }}>
-            <PostComponent count={post.like_count} url={post.imageUrl} id={post.id} name={post.name} content={post.content} date={post.createdAt.toDate().toLocaleString()} comment_count={post.comment_count} />
-          </View>
-        </Suspense>
-      ))}
+        {
+        posts && posts.length > 0 ? (
+            posts.map((post) => (
+              <Suspense key={post.id} fallback={<ActivityIndicator size="small" color="#000" />}>
+                <View style={{padding: 10 }}>
+                  <PostComponent count={post.like_count} url={post.imageUrl} id={post.id} name={post.name} content={post.content} date={post.createdAt.toDate().toLocaleString()} comment_count={post.comment_count} />
+                </View>
+              </Suspense>
+            ))) : <Text style={{ color: '#fff', textAlign: 'center', fontFamily:color.textFont,fontSize:20}}>No posts available</Text>}
     </View>
     </ScrollView>
     
@@ -130,13 +133,18 @@ const AccountScreen = () => {
   const Projects = () => (
     <ScrollView style={{flex:1,backgroundColor:color.backgroundcolor}}>
     <View style={{flex:1,backgroundColor:color.backgroundcolor,padding:50}}>
-      {skills.map((project, index) => (
-        <TouchableOpacity key={index} onPress={()=>navigation.navigate('ProjectScreen')}>
-           <View style={{ backgroundColor: '#252525', borderRadius: 25, padding: 30,marginBottom:10 }}>
-          <Text style={{ textAlign: 'center', color: '#fff' }}>{project?.projects?.project_name}</Text>
-        </View>
-        </TouchableOpacity>
-      ))}
+      {
+        projects && projects.length > 0 ? (
+          projects.map((project, index) => (
+        
+          <TouchableOpacity key={index} onPress={()=>navigation.navigate('ProjectScreen')}>
+             <View style={{ backgroundColor: '#252525', borderRadius: 25, padding: 30,marginBottom:10 }}>
+            <Text style={{ textAlign: 'center', color: '#fff' }}>{project?.projects?.project_name}</Text>
+          </View>
+          </TouchableOpacity>
+        ))) : <Text style={{ color: '#fff', textAlign: 'center', fontFamily:color.textFont,fontSize:20}}>No projects available</Text>
+      }
+      
     </View>
     </ScrollView>
   );
