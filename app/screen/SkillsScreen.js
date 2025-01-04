@@ -2,42 +2,40 @@ import React,{useState,useEffect} from 'react'
 import {View, Text,StyleSheet,Platform,Keyboard,TouchableWithoutFeedback,TouchableOpacity} from 'react-native'
 import color from '../../config/color'
 import Autocomplete from 'react-native-autocomplete-input'
+import { useAuth } from '../authContext'
 import {db} from '../../FireBase/FireBaseConfig';
-import {getDoc,doc, collection, onSnapshot,query,where } from 'firebase/firestore';
+import {getDoc,doc, collection, onSnapshot,query,where,updateDoc } from 'firebase/firestore';
 import axios from 'axios'
-import {SkillsAPIKEY} from '@env'
+import {SkillsAPIKEY,SkillsAPIURL} from '@env'
 
 const SkillsScreen = () => {
     const [ query, setQuery ] = useState('');
     const [results,setResults] = useState([])
     const [skills,setSkills] = useState([])
     const [isloading,setLoading] = useState(false)
+    const {user} = useAuth()
 
   
 
     useEffect(() =>{
-      
-
         const fetchSkills = async () => {
             setLoading(true)
             if(query.trim() == ''){
                 setResults([])
                 return
-
             }
             try{
-                const res = await axios.get(`https://api.apilayer.com/skills?q=${query}`,{headers:{
+                const res = await axios.get(`${SkillsAPIURL}skills?q=${query}`,{headers:{
                     "apikey": SkillsAPIKEY,
                     "redirect":'follow'
                 }})
                 setResults(res.data || [])
             }catch(err){
-                console.log(`Error API:${err}`)
+                console.error(`Error API:${err}`)
                 setResults([])
             }finally{
                 setLoading(false)
-            }
-                
+            }      
         }
 
         fetchSkills()
@@ -45,7 +43,23 @@ const SkillsScreen = () => {
     },[query])
 
 
-    const handleSubmit = (item) => {
+    const handleSubmit = async (item) => {
+        const docRef =  doc(db,'users',user.userId)
+
+        if(!skills.includes(item)){
+            await updateDoc(docRef,{
+                skills:[
+                    item
+                    ]
+            })
+        }else{
+            await updateDoc(docRef,{
+                skills:[
+                    ...prev,
+                    item
+                    ]
+            })
+        }
         setSkills(item)
     }
 
