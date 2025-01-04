@@ -128,7 +128,7 @@ const HomeScreen = () => {
           <TouchableOpacity onPress={() => console.log('text pressed')}><Text style={styles.linkText}>Code</Text></TouchableOpacity>
           <TouchableOpacity onPress={() => console.log('test pressed')}><Text style={styles.linkText}>Learning Path</Text></TouchableOpacity>
         </View>
-        <View style={{padding:2}}>
+        {/* <View style={{padding:2}}>
     <FlatList
       data={DATA1}
      horizontal
@@ -138,7 +138,7 @@ const HomeScreen = () => {
           <Cards navigation={navigation} color='#ffffff' image={item.image} title={item.title} backgroundColor={color.grey}/>
         </Suspense>}
       ItemSeparatorComponent={Separator}/>
-   </View>
+   </View> */}
    {mount ? <View style={{flex:1,justifyContent:'center',alignItems:'center'}}> <ActivityIndicator size='Large' color='#fff'/></View>
    : <FlatList
     data={memoPost}
@@ -170,7 +170,7 @@ const styles = StyleSheet.create({
       marginVertical:10,
       flexDirection:'row',
       justifyContent:'space-evenly',
-      padding:10
+      padding:5
     },
     messageContainer:{
       marginLeft:40

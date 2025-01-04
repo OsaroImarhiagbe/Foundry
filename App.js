@@ -10,7 +10,6 @@ import AuthNavigation from './app/navigation/AuthNavigation';
 import { PersistGate } from 'redux-persist/integration/react';
 import { I18nextProvider } from 'react-i18next';
 import i18n from './app/Language/i18n';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
 export default function App() {
@@ -67,7 +66,7 @@ export default function App() {
       <MenuProvider>
           <AuthContextProvider>
         <NavigationContainer>
-          {isloading ? <SplashScreen/> :   <AuthNavigation/>}
+          {isloading ? <SplashScreen/> :   <AuthNavigation/> }
       </NavigationContainer>
     </AuthContextProvider>
     <StatusBar style="light" />

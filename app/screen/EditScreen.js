@@ -144,10 +144,10 @@ const EditScreen = () => {
             })
             dispatch(addImage({profileimg:uploadResponse.data.file}))
             }else{
-                console.log('user cancelled the image picker.')
+                console.error('user cancelled the image picker.')
             }
         }catch(err){
-            console.log('Error picking image and uploading to s3:',err)
+            console.error('Error picking image and uploading to s3:',err)
         }
         }
       

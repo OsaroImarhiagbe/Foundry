@@ -6,11 +6,11 @@ import { useAuth } from '../authContext';
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
 import { addDoc, collection, Timestamp, updateDoc } from "firebase/firestore"; 
 import { db } from '../../FireBase/FireBaseConfig';
-import { useDispatch } from 'react-redux';
+import { useDispatch,useSelector } from 'react-redux';
 import { addPost } from '../features/PostandComments/socialSlice';
 import { useNavigation } from '@react-navigation/native';
 import * as ImagePicker from 'expo-image-picker';
-import person from '../assets/person.jpg';
+import { addImage } from '../features/user/userSlice';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import axios from 'axios'
 const PostScreen = () => {
@@ -20,6 +20,7 @@ const PostScreen = () => {
   const [loading, setLoading] = useState(false);
   const [image, setImage] = useState(null);
   const hasUnsavedChanges = Boolean(text);
+  const profileImage = useSelector((state) => state.user.profileImage)
   const navigation = useNavigation();
   const dispatch = useDispatch();
 
@@ -67,12 +68,12 @@ const PostScreen = () => {
           {
             text: 'Discard',
             style: 'destructive',
-            onPress: () => navigation.navigate('Main'), // Navigate only if user confirms
+            onPress: () => navigation.navigate('Main'),
           },
         ]
       );
     } else {
-      navigation.navigate('Main'); // No unsaved changes, navigate immediately
+      navigation.navigate('Main');
     }
   };
 
@@ -92,13 +93,12 @@ const PostScreen = () => {
         }
       })
       if(uploadResponse.status === 201){
-        console.log('file uploaded to s3')
         return uploadResponse.data.file
       }else{
-        console.log('Failed to upload to s3')
+        console.error('Failed to upload to s3')
       }
     }catch(err){
-      console.log('Error uploading to s3:',err)
+      console.error('Error uploading to s3:',err)
     }
   }
 
@@ -108,11 +108,10 @@ const PostScreen = () => {
       allowsEditing:true,
       quality:1
     })
-    console.log('Image results:',results)
     if(!results.canceled){
       setImage(results.assets[0].uri)
     }else{
-      console.log('user cancelled the image picker.')
+      console.error('user cancelled the image picker.')
     }
   }
   return (
@@ -136,7 +135,7 @@ const PostScreen = () => {
       </View>
       <View style={styles.textContainer}>
         <Image
-          source={user?.profileImage || ''}
+          source={profileImage || ''}
           placeholder={{blurhash}}
           style={[styles.profileImage,{height:hp(4.3), aspectRatio:1, borderRadius:100}]}
           transition={500}

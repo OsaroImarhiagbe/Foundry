@@ -101,16 +101,14 @@ const AuthNavigation = () => {
     const Stack = createStackNavigator()
 
   return (
-    <Stack.Navigator
-    screenOptions={{
-    }}>
-      
+    <Stack.Navigator>    
       <Stack.Screen
         name="Login"
         component={LoginScreen}
         options={{
           headerShown:false,
-          gestureEnabled:false
+          gestureEnabled:false,
+          animation:'fade_from_bottom'
           
         }}
       /> 
@@ -126,7 +124,8 @@ const AuthNavigation = () => {
       component={DrawerNavigationWrapper}
       options={{
         headerShown:false,
-        gestureEnabled:false
+        gestureEnabled:false,
+        animation:'fade_from_bottom'
       }}/>
         <Stack.Screen
       name="ProjectScreen"

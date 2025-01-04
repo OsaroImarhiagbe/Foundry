@@ -4,7 +4,7 @@ import color from '../../config/color'
 import Autocomplete from 'react-native-autocomplete-input'
 import { useAuth } from '../authContext'
 import {db} from '../../FireBase/FireBaseConfig';
-import {getDoc,doc, collection, onSnapshot,query,where,updateDoc } from 'firebase/firestore';
+import {doc, updateDoc } from 'firebase/firestore';
 import axios from 'axios'
 import {SkillsAPIKEY,SkillsAPIURL} from '@env'
 
@@ -45,7 +45,6 @@ const SkillsScreen = () => {
 
     const handleSubmit = async (item) => {
         const docRef =  doc(db,'users',user.userId)
-
         if(!skills.includes(item)){
             await updateDoc(docRef,{
                 skills:[
@@ -65,7 +64,7 @@ const SkillsScreen = () => {
 
    
   return (
-          <TouchableWithoutFeedback>
+          <TouchableWithoutFeedback onPress={()=>Keyboard.dismiss()}>
     <View style={styles.screen}>
     <View style={styles.headingContainer}>
         <Text style={styles.headingText}>Skills</Text>
