@@ -50,7 +50,6 @@ const SearchScreen = () => {
       let user = [];
       querySnapShot.forEach(doc => {
         user.push({...doc.data(), id:doc.id})
-        console.log('search id:',doc.id)
         dispatch(addsearchID({searchID:doc.id}))
       })
       setLoading(false)

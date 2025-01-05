@@ -61,7 +61,7 @@ const AccountScreen = () => {
       })
       return () => unsub()
     }catch(err){
-      console.log('error grabbing user post:',err)
+      console.error('error grabbing user post:',err)
     }
     
   },[user])
@@ -79,7 +79,7 @@ const AccountScreen = () => {
       })
       return () => unsub()
     }catch(err){
-      console.log('error grabbing user post:',err)
+      console.error('error grabbing user post:',err)
     }
     
   },[user])
@@ -230,7 +230,6 @@ const AccountScreen = () => {
                     name='Projects'
                     component={Projects}
                     options={{
-                      lazy,
                       tabBarIcon:() => (
                         <MaterialIcons name='work' color='#00bf63' size={25}
                         />),
@@ -273,17 +272,17 @@ const styles = StyleSheet.create({
     fontSize:30,
     letterSpacing:1,
     fontWeight:'bold',
-   fontFamily:'Helvetica-light'
+   fontFamily:color.textFont
   },
   location:{
     fontSize:15,
     color:'#fff',
-    fontFamily:'Helvetica-light'
+    fontFamily:color.textFont
   },
   title:{
     fontSize:15,
     color:'#fff',
-    fontFamily:'Helvetica-light'
+    fontFamily:color.textFont
   },
 
 

@@ -53,14 +53,14 @@ export const AuthContextProvider = ({children}) => {
             return {success:true}
         }catch(error){
             setLoading(false)
-            console.log(`Error:${error}`)
+            console.error(`Error:${error}`)
         }
     }
 
     const logout = async () => {
         try{
             await signOut(auth);
-            AsyncStorage.removeItem('authUser')
+            await AsyncStorage.removeItem('authUser')
             return {success:true,}
         }catch(error){
             return {success:false, message: error.message}
@@ -85,7 +85,7 @@ export const AuthContextProvider = ({children}) => {
         try{
             await sendPasswordResetEmail(auth,email)
         }catch(e){
-            console.log(e)
+            console.error(e)
         }
     }
     const updateUserData = async (userId) => {
