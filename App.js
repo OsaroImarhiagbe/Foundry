@@ -10,7 +10,7 @@ import AuthNavigation from './app/navigation/AuthNavigation';
 import { PersistGate } from 'redux-persist/integration/react';
 import { I18nextProvider } from 'react-i18next';
 import i18n from './app/Language/i18n';
-
+// import { OneSignal } from 'react-native-onesignal';
 
 export default function App() {
 

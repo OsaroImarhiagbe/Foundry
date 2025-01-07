@@ -5,7 +5,6 @@ import { ActivityIndicator } from 'react-native';
 import ProjectScreen from '../screen/ProjectScreen';
 import LocationScreen from '../screen/LocationScreen';
 import { useNavigation } from '@react-navigation/native';
-import { auth} from '../../FireBase/FireBaseConfig';
 import {useAuth} from '../authContext'
 import AsyncStorage from '@react-native-async-storage/async-storage';
 const RegisterScreen = lazy(() => import('../screen/RegisterScreen'))
