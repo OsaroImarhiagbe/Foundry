@@ -10,7 +10,11 @@ import AuthNavigation from './app/navigation/AuthNavigation';
 import { PersistGate } from 'redux-persist/integration/react';
 import { I18nextProvider } from 'react-i18next';
 import i18n from './app/Language/i18n';
+import * as Notifications from 'expo-notifications';
+import * as Permissions from 'expo-permissions';
 // import { OneSignal } from 'react-native-onesignal';
+import { LogLevel, OneSignal } from 'react-native-onesignal';
+import Constants from "expo-constants";
 
 export default function App() {
 
@@ -18,37 +22,18 @@ export default function App() {
   const [user, setUser] = useState(null)
   const [isAuthenticated, setIsAuthenticated] = useState(undefined)
 
- 
+  
+  useEffect(() => {
+    OneSignal.initialize('8a6e60de-6336-40e2-8162-4b8077a2176d');
+
+    // Also need enable notifications to complete OneSignal setup
+    OneSignal.Notifications.requestPermission(true);
+
+  }, []);
+  
 
 
-  // useEffect(() => {
-  //   // Set your OneSignal App ID here
-  //   OneSignal.initialize('8a6e60de-6336-40e2-8162-4b8077a2176d');  // Replace with your OneSignal App ID
 
-  //   // iOS-specific setup (prompt for notifications)
-  //   OneSignal.promptForPushNotificationsWithUserResponse(response => {
-  //     console.log('Prompt response:', response);
-  //   });
-
-  //   // Notification opened handler
-  //   OneSignal.setNotificationOpenedHandler(notification => {
-  //     console.log('Notification opened:', notification);
-  //     // You can navigate to a specific screen based on the notification
-  //   });
-
-  //   // Notification received handler
-  //   OneSignal.setNotificationReceivedHandler(notification => {
-  //     console.log('Notification received:', notification);
-  //     // You can process the notification data here
-  //   });
-
-  //   // Add subscription observer to get the OneSignal Player ID
-  //   OneSignal.addSubscriptionObserver(({ to }) => {
-  //     if (to && to.userId) {
-  //       console.log('Player ID:', to.userId);  // Get the Player ID for this device
-  //     }
-  //   });
-  // }, []);
   useEffect(() => {
     const timer = setTimeout(() => {
       setLoading(false)
