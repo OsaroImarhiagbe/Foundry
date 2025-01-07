@@ -10,11 +10,8 @@ import AuthNavigation from './app/navigation/AuthNavigation';
 import { PersistGate } from 'redux-persist/integration/react';
 import { I18nextProvider } from 'react-i18next';
 import i18n from './app/Language/i18n';
-import * as Notifications from 'expo-notifications';
-import * as Permissions from 'expo-permissions';
-// import { OneSignal } from 'react-native-onesignal';
-import { LogLevel, OneSignal } from 'react-native-onesignal';
-import Constants from "expo-constants";
+
+
 
 export default function App() {
 
@@ -23,14 +20,7 @@ export default function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(undefined)
 
   
-  useEffect(() => {
-    OneSignal.initialize('8a6e60de-6336-40e2-8162-4b8077a2176d');
 
-    // Also need enable notifications to complete OneSignal setup
-    OneSignal.Notifications.requestPermission(true);
-
-  }, []);
-  
 
 
 
