@@ -25,14 +25,6 @@
       "package": "com.devguides.app"
     },
     "web": {},
-    "plugins": [
-      [
-        {
-          "mode": "development",
-          "devTeam": "UFQYWBYAJF"
-        }
-      ]
-    ],
     "extra": {
       "eas": {
         "build": {
