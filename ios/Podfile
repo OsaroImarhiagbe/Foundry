@@ -39,8 +39,6 @@ target 'DevGuides' do
   use_frameworks! :linkage => podfile_properties['ios.useFrameworks'].to_sym if podfile_properties['ios.useFrameworks']
   use_frameworks! :linkage => ENV['USE_FRAMEWORKS'].to_sym if ENV['USE_FRAMEWORKS']
   # Enable Fabric renderer
-  use_frameworks! :linkage => :static
-  config = use_native_modules!
 
   # Fabric specific pods
   pod 'React-RCTFabric', :path => '../node_modules/react-native/React/Fabric'
