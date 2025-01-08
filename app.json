@@ -27,6 +27,7 @@
     "web": {},
     "plugins": [
       [
+        "expo-notfications",
         {
           "mode": "development",
           "devTeam": "UFQYWBYAJF"
