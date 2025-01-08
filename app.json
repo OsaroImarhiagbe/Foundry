@@ -27,7 +27,6 @@
     "web": {},
     "plugins": [
       [
-        "onesignal-expo-plugin",
         {
           "mode": "development",
           "devTeam": "UFQYWBYAJF"
