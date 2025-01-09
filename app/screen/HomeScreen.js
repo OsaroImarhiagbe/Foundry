@@ -12,7 +12,7 @@ import {db} from '../../FireBase/FireBaseConfig';
 import { useDispatch} from 'react-redux';
 import { addId } from '../features/user/userSlice';
 import { store } from '../store';
-import PushNotifications from '../components/PushNotifications'
+import PushNotification from '../components/PushNotifications';
 const PostComponent = lazy(() => import('../components/PostComponent'))
 const Cards = lazy(() => import('../components/Cards'))
 
@@ -67,7 +67,7 @@ const HomeScreen = () => {
 
   useEffect(() => { 
     setMount(true)
-    // dispatch(addId({currentuserID:user.userId}))
+    dispatch(addId({currentuserID:user.userId}))
     const timer = setTimeout(() => {
       setMount(false)
       fetchPosts();
@@ -97,7 +97,7 @@ const HomeScreen = () => {
         setPost([...data]);
       });
     }  catch (e) {
-    console.log(`Error post can not be found: ${e}`);
+    console.error(`Error post can not be found: ${e}`);
   } 
 };
   const handlePress = () => {
@@ -110,7 +110,7 @@ const HomeScreen = () => {
     <View
     style={styles.screen}
     >
-      <PushNotifications/>
+      <PushNotification/>
         <View>
           <ChatRoomHeader
           onPress={handlePress}

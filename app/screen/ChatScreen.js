@@ -80,7 +80,7 @@ const ChatScreen = () => {
     getToken()
     
   },[route?.params?.userid, item?.userId])
-  
+
   const createRoom = async () => {
     try{
       
@@ -112,7 +112,7 @@ const ChatScreen = () => {
       textRef.current ="";
       if(inputRef) inputRef?.current?.clear();
       
-      const newDoc = await addDoc(messageRef,{
+      await addDoc(messageRef,{
         userId:user?.userId,
         text:message,
         senderName: user?.username,
@@ -125,7 +125,7 @@ const ChatScreen = () => {
         sound: 'default',
         title: `${user.username} sent you a message.`,
         body: message,
-        data: { someData: 'goes here' },
+        data: { type: 'message' },
       };
       await axios.post(EXPOPUSHURL,message, {
         headers: {
