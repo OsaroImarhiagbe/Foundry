@@ -3,12 +3,22 @@ import {View,Text,StyleSheet,Dimensions} from 'react-native'
 import Onboarding from 'react-native-onboarding-swiper'
 import LottieView from 'lottie-react-native';
 import color from '../../config/color';
+import { useNavigation } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const {width,height} = Dimensions.get('window')
 const OnboardingScreen = () => {
+    // const navigation = useNavigation()
+
+    const handleDone = async () => {
+        await AsyncStorage.setItem('onboarded','1')
+        navigation.navigate('Drawer',{screen:'Home'})
+    }
   return (
     <View style={styles.screen}>
     <Onboarding
+        onDone={handleDone}
+        onSkip={handleDone}
         containerStyles={{paddingHorizontal:15}}
         pages={[
             {
@@ -26,40 +36,52 @@ const OnboardingScreen = () => {
             },
             {
             backgroundColor: color.grey,
+            titleStyles:{
+                fontFamily:color.textFont
+            },
             image:(
-                <View>
-                    <Text>Hello World</Text>
-                </View>
+                <>
+                <LottieView style={styles.lottie} source={require('../assets/animations/animation2.json')} autoPlay loop />;
+                </>
             ),
             title: 'Connect with Developers Worldwide',
             subtitle: 'Collaborate with developers from all skill levels and backgrounds.',
             },
             {
-            backgroundColor: '#fff',
+            backgroundColor: '#0097b2',
+            titleStyles:{
+                fontFamily:color.textFont
+            },
             image:(
-                <View>
-                    <Text>Hello World</Text>
-                </View>
+                <>
+                <LottieView style={styles.lottie} source={require('../assets/animations/animation3.json')} autoPlay loop />;
+                </>
             ),
             title: 'Bring Your Ideas to Life',
             subtitle: 'From concepts to code, DevGuides is here to help you make it happen.',
             },
             {
             backgroundColor: '#fff',
+            titleStyles:{
+                fontFamily:color.textFont
+            },
             image:(
-                <View>
-                    <Text>Hello World</Text>
-                </View>
+                <>
+                <LottieView style={styles.lottie} source={require('../assets/animations/animation4.json')} autoPlay loop />;
+                </>
             ),
             title: 'Launch Your Next Big Idea',
             subtitle: 'Turn your side projects into real-world applications with DevGuides.',
             },
             {
-            backgroundColor: '#fff',
+            backgroundColor: color.backgroundcolor,
+            titleStyles:{
+                fontFamily:color.textFont
+            },
             image:(
-                <View>
-                    <Text>Hello World</Text>
-                </View>
+                <>
+                <LottieView style={styles.lottie} source={require('../assets/animations/animation5.json')} autoPlay loop />;
+                </>
             ),
             title: 'Join the DevGuides Community',
             subtitle: 'Meet like-minded developers, build connections, and grow your network.',

@@ -75,6 +75,8 @@ export const AuthContextProvider = ({children}) => {
                 username,
                 userId: response?.user?.uid
             })
+            await sendEmailVerification(auth)
+            await AsyncStorage.setItem('userId',response?.user?.uid)
             return {success:true, data: response?.user}
         }catch(error){
             console.error(`${error}`)

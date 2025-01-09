@@ -25,7 +25,7 @@ const RegisterScreen = () => {
             let response = await register(values.username, values.email, values.password)
             if(response){
                 setLoading((prev)=> !prev)
-                navigation.navigate('Main')
+                navigation.navigate('Onboarding')
                 Alert.alert('Success','You have registered!')
             }
             resetForm({values:initialValues})

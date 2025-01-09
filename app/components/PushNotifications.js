@@ -2,9 +2,10 @@ import * as Device from 'expo-device';
 import * as Notifications from 'expo-notifications';
 import Constants from 'expo-constants';
 import { db } from '../../FireBase/FireBaseConfig';
-import { addDoc,updateDoc,Timestamp,doc } from 'firebase/firestore';
+import { addDoc,updateDoc,Timestamp,doc,runTransaction } from 'firebase/firestore';
 import { useAuth } from '../authContext';
 import {useState,useEffect,useRef} from 'react'
+import {Alert} from 'react-native'
 
 
 Notifications.setNotificationHandler({
@@ -44,7 +45,6 @@ async function registerForPushNotificationsAsync() {
           projectId,
         })
       ).data;
-      console.log(pushTokenString);
       return pushTokenString;
     } catch (e) {
       handleRegistrationError(`${e}`);
@@ -82,6 +82,10 @@ export default function PushNotification(){
    
     notificationListener.current = Notifications.addNotificationReceivedListener(async (notification) => {
       setNotification((prev) => [...prev,notification]);
+      Alert.alert(
+        notification.request.content.title,
+        notification.request.content.body
+      );
       if(user){
       const message = notification.request.content.body;
       const title = notification.request.content.title;

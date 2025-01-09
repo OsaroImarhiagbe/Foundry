@@ -13,6 +13,7 @@ const ReportBugScreen = lazy(() => import('../screen/ReportBugScreen'))
 const ContactUsScreen = lazy(() => import('../screen/ContactUsScreen'))
 const ProjectEntryScreen = lazy(() => import('../screen/ProjectEntryScreen'))
 const SkillsScreen = lazy(() => import('../screen/SkillsScreen'))
+const OnboardingScreen = lazy(()=> import('../screen/OnboardingScreen'))
 const RegisterScreenWrapper = (props) => {
   
     return (
@@ -69,11 +70,20 @@ const ProjectEntryScreenWrapper = (props) => {
 
   )
 }
+
+const OnboardingScreenWrapper = () =>{
+  return (
+    <Suspense fallback={<ActivityIndicator size='small' color='#fff'/>}>
+    <OnboardingScreen/>
+  </Suspense>
+  )
+}
 const AuthNavigation = () => {
   const navigation = useNavigation()
   const [user, setUser] = useState(null)
   const [loading,setLoading] = useState(false)
   const [isAuthenticated, setIsAuthenticated] = useState(undefined)
+  const [showOnboarding,setShowOnboarding] = useState(false)
 
   const {updateUserData} = useAuth()
 
@@ -96,80 +106,191 @@ const AuthNavigation = () => {
       getAuthState()
   },[])
 
+  useEffect(() => {
+    checkifOnboard()
+  })
+
+
+  const  checkifOnboard = async () => {
+      const onboardkey = await AsyncStorage.getItem('onboarded')
+      if(onboardkey==1){
+        setShowOnboarding(false)
+      }else{
+        setShowOnboarding(true)
+      }
+    }
+  
+
+
 
     const Stack = createStackNavigator()
 
-  return (
-    <Stack.Navigator>    
-      <Stack.Screen
-        name="Login"
-        component={LoginScreen}
-        options={{
-          headerShown:false,
-          gestureEnabled:false,
-          animation:'fade_from_bottom'
-          
-        }}
-      /> 
-      <Stack.Screen
-      name="Register"
-      component={RegisterScreenWrapper}
-      options={{
-        headerShown:false,
-        gestureEnabled:false
-      }}/>
-      <Stack.Screen
-      name='Drawer'
-      component={DrawerNavigationWrapper}
-      options={{
-        headerShown:false,
-        gestureEnabled:false,
-        animation:'fade_from_bottom'
-      }}/>
-        <Stack.Screen
-      name="ProjectScreen"
-      component={ProjectScreen}
-      options={{
-        headerShown:false,
-        presentation:'modal',
-      }}/>
+
+    if(showOnboarding==null){
+      return null
+    }
+    if(loading || showOnboarding){
+      return (
+          <Stack.Navigator
+          initialRouteName='Register'
+          >    
+            <Stack.Screen
+              name="Login"
+              component={LoginScreen}
+              options={{
+                headerShown:false,
+                gestureEnabled:false,
+                animation:'fade_from_bottom'
+                
+              }}
+            /> 
+            <Stack.Screen
+            name="Register"
+            component={RegisterScreenWrapper}
+            options={{
+              headerShown:false,
+              gestureEnabled:false
+            }}/>
+            <Stack.Screen
+            name="Onboarding"
+            component={OnboardingScreenWrapper}
+            options={{
+              headerShown:false,
+              presentation:'modal',
+            }}/>
+            <Stack.Screen
+            name='Drawer'
+            component={DrawerNavigationWrapper}
+            options={{
+              headerShown:false,
+              gestureEnabled:false,
+              animation:'fade_from_bottom'
+            }}/>
+              <Stack.Screen
+            name="ProjectScreen"
+            component={ProjectScreen}
+            options={{
+              headerShown:false,
+              presentation:'modal',
+            }}/>
+                <Stack.Screen
+            name="LocationScreen"
+            component={LocationScreen}
+            options={{
+              headerShown:false,
+              presentation:'modal',
+            }}/>
+            <Stack.Screen
+            name="ReportBugScreen"
+            component={ReportBugScreenWrapper}
+            options={{
+              headerShown:false,
+              presentation:'modal',
+            }}/>
+              <Stack.Screen
+            name="ContactUsScreen"
+            component={ContactUsScreenWrapper}
+            options={{
+              headerShown:false,
+              presentation:'modal',
+            }}/>
+            <Stack.Screen
+            name="ProjectEntryScreen"
+            component={ProjectEntryScreenWrapper}
+            options={{
+              headerShown:false,
+              presentation:'modal',
+            }}/>
+             <Stack.Screen
+            name="SkillsScreen"
+            component={SkillsScreenWrapper}
+            options={{
+              headerShown:false,
+              presentation:'modal',
+            }}/>
+          </Stack.Navigator>
+        )
+    }else{
+      return (
+        <Stack.Navigator initialRouteName='Login'>    
           <Stack.Screen
-      name="LocationScreen"
-      component={LocationScreen}
-      options={{
-        headerShown:false,
-        presentation:'modal',
-      }}/>
-      <Stack.Screen
-      name="ReportBugScreen"
-      component={ReportBugScreenWrapper}
-      options={{
-        headerShown:false,
-        presentation:'modal',
-      }}/>
-        <Stack.Screen
-      name="ContactUsScreen"
-      component={ContactUsScreenWrapper}
-      options={{
-        headerShown:false,
-        presentation:'modal',
-      }}/>
-      <Stack.Screen
-      name="ProjectEntryScreen"
-      component={ProjectEntryScreenWrapper}
-      options={{
-        headerShown:false,
-        presentation:'modal',
-      }}/>
-       <Stack.Screen
-      name="SkillsScreen"
-      component={SkillsScreenWrapper}
-      options={{
-        headerShown:false,
-        presentation:'modal',
-      }}/>
-    </Stack.Navigator>
-  )
-}
+            name="Login"
+            component={LoginScreen}
+            options={{
+              headerShown:false,
+              gestureEnabled:false,
+              animation:'fade_from_bottom'
+              
+            }}
+          /> 
+          <Stack.Screen
+          name="Register"
+          component={RegisterScreenWrapper}
+          options={{
+            headerShown:false,
+            gestureEnabled:false
+          }}/>
+          <Stack.Screen
+          name="Onboarding"
+          component={OnboardingScreenWrapper}
+          options={{
+            headerShown:false,
+            presentation:'modal',
+          }}/>
+          <Stack.Screen
+          name='Drawer'
+          component={DrawerNavigationWrapper}
+          options={{
+            headerShown:false,
+            gestureEnabled:false,
+            animation:'fade_from_bottom'
+          }}/>
+            <Stack.Screen
+          name="ProjectScreen"
+          component={ProjectScreen}
+          options={{
+            headerShown:false,
+            presentation:'modal',
+          }}/>
+              <Stack.Screen
+          name="LocationScreen"
+          component={LocationScreen}
+          options={{
+            headerShown:false,
+            presentation:'modal',
+          }}/>
+          <Stack.Screen
+          name="ReportBugScreen"
+          component={ReportBugScreenWrapper}
+          options={{
+            headerShown:false,
+            presentation:'modal',
+          }}/>
+            <Stack.Screen
+          name="ContactUsScreen"
+          component={ContactUsScreenWrapper}
+          options={{
+            headerShown:false,
+            presentation:'modal',
+          }}/>
+          <Stack.Screen
+          name="ProjectEntryScreen"
+          component={ProjectEntryScreenWrapper}
+          options={{
+            headerShown:false,
+            presentation:'modal',
+          }}/>
+           <Stack.Screen
+          name="SkillsScreen"
+          component={SkillsScreenWrapper}
+          options={{
+            headerShown:false,
+            presentation:'modal',
+          }}/>
+        </Stack.Navigator>
+      )
+    }
+
+  }
 
 export default AuthNavigation

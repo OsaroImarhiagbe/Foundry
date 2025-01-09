@@ -23,9 +23,6 @@ const TabNavigationWrapper = (props) =>{
 const DrawerNavigation = ({route}) => {
   const navigation = useNavigation();
 
-  const handleBack = () => {
-    navigation.navigate('Welcome');
-  }
   return (
 
     <Drawer.Navigator 
