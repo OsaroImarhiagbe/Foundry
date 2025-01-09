@@ -127,17 +127,6 @@ const HomeScreen = () => {
           <TouchableOpacity onPress={() => console.log('text pressed')}><Text style={styles.linkText}>Code</Text></TouchableOpacity>
           <TouchableOpacity onPress={() => console.log('test pressed')}><Text style={styles.linkText}>Learning Path</Text></TouchableOpacity>
         </View>
-        {/* <View style={{padding:2}}>
-    <FlatList
-      data={DATA1}
-     horizontal
-      keyExtractor={item => item.id.toString()}
-      renderItem={({item}) =>
-        <Suspense fallback={<ActivityIndicator size='small' color='#000'/>}>
-          <Cards navigation={navigation} color='#ffffff' image={item.image} title={item.title} backgroundColor={color.grey}/>
-        </Suspense>}
-      ItemSeparatorComponent={Separator}/>
-   </View> */}
    {mount ? <View style={{flex:1,justifyContent:'center',alignItems:'center'}}> <ActivityIndicator size='Large' color='#fff'/></View>
    : <FlatList
     data={memoPost}

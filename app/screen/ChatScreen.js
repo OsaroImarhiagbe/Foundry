@@ -15,7 +15,7 @@ import ChatRoomHeader from '../components/ChatRoomHeader';
 import { useNavigation } from '@react-navigation/native';
 import { useDispatch } from 'react-redux';
 import { addID } from '../features/Message/messageidSlice';
-import {store} from '../store';
+import axios from 'axios'
 const ChatScreen = () => {
   const [messages, setMessages] = useState([]);
   const route = useRoute();
@@ -76,6 +76,25 @@ const ChatScreen = () => {
   };
 
   
+// async function sendPushNotification(expoPushToken) {
+//   const message = {
+//     to: expoPushToken,
+//     sound: 'default',
+//     title: 'Original Title',
+//     body: 'And here is the body!',
+//     data: { someData: 'goes here' },
+//   };
+
+//   await fetch('https://exp.host/--/api/v2/push/send', {
+//     method: 'POST',
+//     headers: {
+//       Accept: 'application/json',
+//       'Accept-encoding': 'gzip, deflate',
+//       'Content-Type': 'application/json',
+//     },
+//     body: JSON.stringify(message),
+//   });
+// }
 
   const handleSend = async () => {
     let message = textRef.current.trim();
@@ -99,6 +118,20 @@ const ChatScreen = () => {
         sent:'true',
         createdAt: Timestamp.fromDate(new Date())
       })
+      const message = {
+        to: expoPushToken,
+        sound: 'default',
+        title: `${user.username} sent you a message.`,
+        body: message,
+        data: { someData: 'goes here' },
+      };
+      await axios.post('https://exp.host/--/api/v2/push/send',message, {
+        headers: {
+          Accept: 'application/json',
+          'Accept-encoding': 'gzip, deflate',
+          'Content-Type': 'application/json',
+        },
+      });
     }catch(error){
       console.error(`${error}`)
     }

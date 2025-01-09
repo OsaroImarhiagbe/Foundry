@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "DevGuides",
-    "icon":"./assests/DevGuide.png",
+    "icon":"./assets/DevGuide.png",
     "slug": "DevGuides",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -17,7 +17,8 @@
     "ios": {
       "supportsTablet": true,
       "newArchEnabled": true,
-      "bundleIdentifier": "com.devguides.app"
+      "bundleIdentifier": "com.devguides.app",
+      "buildNumber":"2"
     },
     "android": {
       "newArchEnabled": true,
