@@ -12,7 +12,7 @@ import {db} from '../../FireBase/FireBaseConfig';
 import { useDispatch} from 'react-redux';
 import { addId } from '../features/user/userSlice';
 import { store } from '../store';
-
+import PushNotifications from '../components/PushNotifications'
 const PostComponent = lazy(() => import('../components/PostComponent'))
 const Cards = lazy(() => import('../components/Cards'))
 
@@ -76,7 +76,6 @@ const HomeScreen = () => {
     return () => clearTimeout(timer)
   }, []); 
 
-  console.log('redux id:',store.getState().user.currentuserID)
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
@@ -111,7 +110,7 @@ const HomeScreen = () => {
     <View
     style={styles.screen}
     >
-       
+      <PushNotifications/>
         <View>
           <ChatRoomHeader
           onPress={handlePress}
