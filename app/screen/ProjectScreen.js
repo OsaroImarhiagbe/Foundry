@@ -1,23 +1,37 @@
 import React,{useState,useEffect} from 'react'
-import {View,Text,StyleSheet, TouchableOpacity,Image} from 'react-native'
+import {View,Text,StyleSheet, TouchableOpacity} from 'react-native'
 import color from '../../config/color';
 import Entypo from 'react-native-vector-icons/Entypo';
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 import { useNavigation } from '@react-navigation/native';
 import {db} from '../../FireBase/FireBaseConfig';
-import {getDoc,doc, collection, onSnapshot,query,where,setDoc,Timestamp,updateDoc } from 'firebase/firestore';
-import profile from '../assets/profile.jpg'
+import {collection, onSnapshot,query,where} from 'firebase/firestore';
+import { useAuth } from '../authContext';
+import { Image } from 'expo-image';
+import { blurhash } from '../../utils';
 
 const ProjectScreen = () => {
-    const skills = ['Python','react','react native','Javascript','SQL','HTML/CSS','Linux','Django']
-    const [text, setText] = useState('')
+    const [projects, setProjects] = useState('')
+    const {user} = useAuth()
 
     const navigation = useNavigation()
 
 
-    // useEffect(() => {
-
-    // })
+    useEffect(() => {
+        const getProject = () => {
+            const docRef = collection(db, 'users', user.userId, 'projects');
+            const projectQuery = query(docRef, where('project_name', '==', projectname));
+            const unsub = onSnapshot(projectQuery,(snapShot)=>{
+                let data = []
+                snapShot.forEach((doc) => {
+                    data.push({...doc.data(),id:doc.id})
+                })
+                setProjects([...data])
+            })
+            return unsub
+        }
+        getProject()
+    },[user])
 
     return (
       <View style={styles.screen}>
@@ -25,7 +39,8 @@ const ProjectScreen = () => {
         <View style={styles.container}>
             <Image
             style={{width:'100%',height:'100%',borderRadius:20}}
-            source={profile}
+            source={projects?.image}
+            placeholder={{blurhash}}
             />
         </View>
         </View>
@@ -40,20 +55,18 @@ const ProjectScreen = () => {
             </View>
             <View style={styles.textcontainer}>
                 {
-                    text ? <Text style={styles.text}>fjkfkfnkdnffmsfnlsandjadm;asndjksdfsdmfdkosdndlasnfkamdansdlasmdlamsdamsd;amsdklasfdsfksakdjassandkjas rekrbkwebrjewb
-                    fkbsdf sdjkf sjkfn ksj fa dka djla dfl fjdf jdf d fjekw fje nwfs adfjs f njfbqjfn   'finallyekwnguj enwfkjbew sdfjbewjknsfj webnfklnewsdjf
-                    fjewdf jewq fqew fo;ew qkfnew;nsfojebwfjewbnfmwepf'
+                    projects ? <Text style={styles.text}>{projects.content}
                 </Text>  : <Text style={styles.text}> Enter Details about your project</Text>
                 }
             </View>
             <View style={{marginTop:20}}>
             <Text style={styles.textHeading}>Tech Used</Text>
             <View style={{padding:10}}>
-            {skills.map((skill,index)=>{
+            {projects.skills.map((project,index)=>{
                 return (
                     <View style={{marginTop:5}}  key={index}>
                         <Text style={styles.text}>
-                            <Entypo name='code' size={15}/> {skill}</Text>
+                            <Entypo name='code' size={15}/> {project.skill}</Text>
                         </View>
                 )
             })}
@@ -83,14 +96,14 @@ const styles = StyleSheet.create({
     },
     text:{
         color:'#fff',
-        fontFamily:'Helvetica-light',
+        fontFamily:color.textFont,
         fontSize:15,
         textAlign:'left'
     },
     textHeading:{
         color:'#fff',
         fontSize:30,
-        fontFamily:'Helvetica-light'
+        fontFamily:color.textFont
     },
     textcontainer:{
         marginTop:10,

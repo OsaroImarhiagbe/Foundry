@@ -10,15 +10,17 @@ import { useDispatch,useSelector } from 'react-redux';
 import { addPost } from '../features/PostandComments/socialSlice';
 import { useNavigation } from '@react-navigation/native';
 import * as ImagePicker from 'expo-image-picker';
-import { addImage } from '../features/user/userSlice';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import axios from 'axios'
+import color from '../../config/color';
+import {DJANGO_MEDIA_URL} from '@env'
 const PostScreen = () => {
 
   const { user } = useAuth();
   const [text, setText] = useState('');
   const [loading, setLoading] = useState(false);
   const [image, setImage] = useState(null);
+  const [post_id,setPost_id] = useState('')
   const hasUnsavedChanges = Boolean(text);
   const profileImage = useSelector((state) => state.user.profileImage)
   const navigation = useNavigation();
@@ -44,7 +46,7 @@ const PostScreen = () => {
       await updateDoc(newDoc, {
         id: newDoc.id
       });
-      console.log('New post id: ', newDoc.id);
+      setPost_id(newDoc.id)
       dispatch(addPost({ id: newDoc.id, content: text }));
       setText('');
       setImage(null);
@@ -87,7 +89,8 @@ const PostScreen = () => {
         type: "image/jpeg",
         name: "photo.jpg"
     })
-      const uploadResponse = await axios.post('http://192.168.1.253:8000/api/media_files/',formData,{
+    formData.append('post_id',post_id)
+      const uploadResponse = await axios.post(DJANGO_MEDIA_URL,formData,{
         headers:{
           'Content-Type':'multipart/form-data'
         }
@@ -135,7 +138,7 @@ const PostScreen = () => {
       </View>
       <View style={styles.textContainer}>
         <Image
-          source={profileImage || ''}
+          source={profileImage}
           placeholder={{blurhash}}
           style={[styles.profileImage,{height:hp(4.3), aspectRatio:1, borderRadius:100}]}
           transition={500}
@@ -175,7 +178,7 @@ const PostScreen = () => {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: '#1f1f1f'
+    backgroundColor:color.backgroundcolor
   },
   container: {
     padding: 20,
@@ -204,7 +207,7 @@ const styles = StyleSheet.create({
   text: {
     textAlign: 'center',
     color: '#ffffff',
-    fontFamily: 'Helvetica-light',
+    fontFamily: color.textFont,
     fontSize: 12
   },
   textContainer: {

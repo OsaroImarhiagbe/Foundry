@@ -1,95 +1,94 @@
 import React,{useState} from 'react'
-import {View,Text,StyleSheet,TextInput,Image, TouchableWithoutFeedback,Keyboard, KeyboardAvoidingView} from 'react-native'
+import {View,StyleSheet,TextInput,TouchableWithoutFeedback,Keyboard} from 'react-native'
 import color from '../../config/color'
-//import profile from '../assets/profile.jpg'
 import {db} from '../../FireBase/FireBaseConfig';
-import {getDoc,doc, collection, onSnapshot,query,where,setDoc,Timestamp,updateDoc } from 'firebase/firestore';
+import {getDocs,collection, query,where,Timestamp,updateDoc,addDoc } from 'firebase/firestore';
 import Button from '../components/Button';
 import {useAuth} from '../authContext';
 import { blurhash } from '../../utils';
 import axios from 'axios';
 import * as ImagePicker from 'expo-image-picker';
+import {DJANGO_PROJECT_URL} from '@env'
+import { Image } from 'expo-image';
 
 const ProjectEntryScreen = () => {
     const [focus,setFocus] = useState('')
     const [text,setText] = useState('')
     const [skills,setSkills] = useState('')
     const [projectname,setProjectName] = useState('')
+    const [image,setImage] = useState('')
+    const [project_id,setProject_id] = useState('')
     const {user} = useAuth()
 
 
-    // const uploadtoS3 = async (image) => {
-    //     try{
-    //       const formData = new FormData()
-    //       formData.append('file',{
-    //         uri: image,
-    //         type: "image/jpeg",
-    //         name: "photo.jpg"
-    //     })
-    //       const uploadResponse = await axios.post('http://192.168.1.253:8000/api/media_files/',formData,{
-    //         headers:{
-    //           'Content-Type':'multipart/form-data'
-    //         }
-    //       })
-    //       if(uploadResponse.status === 201){
-    //         console.log('file uploaded to s3')
-    //         return uploadResponse.data.file
-    //       }else{
-    //         console.log('Failed to upload to s3')
-    //       }
-    //     }catch(err){
-    //       console.log('Error uploading to s3:',err)
-    //     }
-    //   }
+    const uploadtoS3 = async (image) => {
+        try{
+          const formData = new FormData()
+          formData.append('file',{
+            uri: image,
+            type: "image/jpeg",
+            name: "photo.jpg"
+        })
+        formData.append('project_id', project_id)
+          const uploadResponse = await axios.post(DJANGO_PROJECT_URL,formData,{
+            headers:{
+              'Content-Type':'multipart/form-data'
+            }
+          })
+          if(uploadResponse.status === 201){
+            console.error('file uploaded to s3')
+            return uploadResponse.data.file
+          }else{
+            console.error('Failed to upload to s3')
+          }
+        }catch(err){
+          console.error('Error uploading to s3:',err)
+        }
+      }
     
-    //   const pickImage = async () => {
-    //     let results = await ImagePicker.launchImageLibraryAsync({
-    //       mediaTypes: ['images', 'videos'],
-    //       allowsEditing:true,
-    //       quality:1
-    //     })
-    //     console.log('Image results:',results)
-    //     if(!results.canceled){
-    //       setImage(results.assets[0].uri)
-    //     }else{
-    //       console.log('user cancelled the image picker.')
-    //     }
-    //   }
+      const pickImage = async () => {
+        let results = await ImagePicker.launchImageLibraryAsync({
+          mediaTypes: ['images', 'videos'],
+          allowsEditing:true,
+          quality:1
+        })
+        console.error('Image results:',results)
+        if(!results.canceled){
+          setImage(results.assets[0].uri)
+        }else{
+          console.error('user cancelled the image picker.')
+        }
+      }
 
     const handleSubmit = async () => {
-        const docRef = doc(db,'projects',user.userId)
-        const docSnap = await getDoc(docRef)
-        if(docSnap.exists()){
-            await updateDoc(docRef,{
-                id:user.userId,
-                projects:[
-                    {
-                        projectLogo:'',
-                        projectUrl:'',
-                        project_name:projectname,
-                        content:text,
-                        skills:[{
-                            skill:skills
-                        }],
-                        createdAt:Timestamp.fromDate(new Date())
-                    }],
-            })
+        const docRef = collection(db, 'users', user.userId, 'projects');
+        const projectQuery = query(docRef, where('project_name', '==', projectname));
+        const projectSnapshot = await getDocs(projectQuery);
+        let imageUrl = null;
+        if(image){
+            imageUrl = await uploadtoS3(image)
+        }
+        if(projectSnapshot.exists()){
+            const projectDoc = projectSnapshot.docs[0]
+            await updateDoc(projectDoc, {
+                project_name: projectname,
+                image:imageUrl,
+                content: text,
+                skills: [{
+                    skill: skills
+                }],
+                createdAt: Timestamp.fromDate(new Date())
+            });
+            setProject_id(projectSnapshot.id)
         }else{
-            const data = docSnap.data();
-            const existingProjects = data.projects || [];
-            await setDoc(docRef,{
-                id:user.userId,
-                projects:[
-                    ...existingProjects,
-                    {
-                        project_name:projectname,
-                        content:text,
-                        skills:[{
-                            skill:skills
-                        }],
-                        createdAt:Timestamp.fromDate(new Date())
-                    }],
-            })
+            const newDoc = await addDoc(docRef, {
+                project_name: projectname,
+                image:imageUrl,
+                content: text,
+                skills: [{ skill: skills }],
+                createdAt: Timestamp.fromDate(new Date())
+            });
+            setProject_id(newDoc.id)
         }
         setText('')
         setProjectName('')
@@ -102,9 +101,15 @@ const ProjectEntryScreen = () => {
         <View style={styles.imagecontainer}>
         <Image
             style={{width:'100%',height:'100%',borderRadius:20}}
-            source={blurhash ||profile }
+            source={{image}}
+            placeholder={{blurhash}}
             />
         </View>
+        <View style={{flexDirection:'row',justifyContent:'center',alignItems:'center',padding:10}}>
+          <TouchableOpacity style={styles.uploadImageButton} onPress={pickImage}>
+          <MaterialIcons name='camera-alt' size={15} color='#fff' />
+        </TouchableOpacity>
+       </View>
         </View>
         <View style={{padding:10}}>
         <View style={[styles.textcontainer,{borderColor:focus === 'projectname' ? '#00BF63' : '#8a8a8a',marginBottom:10}]}>
@@ -162,7 +167,16 @@ const styles = StyleSheet.create({
         backgroundColor:'#3b3b3b',
         borderWidth:2,
         
-    }
+    },
+    uploadImageButton: {
+        position: 'absolute',
+        backgroundColor: '#00bf63',
+        padding: 12,
+        alignItems: 'center',
+        borderRadius:50,
+        justifyContent:'center',
+        top:5
+      },
 })
 
 export default ProjectEntryScreen
