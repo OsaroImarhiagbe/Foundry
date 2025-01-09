@@ -93,12 +93,12 @@ const styles = StyleSheet.create({
       textStyle: {
         color: '#fff',
         textAlign: 'center',
-        fontFamily:'Helvetica-light',
+        fontFamily:color.textFont,
         fontSize:15
       },
       modalText: {
         textAlign: 'center',
-        fontFamily:'Helvetica-light',
+        fontFamily:color.textFont,
         fontSize:30
       },
 })

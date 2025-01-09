@@ -64,9 +64,7 @@ export const AuthContextProvider = ({children}) => {
             return {success:true,}
         }catch(error){
             return {success:false, message: error.message}
-
         }
-
     }
     const register = async (username,email,password) => {
         try{

@@ -1,6 +1,5 @@
 import React,{useState, useEffect} from 'react'
-import {View, Text, SafeAreaView, StyleSheet,FlatList,Image, TouchableOpacity,ActivityIndicator, Platform,StatusBar} from 'react-native';
-import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
+import {View, Text, StyleSheet,FlatList,Image, TouchableOpacity,ActivityIndicator, Platform,StatusBar} from 'react-native';
 import SearchComponent from '../components/SearchComponent';
 import color from '../../config/color';
 import { userRef} from '../../FireBase/FireBaseConfig';

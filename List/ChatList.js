@@ -1,13 +1,7 @@
 import React from 'react'
-import {View, Text,FlatList,ScrollView} from 'react-native'
+import {View} from 'react-native'
 import ChatRoom from '../app/components/ChatRoom'
 import { useNavigation } from '@react-navigation/native';
-
-
-const separator = () => {
-  return <View style={{height:1,width:'100%',backgroundColor:'#8a8a8a'}}/>
-}
-
 const ChatList = ({otherusers,currentUser}) => {
     const navigation = useNavigation();
 

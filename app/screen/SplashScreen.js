@@ -1,14 +1,13 @@
 import React,{useEffect,useState} from 'react';
 import { StyleSheet, Image, View,Dimensions  } from 'react-native';
 import ProgressBar from 'react-native-progress/Bar';
-import { useNavigation } from '@react-navigation/native';
+import color from '../../config/color';
 const { width } = Dimensions.get('window');
 
 
 const SplashScreen = () => {
 
     const [progress, setProgress] = useState(0);
-    const navigation = useNavigation()
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -54,7 +53,7 @@ const SplashScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#1f1f1f',
+    backgroundColor:color.backgroundcolor,
     padding:20
   },
   headingContainer: {
