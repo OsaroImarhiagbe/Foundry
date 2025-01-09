@@ -1,13 +1,15 @@
 {
   "expo": {
     "name": "DevGuides",
+    "icon":"./assests/DevGuide.png",
     "slug": "DevGuides",
     "version": "1.0.0",
     "orientation": "portrait",
     "userInterfaceStyle": "light",
     "splash": {
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "image":"./assests/DevGuide.png",
+      "backgroundColor": "#1f1f1f"
     },
     "assetBundlePatterns": [
       "**/*"
