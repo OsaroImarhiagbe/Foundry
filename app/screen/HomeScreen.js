@@ -11,48 +11,12 @@ import {  collection, onSnapshot, orderBy,query, } from "firebase/firestore";
 import {db} from '../../FireBase/FireBaseConfig';
 import { useDispatch} from 'react-redux';
 import { addId } from '../features/user/userSlice';
-import { store } from '../store';
 import PushNotification from '../components/PushNotifications';
 const PostComponent = lazy(() => import('../components/PostComponent'))
 const Cards = lazy(() => import('../components/Cards'))
 
 
 
-const DATA1 = [
-  {
-    id: 'bd7acbea-c1b1-46c2-aed5-3ad53abb28ba',
-    image: python,
-    title: 'Python',
-  },
-  {
-    id: '3ac68afc-c605-48d3-a4f8-fbd91aa97f63',
-    image:react,
-    title: 'React',
-  },
-  {
-    id: '58694a0f-3da1-471f-bd96-145571e29d72',
-    image:javascript,
-    title: 'Javascript',
-  },
-  {
-    id: '48694a0f-3da1-471f-bd96-145571e29d72',
-    image:javascript,
-    title: 'Javascript',
-  },
-  {
-    id: 'ff8694a0f-3da1-471f-bd96-145571e29d72',
-    image:javascript,
-    title: 'Javascript',
-  },
-  {
-    id: '6y8694a0f-3da1-471f-bd96-145571e29d72',
-    image:javascript,
-    title: 'Javascript',
-  },
-];
-const Separator = () => {
-  return <View style={{marginRight:10}}/>
-}
 
 const HomeScreen = () => {
 
