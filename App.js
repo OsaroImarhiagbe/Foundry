@@ -10,7 +10,7 @@ import AuthNavigation from './app/navigation/AuthNavigation';
 import { PersistGate } from 'redux-persist/integration/react';
 import { I18nextProvider } from 'react-i18next';
 import i18n from './app/Language/i18n';
-
+import OnboardingScreen from './app/screen/OnboardingScreen';
 
 export default function App() {
 
@@ -19,31 +19,34 @@ export default function App() {
   
 
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setLoading(false)
+  // useEffect(() => {
+  //   const timer = setTimeout(() => {
+  //     setLoading(false)
 
-    },4000)
-    return () => clearTimeout(timer)
-  },[])
+  //   },4000)
+  //   return () => clearTimeout(timer)
+  // },[])
 
   
   return (
 
-    <I18nextProvider i18n={i18n}>
-       <Provider store={store}>
-      <PersistGate loading={isloading} persistor={persistor}>
-      <MenuProvider>
-          <AuthContextProvider>
-        <NavigationContainer>
-          {isloading ? <SplashScreen/> :   <AuthNavigation/> }
-      </NavigationContainer>
-    </AuthContextProvider>
-    <StatusBar style="light" />
-    </MenuProvider>
-      </PersistGate>
-    </Provider>
-    </I18nextProvider>
+    <>
+    <OnboardingScreen/>
+    </>
+    // <I18nextProvider i18n={i18n}>
+    //    <Provider store={store}>
+    //   <PersistGate loading={isloading} persistor={persistor}>
+    //   <MenuProvider>
+    //       <AuthContextProvider>
+    //     <NavigationContainer>
+    //       {isloading ? <SplashScreen/> :   <AuthNavigation/> }
+    //   </NavigationContainer>
+    // </AuthContextProvider>
+    // <StatusBar style="light" />
+    // </MenuProvider>
+    //   </PersistGate>
+    // </Provider>
+    // </I18nextProvider>
   
   );
 }
