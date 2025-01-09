@@ -194,7 +194,7 @@ const OtherUserScreen = () => {
       })
       
     }catch(err){
-      console.log(err)
+      console.error(err)
 
     }
   }

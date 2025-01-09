@@ -105,7 +105,6 @@ const ChatRoom = ({next_item, onPress,User}) => {
               transition={500}/>
           </View>
          <View style={styles.detailsContainer}>
-            {/*Name and last message */}
              <Text numberOfLines={1} style={styles.title}>{next_item?.name}</Text>
              <Text  numberOfLines={2} style={styles.subTitle} >{renderLastMessage()}</Text>
          </View>

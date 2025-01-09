@@ -1,5 +1,5 @@
 
-import {View, Text, StyleSheet,TouchableOpacity, Platform, KeyboardAvoidingView,TextInput}  from 'react-native'
+import {View,StyleSheet,TouchableOpacity,TextInput}  from 'react-native'
 import color from'../../config/color';
 import React, { useState, useEffect, useRef} from 'react'
 import {  addDoc, collection, doc, onSnapshot, orderBy, setDoc, Timestamp,query, getDoc} from "firebase/firestore"; 
@@ -16,8 +16,10 @@ import { useNavigation } from '@react-navigation/native';
 import { useDispatch } from 'react-redux';
 import { addID } from '../features/Message/messageidSlice';
 import axios from 'axios'
+import {EXPOPUSHURL} from "@env"
 const ChatScreen = () => {
   const [messages, setMessages] = useState([]);
+  const [expoPushToken,setExpoPushToken] = useState('')
   const route = useRoute();
   const { item,} = route.params;
   const { user } = useAuth();
@@ -55,9 +57,30 @@ const ChatScreen = () => {
       return () => unsubscribe();
     }
   
-  }, [route?.params?.userid, item?.userId]); // Dependency array
+  }, [route?.params?.userid, item?.userId]);
   
+  useEffect(() => {
+    const getToken = async () => {
+      try{
+      const id = route?.params?.userid ? route?.params?.userid : item?.userId
+      const docRef = doc(db,'users',id)
+      const snapShot = await getDoc(docRef)
+        if(snapShot.exists()){
+          const data = snapShot.data()
+          setExpoPushToken(data.expoToken)
+        }else{
+          console.error('No such document')
+        }
+      }catch(err){
+        console.error('Error with grabbing token:',err)
 
+      }
+    }
+
+    getToken()
+    
+  },[route?.params?.userid, item?.userId])
+  
   const createRoom = async () => {
     try{
       
@@ -74,27 +97,6 @@ const ChatScreen = () => {
       console.error("Error creating room:", error.message);
     }
   };
-
-  
-// async function sendPushNotification(expoPushToken) {
-//   const message = {
-//     to: expoPushToken,
-//     sound: 'default',
-//     title: 'Original Title',
-//     body: 'And here is the body!',
-//     data: { someData: 'goes here' },
-//   };
-
-//   await fetch('https://exp.host/--/api/v2/push/send', {
-//     method: 'POST',
-//     headers: {
-//       Accept: 'application/json',
-//       'Accept-encoding': 'gzip, deflate',
-//       'Content-Type': 'application/json',
-//     },
-//     body: JSON.stringify(message),
-//   });
-// }
 
   const handleSend = async () => {
     let message = textRef.current.trim();
@@ -125,7 +127,7 @@ const ChatScreen = () => {
         body: message,
         data: { someData: 'goes here' },
       };
-      await axios.post('https://exp.host/--/api/v2/push/send',message, {
+      await axios.post(EXPOPUSHURL,message, {
         headers: {
           Accept: 'application/json',
           'Accept-encoding': 'gzip, deflate',
