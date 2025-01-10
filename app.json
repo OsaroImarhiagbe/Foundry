@@ -4,11 +4,11 @@
     "slug": "DevGuides",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon":"app/assets/images/icon.png",
+    "icon": "app/assets/images/icon.png",
     "userInterfaceStyle": "light",
     "splash": {
       "resizeMode": "contain",
-      "image":"app/assets/images/icon.png",
+      "image": "app/assets/images/icon.png",
       "backgroundColor": "#1f1f1f"
     },
     "assetBundlePatterns": [
@@ -17,10 +17,15 @@
     "ios": {
       "supportsTablet": true,
       "newArchEnabled": true,
-      "icon":"app/assets/images/icon.png",
+      "icon": "app/assets/images/icon.png",
       "bundleIdentifier": "com.devguides.app",
       "infoPlist": {
-        "UIBackgroundModes": ["remote-notification","fetch"]
+        "UIBackgroundModes": [
+          "remote-notification",
+          "fetch",
+          "remote-notification",
+          "fetch"
+        ]
       }
     },
     "android": {
@@ -30,10 +35,11 @@
       },
       "package": "com.devguides.app"
     },
-    "plugins":[
+    "plugins": [
       [
-        "expo-notifications",{
-         "enableBackgroundRemoteNotifications":true
+        "expo-notifications",
+        {
+          "enableBackgroundRemoteNotifications": true
         }
       ]
     ],
@@ -42,12 +48,15 @@
       "eas": {
         "build": {
           "experimental": {
-            "ios": {
-            }
+            "ios": {}
           }
         },
         "projectId": "3a17d314-84d0-49f9-8373-f3eee01578a5"
       }
+    },
+    "runtimeVersion": "1.0.0",
+    "updates": {
+      "url": "https://u.expo.dev/3a17d314-84d0-49f9-8373-f3eee01578a5"
     }
   }
 }
