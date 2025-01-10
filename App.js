@@ -21,9 +21,14 @@ export default function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(undefined)
   
 
+ 
+  useEffect(async ()=>{
+    await AsyncStorage.clear();
+  },[])
 
   useEffect(() => {
     const timer = setTimeout(() => {
+     
       setLoading(false)
 
     },4000)
@@ -71,6 +76,7 @@ export default function App() {
       console.log('Background notification received:', data);
     }
   })
+ 
   
   return (
     <I18nextProvider i18n={i18n}>
