@@ -23,7 +23,7 @@ const RegisterScreenWrapper = (props) => {
   
     )
 }
-
+//AsyncStorage.clear()
 const DrawerNavigationWrapper = (props) => {
   
     return (
@@ -81,9 +81,9 @@ const OnboardingScreenWrapper = () =>{
 const AuthNavigation = () => {
   const navigation = useNavigation()
   const [user, setUser] = useState(null)
-  const [loading,setLoading] = useState(false)
+  const [loading,setLoading] = useState(null)
   const [isAuthenticated, setIsAuthenticated] = useState(undefined)
-  const [showOnboarding,setShowOnboarding] = useState(false)
+  const [showOnboarding,setShowOnboarding] = useState(null)
 
   const {updateUserData} = useAuth()
 
@@ -108,7 +108,7 @@ const AuthNavigation = () => {
 
   useEffect(() => {
     checkifOnboard()
-  })
+  },[])
 
 
   const  checkifOnboard = async () => {
@@ -129,7 +129,7 @@ const AuthNavigation = () => {
     if(showOnboarding==null){
       return null
     }
-    if(loading || showOnboarding){
+    if(loading === null && showOnboarding === null){
       return (
           <Stack.Navigator
           initialRouteName='Register'
@@ -212,7 +212,7 @@ const AuthNavigation = () => {
         )
     }else{
       return (
-        <Stack.Navigator initialRouteName='Login'>    
+        <Stack.Navigator>    
           <Stack.Screen
             name="Login"
             component={LoginScreen}

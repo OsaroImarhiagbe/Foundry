@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "DevGuides",
-    "icon":"app/assets/DevGuide.png",
+    "icon":"app/assets/AppLogo.png",
     "slug": "DevGuides",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -18,8 +18,11 @@
       "supportsTablet": true,
       "newArchEnabled": true,
       "bundleIdentifier": "com.devguides.app",
-      "buildNumber":"2",
-      "icon":"app/assets/DevGuide.png"
+      "infoPlist": {
+        "UIBackgroundModes": ["fetch", "remote-notification"]
+      },
+      "buildNumber":"3",
+      "icon":"app/assets/AppLogo.png"
     },
     "android": {
       "newArchEnabled": true,
