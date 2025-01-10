@@ -19,7 +19,7 @@
       "newArchEnabled": true,
       "bundleIdentifier": "com.devguides.app",
       "infoPlist": {
-        "UIBackgroundModes": ["fetch", "remote-notification"]
+        "UIBackgroundModes": ["remote-notification","fetch"]
       },
       "icon":"app/assets/images/icon.png"
     },
