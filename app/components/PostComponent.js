@@ -17,7 +17,6 @@ const PostComponent = ({content,date,name,id,url,count,comment_count}) => {
     const [isloading,setLoading] = useState(false)
     const profileImage = useSelector((state) => state.user.profileimg)
     const {user} = useAuth();
-
     const navigation = useNavigation();
 
   

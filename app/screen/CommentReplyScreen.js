@@ -6,7 +6,7 @@ import { useAuth } from '../authContext'
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import CustomKeyboardView from '../components/CustomKeyboardView';
 import { TouchableOpacity } from 'react-native-gesture-handler'
-import {  addDoc, collection,Timestamp} from "firebase/firestore"; 
+import {  addDoc, collection,Timestamp,updateDoc} from "firebase/firestore"; 
 import {  db, } from '../../FireBase/FireBaseConfig';
 import { useNavigation, useRoute  } from '@react-navigation/native';
 
@@ -30,6 +30,9 @@ const CommentReplyScreen = () => {
           content:text,
           createdAt: Timestamp.fromDate(new Date()),
           parentId:comment_id
+        })
+        await updateDoc(newDoc,{
+          id:newDoc.id
         })
         setText('')
         setTimeout(() =>{

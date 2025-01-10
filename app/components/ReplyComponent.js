@@ -5,18 +5,49 @@ import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-nativ
 import { Image } from 'expo-image';
 import { useAuth } from '../authContext';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import { useNavigation } from '@react-navigation/native';
-const ReplyComponent = ({name,content}) => {
+import color from '../../config/color';
+import { useSelector } from 'react-redux';
+const ReplyComponent = ({name,content,post_id,comment_id,reply_id,count}) => {
 
-    const navigation = useNavigation();
     const [press,setIsPress] = useState(false)
-    const [count, setCount] = useState(0)
-    const [showReply,setShowReply] = useState(false)
     const {user} = useAuth();
+    const profileImage = useSelector((state) => state.user.profileImage)
 
+    const handleLike = async () => {
+      if(isloading) return
 
-    const handleLike = () => {
-        setCount(count + 1)
+      setLoading(true)
+      try{
+        const docRef = doc(db, 'posts',post_id,'comments',comment_id,'replys',reply_id);;
+        await runTransaction(db,async (transaction)=>{
+          const doc = await transaction.get(docRef)
+          if (!doc.exists()) throw new Error ('Document doesnt exists');
+
+          const currentLikes = doc.data().like_count || 0
+          const likeBy = doc.data().liked_by || []
+          const hasliked = likeBy.includes(user.userId)
+
+          let newlike
+          let updatedLike
+
+          if(hasliked){
+            newlike = currentLikes - 1
+            updatedLike = likeBy.filter((id)=> id != user?.userId)
+          }else{
+            newlike = currentLikes + 1
+            updatedLike = [...likeBy,user.userId]
+          }
+          transaction.update(docRef,{
+            like_count:newlike,
+            liked_by:updatedLike
+          })
+        })
+      }catch(err){
+        console.log('error liking comment:',err)
+      }finally{
+        setLoading(false)
+      }
+  
     }
 
 return (
@@ -25,7 +56,7 @@ return (
     <View style={styles.imageText}>
     <Image
         style={{height:hp(4.3), aspectRatio:1, borderRadius:100}}
-        source={user?.profileImage}
+        source={profileImage}
         placeholder={{blurhash}}
         transition={500}/>
     <View>
@@ -38,7 +69,6 @@ return (
     </View>
       <Text style={styles.postText}>{content}
       </Text>
-      {/* <Text style={styles.postDate}>{date}</Text> */}
       <View style={styles.reactionContainer}>
     <TouchableHighlight
                  onShowUnderlay={() => setIsPress(true)}
@@ -81,14 +111,14 @@ const styles = StyleSheet.create({
     }
     ,
     userPost:{
-      fontFamily:'Helvetica-light',
+      fontFamily:color.textFont,
       color:'#000',
       marginLeft:50
     
     }
     ,
     userTime:{
-      fontFamily:'Helvetica-light',
+      fontFamily:color.textFont,
       color:'#000',
       marginLeft:50,
       marginTop:5,
@@ -99,7 +129,7 @@ const styles = StyleSheet.create({
         flexDirection:'row',
     },
     userLocation:{
-        fontFamily:'Helvetica-light',
+        fontFamily:color.textFont,
         color:'#000',
         marginLeft:100,
         marginTop:5,
@@ -115,7 +145,7 @@ const styles = StyleSheet.create({
     
     },
     postText:{
-      fontFamily:'Helvetica-light',
+      fontFamily:color.textFont,
       color:'#000',
     },
     postDate:{
@@ -123,7 +153,7 @@ const styles = StyleSheet.create({
       paddin:5,
       fontSize:9,
       color:'#8a8a8a',
-      fontFamily:'Helvetica-light',
+      fontFamily:color.textFont,
       
 
     },
@@ -143,7 +173,7 @@ const styles = StyleSheet.create({
     reactionText:{
       color:'#000',
       marginLeft:10,
-      fontFamily:'Helvetica-light',
+      fontFamily:color.textFont,
       fontSize:10,
       textAlign:'center',
     },

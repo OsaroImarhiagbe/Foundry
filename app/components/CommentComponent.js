@@ -9,13 +9,14 @@ import { useNavigation } from '@react-navigation/native';
 import ReplyComponent from './ReplyComponent';
 import {collection,  onSnapshot, orderBy,query,runTransaction,doc} from "firebase/firestore"; 
 import {  db, } from '../../FireBase/FireBaseConfig';
-
+import { useSelector } from 'react-redux';
 const CommentComponent = ({content,name,comment_id,post_id,count,date}) => {
     const [press,setIsPress] = useState(false)
     const [isloading,setLoading] = useState(false)
     const [showReply,setShowReply] = useState(false)
     const [reply,setReply] = useState([])
     const {user} = useAuth();
+    const profileImage = useSelector((state) => state.user.profileImage)
 
     const navigation = useNavigation();
 
@@ -49,7 +50,7 @@ const CommentComponent = ({content,name,comment_id,post_id,count,date}) => {
           })
         })
       }catch(err){
-        console.log('error liking comment:',err)
+        console.error('error liking comment:',err)
       }finally{
         setLoading(false)
       }
@@ -70,7 +71,7 @@ const CommentComponent = ({content,name,comment_id,post_id,count,date}) => {
           })
           return () => unsub();
         }  catch (e) {
-        console.log(`Error: ${e}`);
+        console.error(`Error: ${e}`);
       }
     };
 
@@ -89,7 +90,7 @@ const CommentComponent = ({content,name,comment_id,post_id,count,date}) => {
     <View style={styles.imageText}>
     <Image
         style={{height:hp(4.3), aspectRatio:1, borderRadius:100}}
-        source={user?.profileUrl}
+        source={profileImage}
         placeholder={{blurhash}}/>
     <View>
     <Text style={styles.userPost}>{name}</Text>
@@ -128,7 +129,7 @@ const CommentComponent = ({content,name,comment_id,post_id,count,date}) => {
         </View>
       </TouchableOpacity>
       { showReply && reply.map((replies) => {
-        return <ReplyComponent key={replies.id} name={replies.name} content={replies.content}/>
+        return <ReplyComponent key={replies.id} reply_id={replies.id} name={replies.name} content={replies.content} post_id={post_id} comment_id={comment_id} count={replies.like_count}/>
       })}
     </View>
   </View>
