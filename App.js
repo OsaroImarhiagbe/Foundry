@@ -61,8 +61,8 @@ export default function App() {
         const userDocRef = doc(db, 'users', userId);
         const notifCollectionRef = collection(userDocRef, 'notifications');
         await addDoc(notifCollectionRef, {
-          title: data.notification.request.content.title || 'No Title',
-          body: data.notification.request.content.body || 'No Body',
+          title: data.notification.request.content.title,
+          body: data.notification.request.content.body,
           createdAt: Timestamp.fromDate(new Date()),
           notification_data: data,
         });
