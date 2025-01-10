@@ -1,14 +1,14 @@
 {
   "expo": {
     "name": "DevGuides",
-    "icon":"app/assets/AppLogo.png",
+    "icon":"./assets/images/icon.png",
     "slug": "DevGuides",
     "version": "1.0.0",
     "orientation": "portrait",
     "userInterfaceStyle": "light",
     "splash": {
       "resizeMode": "contain",
-      "image":"app/assets/DevGuide.png",
+      "image":"./assets/images/icon.png",
       "backgroundColor": "#1f1f1f"
     },
     "assetBundlePatterns": [
@@ -21,8 +21,8 @@
       "infoPlist": {
         "UIBackgroundModes": ["fetch", "remote-notification"]
       },
-      "buildNumber":"3",
-      "icon":"app/assets/AppLogo.png"
+      "buildNumber":"4",
+      "icon":"./assets/images/icon.png"
     },
     "android": {
       "newArchEnabled": true,
@@ -31,6 +31,13 @@
       },
       "package": "com.devguides.app"
     },
+    "plugins":[
+      [
+        "expo-notifications",{
+         "enableBackgroundRemoteNotifications":true
+        }
+      ]
+    ],
     "web": {},
     "extra": {
       "eas": {

@@ -69,10 +69,10 @@ export default function App() {
       }catch(err){
         console.error('Error with background notifications',err)
       }
-      console.log('Background notification received:', data);
+      console.error('Background notification received:', data);
     }
   })
- 
+
   
   return (
     <I18nextProvider i18n={i18n}>
