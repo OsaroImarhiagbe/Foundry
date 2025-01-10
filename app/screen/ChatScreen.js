@@ -126,6 +126,7 @@ const ChatScreen = () => {
         title: `${user.username} sent you a message.`,
         body: message,
         data: { type: 'message' },
+        _contentAvailable: true
       };
       await axios.post(EXPOPUSHURL,message, {
         headers: {
