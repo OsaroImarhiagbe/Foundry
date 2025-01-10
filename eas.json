@@ -8,6 +8,7 @@
       "developmentClient": true,
       "autoIncrement": true,
       "distribution": "internal",
+      "environment":"development",
       "env": {
         "ENV_FILE": "development"
       }
@@ -15,6 +16,7 @@
     "preview": {
       "distribution": "internal",
       "autoIncrement": true,
+      "environment":"preview",
       "env": {
         "ENV_FILE": "uat"
       }
@@ -22,6 +24,7 @@
     "production": {
       "autoIncrement": true,
       "distribution": "store",
+      "environment":"production",
       "env": {
         "ENV_FILE": "production"
       }
