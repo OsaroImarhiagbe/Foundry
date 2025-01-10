@@ -23,7 +23,10 @@
     },
     "production": {
       "autoIncrement": true,
-      "distribution": "store",
+      "distribution": "app-store",
+      "ios":{
+        "distribution":"app-store"
+      },
       "environment":"production",
       "env": {
         "ENV_FILE": "production"
