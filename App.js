@@ -21,10 +21,6 @@ export default function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(undefined)
   
 
- 
-  useEffect(async ()=>{
-    await AsyncStorage.clear();
-  },[])
 
   useEffect(() => {
     const timer = setTimeout(() => {
