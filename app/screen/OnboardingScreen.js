@@ -27,9 +27,9 @@ const OnboardingScreen = () => {
                 fontFamily:color.textFont
             },
             image:(
-               <>
+                <View>
                <LottieView style={styles.lottie} source={require('../assets/animations/animation1.json')} autoPlay loop />;
-               </>
+               </View>
             ),
             title: 'Welcome to DevGuides',
             subtitle: 'Your journey to becoming a better developer starts here!',
@@ -40,9 +40,9 @@ const OnboardingScreen = () => {
                 fontFamily:color.textFont
             },
             image:(
-                <>
-                <LottieView style={styles.lottie} source={require('../assets/animations/animation2.json')} autoPlay loop />;
-                </>
+                <View>
+                <LottieView  style={styles.lottie}source={require('../assets/animations/animation2.json')} autoPlay loop />;
+                </View>
             ),
             title: 'Connect with Developers Worldwide',
             subtitle: 'Collaborate with developers from all skill levels and backgrounds.',
@@ -53,9 +53,9 @@ const OnboardingScreen = () => {
                 fontFamily:color.textFont
             },
             image:(
-                <>
+                <View>
                 <LottieView style={styles.lottie} source={require('../assets/animations/animation3.json')} autoPlay loop />;
-                </>
+                </View>
             ),
             title: 'Bring Your Ideas to Life',
             subtitle: 'From concepts to code, DevGuides is here to help you make it happen.',
@@ -66,9 +66,9 @@ const OnboardingScreen = () => {
                 fontFamily:color.textFont
             },
             image:(
-                <>
+                <View>
                 <LottieView style={styles.lottie} source={require('../assets/animations/animation4.json')} autoPlay loop />;
-                </>
+                </View>
             ),
             title: 'Launch Your Next Big Idea',
             subtitle: 'Turn your side projects into real-world applications with DevGuides.',
@@ -79,9 +79,10 @@ const OnboardingScreen = () => {
                 fontFamily:color.textFont
             },
             image:(
-                <>
-                <LottieView style={styles.lottie} source={require('../assets/animations/animation5.json')} autoPlay loop />;
-                </>
+                <View>
+                    <LottieView style={styles.lottie} source={require('../assets/animations/animation5.json')} autoPlay loop />;
+                </View>
+                
             ),
             title: 'Join the DevGuides Community',
             subtitle: 'Meet like-minded developers, build connections, and grow your network.',
@@ -99,7 +100,7 @@ const styles = StyleSheet.create({
     },
     lottie:{
         width:width*0.9,
-        height:width
+        height:width,
     }
 })
 export default OnboardingScreen

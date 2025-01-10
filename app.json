@@ -17,11 +17,11 @@
     "ios": {
       "supportsTablet": true,
       "newArchEnabled": true,
+      "icon":"app/assets/images/icon.png",
       "bundleIdentifier": "com.devguides.app",
       "infoPlist": {
         "UIBackgroundModes": ["remote-notification","fetch"]
-      },
-      "icon":"app/assets/images/icon.png"
+      }
     },
     "android": {
       "newArchEnabled": true,
