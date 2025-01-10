@@ -28,11 +28,11 @@ const OnboardingScreen = () => {
             },
             image:(
                 <View style={styles.lottie}>
-               <LottieView style={styles.lottie} source={require('../assets/animations/animation1.json')} autoPlay loop />;
+               <LottieView source={require('../assets/animations/animation1.json')} autoPlay loop />;
                </View>
             ),
-            title: 'Welcome to DevGuides',
-            subtitle: 'Your journey to becoming a better developer starts here!',
+            title: <Text style={styles.title}>Welcome to DevGuides</Text>,
+            subtitle: <Text style={styles.subtitle}>Your journey to becoming a better developer starts here!</Text>,
             },
             {
             backgroundColor: color.grey,
@@ -40,12 +40,12 @@ const OnboardingScreen = () => {
                 fontFamily:color.textFont
             },
             image:(
-                <View>
-                <LottieView  style={styles.lottie}source={require('../assets/animations/animation2.json')} autoPlay loop />;
+                <View style={styles.lottie}>
+                <LottieView source={require('../assets/animations/animation2.json')} autoPlay loop />;
                 </View>
             ),
-            title: 'Connect with Developers Worldwide',
-            subtitle: 'Collaborate with developers from all skill levels and backgrounds.',
+            title: <Text style={styles.title}>Connect with Developers Worldwide</Text>,
+            subtitle: <Text style={styles.subtitle}>Collaborate with developers from all skill levels and backgrounds.</Text>,
             },
             {
             backgroundColor: '#0097b2',
@@ -57,8 +57,8 @@ const OnboardingScreen = () => {
                 <LottieView style={styles.lottie} source={require('../assets/animations/animation3.json')} autoPlay loop />;
                 </View>
             ),
-            title: 'Bring Your Ideas to Life',
-            subtitle: 'From concepts to code, DevGuides is here to help you make it happen.',
+            title: <Text style={styles.title}>Bring Your Ideas to Life</Text>,
+            subtitle: <Text style={styles.subtitle}>From concepts to code, DevGuides is here to help you make it happen.</Text>,
             },
             {
             backgroundColor: '#fff',
@@ -70,8 +70,10 @@ const OnboardingScreen = () => {
                 <LottieView style={styles.lottie} source={require('../assets/animations/animation4.json')} autoPlay loop />;
                 </View>
             ),
-            title: 'Launch Your Next Big Idea',
-            subtitle: 'Turn your side projects into real-world applications with DevGuides.',
+            title: <Text style={{fontSize: 24,
+                color: '#000',fontFamily:'Helvetica-light' }}>Launch Your Next Big Idea</Text>,
+            subtitle: <Text style={{color:'#000',fontSize: 16,
+                textAlign:'center',paddingTop:10,fontFamily:'Helvetica-light'}}>Turn your side projects into real-world applications with DevGuides.</Text>,
             },
             {
             backgroundColor: color.backgroundcolor,
@@ -84,8 +86,8 @@ const OnboardingScreen = () => {
                 </View>
                 
             ),
-            title: 'Join the DevGuides Community',
-            subtitle: 'Meet like-minded developers, build connections, and grow your network.',
+            title: <Text style={styles.title}>Join the DevGuides Community</Text>,
+            subtitle: <Text style={styles.subtitle}>Meet like-minded developers, build connections, and grow your network.</Text>,
             },
             
         ]}
@@ -101,6 +103,18 @@ const styles = StyleSheet.create({
     lottie:{
         width:300,
         height:400,
+    },
+    title: {
+        fontSize: 24,
+        color: 'white',
+        fontFamily:'Helvetica-light', 
+    },
+    subtitle: {
+        fontSize: 16,
+        color: 'white',
+        textAlign:'center',
+        paddingTop:10,
+        fontFamily:'Helvetica-light',
     }
 })
 export default OnboardingScreen

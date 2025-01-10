@@ -21,7 +21,7 @@ export default function App() {
   
 
 
-  AsyncStorage.clear()
+  // AsyncStorage.clear()
   useEffect(() => {
     const timer = setTimeout(() => {
      

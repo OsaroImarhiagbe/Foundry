@@ -27,6 +27,7 @@ target 'DevGuides' do
   pod 'FirebaseRemoteConfig', :modular_headers => true
   pod 'FirebaseABTesting', :modular_headers => true
   pod 'RNFBApp', :path => '../node_modules/@react-native-firebase/app'
+  pod 'lottie-ios'
 
   if ENV['EXPO_USE_COMMUNITY_AUTOLINKING'] == '1'
     config_command = ['node', '-e', "process.argv=['', '', 'config'];require('@react-native-community/cli').run()"];
