@@ -75,7 +75,7 @@ const LoginScreen = ({navigation}) => {
             <Text style={styles.welcomeStext}>DevGuide</Text>
             </View>
             <View style={styles.welcomeLcontainer}>
-            <Text style={styles.welcomeLtext}>The Most Popular Social Media App.</Text>
+            <Text style={styles.welcomeLtext}>The Most Popular Social Media App For All.</Text>
             </View>
            </View>
            <SafeAreaView>
@@ -151,7 +151,7 @@ const LoginScreen = ({navigation}) => {
 
 const styles = StyleSheet.create({
     back:{
-        backgroundColor:'#1f1f1f',
+        backgroundColor:color.backgroundcolor,
         flex:1,
     }
     ,

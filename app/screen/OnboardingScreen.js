@@ -8,7 +8,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const {width,height} = Dimensions.get('window')
 const OnboardingScreen = () => {
-    // const navigation = useNavigation()
+    const navigation = useNavigation()
 
     const handleDone = async () => {
         await AsyncStorage.setItem('onboarded','1')

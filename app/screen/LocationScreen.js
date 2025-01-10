@@ -1,4 +1,4 @@
-import {useState} from 'react'
+
 import {View,Text,StyleSheet,Keyboard, TouchableWithoutFeedback} from 'react-native'
 import color from '../../config/color';
 import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
@@ -17,12 +17,12 @@ const LocationScreen = () => {
     <Text style={styles.label}>Select Your City</Text>
     <GooglePlacesAutocomplete
       placeholder='Enter your Location...'
-      onPress={(data, details = null) => {
+      onPress={async (data, details = null) => {
         const city = data.structured_formatting.main_text
         const state = data.structured_formatting.secondary_text
         const formattedCity = `${city}, ${state.split(',')[0]}`;
         const docRef = doc(db,'users',user.userId)
-        updateDoc(docRef,{
+        await updateDoc(docRef,{
             location:formattedCity
         })
       }}

@@ -1,7 +1,5 @@
 import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import color from '../../config/color';
-import ChatRoomHeader from '../components/ChatRoomHeader';
 import { useNavigation } from '@react-navigation/native';
 import { lazy,Suspense } from 'react';
 import { ActivityIndicator } from 'react-native';

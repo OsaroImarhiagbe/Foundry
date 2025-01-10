@@ -1,9 +1,6 @@
 import React,{useState,useEffect,lazy, Suspense,useMemo,useCallback} from 'react'
 import {View, Text, StyleSheet,TouchableOpacity, FlatList, Platform,StatusBar, ActivityIndicator} from 'react-native'
 import color from '../../config/color';
-import javascript from '../assets/javascript.png';
-import react from '../assets/react.png';
-import python from '../assets/python.png';
 import { useNavigation } from '@react-navigation/native';
 import ChatRoomHeader from '../components/ChatRoomHeader';;
 import { useAuth } from '../authContext';
@@ -13,7 +10,7 @@ import { useDispatch} from 'react-redux';
 import { addId } from '../features/user/userSlice';
 import PushNotification from '../components/PushNotifications';
 const PostComponent = lazy(() => import('../components/PostComponent'))
-const Cards = lazy(() => import('../components/Cards'))
+
 
 
 

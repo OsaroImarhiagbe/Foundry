@@ -42,7 +42,7 @@ const CommentScreen = () => {
             })
             setComment([...data])
         }catch(e){
-          console.log(e)
+          console.error('Error with comment',e)
         }
       }
       ) 
@@ -64,20 +64,20 @@ const CommentScreen = () => {
       await updateDoc(newDoc,{
         id:newDoc.id
       })
-      console.log('comment id:',newDoc.id)
-      // dispatch(addComment({id:newDoc.id,postId:id,content:text}))
+      console.error('comment id:',newDoc.id)
+      dispatch(addComment({id:newDoc.id,postId:id,content:text}))
       setText('')
       const postDocRef = doc(db,'posts',id)
       await runTransaction(db,async (transaction)=>{
         const doc = await transaction.get(postDocRef)
         if (!doc.exists()) throw new Error('Doc does not exists!!')
-        const commentCount = doc.data().comment_count || 0 // Get the coun
+        const commentCount = doc.data().comment_count || 0
         transaction.update(postDocRef,{
           comment_count:commentCount + 1
         })
       })
     }catch(e){
-      console.log('Error:',e)
+      console.error('Error:',e)
     }
   }
 const grabCurrentPost = async () => { 
@@ -89,7 +89,7 @@ const grabCurrentPost = async () => {
     querySnapShot.forEach(doc => {
       data.push({...doc.data(),id:doc.id})
     })
-    console.log(data)
+    console.error(data)
     setCurrentComment([...data])
   }catch(e){
     console.error('ERROR:',e)

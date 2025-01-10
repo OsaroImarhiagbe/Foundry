@@ -17,7 +17,7 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import EvilIcons from 'react-native-vector-icons/EvilIcons';
 
-const { width, height } = Dimensions.get('window');
+
 
 const PostComponent = lazy(() => import('../components/PostComponent'))
 
@@ -36,7 +36,6 @@ const AccountScreen = () => {
   const { user } = useAuth();
   const navigation = useNavigation();
   const isCurrentUser = user
-  console.log('is current user',isCurrentUser)
   const [refreshing, setRefreshing] = useState(false);
   
   const follow_items = [{count:projects?.projects?.length,content:'projects'},{count:users.connection,content:'connection'},{count:posts.length,content:'posts'}]
@@ -255,7 +254,7 @@ const styles = StyleSheet.create({
     padding:10,
   },
   screen:{
-    backgroundColor:'#1F1F1F',
+    backgroundColor:color.backgroundcolor,
     flex:1
   },
   text:{

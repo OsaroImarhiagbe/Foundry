@@ -2,12 +2,11 @@ import React, {useState, useEffect,lazy,Suspense,useCallback} from 'react'
 import {View, Text, StyleSheet, Platform, StatusBar,ActivityIndicator,ScrollView,RefreshControl} from 'react-native'
 import color from '../../config/color';
 import {db } from '../../FireBase/FireBaseConfig';
-import { getDocs,query,where,doc,collection,onSnapshot } from "firebase/firestore"; 
+import { query,where,doc,collection,onSnapshot } from "firebase/firestore"; 
 import { useAuth } from '../authContext';
 import ChatRoomHeader from '../components/ChatRoomHeader';
 import { useNavigation } from '@react-navigation/native';
 import { useSelector } from 'react-redux';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 const ChatList = lazy(() => import('../../List/ChatList'))
 
 

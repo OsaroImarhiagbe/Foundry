@@ -1,4 +1,4 @@
-import {View, Text, StyleSheet, ScrollView, TouchableOpacity,Dimensions,ActivityIndicator,RefreshControl} from 'react-native'
+import {View, Text, StyleSheet, ScrollView, TouchableOpacity,ActivityIndicator,RefreshControl} from 'react-native'
 import {lazy,Suspense} from 'react'
 import color from '../../config/color';
 import { useNavigation } from '@react-navigation/native';
@@ -19,7 +19,6 @@ import { createMaterialTopTabNavigator } from '@react-navigation/material-top-ta
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import EvilIcons from 'react-native-vector-icons/EvilIcons';
-const skills = ['Python','react','react native','Javascript','SQL','HTML/CSS','Linux','Django']
 const PostComponent = lazy(() => import('../components/PostComponent'))
 
 
@@ -67,7 +66,7 @@ const OtherUserScreen = () => {
         })
         return () => unsub()
       }catch(err){
-        console.log('error grabbing user projects:',err)
+        console.error('error grabbing user projects:',err)
       }
     },[users])
 
@@ -89,7 +88,7 @@ const OtherUserScreen = () => {
         })
         return () => unsub()
       }catch(err){
-        console.log('error grabbing user post:',err)
+        console.error('error grabbing user post:',err)
       }
     },[users])
 
@@ -254,8 +253,7 @@ const OtherUserScreen = () => {
                       <TouchableOpacity onPressIn={handlePress}>
                       <SmallButton name={users.follow_state ? 'Connecting...' : 'Connect'} isTrue={users.follow_state}/>
                       </TouchableOpacity>
-                      <TouchableOpacity onPress={() => navigation.navigate('Edit')}>
-                        {!other_user_id &&  <SmallButton name='Edit Profile'/>}
+                      <TouchableOpacity>
                         <SmallButton name='Mentor'/>
                       </TouchableOpacity>
                     </View>

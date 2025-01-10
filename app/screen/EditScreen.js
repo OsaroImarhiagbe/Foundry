@@ -1,11 +1,11 @@
 import {View,Text,StyleSheet, TouchableOpacity,FlatList,ScrollView,Switch,Modal,Button} from 'react-native'
-import { useState } from 'react';
+import { useState,useEffect } from 'react';
 import ChatRoomHeader from '../components/ChatRoomHeader';
 import color from '../../config/color';
 import { useNavigation } from '@react-navigation/native';
 import { useAuth } from '../authContext';
 import { db} from '../../FireBase/FireBaseConfig';
-import { updateDoc,doc} from 'firebase/firestore';
+import { updateDoc,doc,onSnapshot} from 'firebase/firestore';
 import { Image } from 'expo-image';
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import { blurhash } from '../../utils/index';
@@ -18,98 +18,17 @@ import { addImage } from '../features/user/userSlice';
 import { Picker } from '@react-native-picker/picker';
 import { useTranslation } from 'react-i18next';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-  const Sections = [
-    {
-        header: 'Settings',
-        icon: 'settings',
-        items:[
-            {
-                icon:'globe', 
-                color:'orange',
-                label:'Language', 
-                type:'link',
-                screen:'LanguageScreen'
-            },
-            {
-                icon:'navigation',
-                color:'green',
-                label:'Location', 
-                type:'link',},
-            {
-                id:'showusers',
-                icon:'users',
-                color:'green',
-                label:'Show',
-                type:'toggle'
-            },
-            {
-                id:'accessmode',
-                icon:'airplay',
-                color:'#fd2d54',
-                label:'Access',
-                type:'toggle'
-            }, 
-        ],
-    },
-    {
-        header:'Help',
-        icon:'help-circle',
-        items:[
-            {icon:'flag', color:'grey',label:'Report Bug', type:'link',screen:'ReportBugScreen'},
-            {icon:'mail', color:'blue',label:'Contact us', type:'link',screen:'ContactUsScreen'},]
-    },
-];
-const sections = [
-    {header:'About Me',
-        id:1,
-      items:[{
-          id:1,
-          icon:'person',
-          name:'',
-          type:'Username',
-          screen:'EditUser',
-          color:'#fff',
-          nav:'keyboard-arrow-right'
-      },
-      {
-          id:2,
-          icon:'email',
-          name:'',
-          type:'Email',
-          screen:'EditEmail',
-          color:'#fff',
-          nav:'keyboard-arrow-right'
-      },
-      {
-          id:3,
-          icon:'phone',
-          name:'',
-          type:'Phone',
-          screen:'EditPhone',
-          color:'#fff',
-          nav:'keyboard-arrow-right'
-      },
-      {
-          id:4,
-          icon:'work',
-          name:'',
-          type:'Job title',
-          screen:'EditJob',
-          color:'#fff',
-          nav:'keyboard-arrow-right'
-      }
-      
-  ]
-    }
-
-  ]
+import {DJANGO_PROFILE_URL} from '@env'
+  
 
   
 const EditScreen = () => {
 
+
     const {i18n,t} = useTranslation()
     const [language, setLanguage] = useState('en');
     const navigation = useNavigation();
+    const [edit,setEdit] = useState([])
     const dispatch = useDispatch()
     const [modalVisible, setModalVisible] = useState(false);
     const profileImage = useSelector((state) => state.user.profileimg)
@@ -121,7 +40,106 @@ const EditScreen = () => {
         showCollaborators:true,
         accessibilityMode: false
     })
+    const Sections = [
+        {
+            header: 'Settings',
+            icon: 'settings',
+            items:[
+                {
+                    icon:'globe', 
+                    color:'orange',
+                    label:'Language', 
+                    type:'link',
+                    screen:'LanguageScreen'
+                },
+                {
+                    icon:'navigation',
+                    color:'green',
+                    label:'Location', 
+                    type:'link',},
+                {
+                    id:'showusers',
+                    icon:'users',
+                    color:'green',
+                    label:'Show',
+                    type:'toggle'
+                },
+                {
+                    id:'accessmode',
+                    icon:'airplay',
+                    color:'#fd2d54',
+                    label:'Access',
+                    type:'toggle'
+                }, 
+            ],
+        },
+        {
+            header:'Help',
+            icon:'help-circle',
+            items:[
+                {icon:'flag', color:'grey',label:'Report Bug', type:'link',screen:'ReportBugScreen'},
+                {icon:'mail', color:'blue',label:'Contact us', type:'link',screen:'ContactUsScreen'},]
+        },
+    ];
+    const sections = [
+        {header:'About Me',
+            id:1,
+          items:[{
+              id:1,
+              icon:'person',
+              name:edit.name,
+              type:'Username',
+              screen:'EditUser',
+              color:'#fff',
+              nav:'keyboard-arrow-right'
+          },
+          {
+              id:2,
+              icon:'email',
+              name:edit.email,
+              type:'Email',
+              screen:'EditEmail',
+              color:'#fff',
+              nav:'keyboard-arrow-right'
+          },
+          {
+              id:3,
+              icon:'phone',
+              name:edit.phone,
+              type:'Phone',
+              screen:'EditPhone',
+              color:'#fff',
+              nav:'keyboard-arrow-right'
+          },
+          {
+              id:4,
+              icon:'work',
+              name:edit.jobTitle,
+              type:'Job title',
+              screen:'EditJob',
+              color:'#fff',
+              nav:'keyboard-arrow-right'
+          }
+          
+      ]
+        }
+    
+      ]
 
+    useEffect(() => {
+        const getUpdate = () => {
+            const docRef = doc(db,'users',user?.userId)
+            const unsub = onSnapshot(docRef,(snapShot) => {
+                let data = []
+                snapShot.forEach(doc => {
+                    data.push({...doc.data(),id:doc.id})
+                });
+                setEdit([...data])
+            })
+            return unsub
+        }
+        getUpdate()
+    },[user])
     const pickImage = async () => {
         try{
             let results = await ImagePicker.launchImageLibraryAsync({
@@ -137,12 +155,13 @@ const EditScreen = () => {
                     type: "image/jpeg",
                     name: "photo.jpg"
                 })
-            const uploadResponse = await axios.post('http://192.168.1.253:8000/api/profile_images/',formData,{headers:{'Content-Type':'multipart/form-data'}})
-            const docRef = doc(db,'users',user.userId)
-            await updateDoc(docRef,{
-                profileUrl:uploadResponse.data.file
-            })
-            dispatch(addImage({profileimg:uploadResponse.data.file}))
+                formData.append('user_id',user.userId)
+                const uploadResponse = await axios.post(DJANGO_PROFILE_URL,formData,{headers:{'Content-Type':'multipart/form-data'}})
+                const docRef = doc(db,'users',user.userId)
+                await updateDoc(docRef,{
+                    profileUrl:uploadResponse.data.file
+                })
+                dispatch(addImage({profileimg:uploadResponse.data.file}))
             }else{
                 console.error('user cancelled the image picker.')
             }
@@ -183,7 +202,7 @@ const EditScreen = () => {
             transition={500}
             cachePolicy='none'/>
         <View style={{marginLeft:40,marginTop:10}}>
-        <Text style={{color:'#fff',fontSize:20}}>Isa Kuhn</Text>
+        <Text style={{color:'#fff',fontSize:20}}>{edit?.name}</Text>
         <TouchableOpacity style={{marginTop:5}} onPress={pickImage}>
         <Text style={{color:'#fff',fontSize:12}}>Edit picture</Text>
         </TouchableOpacity>
@@ -273,7 +292,6 @@ const EditScreen = () => {
                 <Picker.Item color="#000" label="German" value="de" />
                 <Picker.Item color="#000" label="Italian" value="it" />
                 </Picker>
-            {/* <Button title="Close" onPress={() => setModalVisible(false)} /> */}
           </View>
         </View>
       </Modal>

@@ -1,4 +1,4 @@
-import {View,Text,TextInput,TouchableOpacity} from 'react-native'
+import {View,TextInput,TouchableOpacity} from 'react-native'
 import { useState } from 'react';
 import color from '../../config/color';
 import ChatRoomHeader from '../components/ChatRoomHeader';
@@ -11,7 +11,6 @@ import { useAuth } from '../authContext';
 const EditPhoneScreen = () => {
     const navigation = useNavigation()
     const [phone,setPhone] = useState('')
-    const [username,setUsername] = useState('')
     const [isloading,setLoading] = useState(false)
     const [focus,setFocus] = useState('')
     const {user} = useAuth()
@@ -25,7 +24,7 @@ const EditPhoneScreen = () => {
                     phone:phone,
             })
         }catch(e){
-            console.log(`Error sending updates:${e}`)
+            console.error(`Error sending updates:${e}`)
         }
         finally{
             setLoading(false)

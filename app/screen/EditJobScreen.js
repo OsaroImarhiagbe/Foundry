@@ -1,4 +1,4 @@
-import {View,Text,TextInput,TouchableOpacity} from 'react-native'
+import {View,TextInput,TouchableOpacity} from 'react-native'
 import { useState } from 'react';
 import color from '../../config/color';
 import ChatRoomHeader from '../components/ChatRoomHeader';
@@ -24,7 +24,7 @@ const EditJobScreen = () => {
                     jobTitle:job,
             })
         }catch(e){
-            console.log(`Error sending updates:${e}`)
+            console.error(`Error sending updates:${e}`)
         }
         finally{
             setLoading(false)
