@@ -1,14 +1,14 @@
 {
   "expo": {
     "name": "DevGuides",
-    "icon":"./assets/images/icon.png",
     "slug": "DevGuides",
     "version": "1.0.0",
     "orientation": "portrait",
+    "icon":"app/assets/images/icon.png",
     "userInterfaceStyle": "light",
     "splash": {
       "resizeMode": "contain",
-      "image":"./assets/images/icon.png",
+      "image":"app/assets/images/icon.png",
       "backgroundColor": "#1f1f1f"
     },
     "assetBundlePatterns": [
@@ -21,8 +21,7 @@
       "infoPlist": {
         "UIBackgroundModes": ["fetch", "remote-notification"]
       },
-      "buildNumber":"4",
-      "icon":"./assets/images/icon.png"
+      "icon":"app/assets/images/icon.png"
     },
     "android": {
       "newArchEnabled": true,

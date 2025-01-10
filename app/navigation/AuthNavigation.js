@@ -23,7 +23,7 @@ const RegisterScreenWrapper = (props) => {
   
     )
 }
-//AsyncStorage.clear()
+
 const DrawerNavigationWrapper = (props) => {
   
     return (
@@ -83,7 +83,7 @@ const AuthNavigation = () => {
   const [user, setUser] = useState(null)
   const [loading,setLoading] = useState(null)
   const [isAuthenticated, setIsAuthenticated] = useState(undefined)
-  const [showOnboarding,setShowOnboarding] = useState(null)
+  const [showOnboarding,setShowOnboarding] = useState(false)
 
   const {updateUserData} = useAuth()
 
@@ -129,10 +129,9 @@ const AuthNavigation = () => {
     if(showOnboarding==null){
       return null
     }
-    if(loading === null && showOnboarding === null){
+    if(showOnboarding){
       return (
           <Stack.Navigator
-          initialRouteName='Register'
           >    
             <Stack.Screen
               name="Login"
@@ -212,7 +211,7 @@ const AuthNavigation = () => {
         )
     }else{
       return (
-        <Stack.Navigator>    
+        <Stack.Navigator initialRouteName='Register'>    
           <Stack.Screen
             name="Login"
             component={LoginScreen}

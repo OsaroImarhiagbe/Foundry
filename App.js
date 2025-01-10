@@ -36,7 +36,7 @@ export default function App() {
       try{
         await Notifications.registerTaskAsync(BACKGROUND_NOTIFICATION_TASK);
       }catch(err){
-        console.error('Error with background:',err)
+        console.error('Error with background:',err.message)
       }
     }
 
