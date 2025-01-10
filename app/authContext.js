@@ -84,6 +84,7 @@ export const AuthContextProvider = ({children}) => {
     const resetpassword = async (email) => {
         try{
             await sendPasswordResetEmail(auth,email)
+            return { success: true, message: 'Password reset email sent successfully.' }
         }catch(e){
             console.error(e)
         }
