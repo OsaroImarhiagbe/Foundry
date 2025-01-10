@@ -4,11 +4,11 @@
     "slug": "DevGuides",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "app/assets/images/icon.png",
+    "icon": "./assets/images/icon.png",
     "userInterfaceStyle": "light",
     "splash": {
       "resizeMode": "contain",
-      "image": "app/assets/images/icon.png",
+      "image": "./assets/images/people.png",
       "backgroundColor": "#1f1f1f"
     },
     "assetBundlePatterns": [
@@ -17,7 +17,7 @@
     "ios": {
       "supportsTablet": true,
       "newArchEnabled": true,
-      "icon": "app/assets/images/icon.png",
+      "icon": "./assets/images/icon.png",
       "bundleIdentifier": "com.devguides.app",
       "infoPlist": {
         "UIBackgroundModes": [
