@@ -19,12 +19,18 @@
     },
     "production": {
       "autoIncrement": true,
+      "distribution": "store",
       "env": {
         "ENV_FILE": ".env.production"
       }
     }
   },
   "submit": {
-    "production": {}
+    "production": {
+      "ios":{
+        "resourceClass": "medium",
+        "distribution": "store"
+      }
+    }
   }
 }
