@@ -8,33 +8,36 @@
       "developmentClient": true,
       "autoIncrement": true,
       "distribution": "internal",
-      "environment":"development",
+      "environment": "development",
       "env": {
         "ENV_FILE": "development"
-      }
+      },
+      "channel": "development"
     },
     "preview": {
       "distribution": "internal",
       "autoIncrement": true,
-      "environment":"preview",
+      "environment": "preview",
       "env": {
         "ENV_FILE": "uat"
-      }
+      },
+      "channel": "preview"
     },
     "production": {
       "autoIncrement": true,
       "distribution": "store",
-      "environment":"production",
+      "environment": "production",
       "env": {
         "ENV_FILE": "production"
-      }
+      },
+      "channel": "production"
     }
   },
   "submit": {
     "production": {
-      "ios":{
-        "appleId":"osaro.imarhiagbe@students.arborprep.com",
-        "appleTeamId":"UFQYWBYAJF"
+      "ios": {
+        "appleId": "osaro.imarhiagbe@students.arborprep.com",
+        "appleTeamId": "UFQYWBYAJF"
       }
     }
   }
