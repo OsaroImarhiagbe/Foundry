@@ -26,11 +26,6 @@
     }
   },
   "submit": {
-    "production": {
-      "ios":{
-        "resourceClass": "medium",
-        "distribution": "store"
-      }
-    }
+    "production": {}
   }
 }
