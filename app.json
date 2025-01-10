@@ -1,14 +1,14 @@
 {
   "expo": {
     "name": "DevGuides",
-    "icon":"./assets/DevGuide.png",
+    "icon":"app/assets/DevGuide.png",
     "slug": "DevGuides",
     "version": "1.0.0",
     "orientation": "portrait",
     "userInterfaceStyle": "light",
     "splash": {
       "resizeMode": "contain",
-      "image":"./assets/DevGuide.png",
+      "image":"app/assets/DevGuide.png",
       "backgroundColor": "#1f1f1f"
     },
     "assetBundlePatterns": [
@@ -19,7 +19,7 @@
       "newArchEnabled": true,
       "bundleIdentifier": "com.devguides.app",
       "buildNumber":"2",
-      "icon":"./assets/DevGuide.png"
+      "icon":"app/assets/DevGuide.png"
     },
     "android": {
       "newArchEnabled": true,
@@ -33,7 +33,8 @@
       "eas": {
         "build": {
           "experimental": {
-            "ios": {}
+            "ios": {
+            }
           }
         },
         "projectId": "3a17d314-84d0-49f9-8373-f3eee01578a5"
