@@ -21,12 +21,12 @@ export default function App() {
   
 
 
-  // AsyncStorage.clear()
+
   useEffect(() => {
     const timer = setTimeout(() => {
      
       setLoading(false)
-
+      
     },4000)
     return () => clearTimeout(timer)
   },[])
