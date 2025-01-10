@@ -27,7 +27,7 @@ const OnboardingScreen = () => {
                 fontFamily:color.textFont
             },
             image:(
-                <View>
+                <View style={styles.lottie}>
                <LottieView style={styles.lottie} source={require('../assets/animations/animation1.json')} autoPlay loop />;
                </View>
             ),
@@ -99,8 +99,8 @@ const styles = StyleSheet.create({
         flex:1
     },
     lottie:{
-        width:width*0.9,
-        height:width,
+        width:300,
+        height:400,
     }
 })
 export default OnboardingScreen

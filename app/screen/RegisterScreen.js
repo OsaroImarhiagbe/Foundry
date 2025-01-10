@@ -31,7 +31,7 @@ const RegisterScreen = () => {
             resetForm({values:initialValues})
         }catch(error){
             setLoading(false)
-            console.error(error)
+            console.error('error with register',error)
         }
     }    
 

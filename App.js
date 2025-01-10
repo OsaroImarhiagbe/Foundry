@@ -16,12 +16,12 @@ import { db } from './FireBase/FireBaseConfig';
 import { addDoc,doc,collection,Timestamp } from 'firebase/firestore';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 export default function App() {
-
   const [isloading,setLoading] = useState(true)
   const [isAuthenticated, setIsAuthenticated] = useState(undefined)
   
 
 
+  AsyncStorage.clear()
   useEffect(() => {
     const timer = setTimeout(() => {
      

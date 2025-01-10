@@ -41,7 +41,7 @@ const SplashScreen = () => {
       </View>
       <View  style={styles.imageContainer}>
         <Image 
-          source={require('../assets/People.png')}
+          source={require('../assets/images/People.png')}
           style={styles.footerImage}
           resizeMode='contain'
         />
