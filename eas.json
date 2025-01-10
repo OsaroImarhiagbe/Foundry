@@ -9,21 +9,21 @@
       "autoIncrement": true,
       "distribution": "internal",
       "env": {
-        "ENV_FILE": ".env.development"
+        "ENV_FILE": "development"
       }
     },
     "preview": {
       "distribution": "internal",
       "autoIncrement": true,
       "env": {
-        "ENV_FILE": ".env.uat"
+        "ENV_FILE": "uat"
       }
     },
     "production": {
       "autoIncrement": true,
       "distribution": "store",
       "env": {
-        "ENV_FILE": ".env.production"
+        "ENV_FILE": "production"
       }
     }
   },
