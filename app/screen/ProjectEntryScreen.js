@@ -1,15 +1,15 @@
 import React,{useState} from 'react'
-import {View,StyleSheet,TextInput,TouchableWithoutFeedback,Keyboard} from 'react-native'
+import {View,StyleSheet,TextInput,TouchableWithoutFeedback,Keyboard,SafeAreaView} from 'react-native'
 import color from '../../config/color'
-import {db} from '../../FireBase/FireBaseConfig';
-import {getDocs,collection, query,where,Timestamp,updateDoc,addDoc } from 'firebase/firestore';
 import Button from '../components/Button';
 import {useAuth} from '../authContext';
 import { blurhash } from '../../utils';
+import firestore from 'react-native-firebase/firestore'
 import axios from 'axios';
 import * as ImagePicker from 'expo-image-picker';
 import {DJANGO_PROJECT_URL} from '@env'
 import { Image } from 'expo-image';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 
 const ProjectEntryScreen = () => {
     const [focus,setFocus] = useState('')
@@ -61,16 +61,18 @@ const ProjectEntryScreen = () => {
       }
 
     const handleSubmit = async () => {
-        const docRef = collection(db, 'users', user.userId, 'projects');
-        const projectQuery = query(docRef, where('project_name', '==', projectname));
-        const projectSnapshot = await getDocs(projectQuery);
+        const docRef = await firestore().collection('users').doc(user?.userId).collection('projects')
+        const projectSnapshot = await docRef.where('project_name', '==', projectname).get();
         let imageUrl = null;
         if(image){
             imageUrl = await uploadtoS3(image)
         }
         if(projectSnapshot.exists()){
-            const projectDoc = projectSnapshot.docs[0]
-            await updateDoc(projectDoc, {
+            await firestore()
+            .collection('users')
+            .doc(user?.userId)
+            .collection('projects')
+            .update({
                 project_name: projectname,
                 image:imageUrl,
                 content: text,
@@ -78,16 +80,20 @@ const ProjectEntryScreen = () => {
                     skill: skills
                 }],
                 createdAt: Timestamp.fromDate(new Date())
-            });
+            })
             setProject_id(projectSnapshot.id)
         }else{
-            const newDoc = await addDoc(docRef, {
+           const newDoc = await firestore()
+            .collection('users')
+            .doc(user?.userId)
+            .collection('projects')
+            .add({
                 project_name: projectname,
                 image:imageUrl,
                 content: text,
                 skills: [{ skill: skills }],
                 createdAt: Timestamp.fromDate(new Date())
-            });
+            })
             setProject_id(newDoc.id)
         }
         setText('')
@@ -96,7 +102,7 @@ const ProjectEntryScreen = () => {
     }
   return (
     <TouchableWithoutFeedback onPress={()=> Keyboard.dismiss()}>
-        <View style={styles.screen}>
+        <SafeAreaView style={styles.screen}>
         <View style={{padding:10}}>
         <View style={styles.imagecontainer}>
         <Image
@@ -143,7 +149,7 @@ const ProjectEntryScreen = () => {
         <View style={{padding:50}}>
         <Button title='Submit' onPress={handleSubmit}/>
         </View>
-    </View>
+    </SafeAreaView>
     </TouchableWithoutFeedback>
   )
 }

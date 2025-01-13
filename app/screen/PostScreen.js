@@ -4,14 +4,13 @@ import { Image } from 'expo-image';
 import { blurhash } from '../../utils/index';
 import { useAuth } from '../authContext';
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
-import { addDoc, collection, Timestamp, updateDoc } from "firebase/firestore"; 
-import { db } from '../../FireBase/FireBaseConfig';
 import { useDispatch,useSelector } from 'react-redux';
 import { addPost } from '../features/PostandComments/socialSlice';
 import { useNavigation } from '@react-navigation/native';
 import * as ImagePicker from 'expo-image-picker';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import axios from 'axios'
+import firestore from 'react-native-firebase/firestore'
 import color from '../../config/color';
 import {DJANGO_MEDIA_URL} from '@env'
 const PostScreen = () => {
@@ -29,23 +28,23 @@ const PostScreen = () => {
   const handlePost = async () => {
     setLoading(true);
     try {
-      let imageUrl = null;
-      if(image){
-        imageUrl = await uploadtoS3(image)
-      }
-      const newDoc = await addDoc(collection(db, 'posts'), {
-        id: user?.userId,
+      const newDoc = await firestore().collection('posts').add({
+        auth_id: user?.userId,
         name: user?.username,
         content: text,
         like_count: null,
         comment_count: null,
         liked_by: null,
+        createdAt: firestore.FieldValue.serverTimestamp()
+      })
+      let imageUrl = null;
+      if(image){
+        imageUrl = await uploadtoS3(image,newDoc.id)
+      }
+      await firestore().collection('posts').doc(newDoc.id).update({
         imageUrl:imageUrl,
-        createdAt: Timestamp.fromDate(new Date())
-      });
-      await updateDoc(newDoc, {
-        id: newDoc.id
-      });
+        post_id: newDoc.id
+      })
       setPost_id(newDoc.id)
       dispatch(addPost({ id: newDoc.id, content: text }));
       setText('');
@@ -82,7 +81,7 @@ const PostScreen = () => {
 
  
 
-  const uploadtoS3 = async (image) => {
+  const uploadtoS3 = async (image,post_id) => {
     try{
       const formData = new FormData()
       formData.append('file',{
