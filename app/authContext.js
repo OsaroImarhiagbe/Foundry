@@ -1,7 +1,6 @@
 import React,{ createContext, useEffect, useState, useContext} from 'react'
-import { onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword,signOut,sendPasswordResetEmail,sendEmailVerification } from 'firebase/auth';
-import { auth, db,} from '../FireBase/FireBaseConfig';
-import { doc, getDoc, setDoc} from 'firebase/firestore';
+import auth from '@react-native-firebase/auth';
+import firestore from '@react-native-firebase/firestore';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 export const AuthContext = createContext();
 
@@ -17,7 +16,7 @@ export const AuthContextProvider = ({children}) => {
             const currentUser = await AsyncStorage.getItem('authUser')
             if(currentUser !== null){
                 setIsAuthenticated(true)
-                setUser(currentUser)
+                setUser(JSON.parse(currentUser))
                 updateUserData(currentUser.uid)
             }else{
                 setIsAuthenticated(false);
@@ -28,19 +27,21 @@ export const AuthContextProvider = ({children}) => {
     },[])
 
     useEffect(() => {
-        const unsub = onAuthStateChanged(auth, async (user) => {
-            if(user){
-                setIsAuthenticated(true)
-                setUser(user)
-                updateUserData(user.uid);
-                const parseData = JSON.stringify(user)
-                await AsyncStorage.setItem('authUser',parseData)
-            }else{
-                setIsAuthenticated(false);
-                setUser(null)
-                await AsyncStorage.removeItem('authUser')
-            }
-        
+        const unsub = auth().onAuthStateChanged((user) => {
+            (async () => {
+                    if(user){
+                        setIsAuthenticated(true)
+                        setUser(user)
+                        updateUserData(user.uid);
+                        const parseData = JSON.stringify(user)
+                        await AsyncStorage.setItem('authUser',parseData)
+                    }else{
+                        setIsAuthenticated(false);
+                        setUser(null)
+                        await AsyncStorage.removeItem('authUser')
+                    }
+                }
+            )
         })
         return unsub
     },[])
@@ -48,7 +49,7 @@ export const AuthContextProvider = ({children}) => {
     const login = async (email,pasword) => {
         setLoading(true)
         try{
-            const response = await signInWithEmailAndPassword(auth, email,pasword)
+            const response = await auth().signInWithEmailAndPassword(email,pasword)
             setLoading(false)
             return {success:true}
         }catch(error){
@@ -59,7 +60,7 @@ export const AuthContextProvider = ({children}) => {
 
     const logout = async () => {
         try{
-            await signOut(auth);
+            await auth().signOut();
             await AsyncStorage.removeItem('authUser')
             return {success:true,}
         }catch(error){
@@ -68,8 +69,10 @@ export const AuthContextProvider = ({children}) => {
     }
     const register = async (username,email,password) => {
         try{
-            const response = await createUserWithEmailAndPassword(auth,email,password)
-            await setDoc(doc(db,'users',response?.user?.uid),{
+            const response = await auth().createUserWithEmailAndPassword(email,password).then(()=>{
+
+            })
+            await firestore().collection('users').doc(response?.user?.uid).set({
                 username,
                 userId: response?.user?.uid
             })
@@ -89,11 +92,10 @@ export const AuthContextProvider = ({children}) => {
         }
     }
     const updateUserData = async (userId) => {
-        const docRef = doc(db,'users',userId)
-        const docSnap = await getDoc(docRef);
+        const docSnap = await firestore().collection('users').doc(userId).get()
         if(docSnap.exists()){
            let data = docSnap.data()
-           setUser({...user, username: data.username, userId:data.userId})
+           setUser((prev)=> ({...prev, username: data.username, userId:data.userId}))
         }
     }
 

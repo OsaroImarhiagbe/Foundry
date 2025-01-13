@@ -6,6 +6,7 @@ import ChatRoomHeader from '../components/ChatRoomHeader';;
 import { useAuth } from '../authContext';
 import {  collection, onSnapshot, orderBy,query, } from "firebase/firestore"; 
 import {db} from '../../FireBase/FireBaseConfig';
+import firestore from '@react-native-firebase/firestore'
 import { useDispatch} from 'react-redux';
 import { addId } from '../features/user/userSlice';
 import PushNotification from '../components/PushNotifications';

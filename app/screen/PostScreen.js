@@ -51,12 +51,13 @@ const PostScreen = () => {
       setText('');
       setImage(null);
       setTimeout(() => {
-        setLoading(false);
         navigation.navigate('Main');
         Alert.alert('Success!!', 'Post has been sent!!');
       }, 1000);
     } catch (error) {
       console.error("Error creating room:", error);
+    }finally{
+      setLoading(false);
     }
   };
 
