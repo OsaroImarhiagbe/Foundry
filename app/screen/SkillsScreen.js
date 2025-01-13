@@ -1,5 +1,5 @@
 import React,{useState,useEffect} from 'react'
-import {View, Text,StyleSheet,Platform,Keyboard,TouchableWithoutFeedback,TouchableOpacity} from 'react-native'
+import {View, Text,StyleSheet,Platform,Keyboard,TouchableWithoutFeedback,TouchableOpacity,SafeAreaView} from 'react-native'
 import color from '../../config/color'
 import Autocomplete from 'react-native-autocomplete-input'
 import { useAuth } from '../authContext'
@@ -65,7 +65,7 @@ const SkillsScreen = () => {
    
   return (
           <TouchableWithoutFeedback onPress={()=>Keyboard.dismiss()}>
-    <View style={styles.screen}>
+    <SafeAreaView style={styles.screen}>
     <View style={styles.headingContainer}>
         <Text style={styles.headingText}>Skills</Text>
     </View>
@@ -93,7 +93,7 @@ const SkillsScreen = () => {
                 </View>
         ))}</View>
     </View>
-   </View>
+   </SafeAreaView>
     </TouchableWithoutFeedback>
   )
 }

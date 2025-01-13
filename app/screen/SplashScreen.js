@@ -1,5 +1,5 @@
 import React,{useEffect,useState} from 'react';
-import { StyleSheet, Image, View,Dimensions  } from 'react-native';
+import { StyleSheet, Image, View,Dimensions,SafeAreaView  } from 'react-native';
 import ProgressBar from 'react-native-progress/Bar';
 import color from '../../config/color';
 const { width } = Dimensions.get('window');
@@ -22,7 +22,7 @@ const SplashScreen = () => {
     return () => clearInterval(timer)
   },[])
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       <View style={styles.headingContainer}>
         <View style={styles.imageContainer}>
           <Image 
@@ -46,7 +46,7 @@ const SplashScreen = () => {
           resizeMode='contain'
         />
       </View>
-    </View>
+    </SafeAreaView>
   );
 };
 

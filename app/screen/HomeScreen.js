@@ -1,11 +1,9 @@
 import React,{useState,useEffect,lazy, Suspense,useMemo,useCallback} from 'react'
-import {View, Text, StyleSheet,TouchableOpacity, FlatList, Platform,StatusBar, ActivityIndicator} from 'react-native'
+import {View, Text, StyleSheet,TouchableOpacity, FlatList, Platform,StatusBar, ActivityIndicator,SafeAreaView} from 'react-native'
 import color from '../../config/color';
 import { useNavigation } from '@react-navigation/native';
 import ChatRoomHeader from '../components/ChatRoomHeader';;
 import { useAuth } from '../authContext';
-import {  collection, onSnapshot, orderBy,query, } from "firebase/firestore"; 
-import {db} from '../../FireBase/FireBaseConfig';
 import firestore from '@react-native-firebase/firestore'
 import { useDispatch} from 'react-redux';
 import { addId } from '../features/user/userSlice';
@@ -39,9 +37,9 @@ const HomeScreen = () => {
   }, []); 
 
 
-  const onRefresh = useCallback(async () => {
+  const onRefresh = useCallback(() => {
     setRefreshing(true);
-    await fetchPosts();
+    fetchPosts();
     setRefreshing(false);
   }, [memoPost]);
   
@@ -49,13 +47,12 @@ const HomeScreen = () => {
   const memoPost = useMemo(() => {return post},[post])
   const fetchPosts = () => { 
     try {
-      const docRef = collection(db, 'posts')
-      const querySnapShot = query(docRef,orderBy('createdAt', 'desc'))
-      const snap = onSnapshot(querySnapShot,(snapShot) => {
-        let data = [];
-        snapShot.forEach(doc => {
-          data.push({ ...doc.data(),id:doc.id });
-      })
+      const docRef = firestore().collection('posts').orderBy('createdAt', 'desc')
+        .then(querySnapShot =>{
+          let data = [];
+          querySnapShot.forEach(documentSnapShot => {
+            data.push({ ...documentSnapShot.data(),id:documentSnapShot.id });
+        } )
         setPost([...data]);
       });
     }  catch (e) {
@@ -69,7 +66,7 @@ const HomeScreen = () => {
     navigation.navigate('Message')
   }
   return (
-    <View
+    <SafeAreaView
     style={styles.screen}
     >
       <PushNotification/>
@@ -99,15 +96,11 @@ const HomeScreen = () => {
       </Suspense>}
     keyExtractor={(item)=> item.id}
     /> } 
-    </View>
+    </SafeAreaView>
   )
 }
 
 const styles = StyleSheet.create({
-  
-  bodyContainer:{
-    padding:20
-  },
   bodyText:{
     fontSize:15
   },
