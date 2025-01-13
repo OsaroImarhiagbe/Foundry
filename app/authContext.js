@@ -69,9 +69,7 @@ export const AuthContextProvider = ({children}) => {
     }
     const register = async (username,email,password) => {
         try{
-            const response = await auth().createUserWithEmailAndPassword(email,password).then(()=>{
-
-            })
+            const response = await auth().createUserWithEmailAndPassword(email,password)
             await firestore().collection('users').doc(response?.user?.uid).set({
                 username,
                 userId: response?.user?.uid

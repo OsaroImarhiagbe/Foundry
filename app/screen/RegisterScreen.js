@@ -61,7 +61,7 @@ const RegisterScreen = () => {
 
     return (
 
-            <View style={styles.container}>
+            <SafeAreaView style={styles.container}>
                 <View
                 style={styles.backImage}
                 >
@@ -153,10 +153,8 @@ const RegisterScreen = () => {
                     )}
                 </Formik>
                 </CustomKeyboardView>
-            
                 </View>
-               
-            </View>
+            </SafeAreaView>
       
       
       

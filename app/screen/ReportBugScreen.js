@@ -1,12 +1,12 @@
 import React,{useState} from 'react'
-import {View,Text,StyleSheet,Modal,Pressable,TextInput, TouchableWithoutFeedback,Keyboard} from 'react-native'
+import {View,Text,StyleSheet,Modal,Pressable,TextInput, TouchableWithoutFeedback,Keyboard,SafeAreaView} from 'react-native'
 import color from '../../config/color'
 
 const ReportBugScreen = () => {
     const [modalVisible, setModalVisible] = useState(false);
   return (
     
-        <View style={styles.screen}>
+        <SafeAreaView style={styles.screen}>
         <Modal
           animationType="slide"
           transparent={true}
@@ -45,7 +45,7 @@ const ReportBugScreen = () => {
         </Pressable>
         </View>
         </View>
-    </View>
+    </SafeAreaView>
    
   )
 }
