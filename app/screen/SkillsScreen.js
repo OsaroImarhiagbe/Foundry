@@ -3,8 +3,7 @@ import {View, Text,StyleSheet,Platform,Keyboard,TouchableWithoutFeedback,Touchab
 import color from '../../config/color'
 import Autocomplete from 'react-native-autocomplete-input'
 import { useAuth } from '../authContext'
-import {db} from '../../FireBase/FireBaseConfig';
-import {doc, updateDoc } from 'firebase/firestore';
+import firestore from '@react-native-firebase/firestore'
 import axios from 'axios'
 import {SkillsAPIKEY,SkillsAPIURL} from '@env'
 
@@ -44,23 +43,23 @@ const SkillsScreen = () => {
 
 
     const handleSubmit = async (item) => {
-        const docRef =  doc(db,'users',user.userId)
-        if(!skills.includes(item)){
-            await updateDoc(docRef,{
-                skills:[
-                    item
-                    ]
-            })
-        }else{
-            await updateDoc(docRef,{
-                skills:[
-                    ...prev,
-                    item
-                    ]
-            })
+        const userDoc = await firestore().collection('users').doc(user?.userId).get()
+        const userskills = userDoc.data()?.skills || []
+        try{
+            if(!userskills.includes(item)){
+                setSkills((prev) => [...prev,item])
+                await firestore().collection('users').doc(user.userId).update({
+                    skills:[
+                        ...skills,
+                        item
+                        ]
+                })
+            }
+        }catch(err){
+            console.error('Error with adding skill:',err)
         }
-        setSkills(item)
     }
+
 
    
   return (

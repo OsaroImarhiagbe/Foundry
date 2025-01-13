@@ -1,12 +1,11 @@
 import React,{useState, useEffect} from 'react'
-import {View, Text, StyleSheet,FlatList,Image, TouchableOpacity,ActivityIndicator, Platform,StatusBar} from 'react-native';
+import {View, Text, StyleSheet,FlatList,Image, TouchableOpacity,ActivityIndicator, Platform,StatusBar,SafeAreaView} from 'react-native';
 import SearchComponent from '../components/SearchComponent';
 import color from '../../config/color';
-import { userRef} from '../../FireBase/FireBaseConfig';
-import { getDocs,query,where } from "firebase/firestore"; 
 import { useNavigation } from '@react-navigation/native';
 import { useDispatch,useSelector } from 'react-redux';
 import { addsearchID } from '../features/search/searchSlice';
+import firestore from '@react-native-firebase/firestore';
 import useDebounce from '../hooks/useDebounce';
 import SearchFilter from '../components/SearchFilter';
 const SearchScreen = () => {
@@ -30,42 +29,34 @@ const SearchScreen = () => {
     }
 }, [debouncedsearch]);
 
-
   const handleSearch = async () => {
     setLoading(true)
     if(searchQuery.trim() === '') return;
     try{
-      if(skills_array.lenghth > 0){
-        q = query(userRef,where('username', '>=', searchQuery),
-        where('username', '<=', searchQuery + '\uf8ff'),
-        where('skills','array-contains-any',skills_array))
-
-      }else{
-        q = query(userRef,
-          where('username', '>=', searchQuery),
-          where('username', '<=', searchQuery + '\uf8ff'))
+      let queryRef = firestore()
+      .collection('users')
+      .where('username', '>=', searchQuery)
+      .where('username', '<=', searchQuery + '\uf8ff')
+      if(skills_array.length > 0){
+        queryRef = queryRef.where('skills','array-contains-any',skills_array)
       }
-      const querySnapShot = await getDocs(q)
-      let user = [];
-      querySnapShot.forEach(doc => {
-        user.push({...doc.data(), id:doc.id})
-        dispatch(addsearchID({searchID:doc.id}))
+      const querySnapShot = await queryRef.get()
+      let user = []
+      querySnapShot.docs.forEach(documentSnapShot => {
+        user.push({...documentSnapShot.data(),id:documentSnapShot.id})
+        dispatch(addsearchID({searchID:documentSnapShot.id}))
       })
-      setLoading(false)
       setResults(user);
       setSearchQuery('')
     }catch(error){
       console.error(`Cant find user: ${error}`)
-
+    }finally{
+      setLoading(false)
     }
-
   }
 
-
-
-
   return (
-    <View style={styles.screen}>
+    <SafeAreaView style={styles.screen}>
         <View style={{padding:30, marginTop:40,flexDirection:'row',justifyContent:'space-between',alignItems:'center'}}>
           <SearchComponent 
           setSearchQuery={setSearchQuery}
@@ -85,7 +76,7 @@ const SearchScreen = () => {
                    <View style={styles.userContainer}>
                  <Image
                  style={styles.image}
-                 source={results?.profileUrl}/>
+                 source={item?.profileUrl}/>
                <Text style={styles.text}>{item.username}</Text>
              </View>
              </View>
@@ -93,7 +84,7 @@ const SearchScreen = () => {
                
                }
                /> }
-    </View>
+    </SafeAreaView>
   
   )
 }

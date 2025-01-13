@@ -54,7 +54,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor:color.backgroundcolor,
-    padding:20
+    padding:10
   },
   headingContainer: {
     alignItems: 'center',
@@ -67,7 +67,7 @@ const styles = StyleSheet.create({
   imageContainer: {
     justifyContent: 'center',
     alignItems: 'center',
-    paddingTop:45
+    marginVertical:50
   },
   footer: {
     position:'absolute',
