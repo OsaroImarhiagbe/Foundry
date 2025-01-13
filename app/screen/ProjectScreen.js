@@ -1,47 +1,48 @@
 import React,{useState,useEffect} from 'react'
-import {View,Text,StyleSheet, TouchableOpacity} from 'react-native'
+import {View,Text,StyleSheet, TouchableOpacity,SafeAreaView} from 'react-native'
 import color from '../../config/color';
 import Entypo from 'react-native-vector-icons/Entypo';
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 import { useNavigation } from '@react-navigation/native';
-import {db} from '../../FireBase/FireBaseConfig';
-import {collection, onSnapshot,query,where} from 'firebase/firestore';
+import firestore from 'react-native-firebase/firestore'
 import { useAuth } from '../authContext';
 import { Image } from 'expo-image';
 import { blurhash } from '../../utils';
 
 const ProjectScreen = () => {
-    const [projects, setProjects] = useState('')
+    const [projects, setProjects] = useState([])
     const {user} = useAuth()
 
     const navigation = useNavigation()
 
 
     useEffect(() => {
-        const getProject = () => {
-            const docRef = collection(db, 'users', user.userId, 'projects');
-            const projectQuery = query(docRef, where('project_name', '==', projectname));
-            const unsub = onSnapshot(projectQuery,(snapShot)=>{
-                let data = []
-                snapShot.forEach((doc) => {
-                    data.push({...doc.data(),id:doc.id})
-                })
-                setProjects([...data])
+        const unsub = firestore()
+        .collection('users')
+        .doc(user?.userId)
+        .collection('projects')
+        .where('project_name', '==', projectname)
+        .onSnapshot(documentSnapShot => {
+            const data = []
+            documentSnapShot.forEach((doc) => {
+                data.push({...doc.data(),id:doc.id})
             })
-            return unsub
-        }
-        getProject()
+            setProjects([...data])
+        })
+        return () => unsub()
     },[user])
 
     return (
-      <View style={styles.screen}>
+      <SafeAreaView style={styles.screen}>
         <View style={{padding:20}}>
         <View style={styles.container}>
-            <Image
-            style={{width:'100%',height:'100%',borderRadius:20}}
-            source={projects?.image}
-            placeholder={{blurhash}}
-            />
+            {projects.length > 0 && projects[0].image ?
+              <Image
+              style={{width:'100%',height:'100%',borderRadius:20}}
+              source={projects[0]?.image}
+              placeholder={{blurhash}}
+              /> : <View style={{justifyContent:'center',alignItems:'center'}}><Text>Upload Image</Text></View>
+            }
         </View>
         </View>
         <View style={{padding:20}}>
@@ -55,14 +56,14 @@ const ProjectScreen = () => {
             </View>
             <View style={styles.textcontainer}>
                 {
-                    projects ? <Text style={styles.text}>{projects.content}
+                    projects.length > 0 ? <Text style={styles.text}>{projects[0]?.content}
                 </Text>  : <Text style={styles.text}> Enter Details about your project</Text>
                 }
             </View>
             <View style={{marginTop:20}}>
             <Text style={styles.textHeading}>Tech Used</Text>
             <View style={{padding:10}}>
-            {projects.skills.map((project,index)=>{
+            {projects[0].skills.map((project,index)=>{
                 return (
                     <View style={{marginTop:5}}  key={index}>
                         <Text style={styles.text}>
@@ -73,7 +74,7 @@ const ProjectScreen = () => {
             </View>
             </View>
         </View>
-      </View>
+      </SafeAreaView>
     )
   }
 
