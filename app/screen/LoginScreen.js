@@ -137,9 +137,6 @@ const LoginScreen = ({navigation}) => {
            </SafeAreaView>
            <StatusBar style="light" />
             </View>
-           
-
-        
     </CustomKeyboardView>
         
   

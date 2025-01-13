@@ -156,7 +156,6 @@ const AuthNavigation = () => {
             component={OnboardingScreenWrapper}
             options={{
               headerShown:false,
-              presentation:'modal',
             }}/>
             <Stack.Screen
             name='Drawer'

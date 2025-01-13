@@ -28,6 +28,10 @@ target 'DevGuides' do
   pod 'FirebaseABTesting', :modular_headers => true
   pod 'RNFBApp', :path => '../node_modules/@react-native-firebase/app'
   pod 'lottie-ios'
+  pod 'FirebaseAnalytics'
+  pod 'FirebaseAuth'
+  pod 'FirebaseFirestore'
+
 
   if ENV['EXPO_USE_COMMUNITY_AUTOLINKING'] == '1'
     config_command = ['node', '-e', "process.argv=['', '', 'config'];require('@react-native-community/cli').run()"];
