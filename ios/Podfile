@@ -15,6 +15,7 @@ prepare_react_native_project!
 
 target 'DevGuides' do
   use_expo_modules!
+  use_modular_headers!
   pod 'FirebaseCoreInternal', :modular_headers => true
   pod 'FirebaseCrashlytics', :modular_headers => true
   pod 'GoogleUtilities', :modular_headers => true
@@ -28,9 +29,9 @@ target 'DevGuides' do
   pod 'FirebaseABTesting', :modular_headers => true
   pod 'RNFBApp', :path => '../node_modules/@react-native-firebase/app'
   pod 'lottie-ios'
-  pod 'FirebaseAnalytics'
-  pod 'FirebaseAuth'
-  pod 'FirebaseFirestore'
+  pod 'FirebaseAnalytics', :modular_headers => true
+  pod 'FirebaseAuth', :modular_headers => true
+  pod 'FirebaseFirestore', :modular_headers => true
 
 
   if ENV['EXPO_USE_COMMUNITY_AUTOLINKING'] == '1'

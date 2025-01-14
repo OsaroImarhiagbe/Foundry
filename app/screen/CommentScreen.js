@@ -2,8 +2,7 @@ import React,{lazy,Suspense,useEffect,useState} from 'react'
 import {View,Text,StyleSheet,Platform,ScrollView, TextInput,TouchableOpacity, ActivityIndicator,KeyboardAvoidingView,SafeAreaView} from 'react-native'
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import Feather from 'react-native-vector-icons/Feather';
-import { addDoc, collection,onSnapshot, Timestamp,query, getDocs,where,updateDoc,runTransaction,doc} from "firebase/firestore"; 
-import { db} from '../../FireBase/FireBaseConfig';
+import firestore from 'react-native-firebase/firestore'
 import { useAuth } from '../authContext';
 import {useDispatch } from 'react-redux';
 import { addComment } from '../features/PostandComments/socialSlice';
