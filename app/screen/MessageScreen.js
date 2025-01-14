@@ -18,7 +18,6 @@ const MessageScreen = () => {
   const [refreshing, setRefreshing] = useState(false);
   const list_of_ids = useSelector((state)=> state.message.messagesID)
 
-  console.log('id is:',list_of_ids)
   const onRefresh = useCallback(() => {
     setRefreshing(true);
     grabUser(list_of_ids); 
@@ -27,7 +26,7 @@ const MessageScreen = () => {
 
   useEffect(() => {
     let unsub
-    const fetchUser = () => {
+    const fetchUser =  () => {
       unsub = grabUser(list_of_ids)
     }
 
@@ -37,13 +36,14 @@ const MessageScreen = () => {
 
   const grabUser = (list_of_ids) => {
     if (!list_of_ids || list_of_ids.length === 0) {
-      console.warn("list_of_ids is empty or undefined.");
-      setUsers([]); 
+      setUsers([]);
+      console.warn("list_of_ids is empty or undefined."); 
       return;
     }
-    const docRef = collection(db,'MessageID')
-    const q  = query(docRef, where('userId','!=',user.userId))
-    const unsub = onSnapshot(q,(snapShot) =>{
+    const unsub = firestore()
+    .collection('sent-message-id')
+    .where('userId','!=',user.userId)
+    .onSnapshot((snapShot) =>{
       let data = []
       snapShot.forEach(doc => {
         data.push({...doc.data()})

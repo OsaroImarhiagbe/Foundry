@@ -65,7 +65,7 @@ const LoginScreen = ({navigation}) => {
   
    
            <CustomKeyboardView>
-            <View style={styles.back}>
+            <SafeAreaView style={styles.screen}>
             <Image
            source={require('../assets/DevGuide.png')}
            style={styles.logo}/>
@@ -136,7 +136,7 @@ const LoginScreen = ({navigation}) => {
            </Formik>
            </SafeAreaView>
            <StatusBar style="light" />
-            </View>
+            </SafeAreaView>
     </CustomKeyboardView>
         
   
@@ -147,7 +147,7 @@ const LoginScreen = ({navigation}) => {
 
 
 const styles = StyleSheet.create({
-    back:{
+    screen:{
         backgroundColor:color.backgroundcolor,
         flex:1,
     }

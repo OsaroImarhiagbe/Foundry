@@ -1,5 +1,5 @@
 import React from 'react'
-import {View,Text,StyleSheet} from 'react-native'
+import {SafeAreaView,Text,StyleSheet} from 'react-native'
 import color from '../../config/color';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 const ContactUsScreen = () => {
@@ -19,7 +19,7 @@ const ContactUsScreen = () => {
         }
     ]
   return (
-    <View style={styles.screen}>
+    <SafeAreaView style={styles.screen}>
         <View style={styles.conatiner}>
             <View style={styles.headingContainer}>
             <Text style={styles.headingText}>
@@ -36,7 +36,7 @@ const ContactUsScreen = () => {
                 })
             }
         </View>
-    </View>
+    </SafeAreaView>
   )
 }
 

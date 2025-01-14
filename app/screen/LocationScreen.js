@@ -1,18 +1,17 @@
 
-import {View,Text,StyleSheet,Keyboard, TouchableWithoutFeedback} from 'react-native'
+import {View,Text,StyleSheet,Keyboard, TouchableWithoutFeedback,SafeAreaView} from 'react-native'
 import color from '../../config/color';
 import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
 import 'react-native-get-random-values';
-import {updateDoc,doc} from 'firebase/firestore';
+import firestore from 'react-native-firebase/firestore'
 import { useAuth } from '../authContext';
-import { db } from '../../FireBase/FireBaseConfig';
 import {GoogleAPIKey} from "@env"
 const LocationScreen = () => {
     const {user} = useAuth()
 
    return (
     <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
-    <View style={styles.screen} >
+    <SafeAreaView style={styles.screen} >
     <View style={styles.conatiner}>
     <Text style={styles.label}>Select Your City</Text>
     <GooglePlacesAutocomplete
@@ -22,8 +21,8 @@ const LocationScreen = () => {
         const state = data.structured_formatting.secondary_text
         const formattedCity = `${city}, ${state.split(',')[0]}`;
         const docRef = doc(db,'users',user.userId)
-        await updateDoc(docRef,{
-            location:formattedCity
+        await firestore().collection('users').doc(user?.userId).update({
+          location:formattedCity
         })
       }}
       query={{
@@ -38,7 +37,7 @@ const LocationScreen = () => {
       }}
     />
     </View>
-    </View>
+    </SafeAreaView>
     </TouchableWithoutFeedback>
   )
 }

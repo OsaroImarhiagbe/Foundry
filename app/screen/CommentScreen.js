@@ -1,5 +1,5 @@
 import React,{lazy,Suspense,useEffect,useState} from 'react'
-import {View,Text,StyleSheet,Platform,ScrollView, TextInput,TouchableOpacity, ActivityIndicator,KeyboardAvoidingView,} from 'react-native'
+import {View,Text,StyleSheet,Platform,ScrollView, TextInput,TouchableOpacity, ActivityIndicator,KeyboardAvoidingView,SafeAreaView} from 'react-native'
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import Feather from 'react-native-vector-icons/Feather';
 import { addDoc, collection,onSnapshot, Timestamp,query, getDocs,where,updateDoc,runTransaction,doc} from "firebase/firestore"; 

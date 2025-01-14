@@ -1,17 +1,15 @@
-import {View,TextInput,TouchableOpacity} from 'react-native'
+import {SafeAreaView,TextInput,TouchableOpacity} from 'react-native'
 import { useState } from 'react';
 import color from '../../config/color';
 import ChatRoomHeader from '../components/ChatRoomHeader';
 import { useNavigation } from '@react-navigation/native';
 import Button from '../components/Button';
-import { db} from '../../FireBase/FireBaseConfig';
-import { updateDoc,doc} from 'firebase/firestore';
+import firestore from 'react-native-firebase/firestore'
 import { useAuth } from '../authContext';
 
 const EditEmailScreen = () => {
     const navigation = useNavigation()
     const [email,setEmail] = useState('')
-    const [username,setUsername] = useState('')
     const [isloading,setLoading] = useState(false)
     const [focus,setFocus] = useState('')
     const {user} = useAuth()
@@ -20,8 +18,10 @@ const EditEmailScreen = () => {
     const handleSubmit = async () =>{
         setLoading(true)
         try{
-           const docRef = doc(db,'users',user.userId)
-            await updateDoc(docRef,{
+           await firestore()
+           .collection('users')
+           .doc(user.userId)
+           .updateDoc({
                     email:email,
             })
         }catch(e){
@@ -32,7 +32,7 @@ const EditEmailScreen = () => {
         }
     }
   return (
-    <View style={{flex:1,backgroundColor:color.backgroundcolor}}>
+    <SafeAreaView style={{flex:1,backgroundColor:color.backgroundcolor}}>
         <ChatRoomHeader 
         onPress={()=>navigation.goBack()} 
         backgroundColor={color.button} 
@@ -56,7 +56,7 @@ const EditEmailScreen = () => {
             </TouchableOpacity>
         </View>
         </View>
-    </View>
+    </SafeAreaView>
   )
 }
 

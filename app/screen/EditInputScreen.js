@@ -1,11 +1,10 @@
-import {View,TextInput,TouchableOpacity} from 'react-native'
+import {SafeAreaView,TextInput,TouchableOpacity} from 'react-native'
 import { useState } from 'react';
 import color from '../../config/color';
 import ChatRoomHeader from '../components/ChatRoomHeader';
 import { useNavigation } from '@react-navigation/native';
 import Button from '../components/Button';
-import { db} from '../../FireBase/FireBaseConfig';
-import { updateDoc,doc} from 'firebase/firestore';
+import firestore from 'react-native-firebase/firestore'
 import { useAuth } from '../authContext';
 const EditInputScreen = () => {
     const navigation = useNavigation()
@@ -19,8 +18,10 @@ const EditInputScreen = () => {
     const handleSubmit = async () =>{
         setLoading(true)
         try{
-           const docRef = doc(db,'users',user.userId)
-            await updateDoc(docRef,{
+           await firestore()
+           .collection('user')
+           .doc(user.userId)
+           .updateDoc({
                     name:name,
                     username:username,
             })
@@ -32,7 +33,7 @@ const EditInputScreen = () => {
         }
     }
   return (
-    <View style={{flex:1,backgroundColor:color.backgroundcolor}}>
+    <SafeAreaView style={{flex:1,backgroundColor:color.backgroundcolor}}>
         <ChatRoomHeader 
         onPress={()=>navigation.goBack()} 
         backgroundColor={color.button} 
@@ -65,7 +66,7 @@ const EditInputScreen = () => {
             </TouchableOpacity>
         </View>
         </View>
-    </View>
+    </SafeAreaView>
   )
 }
 

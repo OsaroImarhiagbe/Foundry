@@ -4,8 +4,7 @@ import ChatRoomHeader from '../components/ChatRoomHeader';
 import color from '../../config/color';
 import { useNavigation } from '@react-navigation/native';
 import { useAuth } from '../authContext';
-import { db} from '../../FireBase/FireBaseConfig';
-import { updateDoc,doc,onSnapshot} from 'firebase/firestore';
+import firestore from 'react-native-firebase/firestore'
 import { Image } from 'expo-image';
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import { blurhash } from '../../utils/index';
@@ -128,10 +127,12 @@ const EditScreen = () => {
 
     useEffect(() => {
         const getUpdate = () => {
-            const docRef = doc(db,'users',user?.userId)
-            const unsub = onSnapshot(docRef,(snapShot) => {
+            const unsub = firestore()
+            .collection('user')
+            .doc(user?.userId)
+            .onSnapshot((documentSnapshot) => {
                 let data = []
-                snapShot.forEach(doc => {
+                documentSnapshot.forEach(doc => {
                     data.push({...doc.data(),id:doc.id})
                 });
                 setEdit([...data])
