@@ -35,18 +35,18 @@ const OnboardingScreen = () => {
             subtitle: <Text style={styles.subtitle}>Your journey to becoming a better developer starts here!</Text>,
             },
             {
-            backgroundColor: color.grey,
-            titleStyles:{
-                fontFamily:color.textFont
-            },
-            image:(
-                <View>
-                <LottieView style={styles.lottie} renderMode={'SOFTWARE'} source={require('../assets/animations/animation2.json')} autoPlay loop />;
-                </View>
-            ),
-            title: <Text style={styles.title}>Connect with Developers Worldwide</Text>,
-            subtitle: <Text style={styles.subtitle}>Collaborate with developers from all skill levels and backgrounds.</Text>
-            },
+                backgroundColor: '#fff',
+                titleStyles:{
+                    fontFamily:color.textFont
+                },
+                image:(
+                    <View>
+                    <LottieView style={styles.lottie} renderMode={'SOFTWARE'} source={require('../assets/animations/animation4.json')} autoPlay loop />;
+                    </View>
+                ),
+                title: <Text style={{fontSize: 24,color: '#000',fontFamily:'Helvetica-light' }}>Launch Your Next Big Idea</Text>,
+                subtitle: <Text style={{color:'#000',fontSize: 16,textAlign:'center',paddingTop:5,fontFamily:'Helvetica-light'}}>Turn your side projects into real-world applications with DevGuides.</Text>,
+                },
             {
             backgroundColor: '#0097b2',
             titleStyles:{
@@ -61,18 +61,18 @@ const OnboardingScreen = () => {
             subtitle: <Text style={styles.subtitle}>From concepts to code, DevGuides is here to help you make it happen.</Text>
             },
             {
-            backgroundColor: '#fff',
-            titleStyles:{
-                fontFamily:color.textFont
-            },
-            image:(
-                <View>
-                <LottieView style={styles.lottie} renderMode={'SOFTWARE'} source={require('../assets/animations/animation4.json')} autoPlay loop />;
-                </View>
-            ),
-            title: <Text style={{fontSize: 24,color: '#000',fontFamily:'Helvetica-light' }}>Launch Your Next Big Idea</Text>,
-            subtitle: <Text style={{color:'#000',fontSize: 16,textAlign:'center',paddingTop:10,fontFamily:'Helvetica-light'}}>Turn your side projects into real-world applications with DevGuides.</Text>,
-            },
+                backgroundColor: color.grey,
+                titleStyles:{
+                    fontFamily:color.textFont
+                },
+                image:(
+                    <View>
+                    <LottieView style={styles.lottie} renderMode={'SOFTWARE'} source={require('../assets/animations/animation2.json')} autoPlay loop />;
+                    </View>
+                ),
+                title: <Text style={styles.title}>Connect with Developers Worldwide</Text>,
+                subtitle: <Text style={styles.subtitle}>Collaborate with developers from all skill levels and backgrounds.</Text>
+                },
             {
             backgroundColor:"#fff",
             titleStyles:{
@@ -85,7 +85,7 @@ const OnboardingScreen = () => {
                 
             ),
             title: <Text style={{fontSize: 24,color: '#000',fontFamily:'Helvetica-light' }}>Join the DevGuides Community</Text>,
-            subtitle: <Text style={{color:'#000',fontSize: 16,textAlign:'center',paddingTop:10,fontFamily:'Helvetica-light'}}>Meet like-minded developers, build connections, and grow your network.</Text>,
+            subtitle: <Text style={{color:'#000',fontSize: 16,textAlign:'center',paddingTop:5,fontFamily:'Helvetica-light'}}>Meet like-minded developers, build connections, and grow your network.</Text>,
             },
             
         ]}
@@ -104,14 +104,15 @@ const styles = StyleSheet.create({
     },
     title: {
         fontSize: 24,
-        color: 'white',
+        color: color.white,
+        textAlign:'center',
         fontFamily:'Helvetica-light', 
     },
     subtitle: {
         fontSize: 16,
-        color: 'white',
+        color: color.white,
         textAlign:'center',
-        paddingTop:10,
+        paddingTop:5,
         fontFamily:'Helvetica-light',
     }
 })

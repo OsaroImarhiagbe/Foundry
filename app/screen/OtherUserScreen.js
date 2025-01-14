@@ -1,4 +1,4 @@
-import {View, Text, StyleSheet, ScrollView, TouchableOpacity,ActivityIndicator,RefreshControl} from 'react-native'
+import {View, Text, StyleSheet, ScrollView, TouchableOpacity,ActivityIndicator,RefreshControl,SafeAreaView} from 'react-native'
 import {lazy,Suspense} from 'react'
 import color from '../../config/color';
 import { useNavigation } from '@react-navigation/native';
@@ -7,11 +7,10 @@ import { Image } from 'expo-image';
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import { useRoute } from '@react-navigation/native';
 import AntDesign from 'react-native-vector-icons/AntDesign';
-import {db} from '../../FireBase/FireBaseConfig';
-import {doc,runTransaction,collection,query,where,onSnapshot } from 'firebase/firestore';
 import ChatRoomHeader from '../components/ChatRoomHeader';
 import SmallButton from '../components/SmallButton';
 import FollowComponent from '../components/FollowComponent';
+import firestore from 'react-native-firebase/firestore'
 import { blurhash } from '../../utils/index';
 import { useSelector } from 'react-redux';
 import { useAuth } from '../authContext';
@@ -24,7 +23,7 @@ const PostComponent = lazy(() => import('../components/PostComponent'))
 
 
 
-  const Tab = createMaterialTopTabNavigator();
+const Tab = createMaterialTopTabNavigator();
   
 
 
@@ -55,9 +54,10 @@ const OtherUserScreen = () => {
 
     useEffect(() => {
       try{
-        const projectRef = collection(db,'projects')
-        const q = query(projectRef,where('id','==',users?.userId))
-        const unsub = onSnapshot(q,(snapShot) => {
+        const unsub = firestore()
+        .collection('projects')
+        .where('id','==',users?.userId)
+        .onSnapshot(snapShot => {
           let data = []
           snapShot.forEach(doc => {
             data.push({...doc.data(),id:doc.id})
@@ -77,14 +77,15 @@ const OtherUserScreen = () => {
         return;
       } 
       try{
-        const docRef = collection(db,'posts')
-        const q = query(docRef,where('name','==',users?.username))
-        const unsub = onSnapshot(q,(snapShot) => {
+        const unsub = firestore()
+        .collection('posts')
+        .where('name','==',users?.username)
+        .onSnapshot(documentSnapShopt => {
           let data = []
-          snapShot.forEach(doc => {
+          documentSnapShopt.forEach(doc => {
             data.push({...doc.data(),id:doc.id})
           })
-          setPosts(data)
+          setPosts([data])
         })
         return () => unsub()
       }catch(err){
@@ -94,10 +95,11 @@ const OtherUserScreen = () => {
 
 
     useEffect(() => {
-        const fetchUser = async () => {
-        const userDoc = doc(db,'users',other_user_id)
-        const unsub = onSnapshot(
-          userDoc,
+      if(!other_user_id) return 
+      const unsub = firestore()
+        .collection('users')
+        .doc(other_user_id)
+        .onSnapshot(
           (snapshot) => {
             if (snapshot.exists()) {
               setUsers(snapshot.data());
@@ -109,14 +111,7 @@ const OtherUserScreen = () => {
             console.error(`Error fetching document: ${error}`);
           }
         );
-
-        return unsub;
-      };
-    
-      fetchUser()
-      return () => {
-        setLoading(false)
-      }
+        return () => unsub()
     
   },[other_user_id])
 
@@ -124,7 +119,7 @@ const OtherUserScreen = () => {
     <ScrollView
     scrollEnabled={true}
      style={{flex:1,backgroundColor:color.backgroundcolor}}>
-      <View style={{flex:1,backgroundColor:color.backgroundcolor}}>
+      <SafeAreaView style={{flex:1,backgroundColor:color.backgroundcolor}}>
         {
         posts && posts.length > 0 ? (
             posts.map((post) => (
@@ -134,14 +129,14 @@ const OtherUserScreen = () => {
                 </View>
               </Suspense>
             ))) : <Text style={{ color: '#fff', textAlign: 'center', fontFamily:color.textFont,fontSize:20}}>No posts available</Text>}
-    </View>
+    </SafeAreaView>
     </ScrollView>
     
   ); 
   
   const Projects = () => (
     <ScrollView style={{flex:1,backgroundColor:color.backgroundcolor}}>
-    <View style={{flex:1,backgroundColor:color.backgroundcolor,padding:50}}>
+    <SafeAreaView style={{flex:1,backgroundColor:color.backgroundcolor,padding:50}}>
       {
         projects && projects.length > 0 ? (
           projects.map((project, index) => (
@@ -154,14 +149,14 @@ const OtherUserScreen = () => {
         ))) : <Text style={{ color: '#fff', textAlign: 'center', fontFamily:color.textFont,fontSize:20}}>No projects available</Text>
       }
       
-    </View>
+    </SafeAreaView>
     </ScrollView>
   );
 
   const handlePress = async () =>{
     try{
-      const docRef = doc(db,'users',other_user_id)
-      await runTransaction(db,async(transaction)=>{
+      const docRef = firestore().collection('users').doc(other_user_id)
+      await firestore().runTransaction(async(transaction)=>{
         const doc = await transaction.get(docRef)
         if(!doc.exists()) throw new Error("Doc doesn't exists!")
         
@@ -191,7 +186,6 @@ const OtherUserScreen = () => {
         })
         
       })
-      
     }catch(err){
       console.error(err)
 
@@ -201,7 +195,7 @@ const OtherUserScreen = () => {
   if(isloading) return null
   
     return (
-        <View style={styles.screen}>
+        <SafeAreaView style={styles.screen}>
           <ChatRoomHeader 
             onPress={()=>navigation.navigate('Main')} 
             backgroundColor={color.button} 
@@ -294,7 +288,7 @@ const OtherUserScreen = () => {
                   </Tab.Navigator>
                 </View> 
             </ScrollView> 
-        </View>
+        </SafeAreaView>
        
       )
     }

@@ -1,8 +1,7 @@
 import React, {useState, useEffect,lazy,Suspense,useCallback} from 'react'
-import {View, Text, StyleSheet, Platform, StatusBar,ActivityIndicator,ScrollView,RefreshControl} from 'react-native'
+import {View, Text, StyleSheet, Platform, StatusBar,ActivityIndicator,ScrollView,RefreshControl,SafeAreaView} from 'react-native'
 import color from '../../config/color';
-import {db } from '../../FireBase/FireBaseConfig';
-import { query,where,doc,collection,onSnapshot } from "firebase/firestore"; 
+import firestore from 'react-native-firebase/firestore'
 import { useAuth } from '../authContext';
 import ChatRoomHeader from '../components/ChatRoomHeader';
 import { useNavigation } from '@react-navigation/native';
@@ -63,7 +62,7 @@ const MessageScreen = () => {
 
 
   return (
-    <View style={styles.screen}>
+    <SafeAreaView style={styles.screen}>
       <ChatRoomHeader title='Message' onPress={handlePress} icon='keyboard-backspace' backgroundColor={color.button}/>
       <ScrollView
       style={{flex:1}}
@@ -83,7 +82,7 @@ const MessageScreen = () => {
        </View>
     </View>
       </ScrollView>
-  </View>
+  </SafeAreaView>
   )
 }
 
