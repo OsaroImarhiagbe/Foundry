@@ -9,15 +9,19 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import firestore from 'react-native-firebase/firestore';
 import { useSelector} from 'react-redux';
 import CommentComponent from './CommentComponent';
+import ReplyComponent from './ReplyComponent';
 import { useDispatch } from 'react-redux';
 import { addComment } from '../features/PostandComments/socialSlice';
 import Feather from 'react-native-vector-icons/Feather';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 const PostComponent = ({content,date,name,id,url,count,comment_count}) => {
 
     const [press,setIsPress] = useState(false)
     const [isloading,setLoading] = useState(false)
     const [modalVisible, setModalVisible] = useState(false);
     const [comments, setComment] = useState([])
+    const [isReply,setReply] = useState(false)
+    con
     const [text,setText] = useState('')
     const dispatch = useDispatch();
     const profileImage = useSelector((state) => state.user.profileimg)
@@ -47,6 +51,19 @@ const PostComponent = ({content,date,name,id,url,count,comment_count}) => {
         }
     }
     grabComments()
+    },[id])
+
+    useEffect(() => {
+      const relpyStatus = async () =>{
+        try{
+          const status = await AsyncStorage.getItem('reply');
+        setReply(status)
+        }catch(error){
+          console.error('Error grabbing async:',error)
+        }
+      }
+
+      relpyStatus()
     },[id])
 
   
@@ -87,10 +104,41 @@ const PostComponent = ({content,date,name,id,url,count,comment_count}) => {
     }
     
     
-  
+    const handlePost = async () => {
+      if(!text) return;
+      setLoading(true)
+        try{
+          const docRef = firestore()
+          .collection('posts')
+          .doc(id)
+          .collection('comments')
+          .doc(comments?.id)
+          .collection('replys')
+          const newDoc = await docRef.add({
+            id:user.userId,
+            name: user?.username,
+            content:text,
+            createdAt: Timestamp.fromDate(new Date()),
+            parentId:id
+          })
+          await newDoc.update({
+            id:newDoc.id
+          })
+          setText('')
+          setTimeout(() =>{
+            setLoading(false)
+            navigation.goBack()
+            Alert.alert('Success!!', 'post has sent!!');
+          },1000)
+        } catch (error) {
+          setLoading(false)
+          console.error("Error with reply:", error);
+        }
+      };
     
 
     const handleSend = async () => {
+      if(!text) return;
       try{
         const docRef = await firestore().collection('posts').doc(id).collection('comments')
         const newDoc = await docRef.add({
@@ -184,13 +232,13 @@ const PostComponent = ({content,date,name,id,url,count,comment_count}) => {
             Alert.alert('Modal has been closed.');
             setModalVisible(!modalVisible);
           }}>
-          <View style={styles.commentView}>
-            <View style={styles.modalView}>
-            <KeyboardAvoidingView
+               <KeyboardAvoidingView
               behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
               keyboardVerticalOffset={60} 
               style={styles.container}
               >
+          <View style={styles.commentView}>
+            <View style={styles.modalView}>
                 <ScrollView
                 keyboardShouldPersistTaps="never">
                   {comments.map((comment) => {
@@ -210,7 +258,7 @@ const PostComponent = ({content,date,name,id,url,count,comment_count}) => {
                     placeholder='Comment....'
                     placeholderTextColor="#000"
                   />
-                  <TouchableOpacity onPress={handleSend}>
+                  <TouchableOpacity onPress={isReply ? handlePost : handleSend}>
                     <View style={styles.sendButton}>
                     <Feather
                     name='send'
@@ -221,12 +269,11 @@ const PostComponent = ({content,date,name,id,url,count,comment_count}) => {
                 </View>
                   </View>
                 </View>
-            </KeyboardAvoidingView>
             </View>
           </View>
+          </KeyboardAvoidingView>
         </Modal>
     </SafeAreaView>
-
   </View>
   )
 }

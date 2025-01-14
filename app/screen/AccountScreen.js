@@ -1,4 +1,4 @@
-import {View, Text, StyleSheet, ScrollView, TouchableOpacity,Dimensions,ActivityIndicator,RefreshControl,Modal} from 'react-native'
+import {View, Text, StyleSheet, ScrollView, TouchableOpacity,Dimensions,ActivityIndicator,RefreshControl,SafeAreaView} from 'react-native'
 import {lazy,Suspense} from 'react'
 import color from '../../config/color';
 import { useNavigation } from '@react-navigation/native';
@@ -6,11 +6,10 @@ import {useState, useEffect,useCallback} from 'react';
 import { useAuth } from '../authContext';
 import { Image } from 'expo-image';
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
-import {db} from '../../FireBase/FireBaseConfig';
-import {doc, collection, onSnapshot,query,where } from 'firebase/firestore';
 import ChatRoomHeader from '../components/ChatRoomHeader';
 import SmallButton from '../components/SmallButton';
 import FollowComponent from '../components/FollowComponent';
+import firestore from 'react-native-firebase/firestore';
 import { blurhash } from '../../utils/index';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -49,11 +48,10 @@ const AccountScreen = () => {
 
   useEffect(() => {
     try{
-      const projectRef = collection(db,'projects')
-      const q = query(projectRef,where('id','==',user?.userId))
-      const unsub = onSnapshot(q,(snapShot) => {
+      const projectRef = firestore().collection('projects').where('id','==',user?.userId)
+      const unsub = projectRef.onSnapshot((documentSnapshot) => {
         let data = []
-        snapShot.forEach(doc => {
+        documentSnapshot.forEach(doc => {
           data.push({...doc.data(),id:doc.id})
         })
         setProjects(data)
@@ -67,11 +65,10 @@ const AccountScreen = () => {
 
   useEffect(() => {
     try{
-      const docRef = collection(db,'posts')
-      const q = query(docRef,where('name','==',user?.username))
-      const unsub = onSnapshot(q,(snapShot) => {
+      const docRef = firestore().collection('posts').where('name','==',user?.username)
+      const unsub = docRef.onSnapshot((documentSnapshot) => {
         let data = []
-        snapShot.forEach(doc => {
+        documentSnapshot.forEach(doc => {
           data.push({...doc.data(),id:doc.id})
         })
         setPosts(data)
@@ -86,11 +83,11 @@ const AccountScreen = () => {
   useEffect(() => {
     setLoading(true)
     const fetchUser = async () => {
-      const userDoc = doc(db,'users',user.userId)
-      const unsub = onSnapshot(userDoc,
-        (doc) =>{
-        if(doc.exists()){
-          setUsers(doc.data())
+      const userDoc = firestore().collection('users').doc(user.userId)
+      const unsub = userDoc.onSnapshot(
+        (documentSnapshot) =>{
+        if(documentSnapshot.exists()){
+          setUsers(documentSnapshot.data())
         }else{
           console.error(`No such document ${error}`)
         }
@@ -114,7 +111,7 @@ const AccountScreen = () => {
     <ScrollView
     scrollEnabled={true}
      style={{flex:1,backgroundColor:color.backgroundcolor}}>
-      <View style={{flex:1,backgroundColor:color.backgroundcolor}}>
+      <SafeAreaView style={{flex:1,backgroundColor:color.backgroundcolor}}>
         {
         posts && posts.length > 0 ? (
             posts.map((post) => (
@@ -124,14 +121,14 @@ const AccountScreen = () => {
                 </View>
               </Suspense>
             ))) : <Text style={{ color: '#fff', textAlign: 'center', fontFamily:color.textFont,fontSize:20}}>No posts available</Text>}
-    </View>
+    </SafeAreaView>
     </ScrollView>
     
   ); 
   
   const Projects = () => (
     <ScrollView style={{flex:1,backgroundColor:color.backgroundcolor}}>
-    <View style={{flex:1,backgroundColor:color.backgroundcolor,padding:50}}>
+    <SafeAreaView style={{flex:1,backgroundColor:color.backgroundcolor,padding:50}}>
       {
         projects && projects.length > 0 ? (
           projects.map((project, index) => (
@@ -144,13 +141,13 @@ const AccountScreen = () => {
         ))) : <Text style={{ color: '#fff', textAlign: 'center', fontFamily:color.textFont,fontSize:20}}>No projects available</Text>
       }
       
-    </View>
+    </SafeAreaView>
     </ScrollView>
   );
 
   return (
   
-    <View style={styles.screen}>
+    <SafeAreaView style={styles.screen}>
       <ChatRoomHeader 
         onPress={()=>navigation.navigate('Main')} 
         backgroundColor={color.button} 
@@ -237,7 +234,7 @@ const AccountScreen = () => {
                   </Tab.Navigator>
                 </View>
                 </ScrollView> 
-    </View>
+    </SafeAreaView>
   )
 }
 

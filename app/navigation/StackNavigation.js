@@ -9,7 +9,6 @@ const ChatScreen = lazy(() => import('../screen/ChatScreen'))
 const MessageScreen = lazy(() => import('../screen/MessageScreen'))
 const AccountScreen = lazy(() => import('../screen/AccountScreen'))
 const PostScreen = lazy(() => import('../screen/PostScreen'))
-const CommentReplyScreen = lazy(() => import('../screen/CommentReplyScreen'))
 const EditScreen = lazy(() => import('../screen/EditScreen'))
 const OtherUserScreen = lazy(() => import('../screen/OtherUserScreen'))
 const EditInputScreen = lazy(() => import('../screen/EditInputScreen'))
@@ -58,17 +57,6 @@ const PostScreenWrapper = (props) => {
 
 }
 
-
-const CommentReplyScreenWrapper = (props) => {
-  
-  return (
-    <Suspense fallback={<ActivityIndicator size='small' color='#000'/>}>
-    <CommentReplyScreen  {...props}/>
-  </Suspense>
-
-  )
-
-}
 const HomeScreenWrapper = (props) => {
   
   return(
@@ -193,20 +181,6 @@ const StackNavigation = () => {
         unmountOnBlur: true,
       }}
       />
-   
-      <Stack.Screen
-      name='CommentReply'
-      component={CommentReplyScreenWrapper}
-      options={{
-        unmountOnBlur:false,
-        ransitionSpec: {
-          open: config,
-          close: config,
-        },
-        headerShown:false,
-        gestureEnabled:false,
-        unmountOnBlur: true,
-      }}/>
        <Stack.Screen
       name='Edit'
       component={EditScreenWrapper}

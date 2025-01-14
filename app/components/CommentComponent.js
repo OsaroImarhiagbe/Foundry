@@ -5,19 +5,18 @@ import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-nativ
 import { Image } from 'expo-image';
 import { useAuth } from '../authContext';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import { useNavigation } from '@react-navigation/native';
 import ReplyComponent from './ReplyComponent';
 import firestore from 'react-native-firebase/firestore';
 import { useSelector } from 'react-redux';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 const CommentComponent = ({content,name,comment_id,post_id,count,date}) => {
     const [press,setIsPress] = useState(false)
     const [isloading,setLoading] = useState(false)
     const [showReply,setShowReply] = useState(false)
+    const [isReply,setIsRely] = useState(false)
     const [reply,setReply] = useState([])
     const {user} = useAuth();
     const profileImage = useSelector((state) => state.user.profileImage)
-
-    const navigation = useNavigation();
 
     const handleLike = async () => {
       if(isloading) return
@@ -26,7 +25,7 @@ const CommentComponent = ({content,name,comment_id,post_id,count,date}) => {
       try{
         const docRef = await firestore().collection('posts').doc(post_id).collection('comments').doc(comment_id);
         await firestore().runTransaction(async (transaction)=>{
-          const doc = await transaction.get(docRef)
+          const doc = await transaction.get()
           if (!doc.exists()) throw new Error ('Document doesnt exists');
 
           const currentLikes = doc.data().like_count || 0
@@ -73,7 +72,7 @@ const CommentComponent = ({content,name,comment_id,post_id,count,date}) => {
             })
             setReply(data);
           })
-          return unsub
+          return () => unsub()
         }  catch (e) {
         console.error(`Error: ${e}`);
       }
@@ -85,7 +84,11 @@ const CommentComponent = ({content,name,comment_id,post_id,count,date}) => {
     const toggleReply = () => {
       setShowReply(!showReply)
     }
-      
+    
+    const handleComment = async () => {
+      setIsRely(true)
+      await AsyncStorage.setItem('reply',isReply)
+    }
  
 
   return (
@@ -118,7 +121,7 @@ const CommentComponent = ({content,name,comment_id,post_id,count,date}) => {
                      <Text style={styles.reactionText}>{count}</Text>
                  </View>
                  </TouchableHighlight>
-        <TouchableOpacity onPress={() => navigation.navigate('CommentReply',{comment_id,post_id})} style={styles.reactionIcon}>
+        <TouchableOpacity onPress={handleComment} style={styles.reactionIcon}>
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                 <MaterialCommunityIcons name="comment-processing-outline" size={20}/>
                 <Text style={styles.reactionText}>{reply.length}</Text>

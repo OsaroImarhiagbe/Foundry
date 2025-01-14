@@ -2,11 +2,9 @@
 import {View,StyleSheet,TouchableOpacity,TextInput}  from 'react-native'
 import color from'../../config/color';
 import React, { useState, useEffect, useRef} from 'react'
-import {  addDoc, collection, doc, onSnapshot, orderBy, setDoc, Timestamp,query, getDoc} from "firebase/firestore"; 
 import MessageList  from '../components/MessageList';
 import { getRoomID } from '../../utils';
 import { useAuth } from '../authContext';
-import {  db } from '../../FireBase/FireBaseConfig';
 import { useRoute } from '@react-navigation/native';
 import CustomKeyboardView from '../components/CustomKeyboardView';
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
@@ -38,11 +36,10 @@ const ChatScreen = () => {
             : 'Unknown Recipient';
   useEffect(() => {
     const loadMessages = (roomId) => {
-      const docRef = doc(db, 'rooms', roomId);
-      const messageRef = collection(docRef, 'messages');
-      const q = query(messageRef, orderBy('createdAt', 'asc'));
-      let unsub = onSnapshot(q, (snapshot) => {
-        let allMessages = snapshot.docs.map((doc) => doc.data());
+      const docRef = firestore().collection('rooms').doc(roomId);
+      const messageRef = docRef.collection('messages').orderBy('createdAt', 'asc')
+      let unsub = messageRef.onSnapshot((documentSnapshot) => {
+        let allMessages = documentSnapshot.docs.map((doc) => doc.data());
         setMessages([...allMessages]);
       });
       return unsub;
@@ -63,8 +60,8 @@ const ChatScreen = () => {
     const getToken = async () => {
       try{
       const id = route?.params?.userid ? route?.params?.userid : item?.userId
-      const docRef = doc(db,'users',id)
-      const snapShot = await getDoc(docRef)
+      const docRef = firestore().collection('users').doc(id)
+      const snapShot = await docRef.getDoc()
         if(snapShot.exists()){
           const data = snapShot.data()
           setExpoPushToken(data.expoToken)
@@ -85,11 +82,11 @@ const ChatScreen = () => {
     try{
       
       const roomId = route?.params?.userid ? getRoomID(user?.userId, route?.params?.userid) : item?.userId ? getRoomID(user?.userId, item?.userId) : null
-      await setDoc(doc(db,'rooms',roomId),{
+      await firestore().collection('rooms').doc(roomId).setDoc({
         roomId,
         createdAt: Timestamp.fromDate(new Date())
       })
-      await setDoc(doc(db,'MessageID',route?.params?.userid),{
+      await firestore().collection('sent-message-id').doc(route?.params?.userid).set({
         userId:route?.params?.userid,
         name:recipentNamec
       })
@@ -107,12 +104,12 @@ const ChatScreen = () => {
       : item?.userId
       ? getRoomID(user?.userId, item.userId)
       : null;
-      const docRef = doc(db,'rooms',roomId);
-      const messageRef = collection(docRef,'messages')
+      const docRef = firestore().collection('rooms').doc(roomId);
+      const messageRef = docRef.collection('messages')
       textRef.current ="";
       if(inputRef) inputRef?.current?.clear();
       
-      await addDoc(messageRef,{
+      await messageRef.add({
         userId:user?.userId,
         text:message,
         senderName: user?.username,
@@ -173,7 +170,6 @@ const ChatScreen = () => {
         </View>
         </View>
       </View>
-      
     </CustomKeyboardView>
   );
 };

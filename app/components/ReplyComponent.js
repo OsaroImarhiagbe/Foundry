@@ -7,6 +7,7 @@ import { useAuth } from '../authContext';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import color from '../../config/color';
 import { useSelector } from 'react-redux';
+import firestore from 'react-native-firebase/firestore'
 const ReplyComponent = ({name,content,post_id,comment_id,reply_id,count}) => {
 
     const [press,setIsPress] = useState(false)
@@ -18,8 +19,14 @@ const ReplyComponent = ({name,content,post_id,comment_id,reply_id,count}) => {
 
       setLoading(true)
       try{
-        const docRef = doc(db, 'posts',post_id,'comments',comment_id,'replys',reply_id);;
-        await runTransaction(db,async (transaction)=>{
+        const docRef = firestore()
+        .collection('posts')
+        .doc(post_id)
+        .collection('comments')
+        .doc(comment_id)
+        .collection('replys')
+        .doc(reply_id);
+        await firestore().runTransaction(async (transaction)=>{
           const doc = await transaction.get(docRef)
           if (!doc.exists()) throw new Error ('Document doesnt exists');
 
@@ -43,7 +50,7 @@ const ReplyComponent = ({name,content,post_id,comment_id,reply_id,count}) => {
           })
         })
       }catch(err){
-        console.log('error liking comment:',err)
+        console.error('error liking comment:',err)
       }finally{
         setLoading(false)
       }
