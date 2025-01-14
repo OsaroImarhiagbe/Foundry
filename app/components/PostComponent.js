@@ -7,15 +7,18 @@ import EvilIcons from 'react-native-vector-icons/EvilIcons'
 import { useAuth } from '../authContext';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useNavigation } from '@react-navigation/native';
-import {runTransaction,doc } from "firebase/firestore";
-import { db } from '../../FireBase/FireBaseConfig';
+import firestore from 'react-native-firebase/firestore';
 import { useSelector} from 'react-redux';
+
 
 const PostComponent = ({content,date,name,id,url,count,comment_count}) => {
 
     const [press,setIsPress] = useState(false)
     const [isloading,setLoading] = useState(false)
     const [modalVisible, setModalVisible] = useState(false);
+    const [currentComment,setCurrentComment] = useState([])
+    const [comments, setComment] = useState([])
+    const [text,setText] = useState('')
     const profileImage = useSelector((state) => state.user.profileimg)
     const {user} = useAuth();
     const navigation = useNavigation();
@@ -26,8 +29,8 @@ const PostComponent = ({content,date,name,id,url,count,comment_count}) => {
 
       setLoading(true)
       try{
-        const docRef = doc(db, 'posts',id);
-        await runTransaction(db,async (transaction)=>{
+        const docRef = firestore().collection('posts').doc(id);
+        await firestore().runTransaction(async (transaction)=>{
           const doc = await transaction.get(docRef)
           if (!doc.exists()) throw new Error ('Document doesnt exists');
 
