@@ -1,0 +1,6 @@
+module BEMCheckBox {
+  umbrella header "BEMCheckBox-umbrella.h"
+
+  export *
+  module * { export * }
+}

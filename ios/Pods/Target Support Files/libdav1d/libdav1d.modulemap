@@ -1,0 +1,6 @@
+module libdav1d {
+  umbrella header "libdav1d-umbrella.h"
+
+  export *
+  module * { export * }
+}
