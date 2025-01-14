@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { TouchableOpacity, View, Text, StyleSheet } from 'react-native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import color from '../../config/color';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const CustomCheckBox = ({label,onSkillToggle}) => {
     const [isChecked, setIsChecked] = useState(false);

@@ -1,8 +1,6 @@
 import { View, Text, StyleSheet, TouchableHighlight,TouchableOpacity} from 'react-native'
 import { useState, useEffect } from 'react';
 import { useAuth } from '../authContext';
-import { db} from '../../FireBase/FireBaseConfig';
-import { collection, doc,query,onSnapshot, orderBy,deleteDoc,getDocs } from "firebase/firestore"; 
 import { blurhash } from '../../utils/index';
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import { Image } from 'expo-image';
@@ -25,18 +23,17 @@ const ChatRoom = ({next_item, onPress,User}) => {
     const [lastMessage, setLastMessage] = useState(undefined);
     useEffect(() => {
         const roomId = getRoomID(User?.userId,next_item?.userId)
-        const docRef = doc(db,'rooms',roomId);
-        const messageRef = collection(docRef,'messages')
-        const q = query(messageRef, orderBy('createdAt','desc'));
-        let unsub = onSnapshot(q, (snapshot) => {
-          let allmessage = snapshot.docs.map(doc => {
+        const docRef = firestore().collection('rooms').doc(roomId);
+        const messageRef = docRef.collection('messages').orderBy('createdAt','desc')
+        const unsub = messageRef.onSnapshot((documentSnapshot) => {
+          let allmessage = documentSnapshot.docs.map(doc => {
             return doc.data()
           });
           setLastMessage(allmessage[0] ? allmessage[0]: null)
       })
-        return unsub
-        
-      },[])
+        return () => unsub()
+
+      },[User?.userId, next_item?.userId])
 
       const renderTime = () => {
         if(lastMessage){
@@ -59,19 +56,18 @@ const ChatRoom = ({next_item, onPress,User}) => {
       const handleDelete = async () => {
         try {
           const roomId = getRoomID(User?.userId,next_item?.userId)
-          const messagesRef = collection(db, 'rooms', roomId,'messages');
-          const messagesSnapshot = await getDocs(messagesRef);
+          const messagesRef = firestore().collection('rooms').doc(roomId).collection('messages')
+          const messagesSnapshot = await messagesRef.get();
           const docPromise = messagesSnapshot.docs.map((messageDoc) => {
-               deleteDoc(messageDoc.ref);
+               return messageDoc.ref.delete();
             });
           await Promise.all(docPromise)
 
-          const roomRef = doc(db,'rooms',roomId)
-          const messageID = doc(db,'MessageID',next_item.userId)
-          await deleteDoc(roomRef)
-          await deleteDoc(messageID)
+          const roomRef = firestore().collection('rooms').doc(roomId)
+          const sent_message = firestore().collection('sent-message-id').doc(next_item.userId)
+          await roomRef.delete()
+          await sent_message.delete()
           dispatch(removeID(next_item.userId))
-          console.log('Document deleted successfully');
         } catch (error) {
           console.error('Error deleting document: ', error);
 

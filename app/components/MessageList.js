@@ -1,4 +1,4 @@
-import { View, Text,StyleSheet,ScrollView} from 'react-native'
+import {ScrollView} from 'react-native'
 import MessageItem from './MessageItem';
 
 const MessageList = ({messages,currentUser}) => {

@@ -1,12 +1,8 @@
-import React, { useReducer } from 'react'
+import React from 'react'
 import { View, Text, StyleSheet} from 'react-native'
 
-const MessageChat = ({user,item}) => {
-    console.log(user);
-    console.log(item.user);
-    
+const MessageChat = ({user,item}) => {  
     const currentUserstatus = item.user !== user
-    console.log(currentUserstatus)
   return (
  <View style={currentUserstatus ? {} : {alignItems: 'flex-end'}}>
     <View style={styles.messageItemwrapper}>

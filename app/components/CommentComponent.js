@@ -7,8 +7,7 @@ import { useAuth } from '../authContext';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useNavigation } from '@react-navigation/native';
 import ReplyComponent from './ReplyComponent';
-import {collection,  onSnapshot, orderBy,query,runTransaction,doc} from "firebase/firestore"; 
-import {  db, } from '../../FireBase/FireBaseConfig';
+import firestore from 'react-native-firebase/firestore';
 import { useSelector } from 'react-redux';
 const CommentComponent = ({content,name,comment_id,post_id,count,date}) => {
     const [press,setIsPress] = useState(false)
@@ -25,8 +24,8 @@ const CommentComponent = ({content,name,comment_id,post_id,count,date}) => {
 
       setLoading(true)
       try{
-        const docRef = doc(db, 'posts',post_id,'comments',comment_id);;
-        await runTransaction(db,async (transaction)=>{
+        const docRef = await firestore().collection('posts').doc(post_id).collection('comments').doc(comment_id);
+        await firestore().runTransaction(async (transaction)=>{
           const doc = await transaction.get(docRef)
           if (!doc.exists()) throw new Error ('Document doesnt exists');
 
@@ -60,16 +59,21 @@ const CommentComponent = ({content,name,comment_id,post_id,count,date}) => {
     useEffect(() => {
       const fetchReply = () => {
         try {
-          const docRef = collection(db, 'posts',post_id,'comments',comment_id,'replys')
-          const q = query(docRef,orderBy('createdAt', 'desc'));
-          const unsub = onSnapshot(q,(SnapShot)=>{
+          const docRef = firestore()
+          .collection('posts')
+          .doc(post_id)
+          .collection('comments')
+          .doc(comment_id)
+          .collection('replys')
+          .orderBy('createdAt', 'desc')
+          const unsub = docRef.onSnapshot((documentSnapshot)=>{
             let data = [];
-            SnapShot.forEach(doc => {
+            documentSnapshot.forEach(doc => {
               data.push({ ...doc.data(),id:doc.id });
             })
-            setReply([...data]);
+            setReply(data);
           })
-          return () => unsub();
+          return unsub
         }  catch (e) {
         console.error(`Error: ${e}`);
       }
