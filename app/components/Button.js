@@ -1,9 +1,6 @@
 import React from 'react'
 import {View, Text, StyleSheet, TouchableOpacity, TouchableHighlight} from 'react-native'
-import color from '../../config/color';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useState } from 'react';
-// import LinearGradient from 'react-native-linear-gradient';
 
 const Button = ({ onPress,title, backgroundColor, color, disabled, borderColor,fontSize}) => {
 
