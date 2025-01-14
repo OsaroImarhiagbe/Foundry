@@ -2,7 +2,6 @@ import React,{lazy,Suspense,useEffect,useState} from 'react'
 import {View,Text,StyleSheet,Platform,ScrollView, TextInput,TouchableOpacity, ActivityIndicator,KeyboardAvoidingView,SafeAreaView} from 'react-native'
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import Feather from 'react-native-vector-icons/Feather';
-import firestore from 'react-native-firebase/firestore'
 import { useAuth } from '../authContext';
 import {useDispatch } from 'react-redux';
 import { addComment } from '../features/PostandComments/socialSlice';
@@ -93,7 +92,6 @@ const grabCurrentPost = async () => {
   }catch(e){
     console.error('ERROR:',e)
   }
-  
 }
 
   return (

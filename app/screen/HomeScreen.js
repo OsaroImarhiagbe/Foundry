@@ -37,17 +37,17 @@ const HomeScreen = () => {
   }, []); 
 
 
-  const onRefresh = useCallback(() => {
+  const onRefresh = useCallback(async () => {
     setRefreshing(true);
-    fetchPosts();
+    await fetchPosts();
     setRefreshing(false);
   }, [memoPost]);
   
 
   const memoPost = useMemo(() => {return post},[post])
-  const fetchPosts = () => { 
+  const fetchPosts = async () => { 
     try {
-      const docRef = firestore().collection('posts').orderBy('createdAt', 'desc')
+      await firestore().collection('posts').orderBy('createdAt', 'desc')
         .then(querySnapShot =>{
           let data = [];
           querySnapShot.forEach(documentSnapShot => {
@@ -92,7 +92,7 @@ const HomeScreen = () => {
     onRefresh={onRefresh}
     refreshing={refreshing}
     renderItem={({item}) => <Suspense fallback={<ActivityIndicator size='small' color='#000'/>}>
-      <PostComponent count={item.like_count} url={item.imageUrl} id={item.id} name={item.name} content={item.content} date={item.createdAt.toDate().toLocaleString()}comment_count={item.comment_count}/>
+      <PostComponent count={item.like_count} url={item.imageUrl} id={item.post_id} name={item.name} content={item.content} date={item.createdAt.toDate().toLocaleString()} comment_count={item.comment_count}/>
       </Suspense>}
     keyExtractor={(item)=> item.id}
     /> } 

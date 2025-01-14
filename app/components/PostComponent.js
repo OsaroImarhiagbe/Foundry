@@ -6,22 +6,48 @@ import { Image } from 'expo-image';
 import EvilIcons from 'react-native-vector-icons/EvilIcons'
 import { useAuth } from '../authContext';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import { useNavigation } from '@react-navigation/native';
 import firestore from 'react-native-firebase/firestore';
 import { useSelector} from 'react-redux';
-
-
+import CommentComponent from './CommentComponent';
+import { useDispatch } from 'react-redux';
+import { addComment } from '../features/PostandComments/socialSlice';
+import Feather from 'react-native-vector-icons/Feather';
 const PostComponent = ({content,date,name,id,url,count,comment_count}) => {
 
     const [press,setIsPress] = useState(false)
     const [isloading,setLoading] = useState(false)
     const [modalVisible, setModalVisible] = useState(false);
-    const [currentComment,setCurrentComment] = useState([])
     const [comments, setComment] = useState([])
     const [text,setText] = useState('')
+    const dispatch = useDispatch();
     const profileImage = useSelector((state) => state.user.profileimg)
     const {user} = useAuth();
-    const navigation = useNavigation();
+
+    useEffect(() => {
+      setLoading(true)
+      const grabComments = async () => {
+        if(id){
+          const unsub = await firestore()
+          .collection('posts')
+          .doc(id)
+          .collection('comments')
+          .onSnapshot((querySnapShot) => {
+            try{
+                let data = []
+                querySnapShot.forEach(doc =>{
+                  data.push({ ...doc.data(),id:doc.id });
+                })
+                setComment(data)
+            }catch(e){
+              console.error('Error with comment',e)
+            }
+          }
+          ) 
+          return () => unsub()
+        }
+    }
+    grabComments()
+    },[id])
 
   
     const handleLike = async () => {
@@ -58,7 +84,38 @@ const PostComponent = ({content,date,name,id,url,count,comment_count}) => {
       }finally{
         setLoading(false)
       }
+    }
+    
+    
   
+    
+
+    const handleSend = async () => {
+      try{
+        const docRef = await firestore().collection('posts').doc(id).collection('comments')
+        const newDoc = await docRef.add({
+          parentId:null,
+          name:user?.username,
+          content:text,
+          createdAt: firestore.FieldValue.serverTimestamp()
+        })
+        await newDoc.update({
+          id:newDoc.id
+        })
+        const postDocRef = await firestore().collection('posts').doc(id)
+        await firestore().runTransaction(async (transaction)=>{
+          const doc = await transaction.get(postDocRef)
+          if (!doc.exists()) throw new Error('Doc does not exists!!')
+          const commentCount = doc.data().comment_count || 0
+          transaction.update(postDocRef,{
+            comment_count:commentCount + 1
+          })
+        })
+        dispatch(addComment({id:newDoc.id,postId:id,content:text}))
+        setText('')
+      }catch(e){
+        console.error('Error with sending comments:',e)
+      }
     }
   return (
     <View style={styles.card}>
@@ -118,8 +175,6 @@ const PostComponent = ({content,date,name,id,url,count,comment_count}) => {
         </TouchableOpacity>
       </View>
     </View>
-
-    {/* () => navigation.navigate('Comment',{id}) */}
     <SafeAreaView>
     <Modal
           animationType="slide"
@@ -136,15 +191,8 @@ const PostComponent = ({content,date,name,id,url,count,comment_count}) => {
               keyboardVerticalOffset={60} 
               style={styles.container}
               >
-                <ChatRoomHeader onPress={handlePress} icon='keyboard-backspace' backgroundColor={color.button}/>
                 <ScrollView
                 keyboardShouldPersistTaps="never">
-                <View>
-                  {currentComment.map((comment) => {
-                    return <Suspense key={comment.id} fallback={<ActivityIndicator size='small' color='#fff'/>}>
-                      <PostComponent url={comment.imageUrl} count={comment.like_count} name={comment.name} content={comment.content} comment_count={comment.comment_count} date={comment.createdAt.toDate().toLocaleString()}/>
-                    </Suspense>
-                  })}</View>
                   {comments.map((comment) => {
                   
                     return <Suspense key={comment.id}  fallback={<ActivityIndicator size='small' color='#fff'/>}>
@@ -173,7 +221,7 @@ const PostComponent = ({content,date,name,id,url,count,comment_count}) => {
                 </View>
                   </View>
                 </View>
-       </KeyboardAvoidingView>
+            </KeyboardAvoidingView>
             </View>
           </View>
         </Modal>
@@ -285,6 +333,32 @@ const styles = StyleSheet.create({
       justifyContent: 'center',
       alignItems: 'center',
     },
+    messageInput: {
+      flexDirection:'row',
+      justifyContent:'space-between',
+      borderColor:'#8a8a8a',
+      borderWidth:0.5,
+      borderRadius:20,
+    },
+    sendButton: {
+      padding: 15,
+      marginRight:1,
+    },
+    inputContainer: {
+      flexDirection: 'row',
+      justifyContent:'space-between',
+      alignItems:'center',
+      marginRight:3,
+      marginLeft:3,
+      padding:5,
+      paddingBottom:30
+    },
+    textinput:{
+      flex:1,
+      marginRight:2,
+      padding:5
+    },
+    
 })
 
 

@@ -9,7 +9,6 @@ const ChatScreen = lazy(() => import('../screen/ChatScreen'))
 const MessageScreen = lazy(() => import('../screen/MessageScreen'))
 const AccountScreen = lazy(() => import('../screen/AccountScreen'))
 const PostScreen = lazy(() => import('../screen/PostScreen'))
-const CommentScreen = lazy(() => import('../screen/CommentScreen'))
 const CommentReplyScreen = lazy(() => import('../screen/CommentReplyScreen'))
 const EditScreen = lazy(() => import('../screen/EditScreen'))
 const OtherUserScreen = lazy(() => import('../screen/OtherUserScreen'))
@@ -58,16 +57,7 @@ const PostScreenWrapper = (props) => {
   )
 
 }
-const CommentScreenWrapper = (props) => {
-  
-  return (
-    <Suspense fallback={<ActivityIndicator size='small' color='#000'/>}>
-    <CommentScreen  {...props}/>
-  </Suspense>
 
-  )
-
-}
 
 const CommentReplyScreenWrapper = (props) => {
   
@@ -269,14 +259,6 @@ const StackNavigation = () => {
         gestureEnabled:false,
         presentation:'modal',
         unmountOnBlur: true,
-      }}/>
-         <Stack.Screen
-      name='Comment'
-      component={CommentScreenWrapper}
-      options={{
-        headerShown:false,
-        unmountOnBlur: true,
-        presentation:'modal'
       }}/>
     </Stack.Navigator>
   );
