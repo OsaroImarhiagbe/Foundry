@@ -12,8 +12,7 @@ import { I18nextProvider } from 'react-i18next';
 import i18n from './app/Language/i18n';
 import * as Notifications from 'expo-notifications';
 import * as TaskManager from 'expo-task-manager';
-import { db } from './FireBase/FireBaseConfig';
-import { addDoc,doc,collection,Timestamp } from 'firebase/firestore';
+import firestore from 'react-native-firebase/firestore';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import PostComponent from './app/components/PostComponent';
 export default function App() {
@@ -59,12 +58,12 @@ export default function App() {
           console.error('No user ID found in AsyncStorage');
           return;
         }
-        const userDocRef = doc(db, 'users', userId);
-        const notifCollectionRef = collection(userDocRef, 'notifications');
-        await addDoc(notifCollectionRef, {
+        const userDocRef = firestore().collection('users').doc(userId);
+        const notifCollectionRef = userDocRef.collection('notifications');
+        await notifCollectionRef.add({
           title: data.notification.request.content.title,
           body: data.notification.request.content.body,
-          createdAt: Timestamp.fromDate(new Date()),
+          createdAt: firestore.FieldValue.serverTimestamp(),
           notification_data: data,
         });
       }catch(err){
