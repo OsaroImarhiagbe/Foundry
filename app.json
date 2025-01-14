@@ -50,9 +50,6 @@
     ],
     "web": {},
     "extra": {
-      "eas": {
-        "projectId": "3a17d314-84d0-49f9-8373-f3eee01578a5"
-      }
     },
     "runtimeVersion": "1.0.0",
     "updates": {
