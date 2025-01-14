@@ -27,13 +27,6 @@
         ]
       }
     },
-    "android": {
-      "newArchEnabled": true,
-      "adaptiveIcon": {
-        "backgroundColor": "#ffffff"
-      },
-      "package": "com.devguides.app"
-    },
     "plugins": [
       [
         "expo-notifications",
@@ -45,7 +38,6 @@
       ],
       "@react-native-firebase/app",
       "@react-native-firebase/auth",
-      "@react-native-firebase/firestore",
       "@react-native-firebase/messaging",
       [
         "expo-build-properties",
