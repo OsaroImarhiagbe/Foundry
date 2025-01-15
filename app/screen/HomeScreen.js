@@ -7,8 +7,8 @@ import { useAuth } from '../authContext';
 import firestore from '@react-native-firebase/firestore'
 import { useDispatch} from 'react-redux';
 import { addId } from '../features/user/userSlice';
-import PushNotification from '../components/PushNotifications';
-const PostComponent = lazy(() => import('../components/PostComponent'))
+import PushNotification from '../components/PushNotifications.js';
+const PostComponent = lazy(() => import('../components/PostComponent.js'))
 
 
 
