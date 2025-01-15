@@ -20,7 +20,7 @@ export const AuthContextProvider = ({children}) => {
                 setIsAuthenticated(true)
                 setUser(currentUser)
                 await updateUserData(currentUser.uid)
-                await AsyncStorage.clear()
+                //await AsyncStorage.clear()
             }else{
                 setIsAuthenticated(false);
                 setUser(null)
@@ -35,12 +35,9 @@ export const AuthContextProvider = ({children}) => {
                         setIsAuthenticated(true)
                         setUser(user)
                         await updateUserData(user.uid);
-                        const parseData = JSON.stringify(user)
-                        console.log('parseData:',parseData)
                     }else{
                         setIsAuthenticated(false);
                         setUser(null)
-                        await AsyncStorage.removeItem('authUser')
                     }
                 }
             )
@@ -51,7 +48,7 @@ export const AuthContextProvider = ({children}) => {
         setLoading(true)
         try{
             const response = await auth().signInWithEmailAndPassword(email,pasword)
-            await AsyncStorage.setItem('authUser',response?.user?.uid)
+            await AsyncStorage.setItem('authUser',response?.user)
             setLoading(false)
             return {success:true}
         }catch(error){
@@ -80,7 +77,7 @@ export const AuthContextProvider = ({children}) => {
                 username,
                 userId: response?.user?.uid
             })
-            await AsyncStorage.setItem('userId',response?.user?.uid)
+            await AsyncStorage.setItem('authUser',response?.user)
             return {success:true, data: response?.user}
         }catch(error){
             console.error(`${error}`)

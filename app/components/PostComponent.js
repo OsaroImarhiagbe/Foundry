@@ -1,5 +1,5 @@
 import React,{useState,useEffect} from 'react'
-import {View,StyleSheet,Text,TouchableOpacity,TouchableHighlight,Modal, SafeAreaView,KeyboardAvoidingView} from 'react-native'
+import {View,StyleSheet,Text,TouchableOpacity,TouchableHighlight,Modal, SafeAreaView,KeyboardAvoidingView,Platform,ScrollView,TextInput,Pressable} from 'react-native'
 import { blurhash } from '../../utils/index'
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import { Image } from 'expo-image';
@@ -10,6 +10,7 @@ import firestore from '@react-native-firebase/firestore';
 import { useSelector} from 'react-redux';
 import CommentComponent from './CommentComponent';
 import ReplyComponent from './ReplyComponent';
+import color from '../../config/color';
 import { useDispatch } from 'react-redux';
 import { addComment } from '../features/PostandComments/socialSlice';
 import Feather from 'react-native-vector-icons/Feather';
@@ -50,7 +51,7 @@ const PostComponent = ({content,date,name,id,url,count,comment_count}) => {
         }
     }
     grabComments()
-    },[id])
+    },[comments])
 
     useEffect(() => {
       const relpyStatus = async () =>{
@@ -63,7 +64,7 @@ const PostComponent = ({content,date,name,id,url,count,comment_count}) => {
       }
 
       relpyStatus()
-    },[id])
+    },[comments])
 
   
     const handleLike = async () => {
@@ -210,7 +211,7 @@ const PostComponent = ({content,date,name,id,url,count,comment_count}) => {
                  </TouchableHighlight>
         <TouchableOpacity onPress={() => setModalVisible(true)} style={styles.reactionIcon}>
           <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-            <MaterialCommunityIcons name="comment-processing-outline" size={20} color='#ffffff'/>
+            <MaterialCommunityIcons name="comment-processing-outline" size={20} color='#ffff'/>
             <Text style={styles.reactionText}>{comment_count}</Text>
           </View>
         </TouchableOpacity>
@@ -223,81 +224,86 @@ const PostComponent = ({content,date,name,id,url,count,comment_count}) => {
       </View>
     </View>
     <SafeAreaView>
-    <Modal
-          animationType="slide"
-          transparent={true}
-          visible={modalVisible}
-          onRequestClose={() => {
-            Alert.alert('Modal has been closed.');
-            setModalVisible(!modalVisible);
+      <Modal
+      animationType="slide"
+      visible={modalVisible}
+      onRequestClose={() => {
+        Alert.alert('Modal has been closed.');
+        setModalVisible(!modalVisible);
           }}>
-               <KeyboardAvoidingView
-              behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-              keyboardVerticalOffset={60} 
-              style={styles.container}
+      <View style={styles.commentView}>
+        <View style={styles.modalView}>
+        <View style={{flexDirection:'row',justifyContent:'space-between'}}>
+          <Text style={{fontFamily:color.textFont,fontSize:18,}}>Comments</Text>
+          <Pressable
+            style={[styles.button, styles.buttonClose,{paddingLeft:20}]}
+            onPress={() => setModalVisible(!modalVisible)}>
+            <Text style={styles.textStyle}>Hide Modal</Text>
+          </Pressable>
+          </View>
+          <KeyboardAvoidingView
+          enabled
+          behavior='padding'
+          keyboardVerticalOffset={0}
               >
-          <View style={styles.commentView}>
-            <View style={styles.modalView}>
-                <ScrollView
-                keyboardShouldPersistTaps="never">
-                  {comments.map((comment) => {
-                  
-                    return <Suspense key={comment.id}  fallback={<ActivityIndicator size='small' color='#fff'/>}>
-                            <CommentComponent count={comment.like_count} content={comment.content} name={comment.name} comment_id={comment.id} post_id={id} date={comment.createdAt.toDate().toLocaleString()}/>
-                      </Suspense>
-                  })}
-                  </ScrollView>
-                  <View>
-                <View style={styles.inputContainer}>
-                  <View style={styles.messageInput}>
-                  <TextInput
-                  value={text}
-                  onChangeText={(text) => setText(text)}
-                  style={[styles.textinput,{fontSize:hp(1.5)}]}
-                    placeholder='Comment....'
-                    placeholderTextColor="#000"
-                  />
-                  <TouchableOpacity onPress={isReply ? handlePost : handleSend}>
-                    <View style={styles.sendButton}>
-                    <Feather
-                    name='send'
-                    size={hp(2.0)}
-                    color='#737373'/>
-                    </View>
-                  </TouchableOpacity>
-                </View>
-                  </View>
-                </View>
+        <ScrollView
+        keyboardShouldPersistTaps="never">
+          {comments.map((comment) => {
+          
+            return <Suspense key={comment.id}  fallback={<ActivityIndicator size='small' color='#fff'/>}>
+                    <CommentComponent count={comment.like_count} content={comment.content} name={comment.name} comment_id={comment.id} post_id={id} date={comment.createdAt.toDate().toLocaleString()}/>
+              </Suspense>
+          })}
+          </ScrollView>
+        <View style={styles.inputContainer}>
+          <View style={styles.messageInput}>
+          <TextInput
+          value={text}
+          onChangeText={(text) => setText(text)}
+          style={[styles.textinput,{fontSize:hp(1.5)}]}
+            placeholder='Comment....'
+            placeholderTextColor="#000"
+          />
+          <TouchableOpacity onPress={isReply ? handlePost : handleSend}>
+            <View style={styles.sendButton}>
+            <Feather
+            name='send'
+            size={hp(2.0)}
+            color='#000'/>
             </View>
+          </TouchableOpacity>
+        </View>
           </View>
           </KeyboardAvoidingView>
-        </Modal>
-    </SafeAreaView>
+    </View>
+  </View>
+      </Modal>
+  </SafeAreaView>
   </View>
   )
 }
 
 
 const styles = StyleSheet.create({
-    card:{
-        padding:10,
-      },
-      image:{
-        width:30,
-        height:30,
-        borderRadius:100
+  container:{
+    flex:1
+  },
+  card:{
+      padding:10,
     },
+    image:{
+      width:30,
+      height:30,
+      borderRadius:100
+  },
     imageText:{
       flexDirection:'row',
       marginBottom:10
-      
-    }
-    ,
+    },
     userPost:{
       fontFamily:'Helvetica-light',
       color:'#ffffff',
       marginLeft:50
-    
     }
     ,
     userTime:{
@@ -361,18 +367,22 @@ const styles = StyleSheet.create({
     },
     commentView: {
       flex: 1,
-      justifyContent: 'flex-end',
+      justifyContent:'flex-end',
       alignItems: 'center',
+      bottom: 0,
+      left: 0,
+      right: 0,
     },
     modalView: {
-      margin: 10,
-      backgroundColor: 'white',
+      margin: 0,
+      backgroundColor: color.grey,
       borderTopRightRadius: 20,
       borderTopLeftRadius:20,
       padding:35,
       alignItems: 'center',
       width:'100%',
-      height:'70%',
+      height:'60%',
+      position:'absolute',
     },
     centeredView: {
       flex: 1,
@@ -382,7 +392,7 @@ const styles = StyleSheet.create({
     messageInput: {
       flexDirection:'row',
       justifyContent:'space-between',
-      borderColor:'#8a8a8a',
+      borderColor:'#000',
       borderWidth:0.5,
       borderRadius:20,
     },
@@ -397,12 +407,13 @@ const styles = StyleSheet.create({
       marginRight:3,
       marginLeft:3,
       padding:5,
-      paddingBottom:30
+      paddingBottom:0,
     },
     textinput:{
       flex:1,
       marginRight:2,
-      padding:5
+      padding:5,
+      height:50
     },
     
 })

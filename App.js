@@ -52,7 +52,7 @@ export default function App() {
     }
     if (data) {
       try{
-        const userId = await AsyncStorage.getItem('userId');
+        const userId = await AsyncStorage.getItem('authUser');
         if (!userId) {
           console.error('No user ID found in AsyncStorage');
           return;

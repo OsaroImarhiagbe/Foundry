@@ -16,6 +16,7 @@ import {DJANGO_MEDIA_URL} from '@env'
 const PostScreen = () => {
 
   const { user } = useAuth();
+  console.log('post screen:',user)
   const [text, setText] = useState('');
   const [loading, setLoading] = useState(false);
   const [image, setImage] = useState(null);
@@ -29,32 +30,31 @@ const PostScreen = () => {
     setLoading(true);
     try {
       const newDoc = await firestore().collection('posts').add({
-        auth_id: user?.userId,
-        name: user?.username,
+        auth_id:user.uid,
         content: text,
         like_count: null,
         comment_count: null,
         liked_by: null,
-        createdAt: firestore.FieldValue.serverTimestamp()
+        createdAt: firestore.Timestamp.fromDate(new Date())
       })
       let imageUrl = null;
       if(image){
         imageUrl = await uploadtoS3(image,newDoc.id)
       }
-      await firestore().collection('posts').doc(newDoc.id).update({
-        imageUrl:imageUrl,
+      await newDoc.update({
+        imageUrl:null,
         post_id: newDoc.id
       })
-      setPost_id(newDoc.id)
-      dispatch(addPost({ id: newDoc.id, content: text }));
-      setText('');
-      setImage(null);
       setTimeout(() => {
         navigation.navigate('Main');
         Alert.alert('Success!!', 'Post has been sent!!');
       }, 1000);
+      setPost_id(newDoc.id)
+      dispatch(addPost({ id: newDoc.id, content: text }));
+      setText('');
+      setImage(null);
     } catch (error) {
-      console.error("Error creating room:", error);
+      console.error("Error creating room:", error.message);
     }finally{
       setLoading(false);
     }
@@ -146,7 +146,7 @@ const PostScreen = () => {
         <TextInput
           style={styles.textArea}
           value={text}
-          onChangeText={setText}
+          onChangeText={(text) => setText(text)}
           numberOfLines={10}
           multiline={true}
           placeholder='Enter a post......'

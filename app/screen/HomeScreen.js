@@ -151,18 +151,6 @@ const styles = StyleSheet.create({
     fontSize:20,
     marginLeft:40
   },
-  updatecontainer:{
-    padding:10
-  },
-  updatetext:{
-    padding:10,
-    fontWeight:'bold',
-    color:'#ffffff',
-    fontSize:20
-  },
-  updatecard:{
-    padding:10
-  }
 })
 
 export default HomeScreen
