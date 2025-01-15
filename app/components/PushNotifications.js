@@ -67,11 +67,11 @@ export default function PushNotification(){
             const token = await registerForPushNotificationsAsync()
             if (token && user?.uid){
                 setExpoPushToken(token ?? '')
-                const docRef = firestore().collection('users').doc(user?.uid)
+                const docRef = firestore().collection('users-notifications-token').doc(user?.uid)
                 await docRef.update({
-                  expoToken:token
+                    id:user.uid,
+                    expoToken:token
                 })
-                console.log('expo token in firestore:',expoPushToken)
             }
         }catch(error){
          console.error(`expo token:${error}`)}

@@ -9,6 +9,7 @@ import ReplyComponent from './ReplyComponent';
 import firestore from '@react-native-firebase/firestore';
 import { useSelector } from 'react-redux';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { DocumentSnapshot } from '@react-native-firebase/app/lib/internal/web/firebaseFirestore';
 const CommentComponent = ({content,name,comment_id,post_id,count,date}) => {
     const [press,setIsPress] = useState(false)
     const [isloading,setLoading] = useState(false)
@@ -65,10 +66,10 @@ const CommentComponent = ({content,name,comment_id,post_id,count,date}) => {
           .doc(comment_id)
           .collection('replys')
           .orderBy('createdAt', 'desc')
-          const unsub = docRef.onSnapshot((documentSnapshot)=>{
+          const unsub = docRef.onSnapshot((querySnapshot)=>{
             let data = [];
-            documentSnapshot.forEach(doc => {
-              data.push({ ...doc.data(),id:doc.id });
+            querySnapshot.forEach(documentSnapshot => {
+              data.push({ ...documentSnapshot.data(),id:documentSnapshot.id });
             })
             setReply(data);
           })
@@ -95,7 +96,7 @@ const CommentComponent = ({content,name,comment_id,post_id,count,date}) => {
     <View style={styles.card}>
     <View style={styles.imageText}>
     <Image
-        style={{height:hp(4.3), aspectRatio:1, borderRadius:100}}
+        style={{height:hp(3.3), aspectRatio:1, borderRadius:100}}
         source={profileImage}
         placeholder={{blurhash}}/>
     <View>
@@ -150,8 +151,8 @@ const styles = StyleSheet.create({
         marginTop:5,
     },
     image:{
-      width:wp(30),
-      height:hp(30),
+      width:20,
+      height:20,
       borderRadius:100
     },
     imageText:{

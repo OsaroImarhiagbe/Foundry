@@ -62,7 +62,7 @@ const MessageScreen = () => {
 
 
   return (
-    <SafeAreaView style={styles.screen}>
+    <View style={styles.screen}>
       <ChatRoomHeader title='Message' onPress={handlePress} icon='keyboard-backspace' backgroundColor={color.button}/>
       <ScrollView
       style={{flex:1}}
@@ -82,7 +82,7 @@ const MessageScreen = () => {
        </View>
     </View>
       </ScrollView>
-  </SafeAreaView>
+  </View>
   )
 }
 

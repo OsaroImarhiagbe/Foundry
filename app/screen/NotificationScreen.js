@@ -23,19 +23,18 @@ const NotificationScreen = () => {
   }, [getNotifications]);
 
 
-  const getNotifications = useCallback(async () => {
+  const getNotifications = useCallback(() => {
     try{
-      const unsub = await firestore()
+      const unsub = firestore()
       .collection('users')
-      .doc(user?.userId)
+      .doc(user?.uid)
       .collection('notifications')
-      .where('notification_data','==','message')
-      .onSnapshot((documentSnapshot)=>{
+      .onSnapshot((querySnapshot)=>{
         let messageOnly = []
         let all = []
-        documentSnapshot.forEach((doc)=>{
-          all.push({...doc.data(),id:doc.id})
-          if (doc.data().notification_data == 'message'){
+        querySnapshot.forEach((documentSnapshot)=>{
+          all.push({...documentSnapshot.data(),id:documentSnapshot.id})
+          if (documentSnapshot.data().notification_data == 'message'){
             messageOnly.push({...doc.data()})
           }
         })
@@ -46,7 +45,7 @@ const NotificationScreen = () => {
     }catch(err){
       console.error('Error grabbing notifications',err)
     }
-  },[user?.userId])
+  },[user?.uid])
 
   useEffect(() => {
     if(!messageNotifications || !notification){
@@ -55,8 +54,8 @@ const NotificationScreen = () => {
       return
     }
     let unsub = () => {}
-    const getNotif = async () => {
-      unsub = await getNotifications()
+    const getNotif = () => {
+      unsub = getNotifications()
     }
 
     getNotif()
@@ -64,7 +63,7 @@ const NotificationScreen = () => {
       if(unsub) unsub()
     }
     
-  },[user.userId,getNotifications])
+  },[user.uid,getNotifications])
 
 
   const MessagesNotifications = () => (
@@ -113,7 +112,7 @@ const NotificationScreen = () => {
     
   );
   return (
-   <SafeAreaView style={styles.screen}>
+   <View style={styles.screen}>
     <View style={styles.headingContainer}>
     <Text style={styles.headingText}>Notifications</Text>
     </View>
@@ -156,7 +155,7 @@ const NotificationScreen = () => {
       />
     </Tab.Navigator>
   </View>
-   </SafeAreaView>
+   </View>
   )
 }
 const styles = StyleSheet.create({

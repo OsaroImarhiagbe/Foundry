@@ -225,6 +225,7 @@ const PostComponent = ({content,date,name,id,url,count,comment_count}) => {
     <SafeAreaView>
       <Modal
       animationType="slide"
+      transparent={true}
       visible={modalVisible}
       onRequestClose={() => {
         Alert.alert('Modal has been closed.');
