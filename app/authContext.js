@@ -2,19 +2,16 @@ import React,{ createContext, useEffect, useState, useContext} from 'react'
 import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {
-    GoogleSignin,
-  GoogleSigninButton,
-  statusCodes,
-  } from '@react-native-google-signin/google-signin';
+import {GoogleOneTapSignIn,GoogleSigninButton,statusCodes,} from '@react-native-google-signin/google-signin';
 export const AuthContext = createContext();
 
 export const AuthContextProvider = ({children}) => {
-
+r
     const [user, setUser] = useState(null)
     const [loading,setLoading] = useState(false)
     const [isAuthenticated, setIsAuthenticated] = useState(undefined)
 
+    GoogleOneTapSignIn.configure()
 
     useEffect(() =>{
         const getAuthState = async () => {
