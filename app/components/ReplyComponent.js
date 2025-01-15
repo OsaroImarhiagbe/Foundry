@@ -7,7 +7,7 @@ import { useAuth } from '../authContext';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import color from '../../config/color';
 import { useSelector } from 'react-redux';
-import firestore from 'react-native-firebase/firestore'
+import firestore from '@react-native-firebase/firestore'
 const ReplyComponent = ({name,content,post_id,comment_id,reply_id,count}) => {
 
     const [press,setIsPress] = useState(false)

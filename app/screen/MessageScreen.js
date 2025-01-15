@@ -1,7 +1,7 @@
 import React, {useState, useEffect,lazy,Suspense,useCallback} from 'react'
 import {View, Text, StyleSheet, Platform, StatusBar,ActivityIndicator,ScrollView,RefreshControl,SafeAreaView} from 'react-native'
 import color from '../../config/color';
-import firestore from 'react-native-firebase/firestore'
+import firestore from '@react-native-firebase/firestore'
 import { useAuth } from '../authContext';
 import ChatRoomHeader from '../components/ChatRoomHeader';
 import { useNavigation } from '@react-navigation/native';

@@ -72,7 +72,7 @@ const LoginScreen = ({navigation}) => {
            <View style={styles.welcome}>
             <View style={styles.welcomeHcontainer}>
             <Text style={styles.welcomeText}>Welcome to </Text>
-            <Text style={styles.welcomeStext}>DevGuide</Text>
+            <Text style={styles.welcomeStext}>DevGuiide</Text>
             </View>
             <View style={styles.welcomeLcontainer}>
             <Text style={styles.welcomeLtext}>The Most Popular Social Media App For All.</Text>

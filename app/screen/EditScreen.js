@@ -4,7 +4,7 @@ import ChatRoomHeader from '../components/ChatRoomHeader';
 import color from '../../config/color';
 import { useNavigation } from '@react-navigation/native';
 import { useAuth } from '../authContext';
-import firestore from 'react-native-firebase/firestore'
+import firestore from '@react-native-firebase/firestore'
 import { Image } from 'expo-image';
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import { blurhash } from '../../utils/index';

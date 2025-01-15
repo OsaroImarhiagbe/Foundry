@@ -4,7 +4,7 @@ import color from '../../config/color';
 import Entypo from 'react-native-vector-icons/Entypo';
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 import { useNavigation } from '@react-navigation/native';
-import firestore from 'react-native-firebase/firestore'
+import firestore from '@react-native-firebase/firestore'
 import { useAuth } from '../authContext';
 import { Image } from 'expo-image';
 import { blurhash } from '../../utils';

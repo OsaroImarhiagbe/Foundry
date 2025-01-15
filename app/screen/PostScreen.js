@@ -10,7 +10,7 @@ import { useNavigation } from '@react-navigation/native';
 import * as ImagePicker from 'expo-image-picker';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import axios from 'axios'
-import firestore from 'react-native-firebase/firestore'
+import firestore from '@react-native-firebase/firestore'
 import color from '../../config/color';
 import {DJANGO_MEDIA_URL} from '@env'
 const PostScreen = () => {

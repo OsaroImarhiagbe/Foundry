@@ -92,6 +92,7 @@ const AuthNavigation = () => {
       const getAuthState = async () => {
           const currentUser = await AsyncStorage.getItem('authUser')
           if(currentUser !== null){
+              checkifOnboard()
               setIsAuthenticated(true)
               setUser(currentUser)
               updateUserData(currentUser.uid)
@@ -105,11 +106,6 @@ const AuthNavigation = () => {
       }
       getAuthState()
   },[])
-
-  useEffect(() => {
-    checkifOnboard()
-  },[])
-
 
   const  checkifOnboard = async () => {
       const onboardkey = await AsyncStorage.getItem('onboarded')
@@ -129,10 +125,19 @@ const AuthNavigation = () => {
     if(showOnboarding==null){
       return null
     }
-    if(showOnboarding){
+    if(!isAuthenticated || showOnboarding){
       return (
           <Stack.Navigator
-          >    
+          initialRouteName={showOnboarding ? 'Drawer' : 'Login'}
+          >
+             <Stack.Screen
+            name='Drawer'
+            component={DrawerNavigationWrapper}
+            options={{
+              headerShown:false,
+              gestureEnabled:false,
+              animation:'fade_from_bottom'
+            }}/>
             <Stack.Screen
               name="Login"
               component={LoginScreen}
@@ -156,14 +161,6 @@ const AuthNavigation = () => {
             component={OnboardingScreenWrapper}
             options={{
               headerShown:false,
-            }}/>
-            <Stack.Screen
-            name='Drawer'
-            component={DrawerNavigationWrapper}
-            options={{
-              headerShown:false,
-              gestureEnabled:false,
-              animation:'fade_from_bottom'
             }}/>
               <Stack.Screen
             name="ProjectScreen"
@@ -211,7 +208,7 @@ const AuthNavigation = () => {
         )
     }else{
       return (
-        <Stack.Navigator initialRouteName='Register'>    
+        <Stack.Navigator initialRouteName='Login'>    
           <Stack.Screen
             name="Login"
             component={LoginScreen}

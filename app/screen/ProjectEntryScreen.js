@@ -4,7 +4,7 @@ import color from '../../config/color'
 import Button from '../components/Button';
 import {useAuth} from '../authContext';
 import { blurhash } from '../../utils';
-import firestore from 'react-native-firebase/firestore'
+import firestore from '@react-native-firebase/firestore'
 import axios from 'axios';
 import * as ImagePicker from 'expo-image-picker';
 import {DJANGO_PROJECT_URL} from '@env'

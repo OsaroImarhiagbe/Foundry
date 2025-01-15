@@ -13,6 +13,7 @@ import ChatRoomHeader from '../components/ChatRoomHeader';
 import { useNavigation } from '@react-navigation/native';
 import { useDispatch } from 'react-redux';
 import { addID } from '../features/Message/messageidSlice';
+import firestore from '@react-native-firebase/firestore'
 import axios from 'axios'
 import {EXPOPUSHURL} from "@env"
 const ChatScreen = () => {

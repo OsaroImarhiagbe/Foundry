@@ -6,7 +6,7 @@ import { Image } from 'expo-image';
 import EvilIcons from 'react-native-vector-icons/EvilIcons'
 import { useAuth } from '../authContext';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import firestore from 'react-native-firebase/firestore';
+import firestore from '@react-native-firebase/firestore';
 import { useSelector} from 'react-redux';
 import CommentComponent from './CommentComponent';
 import ReplyComponent from './ReplyComponent';
@@ -21,10 +21,9 @@ const PostComponent = ({content,date,name,id,url,count,comment_count}) => {
     const [modalVisible, setModalVisible] = useState(false);
     const [comments, setComment] = useState([])
     const [isReply,setReply] = useState(false)
-    con
     const [text,setText] = useState('')
-    const dispatch = useDispatch();
-    const profileImage = useSelector((state) => state.user.profileimg)
+    //const dispatch = useDispatch();
+    //const profileImage = useSelector((state) => state.user.profileimg)
     const {user} = useAuth();
 
     useEffect(() => {
@@ -159,7 +158,7 @@ const PostComponent = ({content,date,name,id,url,count,comment_count}) => {
             comment_count:commentCount + 1
           })
         })
-        dispatch(addComment({id:newDoc.id,postId:id,content:text}))
+        //dispatch(addComment({id:newDoc.id,postId:id,content:text}))
         setText('')
       }catch(e){
         console.error('Error with sending comments:',e)

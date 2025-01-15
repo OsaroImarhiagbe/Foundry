@@ -3,7 +3,7 @@ import {View,Text,StyleSheet,Keyboard, TouchableWithoutFeedback,SafeAreaView} fr
 import color from '../../config/color';
 import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
 import 'react-native-get-random-values';
-import firestore from 'react-native-firebase/firestore'
+import firestore from '@react-native-firebase/firestore'
 import { useAuth } from '../authContext';
 import {GoogleAPIKey} from "@env"
 const LocationScreen = () => {

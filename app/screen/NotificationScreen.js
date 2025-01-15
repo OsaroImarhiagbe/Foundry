@@ -1,6 +1,6 @@
 import React,{useState,useEffect,lazy,Suspense,useCallback} from 'react'
 import {View,Text, StyleSheet,FlatList,ScrollView,ActivityIndicator,RefreshControl,SafeAreaView} from 'react-native'
-import firestore from 'react-native-firebase/firestore'
+import firestore from '@react-native-firebase/firestore'
 import { useAuth } from '../authContext';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import color from '../../config/color';

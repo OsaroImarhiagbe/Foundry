@@ -6,7 +6,7 @@ const AppTextInput = ({placeholder,backgroundColor,borderColor,secureTextEntry,i
   return (
     
   
-    <View style={[styles.Container,{backgroundColor:backgroundColor,borderColor:borderColor}]}>
+    <View style={{flexDirection:'row', justifyContent:'space-between',borderColor:borderColor,borderWidth:1,alignItems:'center', borderRadius: 10,marginVertical:10}}>
       <TextInput
       value={values}
       secureTextEntry={secureTextEntry}
@@ -20,7 +20,7 @@ const AppTextInput = ({placeholder,backgroundColor,borderColor,secureTextEntry,i
       onFocus={onFocus}
       />  
       <View style={styles.inputContainer}>
-        {icon && <MaterialCommunityIcons name={icon} size={20} style={styles.icon} color={iconcolor}/>}
+        {icon && <MaterialCommunityIcons name={icon} size={25} style={styles.icon} color={iconcolor}/>}
        </View>
       </View>
       
@@ -31,16 +31,13 @@ const AppTextInput = ({placeholder,backgroundColor,borderColor,secureTextEntry,i
 
 const styles = StyleSheet.create({
   Container: {
-    borderRadius: 5,
-    flexDirection:'row',
     padding: 10,
-    height:60,
     margin:12,
-    justifyContent:'space-between',
-    borderWidth:1,
+    height:40,
     alignItems:'center',
-    color:'#ffffff'
-    
+    color:'#ffffff',
+    borderColor:'#fff',
+    width:'80%' 
   },
   icon:{
     margin:10

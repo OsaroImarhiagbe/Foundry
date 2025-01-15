@@ -6,7 +6,7 @@ import { Image } from 'expo-image';
 import { useAuth } from '../authContext';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import ReplyComponent from './ReplyComponent';
-import firestore from 'react-native-firebase/firestore';
+import firestore from '@react-native-firebase/firestore';
 import { useSelector } from 'react-redux';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 const CommentComponent = ({content,name,comment_id,post_id,count,date}) => {

@@ -4,7 +4,7 @@ import color from '../../config/color';
 import ChatRoomHeader from '../components/ChatRoomHeader';
 import { useNavigation } from '@react-navigation/native';
 import Button from '../components/Button';
-import firestore from 'react-native-firebase/firestore'
+import firestore from '@react-native-firebase/firestore'
 import { useAuth } from '../authContext';
 
 const EditJobScreen = () => {

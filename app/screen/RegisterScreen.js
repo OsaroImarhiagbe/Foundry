@@ -1,5 +1,5 @@
 import React, {useState} from 'react'
-import {View, Text,StyleSheet,Platform,StatusBar, TouchableOpacity,Alert, ActivityIndicator, Image} from 'react-native';
+import {View, Text,StyleSheet,Platform,StatusBar, TouchableOpacity,Alert, ActivityIndicator, Image,SafeAreaView} from 'react-native';
 import { Formik} from 'formik';
 import AppTextInput from '../components/AppTextInput';
 import color from '../../config/color';
@@ -82,7 +82,7 @@ const RegisterScreen = () => {
                 >
                     {({handleChange, handleSubmit, values, setFieldTouched,touched, errors, isValid}) => (
                         <>
-                            <View>
+                            <View style={{}}>
                             <AppTextInput
                                     icon='account'
                                     placeholder='Username'
@@ -170,7 +170,7 @@ const RegisterScreen = () => {
 const styles = StyleSheet.create({
     backImage:{
         width: '100%',
-        height: 340,
+        height: 370,
         position:'absolute',
         top:0,
         resizedMode: 'cover',
@@ -191,7 +191,6 @@ const styles = StyleSheet.create({
         backgroundColor:'#1f1f1f',
         borderTopLeftRadius: 60,
         padding:20
-        
   } , 
 
     buttoncontainer:{
