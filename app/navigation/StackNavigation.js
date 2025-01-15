@@ -2,8 +2,7 @@ import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { lazy,Suspense } from 'react';
 import { ActivityIndicator } from 'react-native';
-import HomeScreen from '../screen/HomeScreen.js'
-// const HomeScreen = lazy(() => import('../screen/HomeScreen.js'))
+const HomeScreen = lazy(() => import('../screen/HomeScreen'))
 const ChatScreen = lazy(() => import('../screen/ChatScreen'))
 const MessageScreen = lazy(() => import('../screen/MessageScreen'))
 const AccountScreen = lazy(() => import('../screen/AccountScreen'))
@@ -56,13 +55,13 @@ const PostScreenWrapper = (props) => {
 
 }
 
-// const HomeScreenWrapper = (props) => {
+const HomeScreenWrapper = (props) => {
   
-//   return(
-//     <Suspense fallback={<ActivityIndicator size='small' color='"#000'/>}>
-//     <HomeScreen {...props}/>
-//   </Suspense>
-//   )}
+  return(
+    <Suspense fallback={<ActivityIndicator size='small' color='"#000'/>}>
+    <HomeScreen {...props}/>
+  </Suspense>
+  )}
 
 const EditScreenWrapper = (props) => {
   return (
@@ -140,7 +139,7 @@ const StackNavigation = () => {
     initialRouteName='Main'>
       <Stack.Screen
         name='Main'
-        component={HomeScreen}
+        component={HomeScreenWrapper}
         options={{
         headerShown: false, 
         gestureEnabled:false,

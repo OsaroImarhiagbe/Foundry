@@ -60,9 +60,9 @@ export const AuthContextProvider = ({children}) => {
         }
     }
 
-    const googleSignIn = () => {
+    // const googleSignIn = () => {
         
-    }
+    // }
 
     const logout = async () => {
         try{
