@@ -35,8 +35,8 @@ const SearchScreen = () => {
     try{
       let queryRef = firestore()
       .collection('users')
-      .where('username', '>=', searchQuery)
-      .where('username', '<=', searchQuery + '\uf8ff')
+      .where('name', '>=', searchQuery)
+      .where('name', '<=', searchQuery + '\uf8ff')
       if(skills_array.length > 0){
         queryRef = queryRef.where('skills','array-contains-any',skills_array)
       }

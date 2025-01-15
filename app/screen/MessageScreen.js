@@ -43,9 +43,9 @@ const MessageScreen = () => {
     const unsub = firestore()
     .collection('sent-message-id')
     .where('userId','!=',user.userId)
-    .onSnapshot((snapShot) =>{
+    .onSnapshot((documentSnapshot) =>{
       let data = []
-      snapShot.forEach(doc => {
+      documentSnapshot.forEach(doc => {
         data.push({...doc.data()})
       })
       setUsers(data)
