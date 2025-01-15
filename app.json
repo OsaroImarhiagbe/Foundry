@@ -57,6 +57,9 @@
     "runtimeVersion": "1.0.0",
     "updates": {
       "url": "https://u.expo.dev/3a17d314-84d0-49f9-8373-f3eee01578a5"
+    },
+    "android": {
+      "package": "com.devguides.app"
     }
   }
 }
