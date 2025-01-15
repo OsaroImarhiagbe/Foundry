@@ -13,7 +13,7 @@ const StackNavigation = lazy(() => import('./StackNavigation'))
 const StackNavigationwrapper = (props) =>{
   return (
     <Suspense fallback={<ActivityIndicator size='small' color='"#000'/>}>
-    <StackNavigation {...props}/>
+    <StackNavigation/>
   </Suspense>
   )}
 
@@ -23,7 +23,7 @@ const SearchScreenWrapper = (props) => {
   
     return(
       <Suspense fallback={<ActivityIndicator size='small' color='"#000'/>}>
-        <SearchScreen  {...props}/>
+        <SearchScreen/>
       </Suspense>
     )}
 
@@ -31,7 +31,7 @@ const NotificationScreenWrapper = (props) => {
   
       return(
         <Suspense fallback={<ActivityIndicator size='small' color='"#000'/>}>
-        <NotificationScreen  {...props}/>
+        <NotificationScreen/>
       </Suspense>
       )}
 
