@@ -8,8 +8,7 @@ import firestore from '@react-native-firebase/firestore'
 import { useDispatch} from 'react-redux';
 import { addId } from '../features/user/userSlice';
 import PushNotification from '../components/PushNotifications.js';
-import PostComponent from '../components/PostComponent.js';
-// const PostComponent = lazy(() => import('../components/PostComponent.js'))
+const PostComponent = lazy(() => import('../components/PostComponent.js'))
 
 
 
@@ -24,38 +23,45 @@ const HomeScreen = () => {
   const [post, setPost] = useState([])
   const [mount, setMount] = useState(false)
 
+  console.log('currentuser:',user)
   
 
   useEffect(() => { 
     setMount(true)
-    dispatch(addId({currentuserID:user.userId}))
-    const timer = setTimeout(() => {
-      setMount(false)
-      fetchPosts();
-    },1000)
-      
-    return () => clearTimeout(timer)
+    //dispatch(addId({currentuserID:user.userId}))
+    const unsub = firestore().collection('posts').orderBy('createdAt', 'desc')
+    .onSnapshot(querySnapShot =>{
+      let data = [];
+      querySnapShot.forEach(documentSnapShot => {
+        data.push({ ...documentSnapShot.data(),id:documentSnapShot.id });
+    } )
+    setPost(data);
+  });
+  setMount(false)
+
+  return () => unsub()
   }, []); 
 
 
-  const onRefresh = useCallback(async () => {
+  const onRefresh = useCallback(() => {
     setRefreshing(true);
-    await fetchPosts();
+    fetchPosts();
     setRefreshing(false);
   }, [memoPost]);
   
 
   const memoPost = useMemo(() => {return post},[post])
-  const fetchPosts = async () => { 
+  const fetchPosts = () => { 
     try {
-      await firestore().collection('posts').orderBy('createdAt', 'desc')
-        .then(querySnapShot =>{
+      const unsub = firestore().collection('posts').orderBy('createdAt', 'desc')
+        .onSnapshot(querySnapShot =>{
           let data = [];
           querySnapShot.forEach(documentSnapShot => {
             data.push({ ...documentSnapShot.data(),id:documentSnapShot.id });
         } )
         setPost([...data]);
       });
+      return unsub
     }  catch (e) {
     console.error(`Error post can not be found: ${e}`);
   } 
@@ -74,7 +80,7 @@ const HomeScreen = () => {
         <View>
           <ChatRoomHeader
           onPress={handlePress}
-          title={'Welcome back ' + user?.username}
+          title={'Welcome back ' + user?.email}
           icon='menu'
           icon2='new-message'
           onPress2={handleMessage}
