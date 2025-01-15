@@ -8,7 +8,8 @@ import firestore from '@react-native-firebase/firestore'
 import { useDispatch} from 'react-redux';
 import { addId } from '../features/user/userSlice';
 import PushNotification from '../components/PushNotifications.js';
-const PostComponent = lazy(() => import('../components/PostComponent.js'))
+import PostComponent from '../components/PostComponent.js';
+// const PostComponent = lazy(() => import('../components/PostComponent.js'))
 
 
 
@@ -66,7 +67,7 @@ const HomeScreen = () => {
     navigation.navigate('Message')
   }
   return (
-    <SafeAreaView
+    <View
     style={styles.screen}
     >
       <PushNotification/>
@@ -96,7 +97,7 @@ const HomeScreen = () => {
       </Suspense>}
     keyExtractor={(item)=> item.id}
     /> } 
-    </SafeAreaView>
+    </View>
   )
 }
 

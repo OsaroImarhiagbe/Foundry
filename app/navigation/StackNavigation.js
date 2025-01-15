@@ -1,10 +1,9 @@
 import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { useNavigation } from '@react-navigation/native';
 import { lazy,Suspense } from 'react';
 import { ActivityIndicator } from 'react-native';
-
-const HomeScreen = lazy(() => import('../screen/HomeScreen'))
+import HomeScreen from '../screen/HomeScreen.js'
+// const HomeScreen = lazy(() => import('../screen/HomeScreen.js'))
 const ChatScreen = lazy(() => import('../screen/ChatScreen'))
 const MessageScreen = lazy(() => import('../screen/MessageScreen'))
 const AccountScreen = lazy(() => import('../screen/AccountScreen'))
@@ -57,13 +56,13 @@ const PostScreenWrapper = (props) => {
 
 }
 
-const HomeScreenWrapper = (props) => {
+// const HomeScreenWrapper = (props) => {
   
-  return(
-    <Suspense fallback={<ActivityIndicator size='small' color='"#000'/>}>
-    <HomeScreen/>
-  </Suspense>
-  )}
+//   return(
+//     <Suspense fallback={<ActivityIndicator size='small' color='"#000'/>}>
+//     <HomeScreen {...props}/>
+//   </Suspense>
+//   )}
 
 const EditScreenWrapper = (props) => {
   return (
@@ -131,7 +130,7 @@ const Stack = createNativeStackNavigator();
 
 const StackNavigation = () => {
 
-  const navigation = useNavigation();
+ 
 
   return (
     <Stack.Navigator
@@ -141,9 +140,9 @@ const StackNavigation = () => {
     initialRouteName='Main'>
       <Stack.Screen
         name='Main'
-        component={HomeScreenWrapper}
+        component={HomeScreen}
         options={{
-          headerShown: false, 
+        headerShown: false, 
         gestureEnabled:false,
         unmountOnBlur: true,}}
       />

@@ -14,7 +14,6 @@ import * as Notifications from 'expo-notifications';
 import * as TaskManager from 'expo-task-manager';
 import firestore from '@react-native-firebase/firestore';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import PostComponent from './app/components/PostComponent';
 export default function App() {
   const [isloading,setLoading] = useState(true)
   const [isAuthenticated, setIsAuthenticated] = useState(undefined)
