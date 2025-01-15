@@ -92,7 +92,6 @@ const AuthNavigation = () => {
       const getAuthState = async () => {
           const currentUser = await AsyncStorage.getItem('authUser')
           if(currentUser !== null){
-              checkifOnboard()
               setIsAuthenticated(true)
               setUser(currentUser)
               updateUserData(currentUser.uid)
@@ -105,6 +104,10 @@ const AuthNavigation = () => {
           }
       }
       getAuthState()
+  },[])
+
+  useEffect(()=>{
+    checkifOnboard()
   },[])
 
   const  checkifOnboard = async () => {
@@ -125,10 +128,10 @@ const AuthNavigation = () => {
     if(showOnboarding==null){
       return null
     }
-    if(!isAuthenticated || showOnboarding){
+    if(isAuthenticated && showOnboarding){
       return (
           <Stack.Navigator
-          initialRouteName={showOnboarding ? 'Drawer' : 'Login'}
+          initialRouteName='Drawer'
           >
              <Stack.Screen
             name='Drawer'

@@ -80,7 +80,7 @@ const HomeScreen = () => {
         <View>
           <ChatRoomHeader
           onPress={handlePress}
-          title={'Welcome back ' + user?.email}
+          title='Welcome back'
           icon='menu'
           icon2='new-message'
           onPress2={handleMessage}

@@ -19,7 +19,8 @@ export const AuthContextProvider = ({children}) => {
             if(currentUser !== null){
                 setIsAuthenticated(true)
                 setUser(currentUser)
-                updateUserData(currentUser.uid)
+                await updateUserData(currentUser.uid)
+                await AsyncStorage.clear()
             }else{
                 setIsAuthenticated(false);
                 setUser(null)
@@ -36,7 +37,6 @@ export const AuthContextProvider = ({children}) => {
                         await updateUserData(user.uid);
                         const parseData = JSON.stringify(user)
                         console.log('parseData:',parseData)
-                        await AsyncStorage.setItem('authUser',parseData)
                     }else{
                         setIsAuthenticated(false);
                         setUser(null)
@@ -51,6 +51,7 @@ export const AuthContextProvider = ({children}) => {
         setLoading(true)
         try{
             const response = await auth().signInWithEmailAndPassword(email,pasword)
+            await AsyncStorage.setItem('authUser',response?.user?.uid)
             setLoading(false)
             return {success:true}
         }catch(error){
@@ -98,7 +99,7 @@ export const AuthContextProvider = ({children}) => {
         const docSnap = await firestore().collection('users').doc(userId).get()
         if(docSnap.exists()){
            let data = docSnap.data()
-           setUser({...user, username: data.username, userId:data.userId})
+           setUser((prev)=>({...prev, username: data.username, userId:data.userId}))
         }
     }
 
