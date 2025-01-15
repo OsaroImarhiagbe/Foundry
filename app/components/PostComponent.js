@@ -1,5 +1,5 @@
-import React,{useState,useEffect} from 'react'
-import {View,StyleSheet,Text,TouchableOpacity,TouchableHighlight,Modal, SafeAreaView,KeyboardAvoidingView,Platform,ScrollView,TextInput,Pressable} from 'react-native'
+import React,{useState,useEffect,lazy, Suspense} from 'react'
+import {View,StyleSheet,Text,TouchableOpacity,TouchableHighlight,Modal, SafeAreaView,KeyboardAvoidingView,Platform,ScrollView,TextInput,Pressable,ActivityIndicator} from 'react-native'
 import { blurhash } from '../../utils/index'
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import { Image } from 'expo-image';
@@ -51,7 +51,7 @@ const PostComponent = ({content,date,name,id,url,count,comment_count}) => {
         }
     }
     grabComments()
-    },[comments])
+    },[id])
 
     useEffect(() => {
       const relpyStatus = async () =>{
@@ -64,7 +64,7 @@ const PostComponent = ({content,date,name,id,url,count,comment_count}) => {
       }
 
       relpyStatus()
-    },[comments])
+    },[id])
 
   
     const handleLike = async () => {
@@ -143,9 +143,8 @@ const PostComponent = ({content,date,name,id,url,count,comment_count}) => {
         const docRef = await firestore().collection('posts').doc(id).collection('comments')
         const newDoc = await docRef.add({
           parentId:null,
-          name:user?.username,
           content:text,
-          createdAt: firestore.FieldValue.serverTimestamp()
+          createdAt: firestore.Timestamp.fromDate(new Date())
         })
         await newDoc.update({
           id:newDoc.id

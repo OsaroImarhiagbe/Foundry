@@ -93,7 +93,6 @@ const CommentComponent = ({content,name,comment_id,post_id,count,date}) => {
 
   return (
     <View style={styles.card}>
-    <View style={styles.postContainer}>
     <View style={styles.imageText}>
     <Image
         style={{height:hp(4.3), aspectRatio:1, borderRadius:100}}
@@ -105,9 +104,11 @@ const CommentComponent = ({content,name,comment_id,post_id,count,date}) => {
     </View>
     </View>
     </View>
-      <Text style={styles.postText}>{content}
+    <View style={{paddingLeft:5}}>
+    <Text style={styles.postText}>{content}
       </Text>
       <Text style={styles.postDate}>{date}</Text>
+    </View>
       <View style={styles.reactionContainer}>
     <TouchableHighlight
                  onShowUnderlay={() => setIsPress(true)}
@@ -127,18 +128,17 @@ const CommentComponent = ({content,name,comment_id,post_id,count,date}) => {
                 <Text style={styles.reactionText}>{reply.length}</Text>
             </View>
         </TouchableOpacity>
-      </View>
-      <TouchableOpacity onPress={toggleReply}>
+        <TouchableOpacity onPress={toggleReply}>
         <View style={styles.replycontainer}>
         <View style={{borderBottomWidth:0.5,width:25,borderColor:'#8a8a8a '}}/>
         <Text style={styles.replies}>
-              view replies</Text>
+              Reply</Text>
         </View>
       </TouchableOpacity>
+      </View>
       { showReply && reply.map((replies) => {
         return <ReplyComponent key={replies.id} reply_id={replies.id} name={replies.name} content={replies.content} post_id={post_id} comment_id={comment_id} count={replies.like_count}/>
       })}
-    </View>
   </View>
   )
 }
@@ -146,16 +146,17 @@ const CommentComponent = ({content,name,comment_id,post_id,count,date}) => {
 
 const styles = StyleSheet.create({
     card:{
-        padding:10,
-      },
-      image:{
-        width:30,
-        height:30,
-        borderRadius:100
+        padding:5,
+        marginTop:5,
+    },
+    image:{
+      width:wp(30),
+      height:hp(30),
+      borderRadius:100
     },
     imageText:{
       flexDirection:'row',
-      marginBottom:20
+      marginBottom:10
       
     }
     ,
@@ -163,7 +164,6 @@ const styles = StyleSheet.create({
       fontFamily:'Helvetica-light',
       color:'#fff',
       marginLeft:50
-    
     }
     ,
     userTime:{
@@ -203,14 +203,12 @@ const styles = StyleSheet.create({
       fontSize:9,
       color:'#8a8a8a',
       fontFamily:'Helvetica-light',
-      
-
     },
 
     reactionContainer:{
       flexDirection:'row',
       justifyContent:'space-around',
-      marginTop:20
+      marginTop:2
 
     },
     reactionIcon:{
@@ -227,15 +225,16 @@ const styles = StyleSheet.create({
       textAlign:'center',
     },
     replies:{
-      fontSize:10,
-      marginLeft:20,
+      fontSize:12,
+      marginLeft:10,
       textAlign:'center'
     },
     replycontainer:{
       marginTop:5,
       flexDirection:'row',
-      justifyContent:'center'
-        }
+      justifyContent:'center',
+      alignItems:'center'
+      }
 })
 
 export default CommentComponent
