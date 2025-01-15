@@ -2,6 +2,11 @@ import React,{ createContext, useEffect, useState, useContext} from 'react'
 import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import {
+    GoogleSignin,
+  GoogleSigninButton,
+  statusCodes,
+  } from '@react-native-google-signin/google-signin';
 export const AuthContext = createContext();
 
 export const AuthContextProvider = ({children}) => {
@@ -56,6 +61,10 @@ export const AuthContextProvider = ({children}) => {
             setLoading(false)
             console.error(`Error:${error}`)
         }
+    }
+
+    const googleSignIn = () => {
+        
     }
 
     const logout = async () => {

@@ -8,7 +8,9 @@ import { Formik} from 'formik';
 import { useAuth } from '../authContext'
 import CustomKeyboardView from '../components/CustomKeyboardView'
 import { StatusBar } from 'expo-status-bar';
-
+import {GoogleSigninButton,
+statusCodes,
+} from '@react-native-google-signin/google-signin';
 
 
 
@@ -135,6 +137,11 @@ const LoginScreen = ({navigation}) => {
            )}
            </Formik>
            </SafeAreaView>
+           <View style={{marginVertical:30,flexDirection:'row',justifyContent:'space-between',padding:30}}>
+            <GoogleSigninButton/>
+            <Text>hi</Text>
+            <Text>hi</Text>
+            </View>
            <StatusBar style="light" />
             </SafeAreaView>
     </CustomKeyboardView>
@@ -154,7 +161,6 @@ const styles = StyleSheet.create({
     ,
     welcome:{
         padding:5,
-       
     },
   
     welcomeText:{
@@ -193,7 +199,7 @@ const styles = StyleSheet.create({
         flex:1,
     },
     LoginContainer:{
-        padding:30,
+        padding:20,
         marginTop:10,
     },
     logo:{
@@ -204,8 +210,8 @@ const styles = StyleSheet.create({
         marginBottom:20,
     },
     UserContainer:{
-        marginTop:30,
-        padding:20
+        marginTop:20,
+        padding:10
     },
     textContainer:{
         marginTop:15,
