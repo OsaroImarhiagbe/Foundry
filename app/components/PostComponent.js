@@ -22,15 +22,15 @@ const PostComponent = ({content,date,name,id,url,count,comment_count}) => {
     const [comments, setComment] = useState([])
     const [isReply,setReply] = useState(false)
     const [text,setText] = useState('')
-    //const dispatch = useDispatch();
-    //const profileImage = useSelector((state) => state.user.profileimg)
+    const dispatch = useDispatch();
+    const profileImage = useSelector((state) => state.user.profileimg)
     const {user} = useAuth();
 
     useEffect(() => {
       setLoading(true)
-      const grabComments = async () => {
+      const grabComments = () => {
         if(id){
-          const unsub = await firestore()
+          const unsub = firestore()
           .collection('posts')
           .doc(id)
           .collection('comments')
@@ -158,7 +158,7 @@ const PostComponent = ({content,date,name,id,url,count,comment_count}) => {
             comment_count:commentCount + 1
           })
         })
-        //dispatch(addComment({id:newDoc.id,postId:id,content:text}))
+        dispatch(addComment({id:newDoc.id,postId:id,content:text}))
         setText('')
       }catch(e){
         console.error('Error with sending comments:',e)

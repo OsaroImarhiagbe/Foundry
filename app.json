@@ -30,6 +30,7 @@
     "plugins": [
       [
         "expo-notifications",
+        "@react-native-google-signin/google-signin",
         {
           "icon": "./app/assets/images/icon.png",
           "color": "#ffffff",
