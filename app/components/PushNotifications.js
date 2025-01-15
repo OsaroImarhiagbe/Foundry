@@ -65,10 +65,10 @@ export default function PushNotification(){
     const getToken = async () => {
         try{
             const token = await registerForPushNotificationsAsync()
-            if (token && user?.userId){
+            if (token && user?.uid){
                 setExpoPushToken(token ?? '')
-                const docRef = doc(db,'users',user?.userId)
-                await updateDoc(docRef,{
+                const docRef = firestore().collection('users').doc(user?.uid)
+                await docRef.update({
                   expoToken:token
                 })
                 console.log('expo token in firestore:',expoPushToken)
@@ -89,12 +89,12 @@ export default function PushNotification(){
       const message = notification.request.content.body;
       const title = notification.request.content.title;
       const data = notification.request.content.data
-      const docRef = doc(db, 'users', user?.userId);
-      const notificationRef = collection(docRef, 'notifications');
-      await addDoc(notificationRef, {
+      const docRef = firestore().collection('users').doc(user?.uid);
+      const notificationRef = docRef.collection('notifications');
+      await notificationRef.add({
         title: title,
         body: message,
-        createdAt: Timestamp.fromDate(new Date()),
+        createdAt: firestore.Timestamp.fromDate(new Date()),
         notification_data:data,
       });
     }
