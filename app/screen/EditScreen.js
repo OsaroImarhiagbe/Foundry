@@ -221,8 +221,8 @@ const EditScreen = () => {
                   {header}
                         </Text>
                 {items.map(({id,icon,nav,name,type,screen})=>(
-                     <TouchableOpacity onPress={()=>navigation.navigate(screen)}>
-                      <View key={icon} style={{ marginTop: 30, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+                     <TouchableOpacity key={id} onPress={()=>navigation.navigate(screen)}>
+                      <View style={{ marginTop: 30, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
                       <View style={{ backgroundColor: '#3b3b3b', borderRadius: 5, width: 30, padding: 5 }}>
                           <View style={{ alignItems: 'center' }}>
                           <MaterialIcons name={icon} size={15} color="#ffffff" />

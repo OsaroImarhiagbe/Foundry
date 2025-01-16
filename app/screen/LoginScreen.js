@@ -8,15 +8,15 @@ import { Formik} from 'formik';
 import { useAuth } from '../authContext'
 import CustomKeyboardView from '../components/CustomKeyboardView'
 import { StatusBar } from 'expo-status-bar';
-// import {GoogleSigninButton,
-// statusCodes,
-// } from '@react-native-google-signin/google-signin';
+import {GoogleSigninButton,
+statusCodes,
+} from '@react-native-google-signin/google-signin';
 
 
 
 const LoginScreen = ({navigation}) => {
     const [isLoading, setLoading] = useState(false)
-    const { login } = useAuth()
+    const { login,googleSignIn } = useAuth()
     const [focus,setFocus] = useState('')
     
     
@@ -58,6 +58,11 @@ const LoginScreen = ({navigation}) => {
             email:'',
             password:''
         }
+
+
+    const handleGoogelIn = async () =>{
+        await googleSignIn()
+    }
       
 
 
@@ -137,10 +142,23 @@ const LoginScreen = ({navigation}) => {
            )}
            </Formik>
            </SafeAreaView>
-           <View style={{marginVertical:30,flexDirection:'row',justifyContent:'space-between',padding:30}}>
-            <Text>hi</Text>
-            <Text>hi</Text>
-            <Text>hi</Text>
+           <View style={{justifyContent:'center',alignItems:'center',paddingTop:50}}>
+           <Text style={{fontFamily:color.textFont,textAlign:'center',color:color.grey,fontSize:20}}>Login with Social</Text>
+           </View>
+           <View style={{marginVertical:10,flexDirection:'row',justifyContent:'space-between',padding:30}}>
+            <GoogleSigninButton
+            style={{borderRadius:20}} 
+            color={GoogleSigninButton.Color.Light}
+            size={GoogleSigninButton.Size.Icon}
+
+            />
+            <GoogleSigninButton
+            onPress={handleGoogelIn}
+            color={GoogleSigninButton.Color.Light}
+            size={GoogleSigninButton.Size.Icon}/>
+           <GoogleSigninButton
+            color={GoogleSigninButton.Color.Light}
+            size={GoogleSigninButton.Size.Icon}/>
             </View>
            <StatusBar style="light" />
             </SafeAreaView>
