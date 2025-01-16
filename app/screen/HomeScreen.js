@@ -32,7 +32,7 @@ const HomeScreen = () => {
     const timer = setTimeout(() => {
       setMount(false)
       fetchPosts();
-    },1000)
+    },3000)
       
     return () => clearTimeout(timer)
   }, []); 

@@ -2,7 +2,7 @@ import React,{ createContext, useEffect, useState, useContext} from 'react'
 import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {GoogleOneTapSignIn,GoogleSigninButton,statusCodes,} from '@react-native-google-signin/google-signin';
+import {GoogleOneTapSignIn,statusCodes,} from '@react-native-google-signin/google-signin';
 export const AuthContext = createContext();
 
 export const AuthContextProvider = ({children}) => {
@@ -10,8 +10,6 @@ export const AuthContextProvider = ({children}) => {
     const [user, setUser] = useState({})
     const [loading,setLoading] = useState(false)
     const [isAuthenticated, setIsAuthenticated] = useState(undefined)
-
-    // GoogleOneTapSignIn.configure()
     useEffect(() => {
         const unsub = auth().onAuthStateChanged(async (user) => {
                     if(user){
@@ -47,9 +45,34 @@ export const AuthContextProvider = ({children}) => {
         }
     }
 
-    // const googleSignIn = () => {
+    const googleSignIn = async () => {
+        try {
+            await GoogleOneTapSignIn.checkPlayServices();
+            await GoogleOneTapSignIn.hasPlayServices({ showPlayServicesUpdateDialog: true });
+            const signInResult = await GoogleOneTapSignIn.signIn();
+            idToken = signInResult.data?.idToken;
+            if (!idToken) {
+                idToken = signInResult.idToken;
+            }
+            if (!idToken) {
+                throw new Error('No ID token found');
+            }
+            const googleCredential = auth.GoogleAuthProvider.credential(signInResult.data.token);
+            return auth().signInWithCredential(googleCredential);
+          } catch (error) {
+            if (isErrorWithCode(error)) {
+              switch (error.code) {
+                case statusCodes.IN_PROGRESS:
+                  break;
+                case statusCodes.PLAY_SERVICES_NOT_AVAILABLE:
+                  break;
+                default:
+              }
+            } else {
+            }
+          }
         
-    // }
+    }
 
     const logout = async () => {
         try{
@@ -89,7 +112,7 @@ export const AuthContextProvider = ({children}) => {
     }
 
     return (
-        <AuthContext.Provider value={{user,isAuthenticated,login,register,logout,resetpassword,updateUserData}} >
+        <AuthContext.Provider value={{user,isAuthenticated,login,register,logout,resetpassword,updateUserData,googleSignIn}} >
             {children}
         </AuthContext.Provider>
     )
