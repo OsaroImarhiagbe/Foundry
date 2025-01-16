@@ -16,7 +16,8 @@ export const AuthContextProvider = ({children}) => {
         const unsub = auth().onAuthStateChanged(async (user) => {
                     if(user){
                         setIsAuthenticated(true)
-                        await updateUserData(user.uid);
+                        setUser(user)
+                        updateUserData(user?.uid)
                         await AsyncStorage.setItem('authUser',user?.uid)
                     }else{
                         setIsAuthenticated(false)
@@ -76,7 +77,7 @@ export const AuthContextProvider = ({children}) => {
     const updateUserData = async (userId) => {
         const docSnap = await firestore().collection('users').doc(userId).get()
         if(docSnap.exists()){
-           setUser((prevUser) => ({...prevUser,username:docSnap.data().username, userId:docSnap.data().userId}))
+           setUser((prevUser) => ({...prevUser.uid,username:docSnap.data().username, userId:docSnap.data().userId}))
         }
     }
 
