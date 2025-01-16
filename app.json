@@ -28,6 +28,12 @@
       }
     },
     "plugins": [
+      "@react-native-firebase/app",
+      "@react-native-firebase/auth",
+      "@react-native-firebase/messaging",
+      "@react-native-google-signin/google-signin",
+      "@react-native-firebase/firestore",
+      "@react-native-firebase/storage",
       [
         "expo-notifications",
         {
@@ -36,12 +42,6 @@
           "useNextNotificationsApi": true
         }
       ],
-      "@react-native-firebase/app",
-      "@react-native-firebase/auth",
-      "@react-native-firebase/messaging",
-      "@react-native-google-signin/google-signin",
-      "@react-native-firebase/storage",
-      "@react-native-firebase/firestore",
       [
         "expo-build-properties",
         {
