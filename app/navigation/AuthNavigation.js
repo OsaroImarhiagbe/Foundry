@@ -92,7 +92,6 @@ const AuthNavigation = () => {
           const currentUser = await AsyncStorage.getItem('authUser')
           if(currentUser !== null){
               setIsAuthenticated(true)
-              updateUserData(currentUser.uid)
               navigation.navigate('Drawer',{screen:'Home'})
               setLoading(false)
           }else{

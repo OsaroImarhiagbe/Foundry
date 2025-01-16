@@ -23,7 +23,7 @@ const HomeScreen = () => {
   const [post, setPost] = useState([])
   const [mount, setMount] = useState(false)
 
-  console.log('currentuser:',user)
+  console.log('HomeScreen currentuser:',user)
   
 
   useEffect(() => { 

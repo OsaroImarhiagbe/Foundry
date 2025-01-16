@@ -189,11 +189,11 @@ const PostComponent = ({content,date,name,id,url,count,comment_count}) => {
       <Image
       source={url}
       style={{
-        width:screenWidth,
-        height: screenWidth * aspectRatio,
+        width:400,
+        height:400,
         alignSelf: 'center',
         marginVertical: 10,
-        resizeMode: 'cover',
+        contentFit: 'cover',
         borderRadius:30}}
       />}
       <Text style={styles.postDate}>{date}</Text>

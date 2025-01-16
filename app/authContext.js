@@ -7,7 +7,7 @@ export const AuthContext = createContext();
 
 export const AuthContextProvider = ({children}) => {
 
-    const [user, setUser] = useState(null)
+    const [user, setUser] = useState({})
     const [loading,setLoading] = useState(false)
     const [isAuthenticated, setIsAuthenticated] = useState(undefined)
 
@@ -16,15 +16,22 @@ export const AuthContextProvider = ({children}) => {
         const unsub = auth().onAuthStateChanged(async (user) => {
                     if(user){
                         setIsAuthenticated(true)
-                        setUser(user)
-                        updateUserData(user?.uid)
+                        const docSnap = await firestore().collection('users').doc(user.uid).get();
+                        if (docSnap.exists) {
+                            const firestoreData = docSnap.data();
+                            setUser({
+                                uid: user.uid,
+                                email: user.email,
+                                username: firestoreData.username,
+                                userId: firestoreData.userId,
+                            });
+                        }
                         await AsyncStorage.setItem('authUser',user?.uid)
                     }else{
                         setIsAuthenticated(false)
                         setUser(null)
                     }
-                }
-            )
+    })
         return unsub
     },[])
 

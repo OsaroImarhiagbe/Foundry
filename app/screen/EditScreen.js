@@ -35,6 +35,8 @@ const EditScreen = () => {
     const profileImage = useSelector((state) => state.user.profileimg)
     const {user} = useAuth()
 
+    console.log('edit screen:',user)
+
     const [form, setForm] = useState({
         darkMode:true,
         wifi:false,
@@ -128,21 +130,26 @@ const EditScreen = () => {
       ]
 
     useEffect(() => {
-        const getUpdate = () => {
-            const unsub = firestore()
-            .collection('user')
-            .doc(user?.userId)
-            .onSnapshot((querySnapshot) => {
-                let data = []
-               querySnapshot.forEach(documentSnapshot => {
-                    data.push({...documentSnapshot.data(),id:documentSnapshot.id})
-                });
-                setEdit(data)
-            })
-            return unsub
-        }
-        getUpdate()
+        const unsub = firestore()
+        .collection('users')
+        .doc(user?.userId)
+        .onSnapshot((documentSnapshot) => {
+        if(documentSnapshot.exists){
+            const data ={
+                ...documentSnapshot.data(),
+                id:documentSnapshot.id
+            };
+            setEdit([data])
+        }else{
+            console.error('Error doc doesnt exists:')
+            setEdit([])
+            }
+        }, (error) => {
+            console.error('Error fetching document:',error.message)
+        });
+        return () => unsub()
     },[user])
+
     const pickImage = async () => {
         try{
             let results = await ImagePicker.launchImageLibraryAsync({
@@ -153,7 +160,7 @@ const EditScreen = () => {
             if(!results.canceled){
                 const uri = results?.assets[0]?.uri
                 const filename = uri.split('/').pop()
-                const ref = storage().ref(`/users/profile/${filename}`)
+                const ref = storage().ref(`/users/profile/${user.userId}/${filename}`)
                 await ref.putFile(uri)
                 const url = await ref.getDownloadURL()
                 const docRef = firestore().collection('users').doc(user.userId)
@@ -165,7 +172,7 @@ const EditScreen = () => {
                 console.error('user cancelled the image picker.')
             }
         }catch(err){
-            console.error('Error picking image and uploading to s3:',err)
+            console.error('Error picking image and uploading to s3:',err.message)
         }
         }
       
@@ -196,7 +203,7 @@ const EditScreen = () => {
         <View style={{flexDirection:'row'}}>
         <Image
             style={{height:hp(5), aspectRatio:1, borderRadius:100}}
-            source={edit?.profileUrl}
+            source={edit.profileUrl}
             placeholder={{blurhash}}
             transition={500}
             cachePolicy='none'/>

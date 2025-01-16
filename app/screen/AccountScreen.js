@@ -36,6 +36,7 @@ const AccountScreen = () => {
   const navigation = useNavigation();
   const isCurrentUser = user
   const [refreshing, setRefreshing] = useState(false);
+  console.log('account screen:',user)
   
   const follow_items = [{count:projects?.projects?.length,content:'projects'},{count:users.connection,content:'connection'},{count:posts.length,content:'posts'}]
 
@@ -58,7 +59,7 @@ const AccountScreen = () => {
       })
       return () => unsub()
     }catch(err){
-      console.error('error grabbing user post:',err)
+      console.error('error grabbing user post:',err.message)
     }
     
   },[user])
@@ -75,7 +76,7 @@ const AccountScreen = () => {
       })
       return () => unsub()
     }catch(err){
-      console.error('error grabbing user post:',err)
+      console.error('error grabbing user post:',err.message)
     }
     
   },[user])
@@ -86,14 +87,14 @@ const AccountScreen = () => {
       const userDoc = firestore().collection('users').doc(user.userId)
       const unsub = userDoc.onSnapshot(
         (documentSnapshot) =>{
-        if(documentSnapshot.exists()){
+        if(documentSnapshot.exists){
           setUsers(documentSnapshot.data())
         }else{
-          console.error(`No such document ${error}`)
+          console.error(`No such document ${error.message}`)
         }
       },
         (error)=>{
-          console.error(`No such document ${error}`)
+          console.error(`No such document ${error.message}`)
         }
       );
       return unsub
@@ -109,9 +110,9 @@ const AccountScreen = () => {
 
   const Post = () => (
     <ScrollView
-    scrollEnabled={true}
+    scrollEnabled
      style={{flex:1,backgroundColor:color.backgroundcolor}}>
-      <SafeAreaView style={{flex:1,backgroundColor:color.backgroundcolor}}>
+      <View style={{flex:1,backgroundColor:color.backgroundcolor}}>
         {
         posts && posts.length > 0 ? (
             posts.map((post) => (
@@ -120,15 +121,16 @@ const AccountScreen = () => {
                   <PostComponent count={post.like_count} url={post.imageUrl} id={post.id} name={post.name} content={post.content} date={post.createdAt.toDate().toLocaleString()} comment_count={post.comment_count} />
                 </View>
               </Suspense>
-            ))) : <Text style={{ color: '#fff', textAlign: 'center', fontFamily:color.textFont,fontSize:20}}>No posts available</Text>}
-    </SafeAreaView>
+            ))) : <View style={{flex:1,justifyContent:'center',alignItems:'center',paddingTop:50}}>
+              <Text style={{ color: '#fff', textAlign: 'center', fontFamily:color.textFont,fontSize:20}}>No posts available</Text></View>}
+    </View>
     </ScrollView>
     
   ); 
   
   const Projects = () => (
-    <ScrollView style={{flex:1,backgroundColor:color.backgroundcolor}}>
-    <SafeAreaView style={{flex:1,backgroundColor:color.backgroundcolor,padding:50}}>
+    <ScrollView scrollEnabled style={{flex:1,backgroundColor:color.backgroundcolor}}>
+    <View style={{flex:1,backgroundColor:color.backgroundcolor,padding:50}}>
       {
         projects && projects.length > 0 ? (
           projects.map((project, index) => (
@@ -138,16 +140,16 @@ const AccountScreen = () => {
             <Text style={{ textAlign: 'center', color: '#fff' }}>{project?.projects?.project_name}</Text>
           </View>
           </TouchableOpacity>
-        ))) : <Text style={{ color: '#fff', textAlign: 'center', fontFamily:color.textFont,fontSize:20}}>No projects available</Text>
+        ))) : <View style={{flex:1,justifyContent:'center',alignItems:'center'}}><Text style={{ color: '#fff', textAlign: 'center', fontFamily:color.textFont,fontSize:20}}>No projects available</Text></View>
       }
       
-    </SafeAreaView>
+    </View>
     </ScrollView>
   );
 
   return (
   
-    <SafeAreaView style={styles.screen}>
+    <View style={styles.screen}>
       <ChatRoomHeader 
         onPress={()=>navigation.navigate('Main')} 
         backgroundColor={color.button} 
@@ -170,7 +172,7 @@ const AccountScreen = () => {
               cachePolicy='none'/>
               <View style={{marginTop:5,flexDirection:'row', justifyContent:'space-evenly',paddingRight:20}}>
               <Text style={{fontSize:30, color:'#fff'}}>  {
-                    isCurrentUser ? (<Text style={styles.username}>@{users?.name}</Text>) 
+                    isCurrentUser ? (<Text style={styles.username}>@{users?.username}</Text>) 
                     : (<Text style={styles.username}>@{users?.username}</Text>)
                   }</Text>
               </View>
@@ -234,7 +236,7 @@ const AccountScreen = () => {
                   </Tab.Navigator>
                 </View>
                 </ScrollView> 
-    </SafeAreaView>
+    </View>
   )
 }
 
