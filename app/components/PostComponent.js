@@ -45,7 +45,7 @@ const PostComponent = ({content,date,name,id,url,count,comment_count}) => {
                 })
                 setComment(data)
             }catch(e){
-              console.error('Error with comment',e)
+              console.error('Error with comment',e.message)
             }
           }
           ) 

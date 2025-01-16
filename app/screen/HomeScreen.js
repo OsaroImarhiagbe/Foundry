@@ -29,15 +29,17 @@ const HomeScreen = () => {
   useEffect(() => { 
     setMount(true)
     //dispatch(addId({currentuserID:user.userId}))
-    const unsub = firestore().collection('posts').orderBy('createdAt', 'desc')
+    const unsub = firestore()
+    .collection('posts')
+    .orderBy('createdAt', 'desc')
     .onSnapshot(querySnapShot =>{
-      let data = [];
-      querySnapShot.forEach(documentSnapShot => {
-        data.push({ ...documentSnapShot.data(),id:documentSnapShot.id });
-    } )
+      const data = querySnapShot.docs.map(documentSnapshot => ({
+        ...documentSnapshot.data(),
+              id: documentSnapshot.id,
+    }))
     setPost(data);
+    setMount(false)
   });
-  setMount(false)
 
   return () => unsub()
   }, []); 

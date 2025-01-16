@@ -5,7 +5,7 @@ import { ActivityIndicator } from 'react-native';
 import ProjectScreen from '../screen/ProjectScreen';
 import LocationScreen from '../screen/LocationScreen';
 import { useNavigation } from '@react-navigation/native';
-import {useAuth} from '../authContext'
+import {useAuth} from '../authContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 const RegisterScreen = lazy(() => import('../screen/RegisterScreen'))
 const DrawerNavigation = lazy(() => import('./DrawerNavigation'))
@@ -92,7 +92,7 @@ const AuthNavigation = () => {
           const currentUser = await AsyncStorage.getItem('authUser')
           if(currentUser !== null){
               setIsAuthenticated(true)
-              updateUserData(currentUser.uid)
+              await updateUserData(currentUser.uid)
               navigation.navigate('Drawer',{screen:'Home'})
               setLoading(false)
           }else{
