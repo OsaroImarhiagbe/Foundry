@@ -15,11 +15,10 @@ import storage from '@react-native-firebase/storage'
 const PostScreen = () => {
 
   const { user } = useAuth();
-  console.log('post screen:',user)
   const [text, setText] = useState('');
-  const [loading, setLoading] = useState(false);
   const [image, setImage] = useState(null);
   const [filename,setFileName] = useState(null)
+  const [loading,setLoading] = useState(false)
   const hasUnsavedChanges = Boolean(text);
   const profileImage = useSelector((state) => state.user.profileImage)
   const navigation = useNavigation();
@@ -30,6 +29,7 @@ const PostScreen = () => {
     try {
       const newDoc = await firestore().collection('posts').add({
         auth_id:user.uid,
+        name:user?.username,
         content: text,
         like_count: null,
         comment_count: null,

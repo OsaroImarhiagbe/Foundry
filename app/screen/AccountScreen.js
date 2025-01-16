@@ -107,6 +107,9 @@ const AccountScreen = () => {
   },[])
 
 
+ 
+
+
 
   const Post = () => (
     <ScrollView
@@ -147,6 +150,11 @@ const AccountScreen = () => {
     </ScrollView>
   );
 
+  // if(isloading){
+  //   return (
+  //     <ActivityIndicator size='Large' color='#fff'/>
+  //   )
+  // }else{
   return (
   
     <View style={styles.screen}>
@@ -239,6 +247,7 @@ const AccountScreen = () => {
     </View>
   )
 }
+
 
 const styles = StyleSheet.create({
   aboutContainer:{
