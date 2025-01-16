@@ -11,10 +11,10 @@ const NotificationScreen = () => {
   const [refreshing, setRefreshing] = useState(false);
   const Tab = createMaterialTopTabNavigator()
 
-  const onRefresh = useCallback(async () => {
+  const onRefresh = useCallback(() => {
     setRefreshing(true);
     try{
-      await getNotifications()
+      getNotifications()
     }catch(err){
       console.error('Error getting notifications',err)
     }finally{

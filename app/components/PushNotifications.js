@@ -5,13 +5,14 @@ import firestore from '@react-native-firebase/firestore'
 import { useAuth } from '../authContext';
 import {useState,useEffect,useRef} from 'react'
 import {Alert} from 'react-native'
+import NotificationBannerComponent from './NotificationBannerComponent';
 
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
-    shouldShowAlert: true,
-    shouldPlaySound: true,
-    shouldSetBadge: true,
+    shouldShowAlert: false,
+    shouldPlaySound: false,
+    shouldSetBadge: false,
   }),
 });
 
@@ -56,6 +57,8 @@ async function registerForPushNotificationsAsync() {
 export default function PushNotification(){
     const [expoPushToken, setExpoPushToken] = useState('');
   const [notification, setNotification] = useState([]);
+  const [showBanner, setShowBanner] = useState(false);
+  const [bannerData, setBannerData] = useState({ title: '', message: '' });
   const notificationListener = useRef();
   const responseListener = useRef();
   const {user} = useAuth();
@@ -81,14 +84,16 @@ export default function PushNotification(){
    
     notificationListener.current = Notifications.addNotificationReceivedListener(async (notification) => {
       setNotification((prev) => [...prev,notification]);
-      Alert.alert(
-        notification.request.content.title,
-        notification.request.content.body
-      );
-      if(user){
       const message = notification.request.content.body;
       const title = notification.request.content.title;
       const data = notification.request.content.data
+      setBannerData({ title, message });
+      setShowBanner(true); 
+    //   Alert.alert(
+    //     notification.request.content.title,
+    //     notification.request.content.body
+    //   );
+      if(user){
       const docRef = firestore().collection('users').doc(user?.uid);
       const notificationRef = docRef.collection('notifications');
       await notificationRef.add({
@@ -98,6 +103,7 @@ export default function PushNotification(){
         notification_data:data,
       });
     }
+    setTimeout(() => setShowBanner(false), 3000);
     });
 
     responseListener.current = Notifications.addNotificationResponseReceivedListener(response => {
@@ -111,4 +117,14 @@ export default function PushNotification(){
         Notifications.removeNotificationSubscription(responseListener.current);
     };
   }, []);
+
+  return(
+    <>
+    {showBanner && (
+        <NotificationBannerComponent
+          title={bannerData.title}
+          message={bannerData.message}
+        />)}
+    </>
+)
 }
