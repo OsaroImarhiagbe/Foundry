@@ -1,5 +1,5 @@
 import React,{useState,useEffect,lazy, Suspense} from 'react'
-import {View,StyleSheet,Text,TouchableOpacity,TouchableHighlight,Modal, SafeAreaView,KeyboardAvoidingView,Platform,ScrollView,TextInput,Pressable,ActivityIndicator} from 'react-native'
+import {View,StyleSheet,Text,TouchableOpacity,TouchableHighlight,Modal, SafeAreaView,KeyboardAvoidingView,Platform,ScrollView,TextInput,Pressable,ActivityIndicator,Dimensions} from 'react-native'
 import { blurhash } from '../../utils/index'
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import { Image } from 'expo-image';
@@ -24,6 +24,8 @@ const PostComponent = ({content,date,name,id,url,count,comment_count}) => {
     const [isReply,setReply] = useState(false)
     const [text,setText] = useState('')
     const dispatch = useDispatch();
+    const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
+    const aspectRatio = 1350 / 1080;
     const profileImage = useSelector((state) => state.user.profileimg)
     const {user} = useAuth();
 
@@ -186,10 +188,12 @@ const PostComponent = ({content,date,name,id,url,count,comment_count}) => {
     {url && 
       <Image
       source={url}
-      style={{width: wp(80),
-        height: hp(50),
+      style={{
+        width:screenWidth,
+        height: screenWidth * aspectRatio,
         alignSelf: 'center',
         marginVertical: 10,
+        resizeMode: 'cover',
         borderRadius:30}}
       />}
       <Text style={styles.postDate}>{date}</Text>

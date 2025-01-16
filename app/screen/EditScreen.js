@@ -11,13 +11,13 @@ import { blurhash } from '../../utils/index';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import Feather from 'react-native-vector-icons/Feather';
 import * as ImagePicker from 'expo-image-picker';
-import axios from 'axios'
+import storage from '@react-native-firebase/storage';
 import { useSelector,useDispatch } from 'react-redux';
 import { addImage } from '../features/user/userSlice';
 import { Picker } from '@react-native-picker/picker';
 import { useTranslation } from 'react-i18next';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {DJANGO_PROFILE_URL} from '@env'
+
   
 
   
@@ -28,6 +28,8 @@ const EditScreen = () => {
     const [language, setLanguage] = useState('en');
     const navigation = useNavigation();
     const [edit,setEdit] = useState([])
+    const [filename,setFile] = useState(null)
+    const [image,setImage] = useState(null)
     const dispatch = useDispatch()
     const [modalVisible, setModalVisible] = useState(false);
     const profileImage = useSelector((state) => state.user.profileimg)
@@ -130,12 +132,12 @@ const EditScreen = () => {
             const unsub = firestore()
             .collection('user')
             .doc(user?.userId)
-            .onSnapshot((documentSnapshot) => {
+            .onSnapshot((querySnapshot) => {
                 let data = []
-                documentSnapshot.forEach(doc => {
-                    data.push({...doc.data(),id:doc.id})
+               querySnapshot.forEach(documentSnapshot => {
+                    data.push({...documentSnapshot.data(),id:documentSnapshot.id})
                 });
-                setEdit([...data])
+                setEdit(data)
             })
             return unsub
         }
@@ -148,21 +150,17 @@ const EditScreen = () => {
                 allowsEditing:true,
                 quality:1
               })
-            console.log('Image results:',results)
             if(!results.canceled){
-                const formData = new FormData()
-                formData.append('file',{
-                    uri: results.assets[0].uri,
-                    type: "image/jpeg",
-                    name: "photo.jpg"
+                const uri = results?.assets[0]?.uri
+                const filename = uri.split('/').pop()
+                const ref = storage().ref(`/users/profile/${filename}`)
+                await ref.putFile(uri)
+                const url = await ref.getDownloadURL()
+                const docRef = firestore().collection('users').doc(user.userId)
+                await docRef.update({
+                    profileUrl:url
                 })
-                formData.append('user_id',user.userId)
-                const uploadResponse = await axios.post(DJANGO_PROFILE_URL,formData,{headers:{'Content-Type':'multipart/form-data'}})
-                const docRef = doc(db,'users',user.userId)
-                await updateDoc(docRef,{
-                    profileUrl:uploadResponse.data.file
-                })
-                dispatch(addImage({profileimg:uploadResponse.data.file}))
+                dispatch(addImage({profileimg:url}))
             }else{
                 console.error('user cancelled the image picker.')
             }
@@ -198,7 +196,7 @@ const EditScreen = () => {
         <View style={{flexDirection:'row'}}>
         <Image
             style={{height:hp(5), aspectRatio:1, borderRadius:100}}
-            source={profileImage}
+            source={edit?.profileUrl}
             placeholder={{blurhash}}
             transition={500}
             cachePolicy='none'/>

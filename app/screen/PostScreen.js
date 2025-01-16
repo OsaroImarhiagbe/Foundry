@@ -9,10 +9,8 @@ import { addPost } from '../features/PostandComments/socialSlice';
 import { useNavigation } from '@react-navigation/native';
 import * as ImagePicker from 'expo-image-picker';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-import axios from 'axios'
 import firestore from '@react-native-firebase/firestore'
 import color from '../../config/color';
-import {DJANGO_MEDIA_URL} from '@env'
 import storage from '@react-native-firebase/storage'
 const PostScreen = () => {
 
@@ -21,7 +19,7 @@ const PostScreen = () => {
   const [text, setText] = useState('');
   const [loading, setLoading] = useState(false);
   const [image, setImage] = useState(null);
-  const [post_id,setPost_id] = useState('')
+  const [filename,setFileName] = useState(null)
   const hasUnsavedChanges = Boolean(text);
   const profileImage = useSelector((state) => state.user.profileImage)
   const navigation = useNavigation();
@@ -40,17 +38,18 @@ const PostScreen = () => {
       })
       let imageUrl = null;
       if(image){
-        imageUrl = await uploadtoS3(image,newDoc.id)
+        const ref = storage().ref(`/posts/images/${newDoc.id}/${filename}`)
+        await ref.putFile(image)
+        imageUrl = await ref.getDownloadURL()
       }
       await newDoc.update({
-        imageUrl:null,
+        imageUrl:imageUrl,
         post_id: newDoc.id
       })
       setTimeout(() => {
         navigation.navigate('Main');
         Alert.alert('Success!!', 'Post has been sent!!');
       }, 1000);
-      setPost_id(newDoc.id)
       dispatch(addPost({ id: newDoc.id, content: text }));
       setText('');
       setImage(null);
@@ -79,33 +78,6 @@ const PostScreen = () => {
       navigation.navigate('Main');
     }
   };
-
- 
-
-  const uploadtoS3 = async (image,post_id) => {
-    try{
-      const formData = new FormData()
-      formData.append('file',{
-        uri: image,
-        type: "image/jpeg",
-        name: "photo.jpg"
-    })
-    formData.append('post_id',post_id)
-      const uploadResponse = await axios.post(DJANGO_MEDIA_URL,formData,{
-        headers:{
-          'Content-Type':'multipart/form-data'
-        }
-      })
-      if(uploadResponse.status === 201){
-        return uploadResponse.data.file
-      }else{
-        console.error('Failed to upload to s3')
-      }
-    }catch(err){
-      console.error('Error uploading to s3:',err)
-    }
-  }
-
   const pickImage = async () => {
     let results = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ['images', 'videos'],
@@ -114,6 +86,7 @@ const PostScreen = () => {
     })
     if(!results.canceled){
       setImage(results.assets[0].uri)
+      setFileName(results.assets[0].uri.split('/').pop())
     }else{
       console.error('user cancelled the image picker.')
     }

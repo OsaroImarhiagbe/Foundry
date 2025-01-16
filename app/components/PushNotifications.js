@@ -56,12 +56,12 @@ async function registerForPushNotificationsAsync() {
 
 export default function PushNotification(){
     const [expoPushToken, setExpoPushToken] = useState('');
-  const [notification, setNotification] = useState([]);
-  const [showBanner, setShowBanner] = useState(false);
-  const [bannerData, setBannerData] = useState({ title: '', message: '' });
-  const notificationListener = useRef();
-  const responseListener = useRef();
-  const {user} = useAuth();
+    const [notification, setNotification] = useState([]);
+    const [showBanner, setShowBanner] = useState(false);
+    const [bannerData, setBannerData] = useState({ title: '', message: '' });
+    const notificationListener = useRef();
+    const responseListener = useRef();
+    const {user} = useAuth();
 
   useEffect(() => {
 

@@ -80,7 +80,6 @@ const OnboardingScreenWrapper = () =>{
 }
 const AuthNavigation = () => {
   const navigation = useNavigation()
-  const [user, setUser] = useState(null)
   const [loading,setLoading] = useState(null)
   const [isAuthenticated, setIsAuthenticated] = useState(undefined)
   const [showOnboarding,setShowOnboarding] = useState(false)
@@ -93,13 +92,11 @@ const AuthNavigation = () => {
           const currentUser = await AsyncStorage.getItem('authUser')
           if(currentUser !== null){
               setIsAuthenticated(true)
-              setUser(currentUser)
               updateUserData(currentUser.uid)
               navigation.navigate('Drawer',{screen:'Home'})
               setLoading(false)
           }else{
               setIsAuthenticated(false);
-              setUser(null)
               setLoading(false)
           }
       }

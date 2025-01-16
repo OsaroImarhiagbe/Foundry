@@ -12,29 +12,13 @@ export const AuthContextProvider = ({children}) => {
     const [isAuthenticated, setIsAuthenticated] = useState(undefined)
 
     // GoogleOneTapSignIn.configure()
-
-    useEffect(() =>{
-        const getAuthState = async () => {
-            const currentUser = await AsyncStorage.getItem('authUser')
-            if(currentUser !== null){
-                setIsAuthenticated(true)
-                setUser(currentUser)
-                updateUserData(currentUser.uid)
-                //await AsyncStorage.clear()
-            }else{
-                setIsAuthenticated(false);
-                setUser(null)
-            }
-        }
-        getAuthState()
-    },[])
-
     useEffect(() => {
         const unsub = auth().onAuthStateChanged(async (user) => {
                     if(user){
                         setIsAuthenticated(true)
                         setUser(user)
                         updateUserData(user.uid);
+                        await AsyncStorage.setItem('authUser',user?.uid)
                     }else{
                         setIsAuthenticated(false);
                         setUser(null)
@@ -48,7 +32,6 @@ export const AuthContextProvider = ({children}) => {
         setLoading(true)
         try{
             const response = await auth().signInWithEmailAndPassword(email,pasword)
-            await AsyncStorage.setItem('authUser',response?.user?.uid)
             setLoading(false)
             return {success:true}
         }catch(error){
@@ -77,7 +60,6 @@ export const AuthContextProvider = ({children}) => {
                 username,
                 userId: response?.user?.uid
             })
-            await AsyncStorage.setItem('authUser',response?.user?.uid)
             return {success:true, data: response?.user}
         }catch(error){
             console.error(`${error}`)
