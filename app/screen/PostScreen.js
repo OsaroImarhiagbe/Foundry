@@ -13,6 +13,7 @@ import axios from 'axios'
 import firestore from '@react-native-firebase/firestore'
 import color from '../../config/color';
 import {DJANGO_MEDIA_URL} from '@env'
+import storage from '@react-native-firebase/storage'
 const PostScreen = () => {
 
   const { user } = useAuth();

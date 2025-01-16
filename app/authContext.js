@@ -19,7 +19,7 @@ export const AuthContextProvider = ({children}) => {
             if(currentUser !== null){
                 setIsAuthenticated(true)
                 setUser(currentUser)
-                await updateUserData(currentUser.uid)
+                updateUserData(currentUser.uid)
                 //await AsyncStorage.clear()
             }else{
                 setIsAuthenticated(false);
@@ -34,7 +34,7 @@ export const AuthContextProvider = ({children}) => {
                     if(user){
                         setIsAuthenticated(true)
                         setUser(user)
-                        await updateUserData(user.uid);
+                        updateUserData(user.uid);
                     }else{
                         setIsAuthenticated(false);
                         setUser(null)
@@ -48,7 +48,7 @@ export const AuthContextProvider = ({children}) => {
         setLoading(true)
         try{
             const response = await auth().signInWithEmailAndPassword(email,pasword)
-            await AsyncStorage.setItem('authUser',response?.user)
+            await AsyncStorage.setItem('authUser',response?.user?.uid)
             setLoading(false)
             return {success:true}
         }catch(error){
@@ -77,7 +77,7 @@ export const AuthContextProvider = ({children}) => {
                 username,
                 userId: response?.user?.uid
             })
-            await AsyncStorage.setItem('authUser',response?.user)
+            await AsyncStorage.setItem('authUser',response?.user?.uid)
             return {success:true, data: response?.user}
         }catch(error){
             console.error(`${error}`)
@@ -96,7 +96,7 @@ export const AuthContextProvider = ({children}) => {
         const docSnap = await firestore().collection('users').doc(userId).get()
         if(docSnap.exists()){
            let data = docSnap.data()
-           setUser((prev)=>({...prev, username: data.username, userId:data.userId}))
+           setUser({...user, username: data.username, userId:data.userId})
         }
     }
 
