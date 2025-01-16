@@ -85,7 +85,7 @@ const ChatScreen = () => {
       const roomId = route?.params?.userid ? getRoomID(user?.userId, route?.params?.userid) : item?.userId ? getRoomID(user?.userId, item?.userId) : null
       await firestore().collection('rooms').doc(roomId).setDoc({
         roomId,
-        createdAt: Timestamp.fromDate(new Date())
+        createdAt: firestore.Timestamp.fromDate(new Date())
       })
       await firestore().collection('sent-message-id').doc(route?.params?.userid).set({
         userId:route?.params?.userid,
@@ -109,14 +109,12 @@ const ChatScreen = () => {
       const messageRef = docRef.collection('messages')
       textRef.current ="";
       if(inputRef) inputRef?.current?.clear();
-      
       await messageRef.add({
         userId:user?.userId,
         text:message,
         senderName: user?.username,
         recipentName:recipentNamec,
-        sent:'true',
-        createdAt: Timestamp.fromDate(new Date())
+        createdAt: firestore.Timestamp.fromDate(new Date())
       })
       const message = {
         to: expoPushToken,
