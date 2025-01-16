@@ -78,7 +78,7 @@ export const AuthContextProvider = ({children}) => {
         const docSnap = await firestore().collection('users').doc(userId).get()
         if(docSnap.exists()){
            let data = docSnap.data()
-           setUser({...user, username: data.username, userId:data.userId})
+           setUser({username: data.username, userId:data.userId,...data})
         }
     }
 
