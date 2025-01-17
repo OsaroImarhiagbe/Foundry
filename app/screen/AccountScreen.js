@@ -149,7 +149,8 @@ const AccountScreen = () => {
   return (
   
     <View style={styles.screen}>
-      <ChatRoomHeader 
+      <ChatRoomHeader
+        iconColor='#00bf63' 
         onPress={()=>navigation.navigate('Main')} 
         backgroundColor={color.button} 
         icon='keyboard-backspace' 

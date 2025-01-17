@@ -29,7 +29,7 @@ const PostComponent = ({content,date,name,id,url,count,comment_count,mount,auth_
 
     useEffect(() => {
       const docRef = firestore().collection('posts').doc(id)
-       const subscriber =  docRef.collection('comments').onSnapshot((querySnapShot) => {
+       const subscriber =  docRef.collection('comments').orderBy('createdAt','desc').onSnapshot((querySnapShot) => {
               if (!querySnapShot || querySnapShot.empty) {
                 setComment([]);
                 return;
@@ -216,7 +216,6 @@ const PostComponent = ({content,date,name,id,url,count,comment_count,mount,auth_
     </View>
     <View>
     <Modal
-    onPress={() => setModalVisible(!modalVisible)}
     animationType="fade"
     transparent={true}
     visible={modalVisible}>
@@ -228,7 +227,7 @@ const PostComponent = ({content,date,name,id,url,count,comment_count,mount,auth_
         <View style={styles.commentView}>
           <View style={styles.modalView}>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between',alignItems:'center' }}>
-              <Text style={{ fontFamily: color.textFont, fontSize: 18}}>Comments</Text>
+              <Text  onPress={() => setModalVisible(!modalVisible)} style={{ fontFamily: color.textFont, fontSize: 18}}>Comments</Text>
               <TouchableOpacity onPress={isReply ? handlePost : handleSend}>
                 <View style={styles.sendButton}>
                   <Feather name="send" size={hp(2.0)} color="#000" />
