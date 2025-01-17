@@ -98,7 +98,7 @@ const AccountScreen = () => {
           console.error(`No such document ${error.message}`)
         }
       );
-      return unsub
+      return () => unsub()
     };
        
     fetchUser()
