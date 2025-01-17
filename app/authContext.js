@@ -31,7 +31,7 @@ export const AuthContextProvider = ({children}) => {
                         setUser(null)
                     }
     })
-        return unsub
+        return () => unsub ()
     },[])
 
     const login = async (email,pasword) => {
@@ -42,7 +42,7 @@ export const AuthContextProvider = ({children}) => {
             return {success:true}
         }catch(error){
             setLoading(false)
-            console.error(`Error:${error}`)
+            console.error(`Error logging in:${error}`)
         }
     }
 

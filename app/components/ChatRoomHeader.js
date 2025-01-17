@@ -41,13 +41,13 @@ const ChatRoomHeader = ({title,onPress,icon,onPress2,backgroundColor,icon2}) => 
       try{
         await logout();
         setTimeout(() => {
-          setLoading(false);
           navigation.navigate('Login')
           Alert.alert('Success!','you have logged out!!')
-      }, 2000);
-     
+        }, 5000);
       }catch(error){
         console.error(` Error failed: ${error}`)
+      }finally{
+        setLoading(false);
       }
   
     }

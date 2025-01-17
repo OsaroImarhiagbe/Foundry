@@ -28,18 +28,15 @@ const PostComponent = ({content,date,name,id,url,count,comment_count,mount,auth_
     const {user} = useAuth();
 
     useEffect(() => {
-      const subscriber = firestore()
-        .collection('posts')
-        .doc(id)
-        .collection('comments')
-        .onSnapshot((querySnapShot) => {
+      const docRef = firestore().collection('posts').doc(id)
+       const subscriber =  docRef.collection('comments').onSnapshot((querySnapShot) => {
               let data = []
-              querySnapShot.forEach(documentSnapshot =>{
+              querySnapShot.forEach(documentSnapshot => {
                 data.push({ ...documentSnapshot.data(),id:documentSnapshot.id });
               })
               setComment(data)
     }) 
-          return () =>subscriber()
+          return () => subscriber()
     },[id])
 
     useEffect(() => {
