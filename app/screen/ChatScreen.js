@@ -62,7 +62,7 @@ const ChatScreen = () => {
       try{
       const id = route?.params?.userid ? route?.params?.userid : item?.userId
       const docRef = firestore().collection('users').doc(id)
-      const snapShot = await docRef.getDoc()
+      const snapShot = await docRef.get()
         if(snapShot.exists()){
           const data = snapShot.data()
           setExpoPushToken(data.expoToken)
