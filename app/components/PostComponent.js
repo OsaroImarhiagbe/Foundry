@@ -28,7 +28,7 @@ const PostComponent = ({content,date,name,id,url,count,comment_count,mount,auth_
     const {user} = useAuth();
 
     useEffect(() => {
-      const unsub = firestore()
+      const subscriber = firestore()
         .collection('posts')
         .doc(id)
         .collection('comments')
@@ -39,7 +39,7 @@ const PostComponent = ({content,date,name,id,url,count,comment_count,mount,auth_
               })
               setComment(data)
     }) 
-          return () => unsub()
+          return () =>subscriber()
     },[id])
 
     useEffect(() => {

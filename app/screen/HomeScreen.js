@@ -28,12 +28,12 @@ const HomeScreen = () => {
 
   useEffect(() => {
     if (!user?.userId) return;
-    let unsub;
+    let subscriber
     setMount(true)
     dispatch(addId({currentuserID:user?.userId}))
     const timer = setTimeout(() => {
         try {
-          unsub = firestore().collection('posts').orderBy('createdAt', 'desc').limit(10)
+          subscriber = firestore().collection('posts').orderBy('createdAt', 'desc').limit(10)
             .onSnapshot(querySnapShot =>{
               let data = [];
               querySnapShot.forEach(documentSnapShot => {
@@ -52,7 +52,7 @@ const HomeScreen = () => {
       
     return () => {
       clearTimeout(timer);
-      if (unsub) unsub();
+      if (subscriber) subscriber();
     };
   }, []); 
 
