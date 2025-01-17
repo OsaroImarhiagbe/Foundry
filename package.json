@@ -70,7 +70,6 @@
     "react-redux": "^9.1.2",
     "redux": "^5.0.1",
     "redux-persist": "^6.0.0",
-    "undefined": "react-native-twitter-signin/twitter-signin",
     "yup": "^1.4.0"
   },
   "devDependencies": {
