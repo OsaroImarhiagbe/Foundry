@@ -20,7 +20,7 @@ import { useSelector} from 'react-redux';
 
 
   
-const ChatRoomHeader = ({title,onPress,icon,onPress2,backgroundColor,icon2}) => {
+const ChatRoomHeader = ({title,onPress,icon,onPress2,backgroundColor,icon2,iconColor}) => {
 
     
 
@@ -58,7 +58,7 @@ const ChatRoomHeader = ({title,onPress,icon,onPress2,backgroundColor,icon2}) => 
     <View style={[styles.container,{paddingTop: ios ? top: top + 10}]}>
          <TouchableOpacity onPress={onPress}>
           <View style={styles.icon}>
-          { icon && <MaterialCommunityIcons name={icon} color='#ffffff' size={20} />}
+          { icon && <MaterialCommunityIcons name={icon} color={iconColor} size={20} />}
           </View>
         </TouchableOpacity>
         <View>
@@ -68,7 +68,7 @@ const ChatRoomHeader = ({title,onPress,icon,onPress2,backgroundColor,icon2}) => 
         style={styles.messageIcon}
          onPress={() => navigation.navigate('Post')}>
         <View style={styles.icon}>
-          {icon2 && <Entypo name={icon2} size={20} color='#ffffff'/>}
+          {icon2 && <Entypo name={icon2} size={20} color={iconColor}/>}
         </View>
         </TouchableOpacity>
         <Menu>
@@ -122,6 +122,7 @@ const styles = StyleSheet.create({
     container:{
         flexDirection:'row',
         justifyContent:'space-between',
+        alignItems:'center',
         padding:10,
         paddingLeft:10,
         paddingRight:10,
@@ -136,9 +137,10 @@ const styles = StyleSheet.create({
         color:'#fff',
         fontFamily:'Helvetica-light',
         textAlign:'center',
-        fontSize:15,
+        fontSize:30,
         padding:10,
-        paddingLeft:70
+        paddingLeft:60
+        
     },
     icon:{
       margin:10

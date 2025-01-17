@@ -129,6 +129,7 @@ const fetchMorePost = async () => {
           onPress={handlePress}
           title='DevGuiide'
           icon='menu'
+          iconColor='#00bf63'
           icon2='new-message'
           onPress2={handleMessage}
           backgroundColor={color.button}
@@ -144,6 +145,7 @@ const fetchMorePost = async () => {
     <PostComponent key={index} mount={mount}/>
    ))
    : <FlatList
+   contentContainerStyle={{flexGrow:1}}
     data={memoPost}
     onRefresh={onRefresh}
     onEndReached={fetchMorePost}

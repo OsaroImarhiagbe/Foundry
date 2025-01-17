@@ -1,5 +1,5 @@
 import React,{useState,useEffect,lazy, Suspense} from 'react'
-import {View,StyleSheet,Text,TouchableOpacity,TouchableHighlight,Modal, SafeAreaView,KeyboardAvoidingView,Platform,ScrollView,TextInput,Pressable,ActivityIndicator,Dimensions,Keyboard} from 'react-native'
+import {View,StyleSheet,Text,TouchableOpacity,TouchableHighlight,Modal, SafeAreaView,KeyboardAvoidingView,Platform,ScrollView,TextInput,Pressable,ActivityIndicator,Dimensions,Keyboard,TouchableWithoutFeedback} from 'react-native'
 import { blurhash } from '../../utils/index'
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import { Image } from 'expo-image';
@@ -155,6 +155,7 @@ const PostComponent = ({content,date,name,id,url,count,comment_count,mount,auth_
       }
     }
   return (
+    
     <View style={styles.card}>
     <View style={styles.postContainer}>
     <View style={styles.imageText}>
@@ -213,63 +214,60 @@ const PostComponent = ({content,date,name,id,url,count,comment_count,mount,auth_
         </TouchableOpacity>
       </View>
     </View>
-    <SafeAreaView>
-      <Modal
-      animationType="slide"
-      transparent={true}
-      visible={modalVisible}
-      onRequestClose={() => {
-        Alert.alert('Modal has been closed.');
-        setModalVisible(!modalVisible);
-          }}>
-      <View style={styles.commentView}>
-        <View style={styles.modalView}>
-        <View style={{flexDirection:'row',justifyContent:'space-between'}}>
-          <Text style={{fontFamily:color.textFont,fontSize:18,}}>Comments</Text>
-          <Pressable
-            style={[styles.button, styles.buttonClose,{paddingLeft:20}]}
-            onPress={() => setModalVisible(!modalVisible)}>
-            <Text style={styles.textStyle}>Hide Modal</Text>
-          </Pressable>
-          </View>
-          <KeyboardAvoidingView
-          enabled
-          behavior='padding'
-          keyboardVerticalOffset={0}
-              >
-        <ScrollView
-        keyboardShouldPersistTaps="never">
-          {comments.map((comment) => {
-          
-            return <Suspense key={comment.id}  fallback={<ActivityIndicator size='small' color='#fff'/>}>
-                    <CommentComponent auth_profile={comment.auth_profile} count={comment.like_count} content={comment.content} name={comment.name} comment_id={comment.id} post_id={id} date={comment.createdAt.toDate().toLocaleString()}/>
-              </Suspense>
-          })}
-          </ScrollView>
-        <View style={styles.inputContainer}>
-          <View style={styles.messageInput}>
-          <TextInput
-          value={text}
-          onChangeText={(text) => setText(text)}
-          style={[styles.textinput,{fontSize:hp(1.5)}]}
-            placeholder='Comment....'
-            placeholderTextColor="#000"
-          />
-          <TouchableOpacity onPress={isReply ? handlePost : handleSend}>
-            <View style={styles.sendButton}>
-            <Feather
-            name='send'
-            size={hp(2.0)}
-            color='#000'/>
+    <View>
+    <Modal
+    animationType="slide"
+    transparent={true}
+    visible={modalVisible}>
+    <KeyboardAvoidingView
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 40 : 0}
+      style={styles.centeredView}>
+      <TouchableWithoutFeedback onPress={() => setModalVisible(!modalVisible)}>
+        <View style={styles.commentView}>
+          <View style={styles.modalView}>
+            <View style={{ flexDirection: 'row', justifyContent: 'center',alignItems:'center' }}>
+              <Text style={{ fontFamily: color.textFont, fontSize: 18 }}>Comments</Text>
             </View>
-          </TouchableOpacity>
-        </View>
+            <ScrollView
+              keyboardShouldPersistTaps="handled"
+              contentContainerStyle={styles.scrollViewContent}>
+              {comments.map((comment) => (
+                <Suspense key={comment.id} fallback={<ActivityIndicator size="small" color="#fff" />}>
+                  <CommentComponent
+                    auth_profile={comment.auth_profile}
+                    count={comment.like_count}
+                    content={comment.content}
+                    name={comment.name}
+                    comment_id={comment.id}
+                    post_id={id}
+                    date={comment.createdAt.toDate().toLocaleString()}
+                  />
+                </Suspense>
+              ))}
+            </ScrollView>
+            <View>
+            <View style={styles.inputContainer}>
+              <TextInput
+                value={text}
+                onChangeText={(text) => setText(text)}
+                style={styles.textinput}
+                placeholder="Comment...."
+                placeholderTextColor="#000"
+              />
+              <TouchableOpacity onPress={isReply ? handlePost : handleSend}>
+                <View style={styles.sendButton}>
+                  <Feather name="send" size={hp(2.0)} color="#000" />
+                </View>
+              </TouchableOpacity>
+            </View>
+            </View>
           </View>
-          </KeyboardAvoidingView>
-    </View>
+        </View>
+      </TouchableWithoutFeedback>
+    </KeyboardAvoidingView>
+  </Modal>
   </View>
-      </Modal>
-  </SafeAreaView>
   </View>
   )
 }
@@ -346,57 +344,42 @@ const styles = StyleSheet.create({
     },
     commentView: {
       flex: 1,
-      justifyContent:'flex-end',
+      justifyContent: 'flex-end',
       alignItems: 'center',
-      bottom: 0,
-      left: 0,
-      right: 0,
     },
     modalView: {
-      margin: 0,
       backgroundColor: color.grey,
       borderTopRightRadius: 20,
-      borderTopLeftRadius:20,
-      padding:35,
-      alignItems: 'center',
-      width:'100%',
-      height:'60%',
-      position:'absolute',
+      borderTopLeftRadius: 20,
+      paddingHorizontal: 15,
+      paddingTop: 20,
+      width: '100%',
+      height: '60%',
     },
     centeredView: {
       flex: 1,
-      justifyContent: 'center',
-      alignItems: 'center',
-    },
-    messageInput: {
-      flexDirection:'row',
-      justifyContent:'space-between',
-      borderColor:'#000',
-      borderWidth:0.5,
-      borderRadius:20,
-    },
-    sendButton: {
-      padding: 15,
-      marginRight:1,
+      justifyContent: 'flex-end',
     },
     inputContainer: {
       flexDirection: 'row',
-      justifyContent:'space-between',
-      alignItems:'center',
-      marginRight:3,
-      marginLeft:3,
-      padding:5,
-      paddingBottom:0,
+      alignItems: 'center',
+      marginTop: 10,
+      borderColor: '#000',
+      borderWidth: 0.5,
+      borderRadius: 20,
+      paddingHorizontal: 10,
+      backgroundColor: '#fff',
     },
-    textinput:{
-      flex:1,
-      marginRight:2,
-      padding:5,
-      height:50
+    textinput: {
+      flex: 1,
+      height: 50,
+      padding: 10,
+      fontSize: hp(2),
+      color: '#000',
     },
-    
-})
-
-
+    sendButton: {
+      padding: 10,
+    },
+  });
 
 export default PostComponent
