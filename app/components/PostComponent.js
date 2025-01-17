@@ -30,6 +30,10 @@ const PostComponent = ({content,date,name,id,url,count,comment_count,mount,auth_
     useEffect(() => {
       const docRef = firestore().collection('posts').doc(id)
        const subscriber =  docRef.collection('comments').onSnapshot((querySnapShot) => {
+              if (!querySnapShot || querySnapShot.empty) {
+                setComment([]);
+                return;
+              }
               let data = []
               querySnapShot.forEach(documentSnapshot => {
                 data.push({ ...documentSnapshot.data(),id:documentSnapshot.id });

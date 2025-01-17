@@ -34,6 +34,10 @@ const HomeScreen = () => {
         try {
           const subscriber = firestore().collection('posts').orderBy('createdAt', 'desc').limit(10)
             .onSnapshot(querySnapShot =>{
+              if (!querySnapShot || querySnapShot.empty) {
+                setPost([]);
+                return;
+              }
               let data = [];
               querySnapShot.forEach(documentSnapShot => {
                 data.push({ ...documentSnapShot.data(),id:documentSnapShot.id });
@@ -83,6 +87,11 @@ const HomeScreen = () => {
 
 const fetchMorePost = async () => {
   if (loadingMore || !hasMore) return;
+  if (!user?.userId) return;
+  if (post.length <= 2) {
+    setHasMore(false);
+    return;
+  }
   setLoadingMore(true);
   try {
     const snapshot = await firestore()
@@ -91,12 +100,10 @@ const fetchMorePost = async () => {
       .startAfter(lastVisible)
       .limit(2)
       .get();
-
     const newPosts = snapshot.docs.map(doc => ({
       id: doc.id,
       ...doc.data(),
     }));
-
     setPost(prevPosts => [...prevPosts, ...newPosts]);
     setLastVisible(snapshot.docs[snapshot.docs.length - 1]);
     setHasMore(snapshot.docs.length > 0);
@@ -140,10 +147,10 @@ const fetchMorePost = async () => {
     data={memoPost}
     onRefresh={onRefresh}
     onEndReached={fetchMorePost}
-    onEndReachedThreshold={0.5}
+    onEndReachedThreshold={0.1}
     refreshing={refreshing}
     ListFooterComponent={() => (
-      <ActivityIndicator color='#fff' size='small'/>
+      loadingMore && post.length > 2 ? <ActivityIndicator color='#fff' size='small'/> : null
     )}
     renderItem={({item}) => <Suspense fallback={<ActivityIndicator size='small' color='#000'/>}>
       <PostComponent
