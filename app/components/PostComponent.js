@@ -141,16 +141,17 @@ const PostComponent = ({content,date,name,id,url,count,comment_count,mount,auth_
     const handleSend = async () => {
       if(!text) return;
       try{
-        const docRef = await firestore().collection('posts').doc(id).collection('comments')
+        const docRef = firestore().collection('posts').doc(id).collection('comments')
         const newDoc = await docRef.add({
           parentId:null,
           content:text,
+          auth_profile:auth_profile,
           createdAt: firestore.Timestamp.fromDate(new Date())
         })
         await newDoc.update({
           id:newDoc.id
         })
-        const postDocRef = await firestore().collection('posts').doc(id)
+        const postDocRef = firestore().collection('posts').doc(id)
         await firestore().runTransaction(async (transaction)=>{
           const doc = await transaction.get(postDocRef)
           if (!doc.exists()) throw new Error('Doc does not exists!!')
@@ -253,7 +254,7 @@ const PostComponent = ({content,date,name,id,url,count,comment_count,mount,auth_
           {comments.map((comment) => {
           
             return <Suspense key={comment.id}  fallback={<ActivityIndicator size='small' color='#fff'/>}>
-                    <CommentComponent count={comment.like_count} content={comment.content} name={comment.name} comment_id={comment.id} post_id={id} date={comment.createdAt.toDate().toLocaleString()}/>
+                    <CommentComponent auth_profile={comment.auth_profile} count={comment.like_count} content={comment.content} name={comment.name} comment_id={comment.id} post_id={id} date={comment.createdAt.toDate().toLocaleString()}/>
               </Suspense>
           })}
           </ScrollView>

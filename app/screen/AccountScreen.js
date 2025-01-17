@@ -151,11 +151,7 @@ const AccountScreen = () => {
     </ScrollView>
   );
 
-  // if(isloading){
-  //   return (
-  //     <ActivityIndicator size='Large' color='#fff'/>
-  //   )
-  // }else{
+
   return (
   
     <View style={styles.screen}>
