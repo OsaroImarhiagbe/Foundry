@@ -28,11 +28,12 @@ const HomeScreen = () => {
 
   useEffect(() => {
     if (!user?.userId) return;
+    let unsub;
     setMount(true)
     dispatch(addId({currentuserID:user?.userId}))
     const timer = setTimeout(() => {
         try {
-          const unsub = firestore().collection('posts').orderBy('createdAt', 'desc').limit(10)
+          unsub = firestore().collection('posts').orderBy('createdAt', 'desc').limit(10)
             .onSnapshot(querySnapShot =>{
               let data = [];
               querySnapShot.forEach(documentSnapShot => {
@@ -42,7 +43,6 @@ const HomeScreen = () => {
             setLastVisible(querySnapShot.docs[querySnapShot.docs.length - 1]);
             setHasMore(querySnapShot.docs.length > 0);
           });
-          return () => unsub()
         }  catch (e) {
         console.error(`Error post can not be found: ${e}`);
       }finally{
@@ -50,7 +50,10 @@ const HomeScreen = () => {
       } 
     },3000)
       
-    return () => clearTimeout(timer)
+    return () => {
+      clearTimeout(timer);
+      if (unsub) unsub();
+    };
   }, []); 
 
 

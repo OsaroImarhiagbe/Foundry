@@ -24,34 +24,22 @@ const PostComponent = ({content,date,name,id,url,count,comment_count,mount,auth_
     const [isReply,setReply] = useState(false)
     const [text,setText] = useState('')
     const dispatch = useDispatch();
-    const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
-    const aspectRatio = 1350 / 1080;
     const profileImage = useSelector((state) => state.user.profileimg)
     const {user} = useAuth();
 
     useEffect(() => {
-      setLoading(true)
-
-        if(id){
-          const unsub = firestore()
-          .collection('posts')
-          .doc(id)
-          .collection('comments')
-          .onSnapshot((querySnapShot) => {
-            try{
-                let data = []
-                querySnapShot.forEach(doc =>{
-                  data.push({ ...doc.data(),id:doc.id });
-                })
-                setComment(data)
-            }catch(e){
-              console.error('Error with comment',e.message)
-              setLoading(false);
-            }
-          }
-          ) 
+      const unsub = firestore()
+        .collection('posts')
+        .doc(id)
+        .collection('comments')
+        .onSnapshot((querySnapShot) => {
+              let data = []
+              querySnapShot.forEach(documentSnapshot =>{
+                data.push({ ...documentSnapshot.data(),id:documentSnapshot.id });
+              })
+              setComment(data)
+    }) 
           return () => unsub()
-        }
     },[id])
 
     useEffect(() => {

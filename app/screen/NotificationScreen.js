@@ -25,7 +25,8 @@ const NotificationScreen = () => {
 
   const getNotifications = useCallback(() => {
     try{
-      const unsub = firestore()
+      if(user){
+        const unsub = firestore()
       .collection('users')
       .doc(user?.uid)
       .collection('notifications')
@@ -41,7 +42,8 @@ const NotificationScreen = () => {
         setMessageNotifications([...messageOnly])
         setNotification([...all])
       })
-      return unsub
+      return () => unsub()
+      }
     }catch(err){
       console.error('Error grabbing notifications',err)
     }
