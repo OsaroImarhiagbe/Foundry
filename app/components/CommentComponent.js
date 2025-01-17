@@ -9,7 +9,6 @@ import ReplyComponent from './ReplyComponent';
 import firestore from '@react-native-firebase/firestore';
 import { useSelector } from 'react-redux';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { DocumentSnapshot } from '@react-native-firebase/app/lib/internal/web/firebaseFirestore';
 const CommentComponent = ({content,name,comment_id,post_id,count,date}) => {
     const [press,setIsPress] = useState(false)
     const [isloading,setLoading] = useState(false)

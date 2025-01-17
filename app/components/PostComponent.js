@@ -134,6 +134,7 @@ const PostComponent = ({content,date,name,id,url,count,comment_count,mount,auth_
           parentId:null,
           content:text,
           auth_profile:auth_profile,
+          name:user?.username,
           createdAt: firestore.Timestamp.fromDate(new Date())
         })
         await newDoc.update({
@@ -142,13 +143,12 @@ const PostComponent = ({content,date,name,id,url,count,comment_count,mount,auth_
         const postDocRef = firestore().collection('posts').doc(id)
         await firestore().runTransaction(async (transaction)=>{
           const doc = await transaction.get(postDocRef)
-          if (!doc.exists()) throw new Error('Doc does not exists!!')
+          if (!doc.exists) throw new Error('Doc does not exists!!')
           const commentCount = doc.data().comment_count || 0
           transaction.update(postDocRef,{
             comment_count:commentCount + 1
           })
         })
-        dispatch(addComment({id:newDoc.id,postId:id,content:text}))
         setText('')
       }catch(e){
         console.error('Error with sending comments:',e)
@@ -188,7 +188,7 @@ const PostComponent = ({content,date,name,id,url,count,comment_count,mount,auth_
         borderRadius:30}}
       />}
       <Text style={styles.postDate}>{date}</Text>
-      <View style={{borderBottomColor:'#8a8a8a',borderBottomWidth:0.5,marginTop:30}}></View>
+      <View style={{borderBottomColor:'#00bf63',borderBottomWidth:0.5,marginTop:30}}></View>
       <View style={styles.reactionContainer}>
     <TouchableHighlight
       onShowUnderlay={() => setIsPress(true)}
@@ -216,21 +216,26 @@ const PostComponent = ({content,date,name,id,url,count,comment_count,mount,auth_
     </View>
     <View>
     <Modal
-    animationType="slide"
+    onPress={() => setModalVisible(!modalVisible)}
+    animationType="fade"
     transparent={true}
     visible={modalVisible}>
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      keyboardVerticalOffset={Platform.OS === 'ios' ? 40 : 0}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 10}
       style={styles.centeredView}>
-      <TouchableWithoutFeedback onPress={() => setModalVisible(!modalVisible)}>
+      <TouchableWithoutFeedback>
         <View style={styles.commentView}>
           <View style={styles.modalView}>
-            <View style={{ flexDirection: 'row', justifyContent: 'center',alignItems:'center' }}>
-              <Text style={{ fontFamily: color.textFont, fontSize: 18 }}>Comments</Text>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between',alignItems:'center' }}>
+              <Text style={{ fontFamily: color.textFont, fontSize: 18}}>Comments</Text>
+              <TouchableOpacity onPress={isReply ? handlePost : handleSend}>
+                <View style={styles.sendButton}>
+                  <Feather name="send" size={hp(2.0)} color="#000" />
+                </View>
+              </TouchableOpacity>
             </View>
             <ScrollView
-              keyboardShouldPersistTaps="handled"
               contentContainerStyle={styles.scrollViewContent}>
               {comments.map((comment) => (
                 <Suspense key={comment.id} fallback={<ActivityIndicator size="small" color="#fff" />}>
@@ -246,7 +251,7 @@ const PostComponent = ({content,date,name,id,url,count,comment_count,mount,auth_
                 </Suspense>
               ))}
             </ScrollView>
-            <View>
+            <View style={{bottom:20}}>
             <View style={styles.inputContainer}>
               <TextInput
                 value={text}
@@ -255,11 +260,6 @@ const PostComponent = ({content,date,name,id,url,count,comment_count,mount,auth_
                 placeholder="Comment...."
                 placeholderTextColor="#000"
               />
-              <TouchableOpacity onPress={isReply ? handlePost : handleSend}>
-                <View style={styles.sendButton}>
-                  <Feather name="send" size={hp(2.0)} color="#000" />
-                </View>
-              </TouchableOpacity>
             </View>
             </View>
           </View>
@@ -302,6 +302,10 @@ const styles = StyleSheet.create({
       marginTop:5,
       fontSize:10
     
+    },
+    scrollViewContent: {
+      flexGrow: 1,
+      paddingBottom: 60,
     },
     postContainer:{
       marginTop:10,
@@ -349,12 +353,12 @@ const styles = StyleSheet.create({
     },
     modalView: {
       backgroundColor: color.grey,
-      borderTopRightRadius: 20,
-      borderTopLeftRadius: 20,
+      borderTopRightRadius: 40,
+      borderTopLeftRadius: 40,
       paddingHorizontal: 15,
       paddingTop: 20,
       width: '100%',
-      height: '60%',
+      height: '70%',
     },
     centeredView: {
       flex: 1,
@@ -363,7 +367,6 @@ const styles = StyleSheet.create({
     inputContainer: {
       flexDirection: 'row',
       alignItems: 'center',
-      marginTop: 10,
       borderColor: '#000',
       borderWidth: 0.5,
       borderRadius: 20,
