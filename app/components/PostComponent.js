@@ -15,7 +15,7 @@ import { useDispatch } from 'react-redux';
 import { addComment } from '../features/PostandComments/socialSlice';
 import Feather from 'react-native-vector-icons/Feather';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-const PostComponent = ({content,date,name,id,url,count,comment_count}) => {
+const PostComponent = ({content,date,name,id,url,count,comment_count,mount}) => {
 
     const [press,setIsPress] = useState(false)
     const [isloading,setLoading] = useState(false)
@@ -70,14 +70,13 @@ const PostComponent = ({content,date,name,id,url,count,comment_count}) => {
 
   
     const handleLike = async () => {
-      if(isloading) return
 
       setLoading(true)
+      const docRef = firestore().collection('posts').doc(id);
       try{
-        const docRef = firestore().collection('posts').doc(id);
         await firestore().runTransaction(async (transaction)=>{
           const doc = await transaction.get(docRef)
-          if (!doc.exists()) throw new Error ('Document doesnt exists');
+          if (!doc.exists) throw new Error ('Document doesnt exists');
 
           const currentLikes = doc.data().like_count || 0
           const likeBy = doc.data().liked_by || []
@@ -170,15 +169,17 @@ const PostComponent = ({content,date,name,id,url,count,comment_count}) => {
     <View style={styles.card}>
     <View style={styles.postContainer}>
     <View style={styles.imageText}>
-    <Image
+      {mount ? <Image
         style={{height:hp(4.3), aspectRatio:1, borderRadius:100}}
-        source={profileImage}
+        source=''
         placeholder={{blurhash}}
-        cachePolicy='none'/>
+        cachePolicy='none'/> : <Image
+        style={{height:hp(4.3), aspectRatio:1, borderRadius:100}}
+        source={user?.profileUrl}
+        placeholder={{blurhash}}
+        cachePolicy='none'/>}
     <View>
     <Text style={styles.userPost}>{name}</Text>
-    <View style={styles.userLocationContainer}>
-    </View>
     </View>
     </View>
     <View style={{marginTop:5}}>
@@ -200,18 +201,16 @@ const PostComponent = ({content,date,name,id,url,count,comment_count}) => {
       <View style={{borderBottomColor:'#8a8a8a',borderBottomWidth:0.5,marginTop:30}}></View>
       <View style={styles.reactionContainer}>
     <TouchableHighlight
-                  disabled={isloading}
-                 onShowUnderlay={() => setIsPress(true)}
-                 onHideUnderlay={() => setIsPress(false)}
-                 underlayColor='#0097b2'
-                 onPress={handleLike}
-                 style={styles.reactionIcon}
-                 >
-                 <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                     <MaterialCommunityIcons name={press ? "heart" : "cards-heart-outline"} size={20} color={press ? '#fff':""}/>
-                     <Text style={styles.reactionText}>{count}</Text>
-                 </View>
-                 </TouchableHighlight>
+      onShowUnderlay={() => setIsPress(true)}
+      onHideUnderlay={() => setIsPress(false)}
+      onPress={handleLike}
+      style={styles.reactionIcon}
+      >
+      <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+          <MaterialCommunityIcons name="heart" size={20} color='#fff'/>
+          <Text style={styles.reactionText}>{count}</Text>
+        </View>
+        </TouchableHighlight>
         <TouchableOpacity onPress={() => setModalVisible(true)} style={styles.reactionIcon}>
           <View style={{ flexDirection: 'row', alignItems: 'center' }}>
             <MaterialCommunityIcons name="comment-processing-outline" size={20} color='#ffff'/>
@@ -221,7 +220,6 @@ const PostComponent = ({content,date,name,id,url,count,comment_count}) => {
         <TouchableOpacity style={styles.reactionIcon}>
           <View style={{ flexDirection: 'row', alignItems: 'center' }}>
           <EvilIcons name='retweet' size={20} color='#ffffff'/>
-          <Text style={styles.reactionText}>10</Text>
           </View>
         </TouchableOpacity>
       </View>
@@ -318,16 +316,6 @@ const styles = StyleSheet.create({
       fontSize:10
     
     },
-    userLocationContainer:{
-        flexDirection:'row',
-    },
-    userLocation:{
-        fontFamily:'Helvetica-light',
-        color:'#ffffff',
-        marginTop:5,
-        marginLeft:50,
-        fontSize:10,
-    },
     postContainer:{
       marginTop:10,
       padding:5,
@@ -344,9 +332,7 @@ const styles = StyleSheet.create({
       marginLeft:10
     },
     postDate:{
-
       marginTop:10,
-      paddin:5,
       fontSize:9,
       color:'#8a8a8a',
       fontFamily:'Helvetica-light',

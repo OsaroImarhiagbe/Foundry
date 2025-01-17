@@ -22,6 +22,7 @@ export const AuthContextProvider = ({children}) => {
                                 email: user.email,
                                 username: firestoreData.username,
                                 userId: firestoreData.userId,
+                                profileUrl:firestoreData.profileUrl
                             });
                         }
                         await AsyncStorage.setItem('authUser',user?.uid)

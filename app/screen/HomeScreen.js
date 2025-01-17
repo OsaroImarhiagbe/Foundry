@@ -1,5 +1,5 @@
 import React,{useState,useEffect,lazy, Suspense,useMemo,useCallback} from 'react'
-import {View, Text, StyleSheet,TouchableOpacity, FlatList, Platform,StatusBar, ActivityIndicator,Dimensions} from 'react-native'
+import {View, Text, StyleSheet,TouchableOpacity, FlatList, Platform,StatusBar, ActivityIndicator,Image} from 'react-native'
 import color from '../../config/color';
 import { useNavigation } from '@react-navigation/native';
 import ChatRoomHeader from '../components/ChatRoomHeader';;
@@ -25,7 +25,6 @@ const HomeScreen = () => {
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const [mount, setMount] = useState(false)
-  const {height} = Dimensions.get('screen')
 
   console.log('HomeScreen currentuser:',user)
   
@@ -34,8 +33,8 @@ const HomeScreen = () => {
     setMount(true)
     dispatch(addId({currentuserID:user.userId}))
     const timer = setTimeout(() => {
-      setMount(false)
       fetchPosts();
+      setMount(false)
     },3000)
       
     return () => clearTimeout(timer)
@@ -59,7 +58,7 @@ const HomeScreen = () => {
             data.push({ ...documentSnapShot.data(),id:documentSnapShot.id });
         } )
         setPost([...data]);
-        setLastVisible(querySnapShot.docs[querySnapShot.docs.length - 1]); // Update the last visible document
+        setLastVisible(querySnapShot.docs[querySnapShot.docs.length - 1]);
         setHasMore(querySnapShot.docs.length > 0);
       });
       return unsub
@@ -75,7 +74,7 @@ const fetchMorePost = async () => {
     const snapshot = await firestore()
       .collection('posts')
       .orderBy('createdAt', 'desc')
-      .startAfter(lastVisible) // Start after the last fetched post
+      .startAfter(lastVisible)
       .limit(2)
       .get();
 
@@ -84,9 +83,9 @@ const fetchMorePost = async () => {
       ...doc.data(),
     }));
 
-    setPost(prevPosts => [...prevPosts, ...newPosts]); // Append new posts
-    setLastVisible(snapshot.docs[snapshot.docs.length - 1]); // Update the last visible document
-    setHasMore(snapshot.docs.length > 0); // Update if there are more posts
+    setPost(prevPosts => [...prevPosts, ...newPosts]);
+    setLastVisible(snapshot.docs[snapshot.docs.length - 1]);
+    setHasMore(snapshot.docs.length > 0);
   } catch (e) {
     console.error(`Error fetching more posts: ${e}`);
   } finally {
@@ -120,15 +119,15 @@ const fetchMorePost = async () => {
           <TouchableOpacity onPress={() => console.log('text pressed')}><Text style={styles.linkText}>Code</Text></TouchableOpacity>
           <TouchableOpacity onPress={() => console.log('test pressed')}><Text style={styles.linkText}>Learning Path</Text></TouchableOpacity>
         </View>
-   {mount ? <View style={{flex:1,justifyContent:'center',alignItems:'center'}}> <ActivityIndicator size='Large' color='#fff'/></View>
+   {mount ? Array.from({length:5}).map((_,index) => (
+    <PostComponent key={index} mount={mount}/>
+   ))
    : <FlatList
     data={memoPost}
-    contentContainerStyle={{bottom:10}}
     onRefresh={onRefresh}
     onEndReached={fetchMorePost}
     onEndReachedThreshold={0.1}
     refreshing={refreshing}
-    removeClippedSubviews={true}
     ListFooterComponent={() => (
       <ActivityIndicator color='#fff' size='small'/>
     )}
@@ -176,11 +175,6 @@ const styles = StyleSheet.create({
       paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
       flex:1,
       backgroundColor:'#1f1f1f'
-  },
-  Textcontainer:{
-    marginTop:30,
-    flexDirection:'row',
-    padding:10
   },
   title:{
     fontWeight:'bold',

@@ -76,7 +76,7 @@ const ChatRoomHeader = ({title,onPress,icon,onPress2,backgroundColor,icon2}) => 
         <View>
         <Image
         style={{height:hp(4.3), aspectRatio:1, borderRadius:100}}
-        source={profileImage}
+        source={user?.profileUrl}
         placeholder={{blurhash}}
         cachePolicy='none'/>
         </View>

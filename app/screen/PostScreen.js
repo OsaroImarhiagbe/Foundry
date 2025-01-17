@@ -110,13 +110,17 @@ const PostScreen = () => {
           </View>
         </TouchableOpacity>
       </View>
-      <View style={styles.textContainer}>
+      <View>
+        <View style={{paddingLeft:10}}>
         <Image
-          source={profileImage}
+          source={user?.profileUrl}
           placeholder={{blurhash}}
-          style={[styles.profileImage,{height:hp(4.3), aspectRatio:1, borderRadius:100}]}
+          style={{height:hp(4.3), aspectRatio:1, borderRadius:100}}
           transition={500}
                 />
+       </View>
+      </View>
+      <View style={styles.textContainer}>
         <TextInput
           style={styles.textArea}
           value={text}
@@ -126,18 +130,19 @@ const PostScreen = () => {
           placeholder='Enter a post......'
           placeholderTextColor='#ffffff'
         />
-      </View>
-        {image && 
+         {image && 
         <View style={{borderRadius:30}}>
           <Image
             source={image}
             style={styles.uploadedImage}
           />
         </View>}
+      </View>
         <KeyboardAvoidingView 
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={60}
         >
-        <View style={{flexDirection:'row',justifyContent:'center',alignItems:'center',padding:10}}>
+        <View style={{flexDirection:'row',justifyContent:'center',alignItems:'center',marginTop:10}}>
           <TouchableOpacity style={styles.uploadImageButton} onPress={pickImage}>
           <MaterialIcons name='camera-alt' size={15} color='#fff' />
         </TouchableOpacity>
@@ -152,10 +157,10 @@ const PostScreen = () => {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor:color.backgroundcolor
+    backgroundColor: color.backgroundcolor,
   },
   container: {
-    padding: 20,
+    padding: 10,
     marginTop: 10,
     flexDirection: 'row',
     height: 60,
@@ -163,17 +168,17 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   postContainer: {
-    padding: 5,
     borderRadius: 10,
-    width:90,
-    backgroundColor: '#00bf63'
+    padding: 10,
+    width: 90,
+    backgroundColor: '#00bf63',
   },
   loading: {
     justifyContent: 'center',
-    alignItems: 'center'
+    alignItems: 'center',
   },
   cancelContainer: {
-    padding: 5,
+    padding: 10,
     borderRadius: 10,
     width: 90,
     backgroundColor: '#8a8a8a',
@@ -182,39 +187,40 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     color: '#ffffff',
     fontFamily: color.textFont,
-    fontSize: 12
+    fontSize: 12,
   },
   textContainer: {
-    flexDirection: 'row',
+    flex: 1,
     paddingHorizontal: 22,
     marginTop: 10,
-  },
-  profileImage: {
-    height: hp(4.3),
-    aspectRatio: 1,
-    borderRadius: 100,
-    marginRight: 10
+    backgroundColor: 'rgba(255, 255, 255, 0.1)', // Optional background to separate text area
+    borderRadius: 10,
+    padding: 10,
   },
   textArea: {
     flex: 1,
-    padding: 10,
     color: '#ffffff',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.3)',
+    borderRadius: 10,
+    padding: 10,
+    marginBottom: 10, // Space between text and uploaded image
   },
   uploadedImage: {
-    width: wp(80),
-    height: hp(50),
+    width: '100%',
+    height: hp(25),
+    borderRadius: 10,
     alignSelf: 'center',
-    marginVertical: 10,
-    borderRadius:30
+    marginTop: 10,
   },
   uploadImageButton: {
     position: 'absolute',
     backgroundColor: '#00bf63',
     padding: 12,
     alignItems: 'center',
-    borderRadius:50,
-    justifyContent:'center',
-    top:5
+    borderRadius: 50,
+    justifyContent: 'center',
+    top: 5,
   },
 });
 

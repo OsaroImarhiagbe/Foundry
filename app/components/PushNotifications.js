@@ -5,7 +5,7 @@ import firestore from '@react-native-firebase/firestore'
 import { useAuth } from '../authContext';
 import {useState,useEffect,useRef} from 'react'
 import {Alert} from 'react-native'
-import NotificationBannerComponent from './NotificationBannerComponent';
+
 
 
 Notifications.setNotificationHandler({
@@ -116,14 +116,4 @@ export default function PushNotification(){
         Notifications.removeNotificationSubscription(responseListener.current);
     };
   }, []);
-
-  return(
-    <>
-    {showBanner && (
-        <NotificationBannerComponent
-          title={bannerData.title}
-          message={bannerData.message}
-        />)}
-    </>
-)
 }

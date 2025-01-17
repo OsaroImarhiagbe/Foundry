@@ -20,13 +20,12 @@ const CommentComponent = ({content,name,comment_id,post_id,count,date}) => {
     const profileImage = useSelector((state) => state.user.profileImage)
 
     const handleLike = async () => {
-      if(isloading) return
 
       setLoading(true)
+      const docRef = firestore().collection('posts').doc(post_id).collection('comments').doc(comment_id);
       try{
-        const docRef = await firestore().collection('posts').doc(post_id).collection('comments').doc(comment_id);
         await firestore().runTransaction(async (transaction)=>{
-          const doc = await transaction.get()
+          const doc = await transaction.get(docRef)
           if (!doc.exists()) throw new Error ('Document doesnt exists');
 
           const currentLikes = doc.data().like_count || 0
@@ -97,7 +96,7 @@ const CommentComponent = ({content,name,comment_id,post_id,count,date}) => {
     <View style={styles.imageText}>
     <Image
         style={{height:hp(3.3), aspectRatio:1, borderRadius:100}}
-        source={profileImage}
+        source={user.profileUrl}
         placeholder={{blurhash}}/>
     <View>
     <Text style={styles.userPost}>{name}</Text>

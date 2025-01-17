@@ -101,7 +101,7 @@ const OtherUserScreen = () => {
         .doc(other_user_id)
         .onSnapshot(
           (snapshot) => {
-            if (snapshot.exists()) {
+            if (snapshot.exists) {
               setUsers(snapshot.data());
             } else {
               console.error('No such document exists!');
@@ -157,7 +157,7 @@ const OtherUserScreen = () => {
     try{
       const docRef = firestore().collection('users').doc(other_user_id)
       await firestore().runTransaction(async(transaction)=>{
-        const doc = await transaction.get(docRef)
+        const doc = await transaction.get()
         if(!doc.exists()) throw new Error("Doc doesn't exists!")
         
         const currentConnectCount = doc.data().connection || 0
