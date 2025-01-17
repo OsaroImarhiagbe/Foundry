@@ -88,10 +88,10 @@ export default function PushNotification(){
       const data = notification.request.content.data
       setBannerData({ title, message });
       setShowBanner(true); 
-    //   Alert.alert(
-    //     notification.request.content.title,
-    //     notification.request.content.body
-    //   );
+      Alert.alert(
+        notification.request.content.title,
+        notification.request.content.body
+      );
       if(user){
       const docRef = firestore().collection('users').doc(user?.uid);
       const notificationRef = docRef.collection('notifications');
