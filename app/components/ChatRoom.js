@@ -4,6 +4,7 @@ import { useAuth } from '../authContext';
 import { blurhash } from '../../utils/index';
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import { Image } from 'expo-image';
+import firestore from '@react-native-firebase/firestore';
 import { getRoomID,formatDate } from '../../utils';
 import Swipeable from 'react-native-gesture-handler/ReanimatedSwipeable';
 import { useDispatch} from 'react-redux';

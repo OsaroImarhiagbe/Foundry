@@ -48,6 +48,7 @@ const AccountScreen = () => {
 
 
   useEffect(() => {
+    if(projects.length === 0) return;
     try{
       const projectRef = firestore().collection('projects').where('id','==',user?.userId)
       const unsub = projectRef.onSnapshot((documentSnapshot) => {

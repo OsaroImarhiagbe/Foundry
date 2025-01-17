@@ -63,7 +63,7 @@ const ChatScreen = () => {
       const id = route?.params?.userid ? route?.params?.userid : item?.userId
       const docRef = firestore().collection('users').doc(id)
       const snapShot = await docRef.get()
-        if(snapShot.exists()){
+        if(snapShot.exists){
           const data = snapShot.data()
           setExpoPushToken(data.expoToken)
         }else{
@@ -83,13 +83,15 @@ const ChatScreen = () => {
     try{
       
       const roomId = route?.params?.userid ? getRoomID(user?.userId, route?.params?.userid) : item?.userId ? getRoomID(user?.userId, item?.userId) : null
-      await firestore().collection('rooms').doc(roomId).setDoc({
+      const id = route?.params?.userid ? route?.params?.userid : item?.userId
+      await firestore().collection('rooms').doc(roomId).set({
         roomId,
         createdAt: firestore.Timestamp.fromDate(new Date())
       })
-      await firestore().collection('sent-message-id').doc(route?.params?.userid).set({
+      await firestore().collection('sent-message-id').doc(id).set({
         userId:route?.params?.userid,
-        name:recipentNamec
+        name:recipentNamec,
+        senderName:user?.username
       })
     } catch (error) {
       console.error("Error creating room:", error.message);
@@ -116,21 +118,21 @@ const ChatScreen = () => {
         recipentName:recipentNamec,
         createdAt: firestore.Timestamp.fromDate(new Date())
       })
-      const message = {
-        to: expoPushToken,
-        sound: 'default',
-        title: `${user.username} sent you a message.`,
-        body: message,
-        data: { type: 'message' },
-        _contentAvailable: true
-      };
-      await axios.post(EXPOPUSHURL,message, {
-        headers: {
-          Accept: 'application/json',
-          'Accept-encoding': 'gzip, deflate',
-          'Content-Type': 'application/json',
-        },
-      });
+      // const message = {
+      //   to: expoPushToken,
+      //   sound: 'default',
+      //   title: `${user.username} sent you a message.`,
+      //   body: message,
+      //   data: { type: 'message' },
+      //   _contentAvailable: true
+      // };
+      // await axios.post(EXPOPUSHURL,message, {
+      //   headers: {
+      //     Accept: 'application/json',
+      //     'Accept-encoding': 'gzip, deflate',
+      //     'Content-Type': 'application/json',
+      //   },
+      // });
     }catch(error){
       console.error(`${error}`)
     }
@@ -153,7 +155,7 @@ const ChatScreen = () => {
       <View style={styles.inputContainer}>
         <View style={styles.messageInput}>
           <TextInput
-          style={[styles.textinput,{fontSize:hp(2)}]}
+          style={[styles.textInput,{fontSize:hp(2)}]}
             ref={inputRef}
             onChangeText={value => textRef.current = value}
             placeholder='Enter message....'
@@ -176,36 +178,41 @@ const ChatScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor:'#fff'
+    backgroundColor: color.background,
   },
   messagesContainer: {
     flex: 1,
-    padding:2
+    padding: wp(3),
   },
   inputContainer: {
     flexDirection: 'row',
-    justifyContent:'space-between',
-    alignItems:'center',
-    marginRight:3,
-    marginLeft:3,
-    paddingBottom:70
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: wp(4),
+    paddingBottom: hp(2),
+    backgroundColor: color.inputBackground,
   },
   messageInput: {
-    flexDirection:'row',
-    justifyContent:'space-between',
-    backgroundColor:color.white,
-    borderWidth:2,
-    borderColor:color.grey,
-    borderRadius:30
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: color.white,
+    borderRadius: hp(2),
+    paddingHorizontal: wp(3),
+    paddingVertical: hp(1),
+    flex: 1,
+    borderColor: color.grey,
+    borderWidth: 1,
   },
-  textinput:{
-    flex:1,
-    marginRight:2,
-    padding:10
+  textInput: {
+    flex: 1,
+    fontSize: hp(2.2),
+    color: color.textColor,
+    paddingVertical: hp(0.5),
   },
   sendButton: {
-    padding: 10,
-    marginRight:1
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: wp(2),
   },
 });
 

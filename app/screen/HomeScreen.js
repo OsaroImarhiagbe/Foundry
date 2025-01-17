@@ -33,8 +33,27 @@ const HomeScreen = () => {
     setMount(true)
     dispatch(addId({currentuserID:user.userId}))
     const timer = setTimeout(() => {
-      fetchPosts();
-      setMount(false)
+      const fetchPosts = () => { 
+        try {
+          const unsub = firestore().collection('posts').orderBy('createdAt', 'desc').limit(10)
+            .onSnapshot(querySnapShot =>{
+              let data = [];
+              querySnapShot.forEach(documentSnapShot => {
+                data.push({ ...documentSnapShot.data(),id:documentSnapShot.id });
+            } )
+            setPost([...data]);
+            setLastVisible(querySnapShot.docs[querySnapShot.docs.length - 1]);
+            setHasMore(querySnapShot.docs.length > 0);
+          });
+          return () => unsub()
+        }  catch (e) {
+        console.error(`Error post can not be found: ${e}`);
+      }finally{
+        setMount(false)
+      } 
+    };
+      fetchPosts()
+      
     },3000)
       
     return () => clearTimeout(timer)
@@ -43,29 +62,28 @@ const HomeScreen = () => {
 
   const onRefresh = useCallback(() => {
     setRefreshing(true);
-    fetchPosts();
-    setRefreshing(false);
+      try {
+        const unsub = firestore().collection('posts').orderBy('createdAt', 'desc').limit(10)
+          .onSnapshot(querySnapShot =>{
+            let data = [];
+            querySnapShot.forEach(documentSnapShot => {
+              data.push({ ...documentSnapShot.data(),id:documentSnapShot.id });
+          } )
+          setPost([...data]);
+          setLastVisible(querySnapShot.docs[querySnapShot.docs.length - 1]);
+          setHasMore(querySnapShot.docs.length > 0);
+        });
+        return () => unsub()
+      }  catch (e) {
+      console.error(`Error post can not be found: ${e}`);
+    }finally{
+      setRefreshing(false);
+    }
   }, [memoPost]);
   
 
   const memoPost = useMemo(() => {return post},[post])
-  const fetchPosts = () => { 
-    try {
-      const unsub = firestore().collection('posts').orderBy('createdAt', 'desc').limit(10)
-        .onSnapshot(querySnapShot =>{
-          let data = [];
-          querySnapShot.forEach(documentSnapShot => {
-            data.push({ ...documentSnapShot.data(),id:documentSnapShot.id });
-        } )
-        setPost([...data]);
-        setLastVisible(querySnapShot.docs[querySnapShot.docs.length - 1]);
-        setHasMore(querySnapShot.docs.length > 0);
-      });
-      return unsub
-    }  catch (e) {
-    console.error(`Error post can not be found: ${e}`);
-  } 
-};
+  
 
 const fetchMorePost = async () => {
   if (loadingMore || !hasMore) return;
@@ -106,7 +124,7 @@ const fetchMorePost = async () => {
         <View>
           <ChatRoomHeader
           onPress={handlePress}
-          title='Welcome back'
+          title='DevGuiide'
           icon='menu'
           icon2='new-message'
           onPress2={handleMessage}

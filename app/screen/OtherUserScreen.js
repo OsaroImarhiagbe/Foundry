@@ -18,6 +18,7 @@ import { createMaterialTopTabNavigator } from '@react-navigation/material-top-ta
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import EvilIcons from 'react-native-vector-icons/EvilIcons';
+import { DocumentSnapshot } from '@react-native-firebase/app/lib/internal/web/firebaseFirestore';
 const PostComponent = lazy(() => import('../components/PostComponent'))
 
 
@@ -42,8 +43,10 @@ const OtherUserScreen = () => {
     const other_user_id = useSelector((state)=>state.search.searchID)
     const [refreshing, setRefreshing] = useState(false);
   
+    console.log('other user:',users)
     const follow_items = [{count:users.projects,content:'projects'},{count:users.connection,content:'connection'},{count:posts.length,content:'posts'}]
 
+    console.log('user other id:',other_user_id)
     const onRefresh = useCallback(async () => {
     setRefreshing(true);
     await fetchUser();
@@ -53,6 +56,7 @@ const OtherUserScreen = () => {
 
 
     useEffect(() => {
+      if(projects.length === 0) return;
       try{
         const unsub = firestore()
         .collection('projects')
@@ -72,24 +76,22 @@ const OtherUserScreen = () => {
 
 
     useEffect(() => {
-      if(!posts || posts.length === 0){
-        setPosts([]) 
-        return;
-      } 
+      if (!users || !users.username) return;  
       try{
         const unsub = firestore()
         .collection('posts')
-        .where('name','==',users?.username)
-        .onSnapshot(documentSnapShopt => {
+        .where('name','==',users.username)
+        .orderBy('createdAt','desc')
+        .onSnapshot(documentSnapshot => {
           let data = []
-          documentSnapShopt.forEach(doc => {
+          documentSnapshot.forEach(doc => {
             data.push({...doc.data(),id:doc.id})
           })
-          setPosts([data])
+          setPosts(data)
         })
         return () => unsub()
       }catch(err){
-        console.error('error grabbing user post:',err)
+        console.error('error grabbing user post:',err.message)
       }
     },[users])
 
@@ -100,9 +102,9 @@ const OtherUserScreen = () => {
         .collection('users')
         .doc(other_user_id)
         .onSnapshot(
-          (snapshot) => {
-            if (snapshot.exists) {
-              setUsers(snapshot.data());
+          (documentSnapshot) => {
+            if (documentSnapshot.exists) {
+              setUsers(documentSnapshot.data());
             } else {
               console.error('No such document exists!');
             }
@@ -123,9 +125,9 @@ const OtherUserScreen = () => {
         {
         posts && posts.length > 0 ? (
             posts.map((post) => (
-              <Suspense key={post.id} fallback={<ActivityIndicator size="small" color="#000" />}>
+              <Suspense key={post.post_id} fallback={<ActivityIndicator size="small" color="#000" />}>
                 <View style={{padding: 10 }}>
-                  <PostComponent count={post.like_count} url={post.imageUrl} id={post.id} name={post.name} content={post.content} date={post.createdAt.toDate().toLocaleString()} comment_count={post.comment_count} />
+                  <PostComponent count={post.like_count} url={post.imageUrl} id={post.post_id} name={post.name} content={post.content} date={post.createdAt.toDate().toLocaleString()} comment_count={post.comment_count} />
                 </View>
               </Suspense>
             ))) : <Text style={{ color: '#fff', textAlign: 'center', fontFamily:color.textFont,fontSize:20}}>No posts available</Text>}
@@ -195,7 +197,7 @@ const OtherUserScreen = () => {
   if(isloading) return null
   
     return (
-        <SafeAreaView style={styles.screen}>
+        <View style={styles.screen}>
           <ChatRoomHeader 
             onPress={()=>navigation.navigate('Main')} 
             backgroundColor={color.button} 
@@ -288,7 +290,7 @@ const OtherUserScreen = () => {
                   </Tab.Navigator>
                 </View> 
             </ScrollView> 
-        </SafeAreaView>
+        </View>
        
       )
     }

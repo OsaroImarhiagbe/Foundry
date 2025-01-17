@@ -48,7 +48,8 @@ const styles = StyleSheet.create({
     textinput: {
         color: color.white,
         fontSize: 15,
-        padding:10
+        padding:10,
+        width:'80%' 
     },
 
 
