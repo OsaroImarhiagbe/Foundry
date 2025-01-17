@@ -36,7 +36,7 @@ const AccountScreen = () => {
   const navigation = useNavigation();
   const isCurrentUser = user
   const [refreshing, setRefreshing] = useState(false);
-  console.log('account screen:',user)
+
   
   const follow_items = [{count:projects?.projects?.length,content:'projects'},{count:users.connection,content:'connection'},{count:posts.length,content:'posts'}]
 
@@ -84,7 +84,6 @@ const AccountScreen = () => {
 
   useEffect(() => {
     setLoading(true)
-    const fetchUser = async () => {
       const userDoc = firestore().collection('users').doc(user.userId)
       const unsub = userDoc.onSnapshot(
         (documentSnapshot) =>{
@@ -96,15 +95,10 @@ const AccountScreen = () => {
       },
         (error)=>{
           console.error(`No such document ${error.message}`)
+          setLoading(false)
         }
       );
       return () => unsub()
-    };
-       
-    fetchUser()
-    return () => {
-      setLoading(false)
-    }
   },[])
 
 

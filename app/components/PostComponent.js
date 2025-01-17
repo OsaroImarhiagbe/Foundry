@@ -31,7 +31,7 @@ const PostComponent = ({content,date,name,id,url,count,comment_count,mount,auth_
 
     useEffect(() => {
       setLoading(true)
-      const grabComments = () => {
+
         if(id){
           const unsub = firestore()
           .collection('posts')
@@ -46,13 +46,12 @@ const PostComponent = ({content,date,name,id,url,count,comment_count,mount,auth_
                 setComment(data)
             }catch(e){
               console.error('Error with comment',e.message)
+              setLoading(false);
             }
           }
           ) 
           return () => unsub()
         }
-    }
-    grabComments()
     },[id])
 
     useEffect(() => {

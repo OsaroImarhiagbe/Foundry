@@ -26,11 +26,11 @@ const HomeScreen = () => {
   const [hasMore, setHasMore] = useState(true);
   const [mount, setMount] = useState(false)
 
-  useEffect(() => { 
+  useEffect(() => {
+    if (!user?.userId) return;
     setMount(true)
-    dispatch(addId({currentuserID:user.userId}))
+    dispatch(addId({currentuserID:user?.userId}))
     const timer = setTimeout(() => {
-      const fetchPosts = () => { 
         try {
           const unsub = firestore().collection('posts').orderBy('createdAt', 'desc').limit(10)
             .onSnapshot(querySnapShot =>{
@@ -48,9 +48,6 @@ const HomeScreen = () => {
       }finally{
         setMount(false)
       } 
-    };
-      fetchPosts()
-      
     },3000)
       
     return () => clearTimeout(timer)

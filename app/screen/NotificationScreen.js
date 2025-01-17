@@ -45,7 +45,7 @@ const NotificationScreen = () => {
     }catch(err){
       console.error('Error grabbing notifications',err)
     }
-  },[user?.uid])
+  },[user?.userId])
 
   useEffect(() => {
     if(!messageNotifications || !notification){
@@ -63,7 +63,7 @@ const NotificationScreen = () => {
       if(unsub) unsub()
     }
     
-  },[user.uid,getNotifications])
+  },[user?.userId,getNotifications])
 
 
   const MessagesNotifications = () => (
