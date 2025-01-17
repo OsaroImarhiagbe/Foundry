@@ -47,8 +47,10 @@ const EditScreen = () => {
         {
             header: 'Settings',
             icon: 'settings',
+            id:1,
             items:[
                 {
+                    id:1,
                     icon:'globe', 
                     color:'orange',
                     label:'Language', 
@@ -56,11 +58,13 @@ const EditScreen = () => {
                     screen:'LanguageScreen'
                 },
                 {
+                    id:2,
                     icon:'navigation',
                     color:'green',
                     label:'Location', 
                     type:'link',},
                 {
+                    id:3,
                     id:'showusers',
                     icon:'users',
                     color:'green',
@@ -68,6 +72,7 @@ const EditScreen = () => {
                     type:'toggle'
                 },
                 {
+                    id:4,
                     id:'accessmode',
                     icon:'airplay',
                     color:'#fd2d54',
@@ -79,9 +84,10 @@ const EditScreen = () => {
         {
             header:'Help',
             icon:'help-circle',
+            id:2,
             items:[
-                {icon:'flag', color:'grey',label:'Report Bug', type:'link',screen:'ReportBugScreen'},
-                {icon:'mail', color:'blue',label:'Contact us', type:'link',screen:'ContactUsScreen'},]
+                {id:5,icon:'flag', color:'grey',label:'Report Bug', type:'link',screen:'ReportBugScreen'},
+                {id:6,icon:'mail', color:'blue',label:'Contact us', type:'link',screen:'ContactUsScreen'},]
         },
     ];
     const sections = [
@@ -186,7 +192,8 @@ const EditScreen = () => {
 
   return (
     <View style={styles.screen}>
-        <ChatRoomHeader 
+        <ChatRoomHeader
+        iconColor='#00bf63' 
         onPress={()=>navigation.navigate('Profile',{user})} 
         backgroundColor={color.button}
         title='Edit Profile'
@@ -203,7 +210,7 @@ const EditScreen = () => {
         <View style={{flexDirection:'row'}}>
         <Image
             style={{height:hp(5), aspectRatio:1, borderRadius:100}}
-            source={edit.profileUrl}
+            source={edit.profileUrl || user.profileUrl}
             placeholder={{blurhash}}
             transition={500}
             cachePolicy='none'/>
@@ -215,9 +222,9 @@ const EditScreen = () => {
         </View>
         </View>
         <View style={{marginTop:40}}>
-            {sections.map(({header,items})=>( 
+            {sections.map(({header,items,id})=>( 
                 <View>
-                     <Text key={header} style={{color:'#fff',fontSize:20}}>
+                     <Text key={id} style={{color:'#fff',fontSize:20}}>
                   {header}
                         </Text>
                 {items.map(({id,icon,nav,name,type,screen})=>(
@@ -245,13 +252,13 @@ const EditScreen = () => {
                 </View>
             ))}
             <View style={{marginTop:20}}>
-            {Sections.map(({header, items}) => (
-                <View key={header}>
+            {Sections.map(({header, items,id}) => (
+                <View key={id}>
                     <Text style={{color:'#fff',fontSize:20,marginBottom:10}}>{header}</Text>
 
                     {items.map(({id, icon,color, label, type,screen}) => (
                         <TouchableOpacity
-                            key={icon}
+                            key={id}
                             onPress={label === 'Language' ? () => setModalVisible(true):() => navigation.navigate(screen)}>
                         <View style={styles.row}>
                             <View style={{ backgroundColor: '#3b3b3b', borderRadius: 5, width: 30, padding: 5 }}>

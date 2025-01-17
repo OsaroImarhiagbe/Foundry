@@ -63,7 +63,7 @@ const MessageScreen = () => {
 
   return (
     <View style={styles.screen}>
-      <ChatRoomHeader title='Message' onPress={handlePress} icon='keyboard-backspace' backgroundColor={color.button}/>
+      <ChatRoomHeader title='Message' onPress={handlePress} icon='keyboard-backspace' backgroundColor={color.button} iconColor='#00bf63'/>
       <ScrollView
       style={{flex:1}}
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh}/>}
