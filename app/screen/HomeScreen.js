@@ -26,9 +26,6 @@ const HomeScreen = () => {
   const [hasMore, setHasMore] = useState(true);
   const [mount, setMount] = useState(false)
 
-  console.log('HomeScreen currentuser:',user)
-  
-
   useEffect(() => { 
     setMount(true)
     dispatch(addId({currentuserID:user.userId}))
@@ -151,6 +148,7 @@ const fetchMorePost = async () => {
     )}
     renderItem={({item}) => <Suspense fallback={<ActivityIndicator size='small' color='#000'/>}>
       <PostComponent
+      auth_profile={item.auth_profile}
       count={item.like_count}
       url={item.imageUrl}
       id={item.post_id}

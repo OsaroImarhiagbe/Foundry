@@ -89,7 +89,7 @@ const ChatScreen = () => {
         createdAt: firestore.Timestamp.fromDate(new Date())
       })
       await firestore().collection('sent-message-id').doc(id).set({
-        userId:route?.params?.userid,
+        userId:id,
         name:recipentNamec,
         senderName:user?.username
       })
@@ -118,21 +118,21 @@ const ChatScreen = () => {
         recipentName:recipentNamec,
         createdAt: firestore.Timestamp.fromDate(new Date())
       })
-      // const message = {
-      //   to: expoPushToken,
-      //   sound: 'default',
-      //   title: `${user.username} sent you a message.`,
-      //   body: message,
-      //   data: { type: 'message' },
-      //   _contentAvailable: true
-      // };
-      // await axios.post(EXPOPUSHURL,message, {
-      //   headers: {
-      //     Accept: 'application/json',
-      //     'Accept-encoding': 'gzip, deflate',
-      //     'Content-Type': 'application/json',
-      //   },
-      // });
+      const message = {
+        to: expoPushToken,
+        sound: 'default',
+        title: `${user.username} sent you a message.`,
+        body: message,
+        data: { type: 'message' },
+        _contentAvailable: true
+      };
+      await axios.post(EXPOPUSHURL,message, {
+        headers: {
+          Accept: 'application/json',
+          'Accept-encoding': 'gzip, deflate',
+          'Content-Type': 'application/json',
+        },
+      });
     }catch(error){
       console.error(`${error}`)
     }
@@ -155,7 +155,7 @@ const ChatScreen = () => {
       <View style={styles.inputContainer}>
         <View style={styles.messageInput}>
           <TextInput
-          style={[styles.textInput,{fontSize:hp(2)}]}
+          style={[styles.textinput,{fontSize:hp(2)}]}
             ref={inputRef}
             onChangeText={value => textRef.current = value}
             placeholder='Enter message....'
@@ -178,41 +178,36 @@ const ChatScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: color.background,
+    backgroundColor:'#fff'
   },
   messagesContainer: {
     flex: 1,
-    padding: wp(3),
+    padding:2
   },
   inputContainer: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: wp(4),
-    paddingBottom: hp(2),
-    backgroundColor: color.inputBackground,
+    justifyContent:'space-between',
+    alignItems:'center',
+    marginRight:3,
+    marginLeft:3,
+    paddingBottom:70
   },
   messageInput: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: color.white,
-    borderRadius: hp(2),
-    paddingHorizontal: wp(3),
-    paddingVertical: hp(1),
-    flex: 1,
-    borderColor: color.grey,
-    borderWidth: 1,
+    flexDirection:'row',
+    justifyContent:'space-between',
+    backgroundColor:color.white,
+    borderWidth:2,
+    borderColor:color.grey,
+    borderRadius:30
   },
-  textInput: {
-    flex: 1,
-    fontSize: hp(2.2),
-    color: color.textColor,
-    paddingVertical: hp(0.5),
+  textinput:{
+    flex:1,
+    marginRight:2,
+    padding:10
   },
   sendButton: {
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: wp(2),
+    padding: 10,
+    marginRight:1
   },
 });
 

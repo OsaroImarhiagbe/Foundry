@@ -15,7 +15,7 @@ import { useDispatch } from 'react-redux';
 import { addComment } from '../features/PostandComments/socialSlice';
 import Feather from 'react-native-vector-icons/Feather';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-const PostComponent = ({content,date,name,id,url,count,comment_count,mount}) => {
+const PostComponent = ({content,date,name,id,url,count,comment_count,mount,auth_profile}) => {
 
     const [press,setIsPress] = useState(false)
     const [isloading,setLoading] = useState(false)
@@ -175,7 +175,7 @@ const PostComponent = ({content,date,name,id,url,count,comment_count,mount}) => 
         placeholder={{blurhash}}
         cachePolicy='none'/> : <Image
         style={{height:hp(4.3), aspectRatio:1, borderRadius:100}}
-        source={user?.profileUrl}
+        source={auth_profile}
         placeholder={{blurhash}}
         cachePolicy='none'/>}
     <View>

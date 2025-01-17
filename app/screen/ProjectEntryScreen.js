@@ -7,7 +7,6 @@ import { blurhash } from '../../utils';
 import firestore from '@react-native-firebase/firestore'
 import axios from 'axios';
 import * as ImagePicker from 'expo-image-picker';
-import {DJANGO_PROJECT_URL} from '@env'
 import { Image } from 'expo-image';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 

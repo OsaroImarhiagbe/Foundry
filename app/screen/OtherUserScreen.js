@@ -127,7 +127,7 @@ const OtherUserScreen = () => {
             posts.map((post) => (
               <Suspense key={post.post_id} fallback={<ActivityIndicator size="small" color="#000" />}>
                 <View style={{padding: 10 }}>
-                  <PostComponent count={post.like_count} url={post.imageUrl} id={post.post_id} name={post.name} content={post.content} date={post.createdAt.toDate().toLocaleString()} comment_count={post.comment_count} />
+                  <PostComponent auth_profile={post.auth_profile} count={post.like_count} url={post.imageUrl} id={post.post_id} name={post.name} content={post.content} date={post.createdAt.toDate().toLocaleString()} comment_count={post.comment_count} />
                 </View>
               </Suspense>
             ))) : <Text style={{ color: '#fff', textAlign: 'center', fontFamily:color.textFont,fontSize:20}}>No posts available</Text>}

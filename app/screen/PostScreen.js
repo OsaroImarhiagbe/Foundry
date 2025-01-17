@@ -29,6 +29,7 @@ const PostScreen = () => {
     try {
       const newDoc = await firestore().collection('posts').add({
         auth_id:user.uid,
+        auth_profile:user.profileUrl,
         name:user?.username,
         content: text,
         like_count: null,
