@@ -10,7 +10,7 @@ import {Alert} from 'react-native'
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
-    shouldShowAlert: false,
+    shouldShowAlert: true,
     shouldPlaySound: false,
     shouldSetBadge: false,
   }),
