@@ -141,7 +141,7 @@ const fetchMorePost = async () => {
     data={memoPost}
     onRefresh={onRefresh}
     onEndReached={fetchMorePost}
-    onEndReachedThreshold={0.1}
+    onEndReachedThreshold={0.5}
     refreshing={refreshing}
     ListFooterComponent={() => (
       <ActivityIndicator color='#fff' size='small'/>
