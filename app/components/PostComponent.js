@@ -15,6 +15,7 @@ import { useDispatch } from 'react-redux';
 import { addComment } from '../features/PostandComments/socialSlice';
 import Feather from 'react-native-vector-icons/Feather';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Card, Text } from 'react-native-paper';
 const PostComponent = ({content,date,name,id,url,count,comment_count,mount,auth_profile}) => {
 
     const [press,setIsPress] = useState(false)
