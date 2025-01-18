@@ -25,6 +25,7 @@
     "@react-navigation/native-stack": "^7.1.14",
     "@react-navigation/stack": "^7.0.18",
     "@reduxjs/toolkit": "^2.4.0",
+    "@shopify/flash-list": "^1.7.2",
     "axios": "^1.6.8",
     "cors": "^2.8.5",
     "eslint": "^9.16.0",
