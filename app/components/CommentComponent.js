@@ -1,5 +1,9 @@
 import React,{useState,useEffect} from 'react'
-import {View,StyleSheet,Text,TouchableOpacity,TouchableHighlight} from 'react-native'
+import {
+  View,
+  StyleSheet,
+  TouchableOpacity,
+  TouchableHighlight} from 'react-native'
 import { blurhash } from '../../utils/index'
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import { Image } from 'expo-image';
@@ -9,6 +13,7 @@ import ReplyComponent from './ReplyComponent';
 import firestore from '@react-native-firebase/firestore';
 import { useSelector } from 'react-redux';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import {Text,Card} from 'react-native-paper'
 const CommentComponent = ({content,name,comment_id,post_id,count,date,auth_profile}) => {
     const [press,setIsPress] = useState(false)
     const [isloading,setLoading] = useState(false)
@@ -96,16 +101,19 @@ const CommentComponent = ({content,name,comment_id,post_id,count,date,auth_profi
     <Image
         style={{height:hp(3.3), aspectRatio:1, borderRadius:100}}
         source={auth_profile}
+        cachePolicy='none'
         placeholder={{blurhash}}/>
     <View>
-    <Text style={styles.userPost}>{name}</Text>
-    <View style={styles.userLocationContainer}>
-    </View>
+    <Text
+    variant='bodyLarge'
+    style={styles.userPost}>{name}</Text>
+    <Text
+    variant='bodyMedium'
+    style={styles.postText}>{content}
+    </Text>
     </View>
     </View>
     <View style={{paddingLeft:5}}>
-    <Text style={styles.postText}>{content}
-      </Text>
       <Text style={styles.postDate}>{date}</Text>
     </View>
       <View style={styles.reactionContainer}>

@@ -207,12 +207,13 @@ const PostComponent = ({content,date,name,id,url,count,comment_count,mount,auth_
     {url && 
       <Image
       source={url}
+      contentFit='cover'
+
       style={{
         aspectRatio:1,
         width:wp('100%'),
         height:hp('50%'),
-        alignSelf: 'center',
-        contentFit: 'cover',}}
+        alignSelf: 'center',}}
       />}
       <Text
        variant="bodySmall"

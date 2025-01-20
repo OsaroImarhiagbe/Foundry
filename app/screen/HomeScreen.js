@@ -13,6 +13,7 @@ import {
   useWindowDimensions,
   StatusBar,
   SafeAreaView,
+  Animated
 } from 'react-native'
 import color from '../../config/color';
 import { useNavigation } from '@react-navigation/native';
@@ -42,6 +43,14 @@ const HomeScreen = () => {
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const [mount, setMount] = useState(false)
+  const scrollY = useState(new Animated.Value(0))[0];
+
+  
+  const headerOpacity = scrollY.interpolate({
+    inputRange: [0, 250],
+    outputRange: [1, 0],
+    extrapolate: 'clamp',
+  });
 
   useEffect(() => {
     if (!user?.userId) return;
@@ -141,7 +150,7 @@ const fetchMorePost = async () => {
     style={styles.screen}
     >
       <PushNotification/>
-        <View>
+      <Animated.View style={{ opacity: headerOpacity }}>
           <ChatRoomHeader
           onPress={handlePress}
           title='DevGuiide'
@@ -151,7 +160,6 @@ const fetchMorePost = async () => {
           onPress2={handleMessage}
           backgroundColor={color.button}
           />
-        </View>
         <View style={styles.link}>
           <TouchableOpacity onPress={() => console.log('text pressed')}>
           <Text
@@ -173,6 +181,7 @@ const fetchMorePost = async () => {
            style={{color:'#fff'}}
            >Learning Path</Text></TouchableOpacity>
         </View>
+        </Animated.View>
    {mount ? Array.from({length:5}).map((_,index) => (
     <PostComponent key={index} mount={mount}/>
    ))
@@ -181,6 +190,10 @@ const fetchMorePost = async () => {
     data={memoPost}
     estimatedItemSize={402}
     onRefresh={onRefresh}
+    onScroll={Animated.event(
+      [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+      { useNativeDriver: false }
+    )}
     onEndReached={fetchMorePost}
     onEndReachedThreshold={0.1}
     refreshing={refreshing}
