@@ -25,6 +25,7 @@ import Feather from 'react-native-vector-icons/Feather';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Card,Text, TextInput,Divider} from 'react-native-paper';
 import { FlashList } from "@shopify/flash-list";
+import { ScrollView } from 'react-native-gesture-handler';
 
 const PostComponent = ({content,date,name,id,url,count,comment_count,mount,auth_profile}) => {
 
@@ -269,7 +270,6 @@ const PostComponent = ({content,date,name,id,url,count,comment_count,mount,auth_
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       keyboardVerticalOffset={0}
       style={styles.centeredView}>
-      <TouchableWithoutFeedback>
         <View style={styles.commentView}>
           <View style={styles.modalView}>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between',alignItems:'center' }}>
@@ -286,9 +286,12 @@ const PostComponent = ({content,date,name,id,url,count,comment_count,mount,auth_
             <Divider
             style={{width:'100%'}}
             />
+             <ScrollView
+             style={{flex:1,flexGrow:1}}
+             >
             <FlashList
             data={comments}
-            estimatedItemSize={200}
+            estimatedItemSize={366}
             keyExtractor={(item) => item.id}
             renderItem={({item}) => (
               <CommentComponent
@@ -298,8 +301,8 @@ const PostComponent = ({content,date,name,id,url,count,comment_count,mount,auth_
                     name={item.name}
                     comment_id={item.id}
                     post_id={id}
-                    date={item.createdAt.toDate().toLocaleString()}/>)}/>
-            <View style={{bottom:10}}>
+                    date={item.createdAt.toDate().toLocaleString()}/>)}/></ScrollView>
+            <View style={{bottom:0,padding:20}}>
               <TextInput
                 value={text}
                 onChangeText={(text) => setText(text)}
@@ -310,7 +313,6 @@ const PostComponent = ({content,date,name,id,url,count,comment_count,mount,auth_
             </View>
           </View>
         </View>
-      </TouchableWithoutFeedback>
     </KeyboardAvoidingView>
   </Modal>
   </View>
@@ -370,22 +372,12 @@ const styles = StyleSheet.create({
       flex: 1,
       justifyContent: 'flex-end',
     },
-    inputContainer: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      borderColor: '#000',
-      borderWidth: 0.5,
-      borderRadius: 20,
-      paddingHorizontal: 10,
-      backgroundColor: '#fff',
-    },
     textinput: {
-      height: 40,
-      padding: 10,
+      height:hp(2),
+      padding: 15,
       fontSize: hp(2),
       color: '#000',
       flexDirection: 'row',
-      alignItems: 'center',
       paddingHorizontal: 10,
       backgroundColor: '#fff',
       borderTopRightRadius:30,
