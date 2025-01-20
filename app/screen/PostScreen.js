@@ -25,6 +25,7 @@ const PostScreen = () => {
   const dispatch = useDispatch();
 
   const handlePost = async () => {
+    if(text.trim() === '') return
     setLoading(true);
     try {
       const newDoc = await firestore().collection('posts').add({

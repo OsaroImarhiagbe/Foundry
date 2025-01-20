@@ -4,8 +4,8 @@ TouchableOpacity,
 TouchableHighlight,
 SafeAreaView,
 KeyboardAvoidingView,
-Platform,ScrollView,
-TextInput,
+Platform,
+ScrollView,
 Modal,
 ActivityIndicator,
 useWindowDimensions,
@@ -26,7 +26,7 @@ import { useDispatch } from 'react-redux';
 import { addComment } from '../features/PostandComments/socialSlice';
 import Feather from 'react-native-vector-icons/Feather';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Card,Text} from 'react-native-paper';
+import { Card,Text, TextInput,Divider} from 'react-native-paper';
 import { FlashList } from "@shopify/flash-list";
 
 const PostComponent = ({content,date,name,id,url,count,comment_count,mount,auth_profile}) => {
@@ -174,7 +174,13 @@ const PostComponent = ({content,date,name,id,url,count,comment_count,mount,auth_
   return (
     
     <SafeAreaView style={styles.card}>
-    <View style={styles.postContainer}>
+      <Card
+      elevation={0}
+      mode='contained'
+      style={{backgroundColor:color.backgroundcolor}}
+      >
+      <Card.Content>
+      <View style={styles.postContainer}>
     <View style={styles.imageText}>
       {mount ? <Image
         style={{height:hp(4.3), aspectRatio:1, borderRadius:100}}
@@ -209,7 +215,6 @@ const PostComponent = ({content,date,name,id,url,count,comment_count,mount,auth_
       <Image
       source={url}
       contentFit='cover'
-
       style={{
         aspectRatio:1,
         width:wp('100%'),
@@ -263,8 +268,9 @@ const PostComponent = ({content,date,name,id,url,count,comment_count,mount,auth_
     transparent={true}
     visible={modalVisible}>
     <KeyboardAvoidingView
+      sh
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 10}
+      keyboardVerticalOffset={0}
       style={styles.centeredView}>
       <TouchableWithoutFeedback>
         <View style={styles.commentView}>
@@ -280,6 +286,9 @@ const PostComponent = ({content,date,name,id,url,count,comment_count,mount,auth_
                 </View>
               </TouchableOpacity>
             </View>
+            <Divider
+            style={{width:'100%'}}
+            />
             <FlashList
             data={comments}
             estimatedItemSize={200}
@@ -293,24 +302,7 @@ const PostComponent = ({content,date,name,id,url,count,comment_count,mount,auth_
                     comment_id={item.id}
                     post_id={id}
                     date={item.createdAt.toDate().toLocaleString()}/>)}/>
-            {/* <ScrollView
-              contentContainerStyle={styles.scrollViewContent}>
-              {comments.map((comment) => (
-                <Suspense key={comment.id} fallback={<ActivityIndicator size="small" color="#fff" />}>
-                  <CommentComponent
-                    auth_profile={comment.auth_profile}
-                    count={comment.like_count}
-                    content={comment.content}
-                    name={comment.name}
-                    comment_id={comment.id}
-                    post_id={id}
-                    date={comment.createdAt.toDate().toLocaleString()}
-                  />
-                </Suspense>
-              ))}
-            </ScrollView> */}
-            <View style={{bottom:20}}>
-            <View style={styles.inputContainer}>
+            <View style={{bottom:10}}>
               <TextInput
                 value={text}
                 onChangeText={(text) => setText(text)}
@@ -319,30 +311,23 @@ const PostComponent = ({content,date,name,id,url,count,comment_count,mount,auth_
                 placeholderTextColor="#000"
               />
             </View>
-            </View>
           </View>
         </View>
       </TouchableWithoutFeedback>
     </KeyboardAvoidingView>
   </Modal>
   </View>
+      </Card.Content>
+      </Card>
   </SafeAreaView>
   )
 }
 
 
 const styles = StyleSheet.create({
-  card:{
-      padding:5,
-    },
-    image:{
-      width:30,
-      height:30,
-      borderRadius:100
-  },
     imageText:{
       flexDirection:'row',
-      marginBottom:10
+      marginBottom:5
     },
     userTime:{
       fontFamily:'Helvetica-light',
@@ -364,7 +349,7 @@ const styles = StyleSheet.create({
     reactionContainer:{
       flexDirection:'row',
       justifyContent:'space-between',
-      marginTop:10
+      marginTop:5
     },
     reactionIcon:{
       padding:5,
@@ -381,8 +366,8 @@ const styles = StyleSheet.create({
       borderTopLeftRadius: 40,
       paddingHorizontal: 15,
       paddingTop: 20,
-      width: '100%',
-      height: '70%',
+      width:wp('100%'),
+      height:hp('55%'),
     },
     centeredView: {
       flex: 1,
@@ -398,11 +383,19 @@ const styles = StyleSheet.create({
       backgroundColor: '#fff',
     },
     textinput: {
-      flex: 1,
-      height: 50,
+      height: 40,
       padding: 10,
       fontSize: hp(2),
       color: '#000',
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingHorizontal: 10,
+      backgroundColor: '#fff',
+      borderTopRightRadius:30,
+      borderTopLeftRadius:30,
+      borderBottomLeftRadius:30,
+      borderBottomRightRadius:30
+      
     },
     sendButton: {
       padding: 10,

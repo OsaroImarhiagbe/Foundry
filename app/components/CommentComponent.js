@@ -13,7 +13,7 @@ import ReplyComponent from './ReplyComponent';
 import firestore from '@react-native-firebase/firestore';
 import { useSelector } from 'react-redux';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {Text,Card} from 'react-native-paper'
+import {Text} from 'react-native-paper'
 const CommentComponent = ({content,name,comment_id,post_id,count,date,auth_profile}) => {
     const [press,setIsPress] = useState(false)
     const [isloading,setLoading] = useState(false)
@@ -129,12 +129,12 @@ const CommentComponent = ({content,name,comment_id,post_id,count,date,auth_profi
                      <Text style={styles.reactionText}>{count}</Text>
                  </View>
                  </TouchableHighlight>
-        <TouchableOpacity onPress={handleComment} style={styles.reactionIcon}>
+        {/* <TouchableOpacity onPress={handleComment} style={styles.reactionIcon}>
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                 <MaterialCommunityIcons name="comment-processing-outline" size={20}/>
                 <Text style={styles.reactionText}>{reply.length}</Text>
             </View>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
         <TouchableOpacity onPress={toggleReply}>
         <View style={styles.replycontainer}>
         <View style={{borderBottomWidth:0.5,width:25,borderColor:'#8a8a8a '}}/>

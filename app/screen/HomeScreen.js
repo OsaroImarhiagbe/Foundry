@@ -24,7 +24,7 @@ import { useDispatch} from 'react-redux';
 import { addId } from '../features/user/userSlice';
 import PushNotification from '../components/PushNotifications.js';
 import { FlashList } from "@shopify/flash-list";
-import {ActivityIndicator,Text} from 'react-native-paper'
+import {ActivityIndicator,Text,Divider} from 'react-native-paper'
 const PostComponent = lazy(() => import('../components/PostComponent.js'))
 
 
@@ -198,7 +198,7 @@ const fetchMorePost = async () => {
     onEndReachedThreshold={0.1}
     refreshing={refreshing}
     ItemSeparatorComponent={()=> (
-      <View style={{borderBottomColor:'#00bf63',borderBottomWidth:0.5,marginTop:10}}></View>
+      <Divider/>
     )}
     ListFooterComponent={() => (
        <ActivityIndicator color='#fff' size='small' animating={loadingMore}/>
