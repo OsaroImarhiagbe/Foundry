@@ -148,7 +148,7 @@ const AccountScreen = () => {
 
   return (
   
-    <View style={styles.screen}>
+    <SafeAreaView style={styles.screen}>
       <ChatRoomHeader
         iconColor='#00bf63' 
         onPress={()=>navigation.navigate('Main')} 
@@ -236,7 +236,7 @@ const AccountScreen = () => {
                   </Tab.Navigator>
                 </View>
                 </ScrollView> 
-    </View>
+    </SafeAreaView>
   )
 }
 

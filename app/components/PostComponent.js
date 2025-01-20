@@ -7,7 +7,6 @@ SafeAreaView,
 KeyboardAvoidingView,
 Platform,ScrollView,
 TextInput,
-Pressable,
 ActivityIndicator,
 useWindowDimensions,
 Keyboard,
@@ -173,7 +172,7 @@ const PostComponent = ({content,date,name,id,url,count,comment_count,mount,auth_
     }
   return (
     
-    <View style={styles.card}>
+    <SafeAreaView style={styles.card}>
     <View style={styles.postContainer}>
     <View style={styles.imageText}>
       {mount ? <Image
@@ -209,17 +208,17 @@ const PostComponent = ({content,date,name,id,url,count,comment_count,mount,auth_
       <Image
       source={url}
       style={{
-        width:width*0.9,
-        height:width,
+        aspectRatio:1,
+        width:wp('100%'),
+        height:hp('50%'),
         alignSelf: 'center',
-        marginVertical: 10,
-        contentFit: 'cover',
-        borderRadius:30}}
+        contentFit: 'cover',}}
       />}
       <Text
        variant="bodySmall"
        style={{
         color:'#fff',
+        maringTop:10,
         fontFamily:color.textFont
        }}>{date}</Text>
       <View style={styles.reactionContainer}>
@@ -312,17 +311,14 @@ const PostComponent = ({content,date,name,id,url,count,comment_count,mount,auth_
     </KeyboardAvoidingView>
   </Modal>
   </View>
-  </View>
+  </SafeAreaView>
   )
 }
 
 
 const styles = StyleSheet.create({
-  container:{
-    flex:1
-  },
   card:{
-      padding:10,
+      padding:5,
     },
     image:{
       width:30,
@@ -346,12 +342,8 @@ const styles = StyleSheet.create({
       paddingBottom: 60,
     },
     postContainer:{
-      marginTop:10,
+      marginTop:5,
       padding:5,
-      borderBottomLeftRadius:20,
-      borderBottomRightRadius:20,
-      borderTopRightRadius:20,
-      borderTopLeftRadius:20
     
     },
     reactionContainer:{

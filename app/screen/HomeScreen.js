@@ -7,7 +7,6 @@ import React,{
   useCallback} from 'react'
 import {
   View,
-  Text,
   StyleSheet,
   TouchableOpacity,
   Platform,
@@ -24,7 +23,7 @@ import { useDispatch} from 'react-redux';
 import { addId } from '../features/user/userSlice';
 import PushNotification from '../components/PushNotifications.js';
 import { FlashList } from "@shopify/flash-list";
-import {ActivityIndicator} from 'react-native-paper'
+import {ActivityIndicator,Text} from 'react-native-paper'
 const PostComponent = lazy(() => import('../components/PostComponent.js'))
 
 
@@ -87,7 +86,7 @@ const HomeScreen = () => {
             querySnapShot.forEach(documentSnapShot => {
               data.push({ ...documentSnapShot.data(),id:documentSnapShot.id });
           } )
-          setPost([...data]);
+          setPost(data);
           setLastVisible(querySnapShot.docs[querySnapShot.docs.length - 1]);
           setHasMore(querySnapShot.docs.length > 0);
         });
@@ -154,10 +153,25 @@ const fetchMorePost = async () => {
           />
         </View>
         <View style={styles.link}>
-          <TouchableOpacity onPress={() => console.log('text pressed')}><Text style={styles.linkText}>Resources</Text></TouchableOpacity>
-          <TouchableOpacity onPress={() => console.log('text pressed')}><Text style={styles.linkText}>Community</Text></TouchableOpacity>
-          <TouchableOpacity onPress={() => console.log('text pressed')}><Text style={styles.linkText}>Code</Text></TouchableOpacity>
-          <TouchableOpacity onPress={() => console.log('test pressed')}><Text style={styles.linkText}>Learning Path</Text></TouchableOpacity>
+          <TouchableOpacity onPress={() => console.log('text pressed')}>
+          <Text
+          varaiant='titleSmall'
+          style={{color:'#fff'}}>Resources</Text></TouchableOpacity>
+          <TouchableOpacity onPress={() => console.log('text pressed')}>
+          <Text
+          variant='titleSmall'
+          style={{color:'#fff'}}
+          >Community</Text></TouchableOpacity>
+          <TouchableOpacity onPress={() => console.log('text pressed')}>
+          <Text
+           variant='titleSmall'
+           style={{color:'#fff'}}
+           >Code</Text></TouchableOpacity>
+          <TouchableOpacity onPress={() => console.log('test pressed')}>
+          <Text
+           variant='titleSmall'
+           style={{color:'#fff'}}
+           >Learning Path</Text></TouchableOpacity>
         </View>
    {mount ? Array.from({length:5}).map((_,index) => (
     <PostComponent key={index} mount={mount}/>
@@ -211,19 +225,12 @@ const styles = StyleSheet.create({
     messageContainer:{
       marginLeft:40
     },
-    linkText:{
-      textAlign:'center',
-      color:'#ffffff',
-      fontSize:15,
-      fontFamily:'Helvetica-light'
-    },
     screen:{
       paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
       flex:1,
-      backgroundColor:'#1f1f1f'
+      backgroundColor:color.backgroundcolor
   },
   title:{
-    fontWeight:'bold',
     textAlign:'center',
     color:color.white,
     fontSize:20,

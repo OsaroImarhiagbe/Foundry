@@ -38,8 +38,6 @@ const DrawerNavigation = ({route}) => {
       component={TabNavigationWrapper}
       initialParams={{route}}
       options={{headerShown:false,
-        swipeEnabled:false
-       
       }}/>
     </Drawer.Navigator>
 

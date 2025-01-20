@@ -1,5 +1,10 @@
 import React,{useState} from 'react'
-import { Platform, Text,StyleSheet,View,TouchableOpacity,Alert, ActivityIndicator} from 'react-native'
+import { 
+  Platform,
+  StyleSheet,
+  View,
+  TouchableOpacity,
+  Alert,} from 'react-native'
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import color from '../../config/color';
@@ -17,6 +22,7 @@ import {
 import { MenuItems } from './CustomMenu';
 import Entypo from 'react-native-vector-icons/Entypo';
 import { useSelector} from 'react-redux';
+import { Appbar,ActivityIndicator } from 'react-native-paper';
 
 
   
@@ -51,18 +57,19 @@ const ChatRoomHeader = ({title,onPress,icon,onPress2,backgroundColor,icon2,iconC
       }
   
     }
-
-
-   
     return (
-    <View style={[styles.container]}>
+    <Appbar.Header
+    dark={true}
+    statusBarHeight={0}
+    mode='center-aligned'
+    style={[styles.container,{backgroundColor:color.backgroundcolor}]}>
          <TouchableOpacity onPress={onPress}>
           <View style={styles.icon}>
           { icon && <MaterialCommunityIcons name={icon} color={iconColor} size={20} />}
           </View>
         </TouchableOpacity>
         <View>
-          {title && <Text style={styles.text}>{title}</Text>}
+          {title && <Appbar.Content titleStyle={styles.text} title={title}/>}
         </View>
         <TouchableOpacity
         style={styles.messageIcon}
@@ -106,7 +113,7 @@ const ChatRoomHeader = ({title,onPress,icon,onPress2,backgroundColor,icon2,iconC
         action={onPress2}
         icon={<MaterialCommunityIcons name='android-messages' size={20} color={color.textcolor}/>}/>
           <Divider/>
-          {isLoading ? (<ActivityIndicator size='large' color='#000'/> ):(
+          {isLoading ? (<ActivityIndicator animating={isLoading} size='large' color='#000'/> ):(
              <MenuItems 
         text='Sign out'
         value={null}
@@ -114,7 +121,7 @@ const ChatRoomHeader = ({title,onPress,icon,onPress2,backgroundColor,icon2,iconC
         icon={<AntDesign name='logout' size={20} color={color.textcolor}/>}/>)}
       </MenuOptions>
     </Menu>
-    </View>
+    </Appbar.Header>
   )
 }
 
@@ -123,13 +130,11 @@ const styles = StyleSheet.create({
         flexDirection:'row',
         justifyContent:'space-between',
         alignItems:'center',
-        padding:10,
-        paddingLeft:10,
+        padding:0,
+        paddingLeft:0,
         paddingRight:10,
         overflow:'hidden',
-        borderBottomLeftRadius:10,
-        borderBottomRightRadius:10,
-        zIndex:10
+        zIndex:10,
 
     },
     text:{
@@ -137,12 +142,12 @@ const styles = StyleSheet.create({
         fontFamily:'Helvetica-light',
         textAlign:'center',
         fontSize:30,
-        padding:10,
-        paddingLeft:60
+        padding:20,
+        paddingLeft:80
         
     },
     icon:{
-      margin:10
+      margin:5
     },
 })
 
