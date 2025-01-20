@@ -105,7 +105,7 @@ const CommentComponent = ({content,name,comment_id,post_id,count,date,auth_profi
         placeholder={{blurhash}}/>
     <View>
     <Text
-    variant='bodyLarge'
+    variant='bodySmall'
     style={styles.userPost}>{name}</Text>
     <Text
     variant='bodyMedium'
@@ -156,11 +156,6 @@ const styles = StyleSheet.create({
         padding:5,
         marginTop:5,
     },
-    image:{
-      width:20,
-      height:20,
-      borderRadius:100
-    },
     imageText:{
       flexDirection:'row',
       marginBottom:10
@@ -170,7 +165,7 @@ const styles = StyleSheet.create({
     userPost:{
       fontFamily:'Helvetica-light',
       color:'#fff',
-      marginLeft:50
+      marginLeft:20
     }
     ,
     userTime:{
@@ -181,28 +176,11 @@ const styles = StyleSheet.create({
       fontSize:10
     
     },
-    userLocationContainer:{
-        flexDirection:'row',
-    },
-    userLocation:{
-        fontFamily:'Helvetica-light',
-        color:'#fff',
-        marginTop:5,
-        marginLeft:50,
-        fontSize:10,
-    },
-    postContainer:{
-      marginTop:10,
-      padding:10,
-      borderBottomLeftRadius:20,
-      borderBottomRightRadius:20,
-      borderTopRightRadius:20,
-      borderTopLeftRadius:4
-    
-    },
+ 
     postText:{
       fontFamily:'Helvetica-light',
       color:'#fff',
+      marginLeft:20
     },
     postDate:{
       marginTop:5,

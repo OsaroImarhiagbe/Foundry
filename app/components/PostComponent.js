@@ -2,11 +2,11 @@ import React,{useState,useEffect,lazy, Suspense} from 'react'
 import {View,StyleSheet,
 TouchableOpacity,
 TouchableHighlight,
-Modal,
 SafeAreaView,
 KeyboardAvoidingView,
 Platform,ScrollView,
 TextInput,
+Modal,
 ActivityIndicator,
 useWindowDimensions,
 Keyboard,
@@ -27,6 +27,7 @@ import { addComment } from '../features/PostandComments/socialSlice';
 import Feather from 'react-native-vector-icons/Feather';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Card,Text} from 'react-native-paper';
+import { FlashList } from "@shopify/flash-list";
 
 const PostComponent = ({content,date,name,id,url,count,comment_count,mount,auth_profile}) => {
 
@@ -279,7 +280,20 @@ const PostComponent = ({content,date,name,id,url,count,comment_count,mount,auth_
                 </View>
               </TouchableOpacity>
             </View>
-            <ScrollView
+            <FlashList
+            data={comments}
+            estimatedItemSize={200}
+            keyExtractor={(item) => item.id}
+            renderItem={({item}) => (
+              <CommentComponent
+                    auth_profile={item.auth_profile}
+                    count={item.like_count}
+                    content={item.content}
+                    name={item.name}
+                    comment_id={item.id}
+                    post_id={id}
+                    date={item.createdAt.toDate().toLocaleString()}/>)}/>
+            {/* <ScrollView
               contentContainerStyle={styles.scrollViewContent}>
               {comments.map((comment) => (
                 <Suspense key={comment.id} fallback={<ActivityIndicator size="small" color="#fff" />}>
@@ -294,7 +308,7 @@ const PostComponent = ({content,date,name,id,url,count,comment_count,mount,auth_
                   />
                 </Suspense>
               ))}
-            </ScrollView>
+            </ScrollView> */}
             <View style={{bottom:20}}>
             <View style={styles.inputContainer}>
               <TextInput
