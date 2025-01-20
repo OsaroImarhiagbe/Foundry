@@ -155,12 +155,6 @@ const AuthNavigation = () => {
               gestureEnabled:false,
               animation:'fade_from_bottom'
             }}/>
-            <Stack.Screen
-            name="Onboarding"
-            component={OnboardingScreenWrapper}
-            options={{
-              headerShown:false,
-            }}/>
               <Stack.Screen
             name="ProjectScreen"
             component={ProjectScreen}
@@ -230,7 +224,6 @@ const AuthNavigation = () => {
           component={OnboardingScreenWrapper}
           options={{
             headerShown:false,
-            presentation:'modal',
           }}/>
           <Stack.Screen
           name='Drawer'

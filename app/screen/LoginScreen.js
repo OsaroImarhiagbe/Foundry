@@ -143,7 +143,7 @@ const LoginScreen = ({navigation}) => {
            </Formik>
            </SafeAreaView>
            <View style={{justifyContent:'center',alignItems:'center',paddingTop:50}}>
-           <Text style={{fontFamily:color.textFont,textAlign:'center',color:color.grey,fontSize:20}}>Login with Social</Text>
+           <Text style={{fontFamily:color.textFont,textAlign:'center',color:color.grey,fontSize:20}}>Or Login with</Text>
            </View>
            <View style={{marginVertical:10,flexDirection:'row',justifyContent:'space-between',padding:30}}>
             <GoogleSigninButton

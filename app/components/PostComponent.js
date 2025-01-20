@@ -1,5 +1,17 @@
 import React,{useState,useEffect,lazy, Suspense} from 'react'
-import {View,StyleSheet,Text,TouchableOpacity,TouchableHighlight,Modal, SafeAreaView,KeyboardAvoidingView,Platform,ScrollView,TextInput,Pressable,ActivityIndicator,Dimensions,Keyboard,TouchableWithoutFeedback} from 'react-native'
+import {View,StyleSheet,
+TouchableOpacity,
+TouchableHighlight,
+Modal,
+SafeAreaView,
+KeyboardAvoidingView,
+Platform,ScrollView,
+TextInput,
+Pressable,
+ActivityIndicator,
+useWindowDimensions,
+Keyboard,
+TouchableWithoutFeedback} from 'react-native'
 import { blurhash } from '../../utils/index'
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import { Image } from 'expo-image';
@@ -15,7 +27,8 @@ import { useDispatch } from 'react-redux';
 import { addComment } from '../features/PostandComments/socialSlice';
 import Feather from 'react-native-vector-icons/Feather';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Card, Text } from 'react-native-paper';
+import { Card,Text} from 'react-native-paper';
+
 const PostComponent = ({content,date,name,id,url,count,comment_count,mount,auth_profile}) => {
 
     const [press,setIsPress] = useState(false)
@@ -24,9 +37,12 @@ const PostComponent = ({content,date,name,id,url,count,comment_count,mount,auth_
     const [comments, setComment] = useState([])
     const [isReply,setReply] = useState(false)
     const [text,setText] = useState('')
+    const {height, width} = useWindowDimensions();
     const dispatch = useDispatch();
     const profileImage = useSelector((state) => state.user.profileimg)
     const {user} = useAuth();
+
+
 
     useEffect(() => {
       const docRef = firestore().collection('posts').doc(id)
@@ -128,7 +144,7 @@ const PostComponent = ({content,date,name,id,url,count,comment_count,mount,auth_
     
 
     const handleSend = async () => {
-      if(!text) return;
+      if(text.trim() === " ") return;
       try{
         const docRef = firestore().collection('posts').doc(id).collection('comments')
         const newDoc = await docRef.add({
@@ -170,26 +186,42 @@ const PostComponent = ({content,date,name,id,url,count,comment_count,mount,auth_
         placeholder={{blurhash}}
         cachePolicy='none'/>}
     <View>
-    <Text style={styles.userPost}>{name}</Text>
+    <Text
+    variant="bodySmall"
+    style={{
+      fontFamily:color.textFont,
+      marginLeft:30,
+      color:'#fff'
+    }}
+    >{name}</Text>
+    <Text
+    variant="bodyLarge"
+    style={{
+    color:'#fff',
+    fontFamily:color.textFont,
+    marginLeft:30,
+    marginVertical:5,
+    }}
+    >{content}</Text>
     </View>
-    </View>
-    <View style={{marginTop:5}}>
-    <Text style={styles.postText}>{content} 
-      </Text>
     </View>
     {url && 
       <Image
       source={url}
       style={{
-        width:400,
-        height:400,
+        width:width*0.9,
+        height:width,
         alignSelf: 'center',
         marginVertical: 10,
         contentFit: 'cover',
         borderRadius:30}}
       />}
-      <Text style={styles.postDate}>{date}</Text>
-      <View style={{borderBottomColor:'#00bf63',borderBottomWidth:0.5,marginTop:30}}></View>
+      <Text
+       variant="bodySmall"
+       style={{
+        color:'#fff',
+        fontFamily:color.textFont
+       }}>{date}</Text>
       <View style={styles.reactionContainer}>
     <TouchableHighlight
       onShowUnderlay={() => setIsPress(true)}
@@ -198,19 +230,28 @@ const PostComponent = ({content,date,name,id,url,count,comment_count,mount,auth_
       style={styles.reactionIcon}
       >
       <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-          <MaterialCommunityIcons name="heart" size={20} color='#fff'/>
-          <Text style={styles.reactionText}>{count}</Text>
+          <MaterialCommunityIcons name="heart" size={15} color='#fff'/>
+          <Text 
+          variant='bodySmall'
+          style={styles.reactionText}>{count}</Text>
         </View>
         </TouchableHighlight>
         <TouchableOpacity onPress={() => setModalVisible(true)} style={styles.reactionIcon}>
           <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-            <MaterialCommunityIcons name="comment-processing-outline" size={20} color='#ffff'/>
-            <Text style={styles.reactionText}>{comment_count}</Text>
+            <MaterialCommunityIcons name="comment-processing-outline" size={15} color='#ffff'/>
+            <Text
+            variant='bodySmall'
+            style={{
+              fontFamily:color.textFont,
+              color:'#fff',
+              marginLeft:5,
+              marginBottom:5
+            }}>{comment_count}</Text>
           </View>
         </TouchableOpacity>
         <TouchableOpacity style={styles.reactionIcon}>
           <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-          <EvilIcons name='retweet' size={20} color='#ffffff'/>
+          <EvilIcons name='retweet' size={15} color='#ffffff'/>
           </View>
         </TouchableOpacity>
       </View>
@@ -228,7 +269,10 @@ const PostComponent = ({content,date,name,id,url,count,comment_count,mount,auth_
         <View style={styles.commentView}>
           <View style={styles.modalView}>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between',alignItems:'center' }}>
-              <Text  onPress={() => setModalVisible(!modalVisible)} style={{ fontFamily: color.textFont, fontSize: 18}}>Comments</Text>
+              <Text
+              variant='titleMedium'
+              onPress={() => setModalVisible(!modalVisible)}
+              style={{ fontFamily:color.textFont}}>Comments</Text>
               <TouchableOpacity onPress={isReply ? handlePost : handleSend}>
                 <View style={styles.sendButton}>
                   <Feather name="send" size={hp(2.0)} color="#000" />
@@ -289,12 +333,6 @@ const styles = StyleSheet.create({
       flexDirection:'row',
       marginBottom:10
     },
-    userPost:{
-      fontFamily:'Helvetica-light',
-      color:'#ffffff',
-      marginLeft:50
-    }
-    ,
     userTime:{
       fontFamily:'Helvetica-light',
       color:'#ffffff',
@@ -310,26 +348,12 @@ const styles = StyleSheet.create({
     postContainer:{
       marginTop:10,
       padding:5,
-      backgroundColor:'#252525',
       borderBottomLeftRadius:20,
       borderBottomRightRadius:20,
       borderTopRightRadius:20,
       borderTopLeftRadius:20
     
     },
-    postText:{
-      fontFamily:'Helvetica-light',
-      color:'#ffffff',
-      marginLeft:10
-    },
-    postDate:{
-      marginTop:10,
-      fontSize:9,
-      color:'#8a8a8a',
-      fontFamily:'Helvetica-light',
-      marginLeft:10
-    },
-
     reactionContainer:{
       flexDirection:'row',
       justifyContent:'space-between',
@@ -338,13 +362,6 @@ const styles = StyleSheet.create({
     reactionIcon:{
       padding:5,
       flexDirection:'row',
-    },
-    reactionText:{
-      color:'#ffffff',
-      marginLeft:10,
-      fontFamily:'Helvetica-light',
-      fontSize:15
-     
     },
     commentView: {
       flex: 1,

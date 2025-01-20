@@ -9,7 +9,7 @@ import ReplyComponent from './ReplyComponent';
 import firestore from '@react-native-firebase/firestore';
 import { useSelector } from 'react-redux';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-const CommentComponent = ({content,name,comment_id,post_id,count,date}) => {
+const CommentComponent = ({content,name,comment_id,post_id,count,date,auth_profile}) => {
     const [press,setIsPress] = useState(false)
     const [isloading,setLoading] = useState(false)
     const [showReply,setShowReply] = useState(false)
@@ -95,7 +95,7 @@ const CommentComponent = ({content,name,comment_id,post_id,count,date}) => {
     <View style={styles.imageText}>
     <Image
         style={{height:hp(3.3), aspectRatio:1, borderRadius:100}}
-        source={user.profileUrl}
+        source={auth_profile}
         placeholder={{blurhash}}/>
     <View>
     <Text style={styles.userPost}>{name}</Text>

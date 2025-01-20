@@ -1,5 +1,20 @@
-import React,{useState,useEffect,lazy, Suspense,useMemo,useCallback} from 'react'
-import {View, Text, StyleSheet,TouchableOpacity, FlatList, Platform,StatusBar, ActivityIndicator,Image} from 'react-native'
+import React,{
+  useState,
+  useEffect,
+  lazy,
+  Suspense,
+  useMemo,
+  useCallback} from 'react'
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  Platform,
+  useWindowDimensions,
+  StatusBar,
+  SafeAreaView,
+} from 'react-native'
 import color from '../../config/color';
 import { useNavigation } from '@react-navigation/native';
 import ChatRoomHeader from '../components/ChatRoomHeader';;
@@ -8,6 +23,8 @@ import firestore from '@react-native-firebase/firestore'
 import { useDispatch} from 'react-redux';
 import { addId } from '../features/user/userSlice';
 import PushNotification from '../components/PushNotifications.js';
+import { FlashList } from "@shopify/flash-list";
+import {ActivityIndicator} from 'react-native-paper'
 const PostComponent = lazy(() => import('../components/PostComponent.js'))
 
 
@@ -20,6 +37,7 @@ const HomeScreen = () => {
   const dispatch = useDispatch()
   const [refreshing, setRefreshing] = useState(false);
   const {user} = useAuth()
+  const {height, width} = useWindowDimensions();
   const [post, setPost] = useState([])
   const [lastVisible,setLastVisible] = useState(null)
   const [loadingMore, setLoadingMore] = useState(false);
@@ -120,7 +138,7 @@ const fetchMorePost = async () => {
     navigation.navigate('Message')
   }
   return (
-    <View
+    <SafeAreaView
     style={styles.screen}
     >
       <PushNotification/>
@@ -144,15 +162,19 @@ const fetchMorePost = async () => {
    {mount ? Array.from({length:5}).map((_,index) => (
     <PostComponent key={index} mount={mount}/>
    ))
-   : <FlatList
-   contentContainerStyle={{flexGrow:1}}
+   : <FlashList
+    contentContainerStyle={{paddingBottom:30,padding:0}}
     data={memoPost}
+    estimatedItemSize={402}
     onRefresh={onRefresh}
     onEndReached={fetchMorePost}
     onEndReachedThreshold={0.1}
     refreshing={refreshing}
+    ItemSeparatorComponent={()=> (
+      <View style={{borderBottomColor:'#00bf63',borderBottomWidth:0.5,marginTop:10}}></View>
+    )}
     ListFooterComponent={() => (
-      loadingMore && post.length > 2 ? <ActivityIndicator color='#fff' size='small'/> : null
+       <ActivityIndicator color='#fff' size='small' animating={loadingMore}/>
     )}
     renderItem={({item}) => <Suspense fallback={<ActivityIndicator size='small' color='#000'/>}>
       <PostComponent
@@ -167,7 +189,7 @@ const fetchMorePost = async () => {
       </Suspense>}
     keyExtractor={(item)=> item.post_id}
     /> } 
-    </View>
+    </SafeAreaView>
   )
 }
 
