@@ -45,7 +45,7 @@ const HomeScreen = () => {
   const [mount, setMount] = useState(false)
   const scrollY = useState(new Animated.Value(0))[0];
 
-  
+  2
   const headerOpacity = scrollY.interpolate({
     inputRange: [0, 250],
     outputRange: [1, 0],
@@ -147,10 +147,10 @@ const fetchMorePost = async () => {
   }
   return (
     <SafeAreaView
-    style={styles.screen}
+    style={[styles.screen,{opacity: headerOpacity}]}
     >
       <PushNotification/>
-      <Animated.View style={{ opacity: headerOpacity }}>
+      <Animated.View style={{ opacity: headerOpacity,backgroundColor:'transparent' }}>
           <ChatRoomHeader
           onPress={handlePress}
           title='DevGuiide'
@@ -224,11 +224,6 @@ const styles = StyleSheet.create({
   bodyText:{
     fontSize:15
   },
-    imagecontainer:{
-      width:50,
-      height:50,
-      marginRight:20
-    },
     link:{
       marginVertical:10,
       flexDirection:'row',
