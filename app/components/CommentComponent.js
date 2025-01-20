@@ -13,7 +13,8 @@ import ReplyComponent from './ReplyComponent';
 import firestore from '@react-native-firebase/firestore';
 import { useSelector } from 'react-redux';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {Text} from 'react-native-paper'
+import {Text,Divider,Card} from 'react-native-paper'
+import color from '../../config/color';
 const CommentComponent = ({content,name,comment_id,post_id,count,date,auth_profile}) => {
     const [press,setIsPress] = useState(false)
     const [isloading,setLoading] = useState(false)
@@ -96,7 +97,11 @@ const CommentComponent = ({content,name,comment_id,post_id,count,date,auth_profi
  
 
   return (
-    <View style={styles.card}>
+    <Card
+    mode='contained'
+    style={{backgroundColor:color.grey}}
+    >
+    <Card.Content>
     <View style={styles.imageText}>
     <Image
         style={{height:hp(3.3), aspectRatio:1, borderRadius:100}}
@@ -137,8 +142,10 @@ const CommentComponent = ({content,name,comment_id,post_id,count,date,auth_profi
         </TouchableOpacity> */}
         <TouchableOpacity onPress={toggleReply}>
         <View style={styles.replycontainer}>
-        <View style={{borderBottomWidth:0.5,width:25,borderColor:'#8a8a8a '}}/>
-        <Text style={styles.replies}>
+       <Divider style={{borderBottomWidth:0.5,width:25,borderColor:'#8a8a8a '}}/>
+        <Text
+        variant='bodySmall'
+        style={styles.replies}>
               Reply</Text>
         </View>
       </TouchableOpacity>
@@ -146,7 +153,8 @@ const CommentComponent = ({content,name,comment_id,post_id,count,date,auth_profi
       { showReply && reply.map((replies) => {
         return <ReplyComponent key={replies.id} reply_id={replies.id} name={replies.name} content={replies.content} post_id={post_id} comment_id={comment_id} count={replies.like_count}/>
       })}
-  </View>
+    </Card.Content>
+  </Card>
   )
 }
 
@@ -210,8 +218,7 @@ const styles = StyleSheet.create({
       textAlign:'center',
     },
     replies:{
-      fontSize:12,
-      marginLeft:10,
+      marginLeft:5,
       textAlign:'center'
     },
     replycontainer:{

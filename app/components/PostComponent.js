@@ -5,11 +5,8 @@ TouchableHighlight,
 SafeAreaView,
 KeyboardAvoidingView,
 Platform,
-ScrollView,
 Modal,
-ActivityIndicator,
 useWindowDimensions,
-Keyboard,
 TouchableWithoutFeedback} from 'react-native'
 import { blurhash } from '../../utils/index'
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
