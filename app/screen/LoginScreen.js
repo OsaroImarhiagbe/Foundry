@@ -12,8 +12,7 @@ import * as Yup from 'yup';
 import { Formik} from 'formik';
 import { useAuth } from '../authContext'
 import CustomKeyboardView from '../components/CustomKeyboardView'
-import { StatusBar } from 'expo-status-bar';
-import { Button,Text, TextInput } from 'react-native-paper'
+import { Button,Text, TextInput,HelperText} from 'react-native-paper'
 import {GoogleSigninButton,
 statusCodes,
 } from '@react-native-google-signin/google-signin';
@@ -131,7 +130,7 @@ const LoginScreen = ({navigation}) => {
                    iconcolor={color.button}/>
                    {
                        touched.username && errors.username && (
-                           <Text style={styles.errormessage}>{errors.username}</Text>
+                           <HelperText type='error' visible={errors} style={styles.errormessage}>{errors.username}</HelperText>
                        )
                    }
                    <AppTextInput
@@ -148,7 +147,7 @@ const LoginScreen = ({navigation}) => {
                    right={<TextInput.Icon icon="eye"/>}
                    />
                    { touched.password && errors.password && (
-                       <Text style={styles.errormessage}>{errors.password}</Text>
+                       <HelperText type='error' visible={errors} style={styles.errormessage}>{errors.password}</HelperText>
                    )}
                    </View>
                    <View style={styles.LoginContainer}>

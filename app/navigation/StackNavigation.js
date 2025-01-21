@@ -3,7 +3,6 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { lazy,Suspense } from 'react';
 import { ActivityIndicator } from 'react-native';
 const HomeScreen = lazy(() => import('../screen/HomeScreen'))
-const ChatScreen = lazy(() => import('../screen/ChatScreen'))
 const MessageScreen = lazy(() => import('../screen/MessageScreen'))
 const AccountScreen = lazy(() => import('../screen/AccountScreen'))
 const PostScreen = lazy(() => import('../screen/PostScreen'))
@@ -14,16 +13,7 @@ const EditEmailScreen = lazy(() => import('../screen/EditEmailScreen'))
 const EditPhoneScreen = lazy(() => import('../screen/EditPhoneScreen'))
 const EditJobScreen = lazy(() => import('../screen/EditJobScreen'))
 
-const ChatScreenWrapper = (props) => {
-  
-  return (
-    <Suspense fallback={<ActivityIndicator size='small' color='#000'/>}>
-    <ChatScreen  {...props}/>
-  </Suspense>
 
-  )
-
-}
 const MessageScreenWrapper = (props) => {
   
   return (
@@ -153,15 +143,6 @@ const StackNavigation = () => {
       gestureEnabled:false,
       unmountOnBlur: true,
      }}/>
-      <Stack.Screen
-      name='Chat'
-      component={ChatScreenWrapper}
-      options={{
-        headerShown:false,
-        gestureEnabled:false,
-        unmountOnBlur: true,
-      }}
-      />
       <Stack.Screen
       name='Profile'
       component={ProfileScreenWrapper}

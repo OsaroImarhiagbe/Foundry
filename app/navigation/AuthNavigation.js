@@ -14,6 +14,7 @@ const ContactUsScreen = lazy(() => import('../screen/ContactUsScreen'))
 const ProjectEntryScreen = lazy(() => import('../screen/ProjectEntryScreen'))
 const SkillsScreen = lazy(() => import('../screen/SkillsScreen'))
 const OnboardingScreen = lazy(()=> import('../screen/OnboardingScreen'))
+const ChatScreen = lazy(() => import('../screen/ChatScreen'))
 const RegisterScreenWrapper = (props) => {
   
     return (
@@ -41,6 +42,16 @@ const ReportBugScreenWrapper = (props) => {
   </Suspense>
 
   )
+}
+const ChatScreenWrapper = (props) => {
+  
+  return (
+    <Suspense fallback={<ActivityIndicator size='small' color='#000'/>}>
+    <ChatScreen  {...props}/>
+  </Suspense>
+
+  )
+
 }
 const ContactUsScreenWrapper = (props) => {
   
@@ -197,6 +208,15 @@ const AuthNavigation = () => {
               headerShown:false,
               presentation:'modal',
             }}/>
+               <Stack.Screen
+                name='Chat'
+                component={ChatScreenWrapper}
+                options={{
+                  headerShown:false,
+                  gestureEnabled:false,
+                  unmountOnBlur: true,
+                }}
+                />
           </Stack.Navigator>
         )
     }else{
@@ -276,6 +296,15 @@ const AuthNavigation = () => {
             headerShown:false,
             presentation:'modal',
           }}/>
+             <Stack.Screen
+              name='Chat'
+              component={ChatScreenWrapper}
+              options={{
+                headerShown:false,
+                gestureEnabled:false,
+                unmountOnBlur: true,
+              }}
+              />
         </Stack.Navigator>
       )
     }
