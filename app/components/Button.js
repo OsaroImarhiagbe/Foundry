@@ -1,15 +1,11 @@
 import React from 'react'
 import {View, Text, StyleSheet, TouchableOpacity, TouchableHighlight} from 'react-native'
 import { LinearGradient } from 'expo-linear-gradient';
-
+//import { Button } from 'react-native-paper';
 const Button = ({ onPress,title, backgroundColor, color, disabled, borderColor,fontSize}) => {
-
-    
-
-  
   return (
    
-    <View >
+    <View>
              <LinearGradient
           colors={['#0097b2', '#7ed957']} // Gradient colors
           start={{ x: 0, y: 0 }}

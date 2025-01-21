@@ -2,21 +2,21 @@ import React, {useState} from 'react'
 import {
     View,
     StyleSheet,
-    ActivityIndicator,
     SafeAreaView,
     useWindowDimensions} from 'react-native';
 import { Formik} from 'formik';
 import AppTextInput from '../components/AppTextInput';
 import color from '../../config/color';
-import Button from '../components/Button';
+//import Button from '../components/Button';
 import * as Yup from 'yup';
 import { useAuth} from '../authContext';
 import CustomKeyboardView from '../components/CustomKeyboardView';
 import { useNavigation } from '@react-navigation/native';
-import { TextInput,Text,HelperText} from 'react-native-paper';
+import { TextInput,Text,HelperText,ActivityIndicator} from 'react-native-paper';
 import LottieView from 'lottie-react-native';
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import { TouchableWithoutFeedback } from 'react-native-gesture-handler';
+import { Button } from 'react-native-paper';
 
 
 
@@ -59,7 +59,6 @@ const RegisterScreen = () => {
         .oneOf([Yup.ref('password'), null], 'Passwords must match')
         .required('Please enter password again'),
       });
-
     const initialValues = {
         username:'',
         email:'', 
@@ -71,7 +70,7 @@ const RegisterScreen = () => {
                 <View
                 style={styles.backImage}
                 >
-                  <>
+                  <Text>
                   <LottieView
                style={{
                 width:width*0.9,
@@ -80,8 +79,7 @@ const RegisterScreen = () => {
                 justifyContent:'center'}}
                 renderMode={'SOFTWARE'}
                 source={require('../assets/animations/animation1.json')} autoPlay loop />;
-              
-                  </>
+                  </Text>
                 </View>
                 <View style={styles.whitesheet}>
                 <View style={styles.headingcontainer}>
@@ -158,14 +156,16 @@ const RegisterScreen = () => {
                             <View style={styles.buttoncontainer}>
                                 {
                                     loading ? (
-                                        <ActivityIndicator size='large' color={color.white} />) 
-                                    :(  <Button title='Register' 
-                                        fontSize={15}
-                                    disabled={!isValid}
-                                    onPress={handleSubmit} 
-                                    color={isValid ? color.white : color.grey} />)
+                                        <ActivityIndicator animating={loading} size='large' color={color.white} />) 
+                                        : (
+                                            <Button mode="contained">Sign Up</Button>
+                                        )
+                                    // :(  <Button title='Register' 
+                                    //     fontSize={15}
+                                    // disabled={!isValid}
+                                    // onPress={handleSubmit} 
+                                    // color={isValid ? color.white : color.grey} />)
                                 }
-                              
                             </View>
                             <View style={styles.textContainer}>
                                     <Text
@@ -224,28 +224,9 @@ const styles = StyleSheet.create({
     headingcontainer:{
        padding:10
     },
-    bottomText:{
-        textAlign:'center',
-        marginTop:10,
-        fontSize:15,
-        fontFamily:color.textFont,
-        color:color.grey
-    },
     textContainer:{
         flexDirection:'row',
         alignSelf:'center'
-    },
-    text:{
-        color:color.grey,
-        textAlign:'center',
-        fontSize: 15,
-        fontFamily:color.textFont
-    },
-    text1:{
-        color:color.grey,
-        fontSize: 15,
-        fontFamily:color.textFont,
-        marginLeft:10
     },
 })
 export default RegisterScreen
