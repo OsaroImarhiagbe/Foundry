@@ -74,7 +74,7 @@ const RegisterScreen = () => {
                   <LottieView
                style={{
                 width:width*0.9,
-                height:width*0.9,
+                height:hp('40%'),
                 alignItems:'center',
                 justifyContent:'center'}}
                 renderMode={'SOFTWARE'}
@@ -154,18 +154,11 @@ const RegisterScreen = () => {
                                 {touched.confirmPassword && errors.confirmPassword &&( <HelperText   type='error' visible={errors} style={styles.errormessage}>{errors.confirmPassword}</HelperText>)}
                             </View>
                             <View style={styles.buttoncontainer}>
-                                {
-                                    loading ? (
-                                        <ActivityIndicator animating={loading} size='large' color={color.white} />) 
-                                        : (
-                                            <Button mode="contained">Sign Up</Button>
-                                        )
-                                    // :(  <Button title='Register' 
-                                    //     fontSize={15}
-                                    // disabled={!isValid}
-                                    // onPress={handleSubmit} 
-                                    // color={isValid ? color.white : color.grey} />)
-                                }
+                                <Button
+                                disabled={!isValid}
+                                loading={loading}
+                                onPress={handleSubmit}
+                                mode="contained">Sign Up</Button>
                             </View>
                             <View style={styles.textContainer}>
                                     <Text
@@ -193,9 +186,7 @@ const RegisterScreen = () => {
 const styles = StyleSheet.create({
     backImage:{
         width:wp('100%'),
-        height:hp(390),
         position:'absolute',
-        top:0,
         resizedMode: 'cover',
         backgroundColor:'#8a8a8a'
       }, 
@@ -210,7 +201,7 @@ const styles = StyleSheet.create({
         padding:20
   } ,
     buttoncontainer:{
-        padding:10
+        padding:30
     },
     errormessage:{
         color: color.danger,
@@ -222,7 +213,7 @@ const styles = StyleSheet.create({
 
     },
     headingcontainer:{
-       padding:10
+       padding:30
     },
     textContainer:{
         flexDirection:'row',

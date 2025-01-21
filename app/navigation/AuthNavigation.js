@@ -217,7 +217,8 @@ const AuthNavigation = () => {
           component={RegisterScreenWrapper}
           options={{
             headerShown:false,
-            gestureEnabled:false
+            gestureEnabled:false,
+            animation:'fade_from_bottom'
           }}/>
           <Stack.Screen
           name="Onboarding"
