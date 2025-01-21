@@ -6,6 +6,9 @@
   "build": {
     "development": {
       "developmentClient": true,
+      "ios":{
+        "simulator": true
+      },
       "autoIncrement": true,
       "distribution": "internal",
       "environment": "development",
