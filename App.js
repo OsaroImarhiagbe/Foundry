@@ -10,67 +10,22 @@ import AuthNavigation from './app/navigation/AuthNavigation';
 import { PersistGate } from 'redux-persist/integration/react';
 import { I18nextProvider } from 'react-i18next';
 import i18n from './app/Language/i18n';
-import * as Notifications from 'expo-notifications';
-import * as TaskManager from 'expo-task-manager';
-import firestore from '@react-native-firebase/firestore';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { NotificationProvider } from './app/NotificationProvider';
+
+
+
 export default function App() {
   const [isloading,setLoading] = useState(true)
   const [isAuthenticated, setIsAuthenticated] = useState(undefined)
-  
-
-
-
   useEffect(() => {
+    setLoading(true)
     const timer = setTimeout(() => {
-     
       setLoading(false)
-      
     },4000)
     return () => clearTimeout(timer)
   },[])
 
-  useEffect(()=>{
-    const registerBackgroundtask = async () => {
-      try{
-        await Notifications.registerTaskAsync(BACKGROUND_NOTIFICATION_TASK);
-      }catch(err){
-        console.error('Error with background:',err.message)
-      }
-    }
 
-    registerBackgroundtask()
-  },[])
-
-
-  const BACKGROUND_NOTIFICATION_TASK='BACKGROUND-NOTIFICATION-TASK';
-
-  TaskManager.defineTask(BACKGROUND_NOTIFICATION_TASK, async ({ data, error }) => {
-    if (error) {
-      console.error('Background notification error:', error);
-      return;
-    }
-    if (data) {
-      try{
-        const userId = await AsyncStorage.getItem('authUser');
-        if (!userId) {
-          console.error('No user ID found in AsyncStorage');
-          return;
-        }
-        const userDocRef = firestore().collection('users').doc(userId);
-        const notifCollectionRef = userDocRef.collection('notifications');
-        await notifCollectionRef.add({
-          title: data.notification.request.content.title,
-          body: data.notification.request.content.body,
-          createdAt: firestore.FieldValue.serverTimestamp(),
-          notification_data: data,
-        });
-      }catch(err){
-        console.error('Error with background notifications',err)
-      }
-      console.error('Background notification received:', data);
-    }
-  })
 
   
   return (
@@ -79,14 +34,16 @@ export default function App() {
     <I18nextProvider i18n={i18n}>
        <Provider store={store}>
       <PersistGate loading={isloading} persistor={persistor}>
-      <MenuProvider>
+        <NotificationProvider>
+        <MenuProvider>
           <AuthContextProvider>
         <NavigationContainer>
           {isloading ? <SplashScreen/> :   <AuthNavigation/> }
-      </NavigationContainer>
-    </AuthContextProvider>
-    <StatusBar style="light" />
-    </MenuProvider>
+        </NavigationContainer>
+      </AuthContextProvider>
+      <StatusBar style="light" />
+      </MenuProvider>
+        </NotificationProvider>
       </PersistGate>
     </Provider>
     </I18nextProvider>

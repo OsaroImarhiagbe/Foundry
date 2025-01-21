@@ -2,7 +2,6 @@ import React,{useEffect,useState} from 'react';
 import { StyleSheet, Image, View,Dimensions,SafeAreaView  } from 'react-native';
 import color from '../../config/color';
 import { ActivityIndicator } from 'react-native-paper';
-const { width } = Dimensions.get('window');
 
 
 const SplashScreen = () => {

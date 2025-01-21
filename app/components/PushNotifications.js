@@ -5,115 +5,124 @@ import firestore from '@react-native-firebase/firestore'
 import { useAuth } from '../authContext';
 import {useState,useEffect,useRef} from 'react'
 import {Alert} from 'react-native'
+import messaging from '@react-native-firebase/messaging';
+import { useNavigation } from '@react-navigation/native';
 
-
-
+ // Set up the notification handler for the app in the foreground
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
     shouldShowAlert: true,
-    shouldPlaySound: false,
+    shouldPlaySound: true,
     shouldSetBadge: false,
   }),
 });
 
-
-function handleRegistrationError(errorMessage) {
-  alert(errorMessage);
-  throw new Error(errorMessage);
-}
-
-async function registerForPushNotificationsAsync() {
-  if (Device.isDevice) {
-    const { status: existingStatus } = await Notifications.getPermissionsAsync();
-    let finalStatus = existingStatus;
-    if (existingStatus !== 'granted') {
-      const { status } = await Notifications.requestPermissionsAsync();
-      finalStatus = status;
-    }
-    if (finalStatus !== 'granted') {
-      handleRegistrationError('Permission not granted to get push token for push notification!');
-      return;
-    }
-    const projectId =
-      Constants?.expoConfig?.extra?.eas?.projectId ?? Constants?.easConfig?.projectId;
-    if (!projectId) {
-      handleRegistrationError('Project ID not found');
-    }
-    try {
-      const pushTokenString = (
-        await Notifications.getExpoPushTokenAsync({
-          projectId,
-        })
-      ).data;
-      return pushTokenString;
-    } catch (e) {
-      handleRegistrationError(`${e}`);
-    }
-  } else {
-    handleRegistrationError('Must use physical device for push notifications');
-  }
-}
-
 export default function PushNotification(){
-    const [expoPushToken, setExpoPushToken] = useState('');
-    const [notification, setNotification] = useState([]);
-    const [showBanner, setShowBanner] = useState(false);
-    const [bannerData, setBannerData] = useState({ title: '', message: '' });
-    const notificationListener = useRef();
-    const responseListener = useRef();
-    const {user} = useAuth();
 
-  useEffect(() => {
+    const navigation = useNavigation();
 
-    const getToken = async () => {
-        try{
-            const token = await registerForPushNotificationsAsync()
-            if (token && user.userId){
-                setExpoPushToken(token)
-                const docRef = firestore().collection('users').doc(user.userId)
-                await docRef.update({
-                    expoToken:token
-                })
-            }
-        }catch(error){
-         console.error(`expo token:${error.message}`)}
-    }
+    const requestUserPermission = async () => {
+      const authStatus = await messaging().requestPermission();
+      const enabled =
+        authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
+        authStatus === messaging.AuthorizationStatus.PROVISIONAL;
 
-    getToken()
-   
-    notificationListener.current = Notifications.addNotificationReceivedListener(async (notification) => {
-      setNotification((prev) => [...prev,notification]);
-      const message = notification.request.content.body;
-      const title = notification.request.content.title;
-      const data = notification.request.content.data
-      setBannerData({ title, message });
-      setShowBanner(true); 
-      Alert.alert(
-        notification.request.content.title,
-        notification.request.content.body
-      );
-      if(user){
-      const docRef = firestore().collection('users').doc(user?.uid);
-      const notificationRef = docRef.collection('notifications');
-      await notificationRef.add({
-        title: title,
-        body: message,
-        createdAt: firestore.Timestamp.fromDate(new Date()),
-        notification_data:data,
-      });
-    }
-    setTimeout(() => setShowBanner(false), 3000);
-    });
-
-    responseListener.current = Notifications.addNotificationResponseReceivedListener(response => {
-      console.log(response);
-    });
-
-    return () => {
-      notificationListener.current &&
-        Notifications.removeNotificationSubscription(notificationListener.current);
-      responseListener.current &&
-        Notifications.removeNotificationSubscription(responseListener.current);
+      if (enabled) {
+        console.log("Authorization status:", authStatus);
+      }
     };
-  }, []);
+
+    useEffect(() => {
+      if (requestUserPermission()) {
+            messaging()
+              .getToken()
+              .then(
+                token => console.log(token)
+              );
+          }
+      }, []);
+
+  
+
+
+    // Handle user clicking on a notification and open the screen
+    const handleNotificationClick = async (response) => {
+      const screen = response?.notification?.request?.content?.data?.screen;
+      if (screen !== null) {
+        navigation.navigate(screen);
+      }
+    };
+
+    // Listen for user clicking on a notification
+    const notificationClickSubscription =
+      Notifications.addNotificationResponseReceivedListener(
+        handleNotificationClick
+      );
+
+    // Handle user opening the app from a notification (when the app is in the background)
+    messaging().onNotificationOpenedApp((remoteMessage) => {
+      console.log(
+        "Notification caused app to open from background state:",
+        remoteMessage.data.screen,
+        navigation
+      );
+      if (remoteMessage?.data?.screen) {
+        navigation.navigate(`${remoteMessage.data.screen}`);
+      }
+    });
+
+    // Check if the app was opened from a notification (when the app was completely quit)
+    messaging()
+      .getInitialNotification()
+      .then((remoteMessage) => {
+        if (remoteMessage) {
+          console.log(
+            "Notification caused app to open from quit state:",
+            remoteMessage.notification
+          );
+          if (remoteMessage?.data?.screen) {
+            navigation.navigate(`${remoteMessage.data.screen}`);
+          }
+        }
+      });
+
+    // Handle push notifications when the app is in the background
+    messaging().setBackgroundMessageHandler(async (remoteMessage) => {
+      console.log("Message handled in the background!", remoteMessage);
+      const notification = {
+        title: remoteMessage.notification.title,
+        body: remoteMessage.notification.body,
+        data: remoteMessage.data, // optional data payload
+      };
+
+      // Schedule the notification with a null trigger to show immediately
+      await Notifications.scheduleNotificationAsync({
+        content: notification,
+        trigger: null,
+      });
+    });
+
+    // Handle push notifications when the app is in the foreground
+    const handlePushNotification = async (remoteMessage) => {
+      const notification = {
+        title: remoteMessage.notification.title,
+        body: remoteMessage.notification.body,
+        data: remoteMessage.data, // optional data payload
+      };
+
+      // Schedule the notification with a null trigger to show immediately
+      await Notifications.scheduleNotificationAsync({
+        content: notification,
+        trigger: null,
+      });
+    };
+
+    // Listen for push notifications when the app is in the foreground
+    const unsubscribe = messaging().onMessage(handlePushNotification);
+
+    // Clean up the event listeners
+    return () => {
+      unsubscribe();
+      notificationClickSubscription.remove();
+    };
 }
