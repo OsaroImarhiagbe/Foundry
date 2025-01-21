@@ -28,12 +28,12 @@ const RegisterScreen = () => {
     const {width,height} = useWindowDimensions()
     const { register } = useAuth();
     const handleRegister = async (values, {resetForm} )=> {
-        setLoading((prev) => !prev);
+        setLoading(true);
         try{
             let response = await register(values.username, values.email, values.password)
             if(response){
-                setLoading((prev)=> !prev)
                 navigation.navigate('Onboarding')
+                setLoading(false)
             }
             resetForm({values:initialValues})
         }catch(error){
@@ -71,9 +71,17 @@ const RegisterScreen = () => {
                 <View
                 style={styles.backImage}
                 >
-                   <Text>
-               <LottieView style={{width:width*0.9,height:width*0.9,alignItems:'center',justifyContent:'center'}} renderMode={'SOFTWARE'} source={require('../assets/animations/animation1.json')} autoPlay loop />;
-               </Text>
+                  <>
+                  <LottieView
+               style={{
+                width:width*0.9,
+                height:width*0.9,
+                alignItems:'center',
+                justifyContent:'center'}}
+                renderMode={'SOFTWARE'}
+                source={require('../assets/animations/animation1.json')} autoPlay loop />;
+              
+                  </>
                 </View>
                 <View style={styles.whitesheet}>
                 <View style={styles.headingcontainer}>
