@@ -1,17 +1,26 @@
-import { SafeAreaView, View, StyleSheet,Text, Image, ActivityIndicator,Alert} from 'react-native'
+import {
+    SafeAreaView,
+    View,
+    StyleSheet,
+    Platform,
+    useWindowDimensions
+    } from 'react-native'
 import AppTextInput from '../components/AppTextInput'
 import color from '../../config/color'
-import Button from '../components/Button'
 import { useState} from 'react'
 import * as Yup from 'yup';
 import { Formik} from 'formik';
 import { useAuth } from '../authContext'
 import CustomKeyboardView from '../components/CustomKeyboardView'
 import { StatusBar } from 'expo-status-bar';
+import { Button,Text, TextInput } from 'react-native-paper'
 import {GoogleSigninButton,
 statusCodes,
 } from '@react-native-google-signin/google-signin';
 import { TouchableWithoutFeedback } from 'react-native-gesture-handler'
+import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
+import LottieView from 'lottie-react-native';
+
 
 
 
@@ -19,6 +28,7 @@ const LoginScreen = ({navigation}) => {
     const [isLoading, setLoading] = useState(false)
     const { login,googleSignIn } = useAuth()
     const [focus,setFocus] = useState('')
+    const {width,height} = useWindowDimensions();
     
     
     const LoginPress = async (values,{resetForm}) => {
@@ -30,7 +40,6 @@ const LoginScreen = ({navigation}) => {
                     setLoading(false);
                     resetForm({values: ''})
                     navigation.navigate('Drawer');
-                    Alert.alert('Success!!', 'you have logged in!');
                 }, 2000); 
             }else{
                 setLoading(false)
@@ -74,17 +83,31 @@ const LoginScreen = ({navigation}) => {
    
            <CustomKeyboardView>
             <SafeAreaView style={styles.screen}>
-            <Image
-           source={require('../assets/DevGuide.png')}
-           style={styles.logo}/>
+            <View>
+            <Text>
+                  <LottieView
+               style={{
+                paddingTop:Platform.OS === 'ios' ? 30: 0,
+                width:width*0.9,
+                height:hp('30%'),
+                alignItems:'center',
+                justifyContent:'center'}}
+                renderMode={'SOFTWARE'}
+                source={require('../assets/animations/animation1.json')} autoPlay loop />;
+                  </Text>
+            </View>
            <View style={styles.welcome}>
             <View style={styles.welcomeHcontainer}>
-            <Text style={styles.welcomeText}>Welcome to </Text>
-            <Text style={styles.welcomeStext}>DevGuiide</Text>
+            <Text
+            variant='titleLarge'
+            style={{color:'#fff'}}>Welcome to </Text>
+            <Text
+            variant='titleLarge'
+            style={{color:'#7ed957'}}>DevGuiide</Text>
             </View>
-            <View style={styles.welcomeLcontainer}>
-            <Text style={styles.welcomeLtext}>The Most Popular Social Media App For All.</Text>
-            </View>
+            <Text
+            variant='titleMedium'
+            style={{color:'#fff',marginLeft:10}}>The Most Popular Social Media App For All.</Text>
            </View>
            <SafeAreaView>
            <Formik
@@ -94,12 +117,12 @@ const LoginScreen = ({navigation}) => {
            >
            {({handleSubmit,handleChange,values, errors,touched, setFieldTouched,isValid}) => (
                    <>
-                   <View style={styles.UserContainer}>
+                   <View style={{padding:20,alignItems:'center',justifyContent:'center'}}>
                    <AppTextInput
                    keyboardTYpe='email-address'
                    icon='account' 
                    placeholder='E-mail' 
-                   backgroundColor="#252525"
+                   backgroundColor="transparnet"
                    borderColor={focus === 'email' ? '#00BF63' : '#8a8a8a'}
                    onChangeText={handleChange('email')}
                    onFocus={() => setFocus('email')}
@@ -115,29 +138,35 @@ const LoginScreen = ({navigation}) => {
                    icon='lock'
                    secureTextEntry
                    placeholder='Password'
-                   backgroundColor="#252525"
+                   backgroundColor="transparent"
                    borderColor={focus === 'password' ? '#00BF63' : '#8a8a8a'}
                    onChangeText={handleChange('password')}
                    values={values.password}
                    onFocus={() => setFocus('password')}
                    onBlur={() => setFieldTouched('password')}
-                   iconcolor={color.button}/>
+                   iconcolor={color.button}
+                   right={<TextInput.Icon icon="eye"/>}
+                   />
                    { touched.password && errors.password && (
                        <Text style={styles.errormessage}>{errors.password}</Text>
                    )}
                    </View>
                    <View style={styles.LoginContainer}>
-                       {isLoading ? ( 
-                       <ActivityIndicator size='large' color={color.white} />) : (
-                       <Button fontSize={15} onPress={handleSubmit} title='Login'color={isValid ? color.white:color.grey} disabled={!isValid}/>
-                       )
-                       }
+                    <Button
+                    disabled={!isValid}
+                    mode='contained'
+                    onPress={handleSubmit}
+                    >Login</Button>
                        <View style={styles.textContainer}>
-                           <Text style={styles.text}>
+                           <Text
+                           variant='bodySmall'
+                           style={{color:color.grey,textAlign:'center'}}>
                                Don't have an account?
                            </Text>
                            <TouchableWithoutFeedback onPress={RegisterPress}>
-                           <Text style={styles.text1}>Sign Up</Text>
+                           <Text
+                           variant='bodySmall'
+                           style={{color:color.grey,textAlign:'center',marginLeft:5}}>Sign Up</Text>
                            </TouchableWithoutFeedback>
                        </View>
                        </View> 
@@ -146,7 +175,9 @@ const LoginScreen = ({navigation}) => {
            </Formik>
            </SafeAreaView>
            <View style={{justifyContent:'center',alignItems:'center',paddingTop:50}}>
-           <Text style={{fontFamily:color.textFont,textAlign:'center',color:color.grey,fontSize:20}}>Or Login with</Text>
+           <Text
+           variant='bodySmall'
+           style={{fontFamily:color.textFont,textAlign:'center',color:color.grey}}>Or Login with</Text>
            </View>
            <View style={{marginVertical:10,flexDirection:'row',justifyContent:'space-between',padding:30}}>
             <GoogleSigninButton
@@ -163,7 +194,6 @@ const LoginScreen = ({navigation}) => {
             color={GoogleSigninButton.Color.Light}
             size={GoogleSigninButton.Size.Icon}/>
             </View>
-           <StatusBar style="light" />
             </SafeAreaView>
     </CustomKeyboardView>
         
@@ -183,34 +213,11 @@ const styles = StyleSheet.create({
     welcome:{
         padding:5,
     },
-  
-    welcomeText:{
-        fontSize:30,
-        marginLeft:20,
-        color:'#ffffff',
-        fontFamily:color.textFont
-    },
-    welcomeStext:{
-        fontSize:30,
-        color:'#7ed957',
-        fontFamily:color.textFont
-        
-    },
-    welcomeLtext:{
-        fontSize:15,
-        color:'#ffffff',
-        fontFamily:color.textFont
-    },
     welcomeHcontainer:{
         padding:8,
         flexDirection:'row'
     }
     ,
-    welcomeLcontainer:{
-        padding:10,
-        marginLeft:20
-    },
-  
     errormessage:{
         color: color.danger,
         textAlign:'center',
@@ -220,14 +227,13 @@ const styles = StyleSheet.create({
         flex:1,
     },
     LoginContainer:{
-        padding:20,
-        marginTop:10,
+        padding:10,
+        marginTop:5,
     },
     logo:{
-        width:120,
-        height:120,
+        width:30,
+        height:30,
         alignSelf:'left',
-        marginVertical:110,
         marginBottom:20,
     },
     UserContainer:{
@@ -238,18 +244,6 @@ const styles = StyleSheet.create({
         marginTop:15,
         flexDirection:'row',
         alignSelf:'center'
-    },
-    text:{
-        color:color.grey,
-        textAlign:'center',
-        fontSize: 15,
-        fontFamily:color.textFont
-    },
-    text1:{
-        color:color.grey,
-        fontSize: 15,
-        marginLeft:10,
-        fontFamily:color.textFont
     },
     registercontainer:{
         marginTop:15
