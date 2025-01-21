@@ -147,10 +147,10 @@ const fetchMorePost = async () => {
   }
   return (
     <SafeAreaView
-    style={[styles.screen,{opacity: headerOpacity}]}
+    style={styles.screen}
     >
       <PushNotification/>
-      <Animated.View style={{ opacity: headerOpacity,backgroundColor:'transparent' }}>
+      <Animated.View style={{ opacity: headerOpacity}}>
           <ChatRoomHeader
           onPress={handlePress}
           title='DevGuiide'

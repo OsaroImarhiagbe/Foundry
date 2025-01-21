@@ -1,28 +1,41 @@
 import React from 'react'
-import {View, StyleSheet, TextInput} from 'react-native'
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
-
-const AppTextInput = ({placeholder,backgroundColor,borderColor,secureTextEntry,icon, onChangeText, onBlur,textAlign,maxLength,iconcolor,values,onFocus}) => {
+import {View, StyleSheet} from 'react-native'
+import { TextInput } from 'react-native-paper'
+import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
+const AppTextInput = ({placeholder,
+  backgroundColor,
+  borderColor,
+  secureTextEntry,
+  icon,
+  onChangeText,
+  onBlur,
+  textAlign,
+  maxLength,
+  iconcolor,
+  values,
+  onFocus,right}) => {
   return (
     
   
-    <View style={{flexDirection:'row', justifyContent:'space-between',borderColor:borderColor,borderWidth:1,alignItems:'center', borderRadius: 10,marginVertical:10}}>
-      <TextInput
-      value={values}
-      secureTextEntry={secureTextEntry}
-      textAlign={textAlign}
-      maxLength={maxLength}
-      style={styles.Container}
-      placeholder={placeholder}
-      placeholderTextColor='#8a8a8a'
-      onChangeText={onChangeText}
-      onBlur={onBlur}
-      onFocus={onFocus}
-      />  
-      <View style={styles.inputContainer}>
-        {icon && <MaterialCommunityIcons name={icon} size={25} style={styles.icon} color={iconcolor}/>}
-       </View>
-      </View>
+    <View style={{flexDirection:'row',
+    justifyContent:'space-between',
+    alignItems:'center',
+    borderRadius: 10,
+    marginVertical:10}}>
+    <TextInput
+    value={values}
+    secureTextEntry={secureTextEntry}
+    textAlign={textAlign}
+    maxLength={maxLength}
+    style={[styles.Container,{backgroundColor:backgroundColor}]}
+    placeholder={placeholder}
+    placeholderTextColor='#8a8a8a'
+    onChangeText={onChangeText}
+    onBlur={onBlur}
+    onFocus={onFocus}
+    right={right}
+    />  
+    </View>
       
    
   )
@@ -31,18 +44,8 @@ const AppTextInput = ({placeholder,backgroundColor,borderColor,secureTextEntry,i
 
 const styles = StyleSheet.create({
   Container: {
-    padding: 10,
-    margin:12,
-    height:40,
-    alignItems:'center',
-    color:'#ffffff',
-    borderColor:'#fff',
-    width:'80%' 
+    width:wp('90%') ,
   },
-  icon:{
-    margin:10
-},
-
 });
 
 

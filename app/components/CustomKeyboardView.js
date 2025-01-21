@@ -17,6 +17,7 @@ const CustomKeyboardView = ({children,inChat}) => {
   return (
    <KeyboardAvoidingView
    behavior='padding'
+   keyboardVerticalOffset={60}
    style={{flex:1,backgroundColor: inChat ? '':'#1f1f1f'}}
    {...kavConfig}
    >

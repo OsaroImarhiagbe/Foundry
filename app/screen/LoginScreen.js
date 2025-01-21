@@ -11,6 +11,7 @@ import { StatusBar } from 'expo-status-bar';
 import {GoogleSigninButton,
 statusCodes,
 } from '@react-native-google-signin/google-signin';
+import { TouchableWithoutFeedback } from 'react-native-gesture-handler'
 
 
 
@@ -135,7 +136,9 @@ const LoginScreen = ({navigation}) => {
                            <Text style={styles.text}>
                                Don't have an account?
                            </Text>
-                           <Text onPress={RegisterPress} style={styles.text1}>Sign Up</Text>
+                           <TouchableWithoutFeedback onPress={RegisterPress}>
+                           <Text style={styles.text1}>Sign Up</Text>
+                           </TouchableWithoutFeedback>
                        </View>
                        </View> 
                    </>

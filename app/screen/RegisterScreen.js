@@ -1,5 +1,10 @@
 import React, {useState} from 'react'
-import {View, Text,StyleSheet,Platform,StatusBar, TouchableOpacity,Alert, ActivityIndicator, Image,SafeAreaView} from 'react-native';
+import {
+    View,
+    StyleSheet,
+    ActivityIndicator,
+    SafeAreaView,
+    useWindowDimensions} from 'react-native';
 import { Formik} from 'formik';
 import AppTextInput from '../components/AppTextInput';
 import color from '../../config/color';
@@ -8,7 +13,10 @@ import * as Yup from 'yup';
 import { useAuth} from '../authContext';
 import CustomKeyboardView from '../components/CustomKeyboardView';
 import { useNavigation } from '@react-navigation/native';
-
+import { TextInput,Text,HelperText} from 'react-native-paper';
+import LottieView from 'lottie-react-native';
+import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
+import { TouchableWithoutFeedback } from 'react-native-gesture-handler';
 
 
 
@@ -17,7 +25,7 @@ const RegisterScreen = () => {
 
     const [loading, setLoading] = useState(false);
     const navigation = useNavigation();
-
+    const {width,height} = useWindowDimensions()
     const { register } = useAuth();
     const handleRegister = async (values, {resetForm} )=> {
         setLoading((prev) => !prev);
@@ -26,7 +34,6 @@ const RegisterScreen = () => {
             if(response){
                 setLoading((prev)=> !prev)
                 navigation.navigate('Onboarding')
-                Alert.alert('Success','You have registered!')
             }
             resetForm({values:initialValues})
         }catch(error){
@@ -60,19 +67,23 @@ const RegisterScreen = () => {
         confirmPassword:''}
 
     return (
-
-            <SafeAreaView style={styles.container}>
+            <SafeAreaView style={styles.screen}>
                 <View
                 style={styles.backImage}
                 >
-                    <Image
-                    style={styles.logo}
-                    source={require('../assets/DevGuide.png')}/>
+                   <Text>
+               <LottieView style={{width:width*0.9,height:width*0.9,alignItems:'center',justifyContent:'center'}} renderMode={'SOFTWARE'} source={require('../assets/animations/animation1.json')} autoPlay loop />;
+               </Text>
                 </View>
                 <View style={styles.whitesheet}>
                 <View style={styles.headingcontainer}>
-                    <Text style={styles.heading}>Register</Text>
-                    <Text style={styles.bottomText} >Create a new account</Text>
+                    <Text
+                    variant='titleLarge'
+                    style={{textAlign:'center',color:'#fff',fontFamily:color.textFont}}>Register</Text>
+                    <Text
+                    variant='titleMedium'
+                    style={{textAlign:'center',color:'#fff',fontFamily:color.textFont}}
+                     >Create a new account</Text>
                 </View>
                 <CustomKeyboardView>
                 <Formik
@@ -82,54 +93,59 @@ const RegisterScreen = () => {
                 >
                     {({handleChange, handleSubmit, values, setFieldTouched,touched, errors, isValid}) => (
                         <>
-                            <View style={{}}>
+                            <View>
                             <AppTextInput
                                     icon='account'
                                     placeholder='Username'
-                                    backgroundColor='#252525'
+                                     backgroundColor='transparent'
                                     borderColor='#8a8a8a'
                                     value={values.username}
                                     onChangeText={handleChange('username')}
                                     onBlur={() => setFieldTouched('username')}
                                     iconcolor={color.button}
                                 />
-                                {touched.username && errors.username &&( <Text style={styles.errormessage}>{errors.username}</Text>)}
+                                {touched.username && errors.username &&( <HelperText
+                                    type='error'
+                                    visible={errors}
+                                    style={styles.errormessage}>{errors.username}</HelperText>)}
                                 <AppTextInput
                                     icon='email'
                                     keyboardType='email-address'
                                     placeholder='Email'
-                                    backgroundColor='#252525'
+                                    backgroundColor='transparent'
                                     borderColor='#8a8a8a'
                                     value={values.email}
                                     onChangeText={handleChange('email')}
                                     onBlur={() => setFieldTouched('email')}
                                     iconcolor={color.button}
                                 />
-                                {touched.email && errors.email && (<Text style={styles.errormessage}>{errors.email}</Text>)}
+                                {touched.email && errors.email && (<HelperText type='error' visible={errors} style={styles.errormessage}>{errors.email}</HelperText>)}
                                 <AppTextInput
                                     icon='lock'
                                     secureTextEntry
                                     placeholder='Password'
-                                    backgroundColor='#252525'
+                                    backgroundColor='transparent'
                                     borderColor='#8a8a8a'
                                     value={values.password}
                                     onChangeText={handleChange('password')}
                                     onBlur={() => setFieldTouched('password')}
                                     iconcolor={color.button}
+                                    right={<TextInput.Icon  icon="eye" />}
                                 />
-                                {touched.password && errors.password  && (<Text style={styles.errormessage}>{errors.password}</Text>)}
+                                {touched.password && errors.password  && (<HelperText  type='error' visible={errors} style={styles.errormessage}>{errors.password}</HelperText>)}
                                 <AppTextInput
                                     icon='lock'
                                     secureTextEntry
                                     placeholder='Confirm Password'
-                                    backgroundColor='#252525'
+                                    backgroundColor='transparent'
                                     borderColor='#8a8a8a'
                                     value={values.confirmPassword}
                                     onChangeText={handleChange('confirmPassword')}
                                     onBlur={() => setFieldTouched('confirmPassword')}
                                     iconcolor={color.button}
+                                    right={<TextInput.Icon  icon="eye" />}
                                 />
-                                {touched.confirmPassword && errors.confirmPassword &&( <Text style={styles.errormessage}>{errors.confirmPassword}</Text>)}
+                                {touched.confirmPassword && errors.confirmPassword &&( <HelperText   type='error' visible={errors} style={styles.errormessage}>{errors.confirmPassword}</HelperText>)}
                             </View>
                             <View style={styles.buttoncontainer}>
                                 {
@@ -144,10 +160,15 @@ const RegisterScreen = () => {
                               
                             </View>
                             <View style={styles.textContainer}>
-                                    <Text style={styles.text}>Have an account?</Text>
-                                <TouchableOpacity onPress={() => navigation.navigate('Login')}>
-                                    <Text style={styles.text1}>Login</Text>
-                                </TouchableOpacity>
+                                    <Text
+                                    variant='bodySmall'
+                                    style={{color:'#fff',textAlign:'center'}}>Have an account?</Text>
+                                <TouchableWithoutFeedback onPress={() => navigation.navigate('Login')}>
+                                    <Text
+                                    variant='bodySmall'
+                                    style={{color:'#fff',marginLeft:10,textAlign:'center'}}
+                                    >Login</Text>
+                                </TouchableWithoutFeedback>
                             </View>
                         </>
                     )}
@@ -155,13 +176,7 @@ const RegisterScreen = () => {
                 </CustomKeyboardView>
                 </View>
             </SafeAreaView>
-      
-      
-      
-     
- 
-    
-      
+            
     )
 }
 
@@ -169,35 +184,25 @@ const RegisterScreen = () => {
 
 const styles = StyleSheet.create({
     backImage:{
-        width: '100%',
-        height: 370,
+        width:wp('100%'),
+        height:hp(390),
         position:'absolute',
         top:0,
         resizedMode: 'cover',
         backgroundColor:'#8a8a8a'
-      },
-      logo:{
-        marginLeft:110,
-        marginTop:30,
-        width:180,
-        height:180,
-        
-      },  
+      }, 
     whitesheet:{
-        width:'100%',
-        height:'75%',
+        width:wp('100%'),
+        height:hp('65%'),
         position:'absolute',
         bottom:0,
         backgroundColor:'#1f1f1f',
         borderTopLeftRadius: 60,
+        borderTopRightRadius: 60,
         padding:20
-  } , 
-
+  } ,
     buttoncontainer:{
         padding:10
-    },
-    container:{
-      flex:1,
     },
     errormessage:{
         color: color.danger,
@@ -205,15 +210,7 @@ const styles = StyleSheet.create({
         fontFamily:color.textFont
     },
     screen:{
-        paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
         flex:1
-
-    },
-    heading:{
-        fontSize:25,
-        textAlign:'center',
-        color:'#ffffff',
-        fontFamily:color.textFont
 
     },
     headingcontainer:{
