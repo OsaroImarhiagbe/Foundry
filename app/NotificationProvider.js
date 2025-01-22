@@ -17,6 +17,12 @@ export const NotificationProvider = ({ children }) => {
             title: title,
             body:message,
             ios: {
+                foregroundPresentationOptions: {
+                    badge: true,
+                    sound: true,
+                    banner: true,
+                    list: true,
+                  },
                 sound:'default'
             },
         });
