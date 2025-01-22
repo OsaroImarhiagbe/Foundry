@@ -148,24 +148,6 @@ const AuthNavigation = () => {
               gestureEnabled:false,
               animation:'fade_from_bottom'
             }}/>
-            <Stack.Screen
-              name="Login"
-              component={LoginScreen}
-              options={{
-                headerShown:false,
-                gestureEnabled:false,
-                animation:'fade_from_bottom'
-                
-              }}
-            /> 
-            <Stack.Screen
-            name="Register"
-            component={RegisterScreenWrapper}
-            options={{
-              headerShown:false,
-              gestureEnabled:false,
-              animation:'fade_from_bottom'
-            }}/>
               <Stack.Screen
             name="ProjectScreen"
             component={ProjectScreen}
@@ -208,13 +190,13 @@ const AuthNavigation = () => {
               headerShown:false,
               presentation:'modal',
             }}/>
-               <Stack.Screen
-                name='Chat'
-                component={ChatScreenWrapper}
-                options={{
-                  headerShown:false,
-                  gestureEnabled:false,
-                  unmountOnBlur: true,
+            <Stack.Screen
+              name='Chat'
+              component={ChatScreenWrapper}
+              options={{
+                headerShown:false,
+                gestureEnabled:false,
+                unmountOnBlur: true,
                 }}
                 />
           </Stack.Navigator>
