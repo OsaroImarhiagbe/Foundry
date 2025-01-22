@@ -1,11 +1,23 @@
-import React, {useState, useEffect,lazy,Suspense,useCallback} from 'react'
-import {View, Text, StyleSheet, Platform, StatusBar,ActivityIndicator,ScrollView,RefreshControl,SafeAreaView} from 'react-native'
+import React, {
+  useState,
+  useEffect,
+  lazy,
+  Suspense,
+  useCallback} from 'react'
+import {
+  View,
+  StyleSheet,
+  Platform,
+  StatusBar,
+  SafeAreaView} from 'react-native'
 import color from '../../config/color';
 import firestore from '@react-native-firebase/firestore'
 import { useAuth } from '../authContext';
 import ChatRoomHeader from '../components/ChatRoomHeader';
 import { useNavigation } from '@react-navigation/native';
 import { useSelector } from 'react-redux';
+import { FlashList } from '@shopify/flash-list';
+import { ActivityIndicator,Text } from 'react-native-paper';
 const ChatList = lazy(() => import('../../List/ChatList'))
 
 
@@ -16,6 +28,8 @@ const MessageScreen = () => {
   const navigation = useNavigation();
   const { user} = useAuth();
   const [refreshing, setRefreshing] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
   const list_of_ids = useSelector((state)=> state.message.messagesID)
 
   const onRefresh = useCallback(() => {
@@ -59,30 +73,60 @@ const MessageScreen = () => {
     navigation.navigate('Main');
   }
  
+  const fetchMorePost = async () => {
+    if (loadingMore || !hasMore) return;
+    if (!user?.userId) return;
+    if (post.length <= 2) {
+      setHasMore(false);
+      return;
+    }
+    setLoadingMore(true);
+    try {
+      const snapshot = await firestore()
+        .collection('posts')
+        .orderBy('createdAt', 'desc')
+        .startAfter(lastVisible)
+        .limit(2)
+        .get();
+      const newPosts = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      setPost(prevPosts => [...prevPosts, ...newPosts]);
+      setLastVisible(snapshot.docs[snapshot.docs.length - 1]);
+      setHasMore(snapshot.docs.length > 0);
+    } catch (e) {
+      console.error(`Error fetching more posts: ${e}`);
+    } finally {
+      setLoadingMore(false);
+    }
+  }
 
 
   return (
-    <View style={styles.screen}>
+    <SafeAreaView style={styles.screen}>
       <ChatRoomHeader title='Message' onPress={handlePress} icon='keyboard-backspace' backgroundColor={color.button} iconColor='#00bf63'/>
-      <ScrollView
-      style={{flex:1}}
-      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh}/>}
-      >
-      <View style={styles.container}>
       <View style={{marginTop:5}}>
-       {users.length > 0 ? (
+      <FlashList
+      onRefresh={onRefresh}
+      data={users}
+      refreshing={refreshing}
+      onEndReached={fetchMorePost}
+      onEndReachedThreshold={0.1}
+      ListFooterComponent={() => (<ActivityIndicator size='small' color='#fff' animating={loadingMore}/>)}
+      ListEmptyComponent={() => ( <View style={{justifyContent:'center',alignItems:'center',flex:1,marginTop:40}}>
+        <Text
+        variant='titleLarge'
+        style={styles.text}>Send a new message!</Text>
+        </View>)}
+      renderItem={({item}) => (
         <Suspense fallback={<ActivityIndicator size='small' color='#fff'/>}>
             <ChatList currentUser={user} otherusers={users}/>
         </Suspense>
-       ): (<View>
-        <View style={{justifyContent:'center',alignItems:'center',flex:1,marginTop:40}}>
-        <Text style={styles.text}>Send a new message!</Text>
-        </View>
-       </View>)}
-       </View>
-    </View>
-      </ScrollView>
-  </View>
+      )}
+      />
+      </View>
+  </SafeAreaView>
   )
 }
 
