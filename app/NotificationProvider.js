@@ -13,10 +13,6 @@ export const NotificationProvider = ({ children }) => {
   const showNotification = useCallback(async (title, message,data) => {
     try{
         await notifee.requestPermission()
-        const channelId = await notifee.createChannel({
-            id: 'default',
-            name: 'Default Channel',
-          });
         await notifee.displayNotification({
             title: title,
             body:message,
