@@ -7,6 +7,7 @@ import {useState,useEffect,useRef} from 'react'
 import {Alert} from 'react-native'
 import messaging from '@react-native-firebase/messaging';
 import { useNavigation } from '@react-navigation/native';
+import { useNotification } from '../NotificationProvider';
 
  // Set up the notification handler for the app in the foreground
 Notifications.setNotificationHandler({
@@ -20,6 +21,7 @@ Notifications.setNotificationHandler({
 export default function PushNotification(){
 
     const navigation = useNavigation();
+    const {showNotification} = useNotification();
 
     const requestUserPermission = async () => {
       const authStatus = await messaging().requestPermission();
@@ -41,10 +43,7 @@ export default function PushNotification(){
               );
           }
       }, []);
-
-  
-
-
+      
     // Handle user clicking on a notification and open the screen
     const handleNotificationClick = async (response) => {
       const screen = response?.notification?.request?.content?.data?.screen;
@@ -104,18 +103,19 @@ export default function PushNotification(){
 
     // Handle push notifications when the app is in the foreground
     const handlePushNotification = async (remoteMessage) => {
-      const notification = {
-        title: remoteMessage.notification.title,
-        body: remoteMessage.notification.body,
-        data: remoteMessage.data, // optional data payload
-      };
+      showNotification(
+        remoteMessage.notification.title,
+        remoteMessage.notification.body,
+        remoteMessage.data, // optional data payload
+      );
+    };
 
       // Schedule the notification with a null trigger to show immediately
-      await Notifications.scheduleNotificationAsync({
-        content: notification,
-        trigger: null,
-      });
-    };
+    //   await Notifications.scheduleNotificationAsync({
+    //     content: notification,
+    //     trigger: null,
+    //   });
+    // };
 
     // Listen for push notifications when the app is in the foreground
     const unsubscribe = messaging().onMessage(handlePushNotification);

@@ -8,8 +8,8 @@ export const useNotification = () => useContext(NotificationContext);
 export const NotificationProvider = ({ children }) => {
   const [notification, setNotification] = useState(null);
 
-  const showNotification = useCallback((title, message) => {
-    setNotification({ title, message });
+  const showNotification = useCallback((title, message,data) => {
+    setNotification({ title, message,data });
     // Auto-hide after 5 seconds
     setTimeout(() => {
       setNotification(null);
