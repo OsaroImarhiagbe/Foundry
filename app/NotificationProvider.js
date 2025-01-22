@@ -3,7 +3,8 @@ import NotificationBanner from './components/NotificationBanner';
 import notifee, { EventType } from '@notifee/react-native'
 import { useNavigation } from '@react-navigation/native';
 import messaging from '@react-native-firebase/messaging';
-
+import firestore from '@react-native-firebase/firestore';
+import App from '../App';
 const NotificationContext = createContext();
 
 export const useNotification = () => useContext(NotificationContext);
@@ -21,7 +22,7 @@ export const NotificationProvider = ({ children }) => {
             await messaging().registerDeviceForRemoteMessages();
             await notifee.requestPermission();
             const token = await messaging().getToken();
-            return token 
+            // firestore().collection('users').
         }catch(error){
           console.error('Error grabbing token:',error.message)
         }
@@ -82,14 +83,12 @@ export const NotificationProvider = ({ children }) => {
         }
       }
     });
-    },[handleNotificationClick])
 
-    useEffect(() => {
-       // Handle push notifications when the app is in the background
-       const unsubscribe = messaging().setBackgroundMessageHandler(handlePushNotification)
+      // Handle push notifications when the app is in the background
+    const unsubscribe = messaging().setBackgroundMessageHandler(handlePushNotification)
        return () => unsubscribe()
-  
-    },[])
+
+    },[handleNotificationClick])
     // Handle push notifications when the app is in the foreground
     const handlePushNotification = useCallback((remoteMessage) => {
       const {title,body,data } = remoteMessage.notification

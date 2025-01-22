@@ -34,16 +34,16 @@ export default function App() {
     <I18nextProvider i18n={i18n}>
        <Provider store={store}>
       <PersistGate loading={isloading} persistor={persistor}>
-        <NotificationProvider>
         <MenuProvider>
           <AuthContextProvider>
+          <NotificationProvider>
         <NavigationContainer>
           {isloading ? <SplashScreen/> :   <AuthNavigation/> }
         </NavigationContainer>
+        </NotificationProvider>
       </AuthContextProvider>
       <StatusBar style="light" />
       </MenuProvider>
-        </NotificationProvider>
       </PersistGate>
     </Provider>
     </I18nextProvider>
