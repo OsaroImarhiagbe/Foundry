@@ -1,5 +1,4 @@
 import * as Device from 'expo-device';
-import * as Notifications from 'expo-notifications';
 import Constants from 'expo-constants';
 import firestore from '@react-native-firebase/firestore'
 import { useAuth } from '../authContext';
@@ -8,15 +7,7 @@ import {Alert} from 'react-native'
 import messaging from '@react-native-firebase/messaging';
 import { useNavigation } from '@react-navigation/native';
 import { useNotification } from '../NotificationProvider';
-
- // Set up the notification handler for the app in the foreground
-Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldShowAlert: true,
-    shouldPlaySound: true,
-    shouldSetBadge: false,
-  }),
-});
+import notifee from '@notifee/react-native'
 
 export default function PushNotification(){
 
@@ -24,24 +15,22 @@ export default function PushNotification(){
     const {showNotification} = useNotification();
 
     const requestUserPermission = async () => {
+      await messaging().registerDeviceForRemoteMessages();
       const authStatus = await messaging().requestPermission();
       const enabled =
         authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
         authStatus === messaging.AuthorizationStatus.PROVISIONAL;
-
+    
       if (enabled) {
-        console.log("Authorization status:", authStatus);
+        console.log('Authorization status:', authStatus);
       }
     };
 
     useEffect(() => {
-      if (requestUserPermission()) {
-            messaging()
-              .getToken()
-              .then(
-                token => console.log(token)
-              );
-          }
+      if (requestUserPermission()){
+        const token = messaging().getToken()
+        return token 
+      }
       }, []);
 
     // Handle user clicking on a notification and open the screen
@@ -53,20 +42,20 @@ export default function PushNotification(){
     };
 
     // Listen for user clicking on a notification
-    const notificationClickSubscription =
-      Notifications.addNotificationResponseReceivedListener(handleNotificationClick);
+    // const notificationClickSubscription =
+    //   Notifications.addNotificationResponseReceivedListener(handleNotificationClick);
 
-    // Handle user opening the app from a notification (when the app is in the background)
-    messaging().onNotificationOpenedApp((remoteMessage) => {
-      console.log(
-        "Notification caused app to open from background state:",
-        remoteMessage.data.screen,
-        navigation
-      );
-      if (remoteMessage?.data?.screen) {
-        navigation.navigate(`${remoteMessage.data.screen}`);
-      }
-    });
+    // // Handle user opening the app from a notification (when the app is in the background)
+    // messaging().onNotificationOpenedApp((remoteMessage) => {
+    //   console.log(
+    //     "Notification caused app to open from background state:",
+    //     remoteMessage.data.screen,
+    //     navigation
+    //   );
+    //   if (remoteMessage?.data?.screen) {
+    //     navigation.navigate(`${remoteMessage.data.screen}`);
+    //   }
+    // });
 
     // Check if the app was opened from a notification (when the app was completely quit)
     messaging()
@@ -91,36 +80,23 @@ export default function PushNotification(){
         body: remoteMessage.notification.body,
         data: remoteMessage.data, // optional data payload
       };
-
-      // Schedule the notification with a null trigger to show immediately
-      await Notifications.scheduleNotificationAsync({
-        content: notification,
-        trigger: null,
-      });
     });
 
     // Handle push notifications when the app is in the foreground
     const handlePushNotification = async (remoteMessage) => {
-      showNotification(
-        remoteMessage.notification.title,
-        remoteMessage.notification.body,
-        remoteMessage.data, // optional data payload
-      );
+      const {title,body,data } = remoteMessage.notification
+      showNotification(title,body,data)
     };
+    useEffect(() => {
+      const unsubscribe = messaging().onMessage(handlePushNotification)
 
-      // Schedule the notification with a null trigger to show immediately
-    //   await Notifications.scheduleNotificationAsync({
-    //     content: notification,
-    //     trigger: null,
-    //   });
-    // };
-
+      return unsubscribe()
+    },[])
     // Listen for push notifications when the app is in the foreground
-    const unsubscribe = messaging().onMessage(handlePushNotification);
+    ;
 
     // Clean up the event listeners
-    return () => {
-      unsubscribe();
+    return () => {3
       notificationClickSubscription.remove();
     };
 }
