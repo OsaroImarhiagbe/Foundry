@@ -1,10 +1,11 @@
 import React,{useState} from 'react'
 import { Banner } from 'react-native-paper';
 
-const NotificationBanner = ({title,message,onClose}) => {
+const NotificationBanner = ({title,message,visible}) => {
     const [visible,setVisible] = useState()
   return (
     <Banner
+    visible={visible}
     actions={[
         {
           label: 'Fix it',
@@ -16,7 +17,8 @@ const NotificationBanner = ({title,message,onClose}) => {
         },
       ]}
     >
-       {notfication} 
+       {title}
+       {message} 
     </Banner>
   )
 }

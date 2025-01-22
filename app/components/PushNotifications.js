@@ -43,7 +43,7 @@ export default function PushNotification(){
               );
           }
       }, []);
-      
+
     // Handle user clicking on a notification and open the screen
     const handleNotificationClick = async (response) => {
       const screen = response?.notification?.request?.content?.data?.screen;
@@ -54,9 +54,7 @@ export default function PushNotification(){
 
     // Listen for user clicking on a notification
     const notificationClickSubscription =
-      Notifications.addNotificationResponseReceivedListener(
-        handleNotificationClick
-      );
+      Notifications.addNotificationResponseReceivedListener(handleNotificationClick);
 
     // Handle user opening the app from a notification (when the app is in the background)
     messaging().onNotificationOpenedApp((remoteMessage) => {
