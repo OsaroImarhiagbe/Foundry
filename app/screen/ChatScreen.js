@@ -18,7 +18,6 @@ import { useNavigation } from '@react-navigation/native';
 import { useDispatch } from 'react-redux';
 import { addID } from '../features/Message/messageidSlice';
 import firestore from '@react-native-firebase/firestore'
-import axios from 'axios'
 import MessageItem from '../components/MessageItem';
 import { FlashList } from '@shopify/flash-list';
 import {EXPOPUSHURL} from "@env"
@@ -149,12 +148,15 @@ const ChatScreen = () => {
         keyExtractor={item => item?.id.toString()}
         estimatedItemSize={360}
         renderItem={({item}) => (
-          <MessageItem  date={item.createdAt.toDate().toLocaleString()} id={item.userId} message_text={item.text} currentUser={user}/>
+          <MessageItem  date={item.createdAt.toDate().toLocaleString('en-US', {
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: true
+          })} id={item.userId} message_text={item.text} currentUser={user}/>
         )}
         />
-        {/* <MessageList messages={messages} currentUser={user} /> */}
       </View>
-      <View style={{paddingTop:5}}>
+      <View>
       <View style={styles.inputContainer}>
         <View style={styles.messageInput}>
           <TextInput
@@ -197,7 +199,7 @@ const styles = StyleSheet.create({
   messageInput: {
     flexDirection:'row',
     width:wp('100%'),
-    padding:25,
+    padding:20,
   },
   textinput:{
     flexDirection:'row',
