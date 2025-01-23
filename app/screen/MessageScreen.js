@@ -51,7 +51,6 @@ const MessageScreen = () => {
   const grabUser = (list_of_ids) => {
     if (!list_of_ids || list_of_ids.length === 0) {
       setUsers([]);
-      console.warn("list_of_ids is empty or undefined."); 
       return;
     }
     const unsub = firestore()
@@ -106,15 +105,16 @@ const MessageScreen = () => {
   return (
     <SafeAreaView style={styles.screen}>
       <ChatRoomHeader title='Message' onPress={handlePress} icon='keyboard-backspace' backgroundColor={color.button} iconColor='#00bf63'/>
-      <View style={{marginTop:5}}>
+      <View style={{marginTop:5,flex:1}}>
       <FlashList
+      estimatedItemSize={460}
       onRefresh={onRefresh}
       data={users}
       refreshing={refreshing}
       onEndReached={fetchMorePost}
       onEndReachedThreshold={0.1}
       ListFooterComponent={() => (<ActivityIndicator size='small' color='#fff' animating={loadingMore}/>)}
-      ListEmptyComponent={() => ( <View style={{justifyContent:'center',alignItems:'center',flex:1,marginTop:40}}>
+      ListEmptyComponent={() => ( <View style={{justifyContent:'center',alignItems:'center',flex:1,marginTop:20}}>
         <Text
         variant='titleLarge'
         style={styles.text}>Send a new message!</Text>

@@ -22,7 +22,7 @@ import { useAuth } from '../authContext';
 import firestore from '@react-native-firebase/firestore'
 import { useDispatch} from 'react-redux';
 import { addId } from '../features/user/userSlice';
-import PushNotification from '../components/PushNotifications.js';
+//import PushNotification from '../components/PushNotifications.js';
 import { FlashList } from "@shopify/flash-list";
 import {ActivityIndicator,Text,Divider} from 'react-native-paper'
 const PostComponent = lazy(() => import('../components/PostComponent.js'))
@@ -149,7 +149,7 @@ const fetchMorePost = async () => {
     <SafeAreaView
     style={styles.screen}
     >
-      <PushNotification/>
+      {/* <PushNotification/> */}
       <Animated.View style={{ opacity: headerOpacity}}>
           <ChatRoomHeader
           onPress={handlePress}

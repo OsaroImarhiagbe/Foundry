@@ -1,5 +1,5 @@
 
-import {View,StyleSheet,TouchableOpacity,TextInput}  from 'react-native'
+import {View,StyleSheet,TouchableOpacity,TextInput, SafeAreaView}  from 'react-native'
 import color from'../../config/color';
 import React, { useState, useEffect, useRef} from 'react'
 import MessageList  from '../components/MessageList';
@@ -143,6 +143,7 @@ const ChatScreen = () => {
     inChat={true}
     style={styles.container}
     >
+      <SafeAreaView style={{flex:1}}>
       <ChatRoomHeader 
       title={recipentNamec}
       backgroundColor={color.button} 
@@ -172,6 +173,7 @@ const ChatScreen = () => {
         </View>
         </View>
       </View>
+      </SafeAreaView>
     </CustomKeyboardView>
   );
 };
@@ -179,7 +181,6 @@ const ChatScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor:'#fff'
   },
   messagesContainer: {
     flex: 1,
@@ -188,10 +189,9 @@ const styles = StyleSheet.create({
   inputContainer: {
     flexDirection: 'row',
     justifyContent:'space-between',
-    alignItems:'center',
+    alignItems:'flex-end',
     marginRight:3,
     marginLeft:3,
-    paddingBottom:70
   },
   messageInput: {
     flexDirection:'row',

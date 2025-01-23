@@ -10,7 +10,7 @@ import AuthNavigation from './app/navigation/AuthNavigation';
 import { PersistGate } from 'redux-persist/integration/react';
 import { I18nextProvider } from 'react-i18next';
 import i18n from './app/Language/i18n';
-import { NotificationProvider } from './app/NotificationProvider';
+//import { NotificationProvider } from './app/NotificationProvider';
 
 
 
@@ -36,11 +36,11 @@ export default function App() {
       <PersistGate loading={isloading} persistor={persistor}>
         <MenuProvider>
           <AuthContextProvider>
-          <NotificationProvider>
+          {/* <NotificationProvider> */}
         <NavigationContainer>
           {isloading ? <SplashScreen/> :   <AuthNavigation/> }
         </NavigationContainer>
-        </NotificationProvider>
+        {/* </NotificationProvider> */}
       </AuthContextProvider>
       <StatusBar style="light" />
       </MenuProvider>

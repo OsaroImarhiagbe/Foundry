@@ -108,7 +108,6 @@ const ChatRoom = ({next_item, onPress,User}) => {
          <Text  numberOfLines={2} style={styles.subTitle} >{renderTime()}</Text>
         </View>
     </TouchableHighlight>
-   
     </Swipeable>
    
   

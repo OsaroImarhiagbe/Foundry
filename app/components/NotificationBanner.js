@@ -2,7 +2,7 @@ import React,{useState} from 'react'
 import { Banner } from 'react-native-paper';
 
 const NotificationBanner = ({title,message,visible}) => {
-    const [visible,setVisible] = useState()
+    const [isvisible,setVisible] = useState()
   return (
     <Banner
     visible={visible}

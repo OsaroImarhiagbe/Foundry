@@ -18,7 +18,7 @@ const CustomKeyboardView = ({children,inChat}) => {
    <KeyboardAvoidingView
    behavior='padding'
    keyboardVerticalOffset={60}
-   style={{flex:1,backgroundColor: inChat ? '':'#1f1f1f'}}
+   style={{flex:1,backgroundColor: inChat ? '#121212':'#1f1f1f'}}
    {...kavConfig}
    >
     <ScrollView

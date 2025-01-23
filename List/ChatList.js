@@ -7,17 +7,15 @@ const ChatList = ({otherusers,currentUser}) => {
 
   return (
    <View>
-
     {otherusers.map((item) =>(
-      <View style={{padding:10}}key={Math.random()}>
+      <View style={{padding:10}} key={Math.random()}>
           <ChatRoom
                     
                     User={currentUser}
                     onPress={() => navigation.navigate('Chat',{item})}
                     next_item={item}
                    />
-      </View>
-                  
+      </View>          
     ))}
    </View>
   )

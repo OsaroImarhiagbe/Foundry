@@ -197,7 +197,7 @@ const OtherUserScreen = () => {
   if(isloading) return null
   
     return (
-        <View style={styles.screen}>
+        <SafeAreaView style={styles.screen}>
           <ChatRoomHeader 
             onPress={()=>navigation.navigate('Main')} 
             backgroundColor={color.button} 
@@ -290,7 +290,7 @@ const OtherUserScreen = () => {
                   </Tab.Navigator>
                 </View> 
             </ScrollView> 
-        </View>
+        </SafeAreaView>
        
       )
     }
