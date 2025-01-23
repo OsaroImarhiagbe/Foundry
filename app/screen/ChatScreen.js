@@ -12,7 +12,6 @@ import { useAuth } from '../authContext';
 import { useRoute } from '@react-navigation/native';
 import CustomKeyboardView from '../components/CustomKeyboardView';
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
-import Feather from 'react-native-vector-icons/Feather';
 import ChatRoomHeader from '../components/ChatRoomHeader';
 import { useNavigation } from '@react-navigation/native';
 import { useDispatch } from 'react-redux';
@@ -34,6 +33,7 @@ const ChatScreen = () => {
 
   const textRef = useRef('');
   const inputRef = useRef(null);
+  const flashListRef = useRef(null);
 
   
   const recipentNamec = route?.params?.userid 
@@ -115,7 +115,7 @@ const ChatScreen = () => {
       : null;
       const docRef = firestore().collection('rooms').doc(roomId);
       const messageRef = docRef.collection('messages')
-      textRef.current ="";
+      //textRef.current ="";
       if(inputRef) inputRef?.current?.clear();
       await messageRef.add({
         userId:user?.userId,
@@ -125,6 +125,14 @@ const ChatScreen = () => {
         recipentName:recipentNamec,
         createdAt: firestore.Timestamp.fromDate(new Date())
       })
+      if (flashListRef.current) {
+        flashListRef.current.scrollToEnd({ animated: true });
+      }
+
+      // Clear the input field after sending
+      textRef.current = "";
+      if (inputRef) inputRef?.current?.clear();
+
     }catch(error){
       console.error(`Error sending message:${error.message}`)
     }
@@ -144,6 +152,7 @@ const ChatScreen = () => {
       onPress={() => navigation.goBack()}/>
       <View style={styles.messagesContainer}>
         <FlashList
+         ref={flashListRef} 
         data={messages}
         keyExtractor={item => item?.id.toString()}
         estimatedItemSize={360}
@@ -156,7 +165,6 @@ const ChatScreen = () => {
         )}
         />
       </View>
-      <View>
       <View style={styles.inputContainer}>
         <View style={styles.messageInput}>
           <TextInput
@@ -176,7 +184,6 @@ const ChatScreen = () => {
            </View>
         </View>
       </View>
-      </View>
     </CustomKeyboardView>
   );
 };
@@ -193,13 +200,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent:'space-between',
     alignItems:'flex-end',
-    marginRight:3,
-    marginLeft:3,
+    marginRight:5,
+    marginLeft:5,
   },
   messageInput: {
     flexDirection:'row',
-    width:wp('100%'),
-    padding:20,
+    padding:40,
   },
   textinput:{
     flexDirection:'row',

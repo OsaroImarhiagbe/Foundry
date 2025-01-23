@@ -146,7 +146,7 @@ const fetchMorePost = async () => {
     navigation.navigate('Message')
   }
   return (
-    <SafeAreaView
+    <View
     style={styles.screen}
     >
       {/* <PushNotification/> */}
@@ -216,7 +216,7 @@ const fetchMorePost = async () => {
       </Suspense>}
     keyExtractor={(item)=> item.post_id}
     /> } 
-    </SafeAreaView>
+    </View>
   )
 }
 

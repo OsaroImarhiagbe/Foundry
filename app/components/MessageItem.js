@@ -14,7 +14,7 @@ const MessageItem = ({ message_text, current_User,date,id}) => {
                     <View style={[styles.textContainer,{backgroundColor:'#6A1B9A'}]}>
                     <Text
                     variant='bodySmall'
-                     style={{fontSize:hp(1.5),color:'#fff',textAlign:'center'}}>{message_text}</Text>
+                     style={{fontSize:hp(1.5),color:'#fff',textAlign:'auto'}}>{message_text}</Text>
                     </View>
                     <Text
                      variant='bodySmall'
@@ -28,7 +28,7 @@ const MessageItem = ({ message_text, current_User,date,id}) => {
                 <View style={[styles.lefttextcontainer, { backgroundColor: '#3C3C3C'}]}>
                         <Text
                         variant='bodySmall'
-                        style={{ fontSize: hp(2),}}>{message_text}</Text>
+                        style={{ fontSize: hp(2),textAlign:'auto'}}>{message_text}</Text>
                     </View>
                     <Text
                     variant='bodySmall'
@@ -50,7 +50,6 @@ const styles = StyleSheet.create({
     },
     textContainer: {
         padding:10,
-        width:wp(20),
         borderRadius: 30,
         felx:1,
         alignSelf:'flex-end',

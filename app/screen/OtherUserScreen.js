@@ -1,4 +1,11 @@
-import {View, Text, StyleSheet, ScrollView, TouchableOpacity,ActivityIndicator,RefreshControl,SafeAreaView} from 'react-native'
+import {
+  View,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+  ActivityIndicator,
+  RefreshControl,
+  SafeAreaView} from 'react-native'
 import {lazy,Suspense} from 'react'
 import color from '../../config/color';
 import { useNavigation } from '@react-navigation/native';
@@ -19,6 +26,8 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import EvilIcons from 'react-native-vector-icons/EvilIcons';
 import { DocumentSnapshot } from '@react-native-firebase/app/lib/internal/web/firebaseFirestore';
+import { FlashList } from '@shopify/flash-list';
+import { Divider,Text } from 'react-native-paper';
 const PostComponent = lazy(() => import('../components/PostComponent'))
 
 
@@ -122,15 +131,34 @@ const OtherUserScreen = () => {
     scrollEnabled={true}
      style={{flex:1,backgroundColor:color.backgroundcolor}}>
       <SafeAreaView style={{flex:1,backgroundColor:color.backgroundcolor}}>
-        {
-        posts && posts.length > 0 ? (
-            posts.map((post) => (
-              <Suspense key={post.post_id} fallback={<ActivityIndicator size="small" color="#000" />}>
+          <FlashList
+          ListEmptyComponent={() => (<Text style={{ color: '#fff', textAlign: 'center', fontFamily:color.textFont,fontSize:20}}>No posts available</Text>)}
+          data={posts}
+          ItemSeparatorComponent={() => <Divider/>}
+          keyExtractor={item => item.post_id.toString()}
+          estimatedItemSize={402}
+          renderItem={({item}) => (
+            <Suspense key={item.post_id} fallback={<ActivityIndicator size="small" color="#000" />}>
                 <View style={{padding: 10 }}>
-                  <PostComponent auth_profile={post.auth_profile} count={post.like_count} url={post.imageUrl} id={post.post_id} name={post.name} content={post.content} date={post.createdAt.toDate().toLocaleString()} comment_count={post.comment_count} />
+                  <PostComponent auth_profile={item.auth_profile}
+                  count={item.like_count}
+                  url={item.imageUrl}
+                  id={item.post_id}
+                  name={item.name}
+                  content={item.content}
+                  date={item.createdAt.toDate().toLocaleString('en-US',{
+                    year: 'numeric',
+                    month: 'short',
+                    day: '2-digit',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    hour12: true
+                  })}
+                  comment_count={item.comment_count} />
                 </View>
               </Suspense>
-            ))) : <Text style={{ color: '#fff', textAlign: 'center', fontFamily:color.textFont,fontSize:20}}>No posts available</Text>}
+          )}
+          />
     </SafeAreaView>
     </ScrollView>
     
@@ -197,7 +225,7 @@ const OtherUserScreen = () => {
   if(isloading) return null
   
     return (
-        <SafeAreaView style={styles.screen}>
+        <View style={styles.screen}>
           <ChatRoomHeader 
             onPress={()=>navigation.navigate('Main')} 
             backgroundColor={color.button} 
@@ -219,22 +247,17 @@ const OtherUserScreen = () => {
                   placeholder={{blurhash}}
                   cachePolicy='none'
                   />
-                  <View style={{marginTop:20,flexDirection:'row', justifyContent:'space-evenly',paddingRight:20}}>
-                  <Text style={{fontSize:30, color:'#fff'}}>  {
-                        other_user_id ? (<Text style={styles.username}>@{users?.username}</Text>) 
-                        : (<Text style={styles.username}>@{users?.username}</Text>)
-                      }</Text>
-                      {other_user_id && (
-                  <TouchableOpacity style={{paddingLeft:20}}onPress={() => navigation.navigate('Chat',{userid:userId,name:users?.username})}>
-                    <AntDesign name='message1' size={25} color='#00BF63'/>
-                  </TouchableOpacity>)}
                   </View>
+                  <View style={{color:'#fff',marginLeft:10,padding:10}}>  {
+                        other_user_id ? (<Text variant='titleSmall'
+                           style={styles.username}>@{users?.username}</Text>) 
+                        : (<Text variant='titleSmall' style={styles.username}>@{users?.username}</Text>)
+                      }</View>
                   </View>
-                  <View style={{alignItems:'flex-end',flexDirection:'column',marginBottom:20,paddingRight:20}}>
+                        {/* <View style={{alignItems:'flex-end',flexDirection:'column',marginBottom:5,paddingRight:20}}>
                   <Text style={styles.title}>{users.jobtitle}</Text>
                   <Text style={styles.location}><EvilIcons name='location' size={20}/> {users.location}</Text>
-                  </View>
-                  </View>
+                  </View> */}
                   <View style={styles.textcontainer}>
                     <View style={{flexDirection:'column',alignItems:'stretch'}}>
                       <View style={{flexDirection:'row', justifyContent:'space-around'}}>
@@ -252,6 +275,10 @@ const OtherUserScreen = () => {
                       <TouchableOpacity>
                         <SmallButton name='Mentor'/>
                       </TouchableOpacity>
+                         {other_user_id && (
+                  <TouchableOpacity style={{paddingLeft:20}}onPress={() => navigation.navigate('Chat',{userid:userId,name:users?.username})}>
+                    <AntDesign name='message1' size={25} color='#00BF63'/>
+                  </TouchableOpacity>)}
                     </View>
                     </View>
                     <View style={{flex: 1}}>
@@ -290,7 +317,7 @@ const OtherUserScreen = () => {
                   </Tab.Navigator>
                 </View> 
             </ScrollView> 
-        </SafeAreaView>
+        </View>
        
       )
     }
@@ -305,7 +332,6 @@ const styles = StyleSheet.create({
       },
       profileContainer:{
         marginTop:10,
-        padding:10,
       },
       screen:{
         backgroundColor:color.backgroundcolor,
@@ -318,14 +344,12 @@ const styles = StyleSheet.create({
         padding:5
       },
       textcontainer:{
-        marginTop:10,
+        marginTop:5,
         padding:10,
       },
       username:{
-        fontSize:30,
         letterSpacing:1,
-        fontWeight:'bold',
-       fontFamily:color.textFont
+        color:color.grey
       },
       location:{
         fontSize:15,
