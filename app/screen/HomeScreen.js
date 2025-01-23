@@ -13,7 +13,8 @@ import {
   useWindowDimensions,
   StatusBar,
   SafeAreaView,
-  Animated
+  Animated,
+  useColorScheme
 } from 'react-native'
 import color from '../../config/color';
 import { useNavigation } from '@react-navigation/native';
@@ -24,7 +25,7 @@ import { useDispatch} from 'react-redux';
 import { addId } from '../features/user/userSlice';
 //import PushNotification from '../components/PushNotifications.js';
 import { FlashList } from "@shopify/flash-list";
-import {ActivityIndicator,Text,Divider} from 'react-native-paper'
+import {ActivityIndicator,Text,Divider,useTheme} from 'react-native-paper'
 const PostComponent = lazy(() => import('../components/PostComponent.js'))
 
 
@@ -34,6 +35,7 @@ const PostComponent = lazy(() => import('../components/PostComponent.js'))
 const HomeScreen = () => {
 
   const navigation = useNavigation();
+  const theme = useTheme()
   const dispatch = useDispatch()
   const [refreshing, setRefreshing] = useState(false);
   const {user} = useAuth()
@@ -147,7 +149,7 @@ const fetchMorePost = async () => {
   }
   return (
     <View
-    style={styles.screen}
+    style={[styles.screen,{backgroundColor:theme.colors.background}]}
     >
       {/* <PushNotification/> */}
       <Animated.View style={{ opacity: headerOpacity}}>
@@ -236,7 +238,6 @@ const styles = StyleSheet.create({
     screen:{
       paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
       flex:1,
-      backgroundColor:'#121212'
   },
   title:{
     textAlign:'center',

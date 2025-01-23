@@ -1,11 +1,16 @@
 import {View,Text} from 'react-native'
+import { Button } from 'react-native-paper'
+
 
 const SmallButton = ({name,isTrue}) => {
   return (
 
    
-         <View style={{backgroundColor:isTrue ? '##3b3b3b' : '#00BF63', padding:10, borderRadius:100,width:100, borderWidth: isTrue ? 1: 0,borderColor:isTrue ? '#00BF63':''}}>
-            <Text style={{textAlign:'center',fontFamily:'Helvetica-light',fontSize:15,color: isTrue ? "#fff":"#000" }}>{name}</Text></View>
+         <Button
+         mode='contained'
+         style={{backgroundColor:isTrue ? '##3b3b3b' : '#00BF63', borderRadius:100, borderWidth: isTrue ? 1: 0,borderColor:isTrue ? '#00BF63':''}}
+        >
+            {name}</Button>
    
     
   )

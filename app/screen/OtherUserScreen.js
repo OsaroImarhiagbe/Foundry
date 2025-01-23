@@ -276,8 +276,8 @@ const OtherUserScreen = () => {
                         <SmallButton name='Mentor'/>
                       </TouchableOpacity>
                          {other_user_id && (
-                  <TouchableOpacity style={{paddingLeft:20}}onPress={() => navigation.navigate('Chat',{userid:userId,name:users?.username})}>
-                    <AntDesign name='message1' size={25} color='#00BF63'/>
+                  <TouchableOpacity onPress={() => navigation.navigate('Chat',{userid:userId,name:users?.username})}>
+                    <SmallButton name='Message'/>
                   </TouchableOpacity>)}
                     </View>
                     </View>
@@ -300,7 +300,7 @@ const OtherUserScreen = () => {
                     component={Post}
                     options={{
                       tabBarIcon:() => (
-                        <MaterialCommunityIcons name='post' color='#00bf63' size={25}
+                        <MaterialCommunityIcons name='post' color='#00bf63' size={20}
                         />),
                     }}
                     />
@@ -310,7 +310,7 @@ const OtherUserScreen = () => {
                     options={{
                       lazy,
                       tabBarIcon:() => (
-                        <MaterialIcons name='work' color='#00bf63' size={25}
+                        <MaterialIcons name='work' color='#00bf63' size={20}
                         />),
                     }}
                     />
@@ -324,7 +324,7 @@ const OtherUserScreen = () => {
     
 const styles = StyleSheet.create({
       aboutContainer:{
-        padding:10,
+        padding:5,
       },
       aboutText:{
         fontSize:15,
@@ -342,10 +342,6 @@ const styles = StyleSheet.create({
         fontWeight:'bold',
         letterSpacing:1,
         padding:5
-      },
-      textcontainer:{
-        marginTop:5,
-        padding:10,
       },
       username:{
         letterSpacing:1,
