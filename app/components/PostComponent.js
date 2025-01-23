@@ -175,7 +175,7 @@ const PostComponent = ({content,date,name,id,url,count,comment_count,mount,auth_
       <Card
       elevation={0}
       mode='contained'
-      style={{backgroundColor:color.backgroundcolor}}
+      style={{backgroundColor:'#121212'}}
       >
       <Card.Content>
       <View style={styles.postContainer}>

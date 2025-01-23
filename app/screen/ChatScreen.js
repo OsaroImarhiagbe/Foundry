@@ -1,5 +1,9 @@
 
-import {View,StyleSheet,TouchableOpacity,TextInput, SafeAreaView}  from 'react-native'
+import {
+  View,
+  StyleSheet,
+  TouchableOpacity,
+  SafeAreaView}  from 'react-native'
 import color from'../../config/color';
 import React, { useState, useEffect, useRef} from 'react'
 import MessageList  from '../components/MessageList';
@@ -16,6 +20,7 @@ import { addID } from '../features/Message/messageidSlice';
 import firestore from '@react-native-firebase/firestore'
 import axios from 'axios'
 import {EXPOPUSHURL} from "@env"
+import { TextInput } from 'react-native-paper';
 const ChatScreen = () => {
   const [messages, setMessages] = useState([]);
   const [expoPushToken,setExpoPushToken] = useState('')
@@ -157,20 +162,19 @@ const ChatScreen = () => {
       <View style={styles.inputContainer}>
         <View style={styles.messageInput}>
           <TextInput
-          style={[styles.textinput,{fontSize:hp(2)}]}
+          dense={true}
+          mode='outlined'
+          outlineStyle={{borderRadius:100}}
+          textColor='#000'
+          placeholderTextColor='#000'
+          style={[styles.textinput,{fontSize:hp(2),backgroundColor:color.grey}]}
             ref={inputRef}
             onChangeText={value => textRef.current = value}
             placeholder='Enter message....'
+            right={<TextInput.Icon icon='send' style={styles.sendButton}/>
+            }
           />
-          <TouchableOpacity onPress={handleSend}>
-            <View style={styles.sendButton}>
-            <Feather
-            name='send'
-            size={20}
-            color='#737373'/>
-            </View>
-          </TouchableOpacity>
-        </View>
+           </View>
         </View>
       </View>
       </SafeAreaView>
@@ -195,20 +199,22 @@ const styles = StyleSheet.create({
   },
   messageInput: {
     flexDirection:'row',
-    justifyContent:'space-between',
-    backgroundColor:color.white,
-    borderWidth:2,
-    borderColor:color.grey,
-    borderRadius:30
+    width:wp('100%'),
+    padding:5,
   },
   textinput:{
-    flex:1,
+    flexDirection:'row',
     marginRight:2,
-    padding:10
+    padding:5,
+    height:35,
+    borderRadius:30,
+    borderTopLeftRadius:30,
+    borderTopRightRadius:30
   },
   sendButton: {
-    padding: 10,
-    marginRight:1
+    marginRight:1,
+    alignItems:'center',
+    justifyContent:'center'
   },
 });
 

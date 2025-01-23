@@ -236,7 +236,7 @@ const styles = StyleSheet.create({
     screen:{
       paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
       flex:1,
-      backgroundColor:color.backgroundcolor
+      backgroundColor:'#121212'
   },
   title:{
     textAlign:'center',
