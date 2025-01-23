@@ -60,9 +60,10 @@ const ChatRoomHeader = ({title,onPress,icon,onPress2,backgroundColor,icon2,iconC
     return (
     <Appbar.Header
     dark={true}
-    statusBarHeight={0}
+    elevated={true}
+    safeAreaInsets={{top:0,bottom:0}}
     mode='center-aligned'
-    style={[styles.container,{backgroundColor:'rgba(0, 0, 0, 0)'}]}>
+    style={[styles.container,{opacity:0.4,backgroundColor:'transparent',borderBottomWidth:4,borderBottomColor:color.grey}]}>
          <TouchableOpacity onPress={onPress}>
           <View style={styles.icon}>
           { icon && <MaterialCommunityIcons name={icon} color={iconColor} size={20} />}

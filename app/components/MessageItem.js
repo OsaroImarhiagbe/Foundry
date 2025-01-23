@@ -3,17 +3,17 @@ import { View, Text, StyleSheet} from 'react-native';
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
 import color from '../../config/color';
 
-const MessageItem = ({ message, current_User }) => {
+const MessageItem = ({ message_text, current_User,date,id}) => {
     
-    if (current_User?.userId === message?.userId) {
+    if (current_User?.userId !== id) {
         return (
             
             <View style={styles.container}>
                 <View style={{width:wp(70)}}>
                     <View style={[styles.textContainer,{backgroundColor:color.grey}]}>
-                    <Text style={{ fontSize: hp(1.5),fontFamily:'Helvetica-light' }}>{message?.text}</Text>
+                    <Text style={{ fontSize: hp(1.5),fontFamily:'Helvetica-light',color:'#fff' }}>{message_text}</Text>
                     </View>
-                    <Text style={styles.time}>{message.createdAt.toDate().toLocaleTimeString()}</Text>
+                    <Text style={styles.time}>{date}</Text>
                 </View>
             </View>
         );
@@ -21,9 +21,9 @@ const MessageItem = ({ message, current_User }) => {
         return (
             <View style={[styles.leftcontainer, , {width:wp(70)}]}>
                 <View style={[styles.lefttextcontainer, { backgroundColor: color.lightblue }]}>
-                        <Text style={{ fontSize: hp(1.5),fontFamily:'Helvetica-light' }}>{message?.text}</Text>
+                        <Text style={{ fontSize: hp(1.5),fontFamily:'Helvetica-light' }}>{message_text}</Text>
                     </View>
-                    <Text style={styles.lefttime}>{message.createdAt.toDate().toLocaleTimeString()}</Text>
+                    <Text style={styles.lefttime}>{date}</Text>
             </View>
            
         );

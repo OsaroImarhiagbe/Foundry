@@ -19,6 +19,8 @@ import { useDispatch } from 'react-redux';
 import { addID } from '../features/Message/messageidSlice';
 import firestore from '@react-native-firebase/firestore'
 import axios from 'axios'
+import MessageItem from '../components/MessageItem';
+import { FlashList } from '@shopify/flash-list';
 import {EXPOPUSHURL} from "@env"
 import { TextInput } from 'react-native-paper';
 const ChatScreen = () => {
@@ -118,28 +120,14 @@ const ChatScreen = () => {
       if(inputRef) inputRef?.current?.clear();
       await messageRef.add({
         userId:user?.userId,
+        id:messageRef.doc().id,
         text:message,
         senderName: user?.username,
         recipentName:recipentNamec,
         createdAt: firestore.Timestamp.fromDate(new Date())
       })
-      const message = {
-        to: expoPushToken,
-        sound: 'default',
-        title: `${user.username} sent you a message.`,
-        body: message,
-        data: { type: 'message' },
-        _contentAvailable: true
-      };
-      await axios.post(EXPOPUSHURL,message, {
-        headers: {
-          Accept: 'application/json',
-          'Accept-encoding': 'gzip, deflate',
-          'Content-Type': 'application/json',
-        },
-      });
     }catch(error){
-      console.error(`${error}`)
+      console.error(`Error sending message:${error.message}`)
     }
   }
 
@@ -148,7 +136,7 @@ const ChatScreen = () => {
     inChat={true}
     style={styles.container}
     >
-      <SafeAreaView style={{flex:1}}>
+      <View style={{flex:1}}>
       <ChatRoomHeader 
       title={recipentNamec}
       backgroundColor={color.button} 
@@ -156,12 +144,21 @@ const ChatScreen = () => {
       iconColor='#00bf63'
       onPress={() => navigation.goBack()}/>
       <View style={styles.messagesContainer}>
-        <MessageList messages={messages} currentUser={user} />
+        <FlashList
+        data={messages}
+        keyExtractor={item => item?.id.toString()}
+        estimatedItemSize={360}
+        renderItem={({item}) => (
+          <MessageItem  date={item.createdAt.toDate().toLocaleString()} id={item.userId} message_text={item.text} currentUser={user}/>
+        )}
+        />
+        {/* <MessageList messages={messages} currentUser={user} /> */}
       </View>
       <View style={{paddingTop:5}}>
       <View style={styles.inputContainer}>
         <View style={styles.messageInput}>
           <TextInput
+          left={<TextInput.Icon icon='camera' style={styles.sendButton} rippleColor='rgba(30, 136, 229, 0.3)'/>}
           dense={true}
           mode='outlined'
           outlineStyle={{borderRadius:100}}
@@ -171,13 +168,13 @@ const ChatScreen = () => {
             ref={inputRef}
             onChangeText={value => textRef.current = value}
             placeholder='Enter message....'
-            right={<TouchableOpacity onPress={handleSend}><TextInput.Icon icon='send' style={styles.sendButton}/></TouchableOpacity>
+            right={<TextInput.Icon icon='send' style={styles.sendButton} onPress={handleSend} rippleColor='rgba(30, 136, 229, 0.3)'/>
             }
           />
            </View>
         </View>
       </View>
-      </SafeAreaView>
+      </View>
     </CustomKeyboardView>
   );
 };
@@ -200,7 +197,7 @@ const styles = StyleSheet.create({
   messageInput: {
     flexDirection:'row',
     width:wp('100%'),
-    padding:5,
+    padding:25,
   },
   textinput:{
     flexDirection:'row',
@@ -213,8 +210,7 @@ const styles = StyleSheet.create({
   },
   sendButton: {
     marginRight:1,
-    alignItems:'center',
-    justifyContent:'center'
+    paddingTop:10
   },
 });
 
