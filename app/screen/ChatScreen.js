@@ -171,7 +171,7 @@ const ChatScreen = () => {
             ref={inputRef}
             onChangeText={value => textRef.current = value}
             placeholder='Enter message....'
-            right={<TextInput.Icon icon='send' style={styles.sendButton}/>
+            right={<TouchableOpacity onPress={handleSend}><TextInput.Icon icon='send' style={styles.sendButton}/></TouchableOpacity>
             }
           />
            </View>
