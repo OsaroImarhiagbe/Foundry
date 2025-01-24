@@ -15,6 +15,7 @@
       "**/*"
     ],
     "ios": {
+      "userInterfaceStyle": "automatic",
       "supportsTablet": true,
       "newArchEnabled": true,
       "icon": "./app/assets/images/icon.png",

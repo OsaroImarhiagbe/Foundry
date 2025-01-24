@@ -19,6 +19,7 @@ import {
     MenuOptions,
     MenuTrigger,
   } from 'react-native-popup-menu';
+import { useTheme } from 'react-native-paper';
 import { MenuItems } from './CustomMenu';
 import Entypo from 'react-native-vector-icons/Entypo';
 import { useSelector} from 'react-redux';
@@ -34,6 +35,7 @@ const ChatRoomHeader = ({title,onPress,icon,onPress2,backgroundColor,icon2,iconC
     const { top } = useSafeAreaInsets(); 
     const { user,logout } = useAuth();
     const [isLoading, setLoading] = useState(false)
+    const theme = useTheme()
     const navigation = useNavigation();
     const profileImage = useSelector((state) => state.user.profileimg)
 
@@ -63,10 +65,10 @@ const ChatRoomHeader = ({title,onPress,icon,onPress2,backgroundColor,icon2,iconC
     elevated={true}
     safeAreaInsets={{top:0,bottom:0}}
     mode='center-aligned'
-    style={[styles.container,{opacity:0.4,backgroundColor:'transparent',borderBottomWidth:0.5,borderBottomColor:color.grey}]}>
+    style={[styles.container,{backgroundColor:'transparent'}]}>
          <TouchableOpacity onPress={onPress}>
           <View style={styles.icon}>
-          { icon && <MaterialCommunityIcons name={icon} color={iconColor} size={20} />}
+          { icon && <MaterialCommunityIcons name={icon} color={theme.colors.primary} size={20} />}
           </View>
         </TouchableOpacity>
         <View>
@@ -76,7 +78,7 @@ const ChatRoomHeader = ({title,onPress,icon,onPress2,backgroundColor,icon2,iconC
         style={styles.messageIcon}
          onPress={() => navigation.navigate('Post')}>
         <View style={styles.icon}>
-          {icon2 && <Entypo name={icon2} size={20} color={iconColor}/>}
+          {icon2 && <Entypo name={icon2} size={20} color={theme.colors.primary}/>}
         </View>
         </TouchableOpacity>
         <Menu>

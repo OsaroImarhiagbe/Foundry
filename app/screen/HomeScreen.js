@@ -162,26 +162,27 @@ const fetchMorePost = async () => {
           onPress2={handleMessage}
           backgroundColor={color.button}
           />
-        <View style={styles.link}>
+        <View style={[styles.link,{borderBottomWidth:0.5,borderBottomColor:theme.colors.primary}]}>
           <TouchableOpacity onPress={() => console.log('text pressed')}>
           <Text
-          varaiant='titleSmall'
-          style={{color:'#fff'}}>Resources</Text></TouchableOpacity>
+           variant='titleSmall'
+           style={{color:theme.colors.text}}
+           >Resources</Text></TouchableOpacity>
           <TouchableOpacity onPress={() => console.log('text pressed')}>
           <Text
           variant='titleSmall'
-          style={{color:'#fff'}}
+          style={{color:theme.colors.text}}
           >Community</Text></TouchableOpacity>
           <TouchableOpacity onPress={() => console.log('text pressed')}>
           <Text
            variant='titleSmall'
-           style={{color:'#fff'}}
+           style={{color:theme.colors.text}}
            >Code</Text></TouchableOpacity>
           <TouchableOpacity onPress={() => console.log('test pressed')}>
           <Text
            variant='titleSmall'
-           style={{color:'#fff'}}
-           >Learning Path</Text></TouchableOpacity>
+           style={{color:theme.colors.text}}
+           >AI Assistant</Text></TouchableOpacity>
         </View>
         </Animated.View>
    {mount ? Array.from({length:5}).map((_,index) => (

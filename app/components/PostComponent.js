@@ -26,6 +26,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Card,Text, TextInput,Divider} from 'react-native-paper';
 import { FlashList } from "@shopify/flash-list";
 import { ScrollView } from 'react-native-gesture-handler';
+import { useTheme } from 'react-native-paper';
 
 const PostComponent = ({content,date,name,id,url,count,comment_count,mount,auth_profile}) => {
 
@@ -37,6 +38,7 @@ const PostComponent = ({content,date,name,id,url,count,comment_count,mount,auth_
     const [text,setText] = useState('')
     const {height, width} = useWindowDimensions();
     const dispatch = useDispatch();
+    const theme = useTheme()
     const profileImage = useSelector((state) => state.user.profileimg)
     const {user} = useAuth();
 
@@ -193,16 +195,14 @@ const PostComponent = ({content,date,name,id,url,count,comment_count,mount,auth_
     <Text
     variant="bodySmall"
     style={{
-      fontFamily:color.textFont,
       marginLeft:30,
-      color:'#fff'
+      color:theme.colors.text
     }}
     >{name}</Text>
     <Text
     variant="bodyLarge"
     style={{
-    color:'#fff',
-    fontFamily:color.textFont,
+    color:'#000',
     marginLeft:30,
     marginVertical:5,
     }}
@@ -222,9 +222,8 @@ const PostComponent = ({content,date,name,id,url,count,comment_count,mount,auth_
       <Text
        variant="bodySmall"
        style={{
-        color:'#fff',
+        color:theme.colors.text,
         maringTop:10,
-        fontFamily:color.textFont
        }}>{date}</Text>
       <View style={styles.reactionContainer}>
     <TouchableHighlight
@@ -234,7 +233,7 @@ const PostComponent = ({content,date,name,id,url,count,comment_count,mount,auth_
       style={styles.reactionIcon}
       >
       <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-          <MaterialCommunityIcons name="heart" size={15} color='#fff'/>
+          <MaterialCommunityIcons name="heart" size={15} color={theme.colors.primary}/>
           <Text 
           variant='bodySmall'
           style={styles.reactionText}>{count}</Text>
@@ -242,12 +241,11 @@ const PostComponent = ({content,date,name,id,url,count,comment_count,mount,auth_
         </TouchableHighlight>
         <TouchableOpacity onPress={() => setModalVisible(true)} style={styles.reactionIcon}>
           <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-            <MaterialCommunityIcons name="comment-processing-outline" size={15} color='#ffff'/>
+            <MaterialCommunityIcons name="comment-processing-outline" size={15} color={theme.colors.primary}/>
             <Text
             variant='bodySmall'
             style={{
-              fontFamily:color.textFont,
-              color:'#fff',
+              color:theme.colors.primary,
               marginLeft:5,
               marginBottom:5
             }}>{comment_count}</Text>
@@ -255,7 +253,7 @@ const PostComponent = ({content,date,name,id,url,count,comment_count,mount,auth_
         </TouchableOpacity>
         <TouchableOpacity style={styles.reactionIcon}>
           <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-          <EvilIcons name='retweet' size={15} color='#ffffff'/>
+          <EvilIcons name='retweet' size={15} color={theme.colors.primary}/>
           </View>
         </TouchableOpacity>
       </View>

@@ -4,7 +4,7 @@ import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { lazy,Suspense } from 'react';
 import { ActivityIndicator, Platform } from 'react-native';
-import { Text, BottomNavigation } from 'react-native-paper';
+import { Text, BottomNavigation,useTheme } from 'react-native-paper';
 import { CommonActions } from '@react-navigation/native';
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 const NotificationScreen = lazy(() => import('../screen/NotificationScreen'))
@@ -50,6 +50,7 @@ const NotificationScreenWrapper = (props) => {
 
 const TabNavigation = () => {
   const Tab = createBottomTabNavigator()
+  const theme = useTheme()
 
   return (
  
@@ -68,7 +69,7 @@ const TabNavigation = () => {
     activeIndicatorStyle='#252525'
     style={{
     position:'absolute',
-    backgroundColor:'#252525',  
+    backgroundColor:'transparent',  
     height:hp('10%'),
     borderTopWidth: 0,
     paddingHorizontal: 0,
