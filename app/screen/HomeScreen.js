@@ -13,8 +13,8 @@ import {
   useWindowDimensions,
   StatusBar,
   SafeAreaView,
+  ScrollView,
   Animated,
-  useColorScheme
 } from 'react-native'
 import color from '../../config/color';
 import { useNavigation } from '@react-navigation/native';
@@ -23,13 +23,23 @@ import { useAuth } from '../authContext';
 import firestore from '@react-native-firebase/firestore'
 import { useDispatch} from 'react-redux';
 import { addId } from '../features/user/userSlice';
-//import PushNotification from '../components/PushNotifications.js';
 import { FlashList } from "@shopify/flash-list";
+import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import {ActivityIndicator,Text,Divider,useTheme} from 'react-native-paper'
 const PostComponent = lazy(() => import('../components/PostComponent.js'))
 
 
-
+const Post = () => (
+  <ScrollView
+  scrollEnabled
+   style={{flex:1,backgroundColor:color.backgroundcolor}}>
+    <View style={{flex:1,backgroundColor:color.backgroundcolor}}>
+      <Text>hi</Text>
+  </View>
+  </ScrollView>
+  
+); 
+const Tab = createMaterialTopTabNavigator();
 
 
 const HomeScreen = () => {
@@ -47,10 +57,15 @@ const HomeScreen = () => {
   const [mount, setMount] = useState(false)
   const scrollY = useState(new Animated.Value(0))[0];
 
-  2
+
   const headerOpacity = scrollY.interpolate({
     inputRange: [0, 250],
     outputRange: [1, 0],
+    extrapolate: 'clamp',
+  });
+  const headerBackgroundColor = scrollY.interpolate({
+    inputRange: [0, 250],
+    outputRange: ['rgba(0, 0, 0, 0)', 'rgba(0, 0,0,0)'], // Adjust the color
     extrapolate: 'clamp',
   });
 
@@ -151,45 +166,42 @@ const fetchMorePost = async () => {
     <View
     style={[styles.screen,{backgroundColor:theme.colors.background}]}
     >
-      {/* <PushNotification/> */}
-      <Animated.View style={{ opacity: headerOpacity}}>
-          <ChatRoomHeader
+      
+           <ChatRoomHeader
           onPress={handlePress}
-          title='DevGuiide'
           icon='menu'
           iconColor='#00bf63'
           icon2='new-message'
           onPress2={handleMessage}
           backgroundColor={color.button}
-          />
-        <View style={[styles.link,{borderBottomWidth:0.5,borderBottomColor:theme.colors.primary}]}>
+          /> 
+        <View style={[styles.link,{borderBottomWidth:0.5,borderBottomColor:theme.colors.primary,backgroundColor:'transparent'}]}>
           <TouchableOpacity onPress={() => console.log('text pressed')}>
           <Text
-           variant='titleSmall'
+           variant='titleMedium'
            style={{color:theme.colors.text}}
            >Resources</Text></TouchableOpacity>
           <TouchableOpacity onPress={() => console.log('text pressed')}>
           <Text
-          variant='titleSmall'
+          variant='titleMedium'
           style={{color:theme.colors.text}}
           >Community</Text></TouchableOpacity>
           <TouchableOpacity onPress={() => console.log('text pressed')}>
           <Text
-           variant='titleSmall'
+           variant='titleMedium'
            style={{color:theme.colors.text}}
            >Code</Text></TouchableOpacity>
           <TouchableOpacity onPress={() => console.log('test pressed')}>
           <Text
-           variant='titleSmall'
+           variant='titleMedium'
            style={{color:theme.colors.text}}
            >AI Assistant</Text></TouchableOpacity>
         </View>
-        </Animated.View>
    {mount ? Array.from({length:5}).map((_,index) => (
     <PostComponent key={index} mount={mount}/>
    ))
    : <FlashList
-    contentContainerStyle={{paddingBottom:30,padding:0}}
+    contentContainerStyle={{padding:0}}
     data={memoPost}
     estimatedItemSize={402}
     onRefresh={onRefresh}
@@ -227,24 +239,12 @@ const styles = StyleSheet.create({
   bodyText:{
     fontSize:15
   },
-    link:{
-      marginVertical:10,
-      flexDirection:'row',
-      justifyContent:'space-evenly',
-      padding:5
-    },
-    messageContainer:{
-      marginLeft:40
+  link:{
+    flexDirection:'row',
+    justifyContent:'space-evenly',
     },
     screen:{
-      paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
       flex:1,
-  },
-  title:{
-    textAlign:'center',
-    color:color.white,
-    fontSize:20,
-    marginLeft:40
   },
 })
 

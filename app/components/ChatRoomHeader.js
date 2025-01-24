@@ -24,10 +24,12 @@ import { MenuItems } from './CustomMenu';
 import Entypo from 'react-native-vector-icons/Entypo';
 import { useSelector} from 'react-redux';
 import { Appbar,ActivityIndicator } from 'react-native-paper';
+import bluejay from '../assets/images/bluejay.png'
+
 
 
   
-const ChatRoomHeader = ({title,onPress,icon,onPress2,backgroundColor,icon2,iconColor}) => {
+const ChatRoomHeader = ({title,onPress,icon,onPress2,backgroundColor,icon2,iconColor,opacity,backColor}) => {
 
     
 
@@ -61,9 +63,6 @@ const ChatRoomHeader = ({title,onPress,icon,onPress2,backgroundColor,icon2,iconC
     }
     return (
     <Appbar.Header
-    dark={true}
-    elevated={true}
-    safeAreaInsets={{top:0,bottom:0}}
     mode='center-aligned'
     style={[styles.container,{backgroundColor:'transparent'}]}>
          <TouchableOpacity onPress={onPress}>
@@ -71,9 +70,10 @@ const ChatRoomHeader = ({title,onPress,icon,onPress2,backgroundColor,icon2,iconC
           { icon && <MaterialCommunityIcons name={icon} color={theme.colors.primary} size={20} />}
           </View>
         </TouchableOpacity>
-        <View>
-          {title && <Appbar.Content titleStyle={styles.text} title={title}/>}
-        </View>
+          <Image
+          style={{width:wp(10),height:hp(4.3),alignItems:'center',justifyContent:'center'}}
+          source={bluejay}
+          />
         <TouchableOpacity
         style={styles.messageIcon}
          onPress={() => navigation.navigate('Post')}>
@@ -81,7 +81,7 @@ const ChatRoomHeader = ({title,onPress,icon,onPress2,backgroundColor,icon2,iconC
           {icon2 && <Entypo name={icon2} size={20} color={theme.colors.primary}/>}
         </View>
         </TouchableOpacity>
-        <Menu>
+        {/* <Menu>
       <MenuTrigger>
         <View>
         <Image
@@ -123,7 +123,7 @@ const ChatRoomHeader = ({title,onPress,icon,onPress2,backgroundColor,icon2,iconC
         action={handleLogout}
         icon={<AntDesign name='logout' size={20} color={color.textcolor}/>}/>)}
       </MenuOptions>
-    </Menu>
+    </Menu> */}
     </Appbar.Header>
   )
 }
@@ -133,8 +133,7 @@ const styles = StyleSheet.create({
         flexDirection:'row',
         justifyContent:'space-between',
         alignItems:'center',
-        padding:0,
-        paddingLeft:0,
+        paddingLeft:10,
         paddingRight:10,
         overflow:'hidden',
         zIndex:10,
@@ -146,7 +145,6 @@ const styles = StyleSheet.create({
         textAlign:'center',
         fontSize:30,
         padding:20,
-        paddingLeft:80
         
     },
     icon:{

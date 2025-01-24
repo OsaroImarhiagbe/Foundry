@@ -69,7 +69,8 @@ const TabNavigation = () => {
     activeIndicatorStyle='#252525'
     style={{
     position:'absolute',
-    backgroundColor:'transparent',  
+    backgroundColor:theme.colors.background,  
+    opacity:0.9,
     height:hp('10%'),
     borderTopWidth: 0,
     paddingHorizontal: 0,
@@ -120,7 +121,7 @@ const TabNavigation = () => {
      component={StackNavigationwrapper}
      options={{
         tabBarIcon:() => (
-        <MaterialCommunityIcons name='home' color='#00bf63' size={20}
+        <MaterialCommunityIcons name='home' color={theme.colors.text} size={25}
         />),
         gestureEnabled: false
        
@@ -130,14 +131,14 @@ const TabNavigation = () => {
      name='Search'
      component={SearchScreenWrapper}
      options={{
-      tabBarIcon: () => <MaterialCommunityIcons name='account-search' size={20} color='#00bf63'/>
+      tabBarIcon: () => <MaterialCommunityIcons name='account-search' size={25} color={theme.colors.text}/>
      }}
     />
     <Tab.Screen 
         name="Notification"
         component={NotificationScreenWrapper}
      options={{
-        tabBarIcon:() => <MaterialIcons name='notifications' color='#00bf63' size={20}/>
+        tabBarIcon:() => <MaterialIcons name='notifications' color={theme.colors.text} size={25}/>
      }}
      />
       </Tab.Navigator>

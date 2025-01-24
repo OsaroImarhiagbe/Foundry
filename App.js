@@ -128,7 +128,7 @@ export default function App() {
       backdrop: 'rgba(47, 48, 56, 0.4)',
       backgroundContainer: 'rgb(0, 77, 100)',
       onBackgroundContainer: 'rgb(190, 233, 255)',
-      text: 'rgb(143, 205, 255)',
+      text: 'rgb(247, 247, 247)',
       onText: 'rgb(0, 52, 79)',
       textContainer: 'rgb(0, 75, 113)',
       onTextContainer: 'rgb(203, 230, 255)'
