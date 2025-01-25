@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "DevGuiide",
-    "slug": "DevGuiide",
+    "name": "BlueJay",
+    "slug": "BlueJay",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./app/assets/images/icon.png",

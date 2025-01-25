@@ -5,17 +5,18 @@ import {
     SafeAreaView,
     ScrollView,
     StyleSheet,
+    Platform,
     useWindowDimensions} from 'react-native'
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
-import HomeScreen from '../screen/HomeScreen';
+import HomeScreen from './HomeScreen';
 import {Image} from 'expo-image'
 import { useAuth } from '../authContext';
 import { blurhash } from '../../utils';
 import { useNavigation } from '@react-navigation/native';
 import { TouchableWithoutFeedback } from 'react-native-gesture-handler';
+import { FAB } from 'react-native-paper';
 
 const Tab = createMaterialTopTabNavigator();
 
@@ -30,9 +31,9 @@ const DashBoardScreen = () => {
   const Projects = () => (
     <ScrollView
     scrollEnabled
-     style={{flex:1,backgroundColor:'#fff'}}>
-      <View style={{flex:1,backgroundColor:'#fff'}}>
-        <Text>hi</Text>
+     style={{flex:1,backgroundColor:'#000'}}>
+      <View style={{flex:1}}>
+        <Text style={{color:'#fff'}}>hi</Text>
     </View>
     </ScrollView>
     
@@ -41,8 +42,8 @@ const DashBoardScreen = () => {
     navigation.openDrawer();
   } 
   return (
-    <SafeAreaView style={{flex:1,paddingTop:insets.top}}> 
-        <View style={{alignItems:'center',paddingTop:10,flexDirection:'row',justifyContent:'space-between',padding:10}}>
+    <View style={{flex:1,paddingTop:insets.top}}> 
+        <View style={{alignItems:'center',paddingTop:10,flexDirection:'row',justifyContent:'space-between',padding:10,backgroundColor:'transparent'}}>
         <TouchableWithoutFeedback onPress={handlePress}>
         <Image
         style={{height:hp(4.3), aspectRatio:1, borderRadius:100}}
@@ -59,6 +60,7 @@ const DashBoardScreen = () => {
         style={styles.logo}
         />
         </View>
+        <View style={{flex:1}}>
         <Tab.Navigator
         screenOptions={{
             headerShown:false,
@@ -73,7 +75,7 @@ const DashBoardScreen = () => {
     }}
     >
         <Tab.Screen
-        name='Home'
+        name='JAY'
         component={Projects}
         />
         <Tab.Screen
@@ -81,7 +83,15 @@ const DashBoardScreen = () => {
         component={HomeScreen}
         />
         </Tab.Navigator>
-    </SafeAreaView>
+        <FAB
+          icon="robot"
+          variant='surface'
+          size='medium'
+          style={{width:wp('20%'),position:'absolute',right:16,top:hp(65),alignItems:'center',borderRadius:30}}
+          onPress={() => console.log('Pressed')}
+        />
+        </View>
+    </View>
   )
 }
 

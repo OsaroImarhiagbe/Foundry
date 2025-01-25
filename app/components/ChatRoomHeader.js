@@ -24,7 +24,6 @@ import { MenuItems } from './CustomMenu';
 import Entypo from 'react-native-vector-icons/Entypo';
 import { useSelector} from 'react-redux';
 import { Appbar,ActivityIndicator } from 'react-native-paper';
-import bluejay from '../assets/images/bluejay.png'
 
 
 
@@ -72,7 +71,7 @@ const ChatRoomHeader = ({title,onPress,icon,onPress2,backgroundColor,icon2,iconC
         </TouchableOpacity>
           <Image
           style={{width:wp(10),height:hp(4.3),alignItems:'center',justifyContent:'center'}}
-          source={bluejay}
+          source={require('../assets/images/icon.png')}
           />
         <TouchableOpacity
         style={styles.messageIcon}

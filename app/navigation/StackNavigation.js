@@ -2,7 +2,7 @@ import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { lazy,Suspense } from 'react';
 import { ActivityIndicator } from 'react-native';
-import  DashBoardScreen  from '../components/DashBoardScreen';
+import  DashBoardScreen  from '../screen/DashBoardScreen';
 const HomeScreen = lazy(() => import('../screen/HomeScreen'))
 const MessageScreen = lazy(() => import('../screen/MessageScreen'))
 const AccountScreen = lazy(() => import('../screen/AccountScreen'))

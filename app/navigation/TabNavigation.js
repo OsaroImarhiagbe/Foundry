@@ -7,7 +7,7 @@ import { ActivityIndicator, Platform } from 'react-native';
 import { Text, BottomNavigation,useTheme } from 'react-native-paper';
 import { CommonActions } from '@react-navigation/native';
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
-import DashBoardScreen from '../components/DashBoardScreen';
+import DashBoardScreen from '../screen/DashBoardScreen';
 const NotificationScreen = lazy(() => import('../screen/NotificationScreen'))
 const SearchScreen = lazy(() => import('../screen/SearchScreen'))
 const StackNavigation = lazy(() => import('./StackNavigation'))
