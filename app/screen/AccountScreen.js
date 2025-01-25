@@ -9,7 +9,7 @@ import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-nativ
 import ChatRoomHeader from '../components/ChatRoomHeader';
 import SmallButton from '../components/SmallButton';
 import FollowComponent from '../components/FollowComponent';
-import firestore, { orderBy } from '@react-native-firebase/firestore';
+import firestore from '@react-native-firebase/firestore';
 import { blurhash } from '../../utils/index';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';

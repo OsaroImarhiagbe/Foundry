@@ -7,6 +7,7 @@ import { ActivityIndicator, Platform } from 'react-native';
 import { Text, BottomNavigation,useTheme } from 'react-native-paper';
 import { CommonActions } from '@react-navigation/native';
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
+import DashBoardScreen from '../components/DashBoardScreen';
 const NotificationScreen = lazy(() => import('../screen/NotificationScreen'))
 const SearchScreen = lazy(() => import('../screen/SearchScreen'))
 const StackNavigation = lazy(() => import('./StackNavigation'))
@@ -71,7 +72,7 @@ const TabNavigation = () => {
     position:'absolute',
     backgroundColor:theme.colors.background,  
     opacity:0.9,
-    height:hp('10%'),
+    height:70,
     borderTopWidth: 0,
     paddingHorizontal: 0,
     paddingVertical:0,

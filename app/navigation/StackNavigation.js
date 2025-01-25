@@ -2,6 +2,7 @@ import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { lazy,Suspense } from 'react';
 import { ActivityIndicator } from 'react-native';
+import  DashBoardScreen  from '../components/DashBoardScreen';
 const HomeScreen = lazy(() => import('../screen/HomeScreen'))
 const MessageScreen = lazy(() => import('../screen/MessageScreen'))
 const AccountScreen = lazy(() => import('../screen/AccountScreen'))
@@ -126,7 +127,15 @@ const StackNavigation = () => {
     screenOptions={{
       unmountOnBlur: true,
     }}
-    initialRouteName='Main'>
+    initialRouteName='Dash'>
+        <Stack.Screen
+        name='Dash'
+        component={DashBoardScreen}
+        options={{
+        headerShown: false, 
+        gestureEnabled:false,
+        unmountOnBlur: true,}}
+      />
       <Stack.Screen
         name='Main'
         component={HomeScreenWrapper}

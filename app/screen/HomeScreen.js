@@ -166,7 +166,7 @@ const fetchMorePost = async () => {
     <View
     style={[styles.screen,{backgroundColor:theme.colors.background}]}
     >
-      
+{/*       
            <ChatRoomHeader
           onPress={handlePress}
           icon='menu'
@@ -196,7 +196,7 @@ const fetchMorePost = async () => {
            variant='titleMedium'
            style={{color:theme.colors.text}}
            >AI Assistant</Text></TouchableOpacity>
-        </View>
+        </View> */}
    {mount ? Array.from({length:5}).map((_,index) => (
     <PostComponent key={index} mount={mount}/>
    ))
