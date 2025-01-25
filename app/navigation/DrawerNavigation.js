@@ -3,6 +3,7 @@ import color from '../../config/color';
 import { useNavigation } from '@react-navigation/native';
 import { lazy,Suspense } from 'react';
 import { ActivityIndicator } from 'react-native';
+import TestScreen from '../screen/TestScreen';
 
 const Drawer = createDrawerNavigator();
 
@@ -30,7 +31,6 @@ const DrawerNavigation = ({route}) => {
     screenOptions={{
       drawerStyle:{
         backgroundColor:color.white,
-        
       }
     }}>
       <Drawer.Screen
@@ -39,6 +39,12 @@ const DrawerNavigation = ({route}) => {
       initialParams={{route}}
       options={{headerShown:false,
       }}/>
+       <Drawer.Screen
+      name='Resource'
+      component={TestScreen}/>
+       <Drawer.Screen
+      name='Code'
+      component={TestScreen}/>
     </Drawer.Navigator>
 
   )

@@ -59,23 +59,19 @@ const TabNavigation = () => {
   initialRouteName='Welcome'
   screenOptions={{
     headerShown: false, 
-    tabBarShowLabel: false,
-    tabBarActiveTintColor:'#252525'         
+    tabBarShowLabel: false,        
   }}
   tabBar={({ navigation, state, descriptors, insets }) => (
     <BottomNavigation.Bar
+    activeIndicatorStyle={{
+      backgroundColor:theme.colors.primary
+    }}
     keyboardHidesNavigationBar={Platform.OS === 'ios'}
-    activeColor='#252525'
-    inactiveColor='red'
-    activeIndicatorStyle='#252525'
     style={{
     position:'absolute',
     backgroundColor:theme.colors.background,  
     opacity:0.9,
-    height:70,
-    borderTopWidth: 0,
-    paddingHorizontal: 0,
-    paddingVertical:0,
+    height:80,
     }}
     navigationState={state}
      safeAreaInsets={insets}

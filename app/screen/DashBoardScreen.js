@@ -14,6 +14,7 @@ import HomeScreen from './HomeScreen';
 import {Image} from 'expo-image'
 import { useAuth } from '../authContext';
 import { blurhash } from '../../utils';
+import { useTheme } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
 import { TouchableWithoutFeedback } from 'react-native-gesture-handler';
 import { FAB } from 'react-native-paper';
@@ -27,13 +28,14 @@ const DashBoardScreen = () => {
     const {width,height} = useWindowDimensions();
     const {user} = useAuth()
     const navigation = useNavigation()
+    const theme = useTheme()
 
   const Projects = () => (
     <ScrollView
     scrollEnabled
-     style={{flex:1,backgroundColor:'#000'}}>
+     style={{flex:1,backgroundColor:theme.colors.background}}>
       <View style={{flex:1}}>
-        <Text style={{color:'#fff'}}>hi</Text>
+        <Text style={{color:'#000'}}>hi</Text>
     </View>
     </ScrollView>
     
@@ -42,8 +44,8 @@ const DashBoardScreen = () => {
     navigation.openDrawer();
   } 
   return (
-    <View style={{flex:1,paddingTop:insets.top}}> 
-        <View style={{alignItems:'center',paddingTop:10,flexDirection:'row',justifyContent:'space-between',padding:10,backgroundColor:'transparent'}}>
+    <View style={{flex:1,paddingTop:hp(5),backgroundColor:'transparent'}}> 
+        <View style={{alignItems:'center',paddingTop:20,flexDirection:'row',justifyContent:'space-between',padding:10,backgroundColor:'transparent'}}>
         <TouchableWithoutFeedback onPress={handlePress}>
         <Image
         style={{height:hp(4.3), aspectRatio:1, borderRadius:100}}
