@@ -152,13 +152,13 @@ export default function App() {
       <PersistGate loading={isloading} persistor={persistor}>
         <MenuProvider>
           <AuthContextProvider>
-          {/* <NotificationProvider> */}
+          <NotificationProvider>
         <PaperProvider theme={theme}>
         <NavigationContainer>
           {isloading ? <SplashScreen/> :   <AuthNavigation/> }
         </NavigationContainer>
         </PaperProvider>
-        {/* </NotificationProvider> */}
+        </NotificationProvider>
       </AuthContextProvider>
       <StatusBar style='dark' />
       </MenuProvider>

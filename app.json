@@ -32,6 +32,7 @@
       "@react-native-firebase/app",
       "@react-native-firebase/auth",
       "@react-native-firebase/messaging",
+      "@react-native-firebase/crashlytics",
       "@react-native-google-signin/google-signin",
       [
         "expo-notifications",

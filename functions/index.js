@@ -28,30 +28,25 @@ exports.checkAuthuser = onCall((data,context)=>{
     }
 
 });
-exports.newMessage = onDocumentCreated('rooms/{roomId}',async (snapShot,context) =>{
-        const newMessage = snapShot.data();
-        const userId = newMessage.userId
-        logger.info('New message created:', newMessage);
-        // You can now send a notification or perform any other action
+exports.newMessage = onDocumentCreated('rooms/{roomId}/messages',async (event) =>{
         try {
-          // Here you can send a notification to the user
-          await sendNotification(userId, 'You have a new message!');
-          return { success: true };
+            const snapShot = event.data;
+            if(!snapShot) return
+            const newMessage = snapShot.data()
+            const userId = newMessage.userId
+            await sendNotification(userId, 'You have a new message!');
+            return { success: true };
         } catch (error) {
           logger.error('Error sending notification:', error);
           throw new Error('Notification failed');
         }
       });
 
-      // Helper function to send notifications
 async function sendNotification(userId, message) {
-        // Assume you are using Firebase Cloud Messaging (FCM) to send push notifications
         const registrationToken = await getUserDeviceToken(userId);
-
         if (!registrationToken) {
             throw new Error('No device token found for user');
         }
-
         const payload = {
             notification: {
             title: 'BlueJay Notification',
@@ -59,13 +54,9 @@ async function sendNotification(userId, message) {
             },
             token: registrationToken,
         };
-
-        // Send the notification
         await admin.messaging().send(payload);
         logger.info(`Notification sent to ${userId}`);
     }
-
-    // Helper function to get user's device token (assuming this data is stored in Firestore)
 async function getUserDeviceToken(userId) {
         const userDoc = await admin.firestore().collection('users').doc(userId).get();
 
@@ -73,6 +64,7 @@ async function getUserDeviceToken(userId) {
             logger.error(`No user found with ID: ${userId}`);
             return null;
         }
+        const token = userDoc.data().token
 
-        return userDoc.data().deviceToken; // Assume the device token is stored in the user's document
+        return token;
     }

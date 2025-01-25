@@ -4,7 +4,6 @@ import notifee, { EventType } from '@notifee/react-native'
 import { useNavigation } from '@react-navigation/native';
 import messaging from '@react-native-firebase/messaging';
 import firestore from '@react-native-firebase/firestore';
-import App from '../App';
 import { useAuth } from './authContext';
 const NotificationContext = createContext();
 
@@ -34,7 +33,7 @@ export const NotificationProvider = ({ children }) => {
       fetchToken()
       }, []);
 
-         // Handle user clicking on a notification and open the screen
+
          const handleNotificationClick = async (response) => {
             const screen = response?.notification?.request?.content?.data?.screen;
             if (screen !== null) {
@@ -42,7 +41,6 @@ export const NotificationProvider = ({ children }) => {
             }
           };
       useEffect(() => {
-        //Listen for user clicking on a notification
         const Foreunsubscribe = notifee.onForegroundEvent(async ({type,detail}) => {
             if(type === EventType.PRESS){
                 await handleNotificationClick(detail.notification)
@@ -60,7 +58,6 @@ export const NotificationProvider = ({ children }) => {
             Backunsubscribe()
           }
       },[handleNotificationClick])
-    // Handle user opening the app from a notification (when the app is in the background)
     useEffect(() => {
       messaging().onNotificationOpenedApp((remoteMessage) => {
         console.log(
@@ -73,27 +70,23 @@ export const NotificationProvider = ({ children }) => {
         }
       });
 
-    // Check if the app was opened from a notification (when the app was completely quit)
-    messaging()
-    .getInitialNotification()
-    .then((remoteMessage) => {
-      if (remoteMessage) {
-        console.log(
-          "Notification caused app to open from quit state:",
-          remoteMessage.notification
-        );
-        if (remoteMessage?.data?.screen) {
-          navigation.navigate(`${remoteMessage.data.screen}`);
-        }
+    
+        messaging().getInitialNotification().then((remoteMessage) => {
+            if (remoteMessage) {
+                console.log(
+                "Notification caused app to open from quit state:",
+                remoteMessage.notification
+                );
+                if (remoteMessage?.data?.screen) {
+                navigation.navigate(`${remoteMessage.data.screen}`);
+                }
       }
     });
-
-      // Handle push notifications when the app is in the background
     const unsubscribe = messaging().setBackgroundMessageHandler(handlePushNotification)
        return () => unsubscribe()
 
     },[handleNotificationClick])
-    // Handle push notifications when the app is in the foreground
+    
     const handlePushNotification = useCallback((remoteMessage) => {
       const {title,body,data } = remoteMessage.notification
       showNotification(title,body,data)
@@ -102,10 +95,9 @@ export const NotificationProvider = ({ children }) => {
     useEffect(() => {
       messaging().onMessage(handlePushNotification)
     },[])
-    // Listen for push notifications when the app is in the foreground
-    ;
 
-    // Clean up the event listeners
+
+
 
   const showNotification = useCallback(async (title, message,data) => {
     try{
@@ -124,7 +116,6 @@ export const NotificationProvider = ({ children }) => {
         });
         setNotification({ title, message,data });
         setVisible(true)
-        // Auto-hide after 5 seconds
         const timer = setTimeout(() => {
           setNotification(null);
           setVisible(false)

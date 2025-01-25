@@ -4,17 +4,18 @@ import {
     Text,
     SafeAreaView,
     ScrollView,
-    StatusBar,
-    Image,
     StyleSheet,
     useWindowDimensions} from 'react-native'
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
-import bluejay from '../assets/images/bluejay.png'
 import HomeScreen from '../screen/HomeScreen';
-
+import {Image} from 'expo-image'
+import { useAuth } from '../authContext';
+import { blurhash } from '../../utils';
+import { useNavigation } from '@react-navigation/native';
+import { TouchableWithoutFeedback } from 'react-native-gesture-handler';
 
 const Tab = createMaterialTopTabNavigator();
 
@@ -23,6 +24,8 @@ const DashBoardScreen = () => {
 
     const insets = useSafeAreaInsets(); 
     const {width,height} = useWindowDimensions();
+    const {user} = useAuth()
+    const navigation = useNavigation()
 
   const Projects = () => (
     <ScrollView
@@ -33,15 +36,28 @@ const DashBoardScreen = () => {
     </View>
     </ScrollView>
     
-  ); 
+  );
+  const handlePress = () => {
+    navigation.openDrawer();
+  } 
   return (
     <SafeAreaView style={{flex:1,paddingTop:insets.top}}> 
-        <View style={{alignItems:'center',paddingTop:10}}>
+        <View style={{alignItems:'center',paddingTop:10,flexDirection:'row',justifyContent:'space-between',padding:10}}>
+        <TouchableWithoutFeedback onPress={handlePress}>
         <Image
-                source={bluejay}
-                style={styles.logo}
-                resizeMode='cover'
-            />
+        style={{height:hp(4.3), aspectRatio:1, borderRadius:100}}
+        source={user?.profileUrl}
+        placeholder={{blurhash}}
+        cachePolicy='none'/>
+        </TouchableWithoutFeedback>
+        <Image
+        source={require('../assets/images/icon.png')}
+        style={styles.logo}
+        />
+        <Image
+        source={require('../assets/images/icon.png')}
+        style={styles.logo}
+        />
         </View>
         <Tab.Navigator
         screenOptions={{
@@ -59,11 +75,6 @@ const DashBoardScreen = () => {
         <Tab.Screen
         name='Home'
         component={Projects}
-        options={{
-            tabBarIcon:() => (
-            <MaterialCommunityIcons name='post' color='#000' size={20}
-            />),
-        }}
         />
         <Tab.Screen
         name='Community'

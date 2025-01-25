@@ -17,7 +17,7 @@ const SplashScreen = () => {
   return (
     <SafeAreaView style={styles.container}>
       <View style={{flex:1,justifyContent:'center',alignItems:'center'}}>
-        <ActivityIndicator size='large' animating={loading} color='#fff'/>
+        <ActivityIndicator size='large' animating={loading} color='#000'/>
       </View>
     </SafeAreaView>
   );
@@ -26,7 +26,7 @@ const SplashScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor:color.backgroundcolor,
+    backgroundColor:'#fff',
     alignItems:'center',
     justifyContent:'center'
   },
