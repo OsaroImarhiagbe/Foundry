@@ -24,7 +24,7 @@ const ChatRoom = ({next_item, onPress,User}) => {
     const [lastMessage, setLastMessage] = useState(undefined);
     useEffect(() => {
         const roomId = getRoomID(User?.userId,next_item?.userId)
-        const docRef = firestore().collection('rooms').doc(roomId);
+        const docRef = firestore().collection('chat-rooms').doc(roomId);
         const messageRef = docRef.collection('messages').orderBy('createdAt','desc')
         const unsub = messageRef.onSnapshot((documentSnapshot) => {
           let allmessage = documentSnapshot.docs.map(doc => {
@@ -57,14 +57,14 @@ const ChatRoom = ({next_item, onPress,User}) => {
       const handleDelete = async () => {
         try {
           const roomId = getRoomID(User?.userId,next_item?.userId)
-          const messagesRef = firestore().collection('rooms').doc(roomId).collection('messages')
+          const messagesRef = firestore().collection('chat-rooms').doc(roomId).collection('messages')
           const messagesSnapshot = await messagesRef.get();
           const docPromise = messagesSnapshot.docs.map((messageDoc) => {
                return messageDoc.ref.delete();
             });
           await Promise.all(docPromise)
 
-          const roomRef = firestore().collection('rooms').doc(roomId)
+          const roomRef = firestore().collection('chat-rooms').doc(roomId)
           const sent_message = firestore().collection('sent-message-id').doc(next_item.userId)
           await roomRef.delete()
           await sent_message.delete()

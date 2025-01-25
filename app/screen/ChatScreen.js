@@ -43,7 +43,7 @@ const ChatScreen = () => {
             : 'Unknown Recipient';
   useEffect(() => {
     const loadMessages = (roomId) => {
-      const docRef = firestore().collection('rooms').doc(roomId);
+      const docRef = firestore().collection('chat-rooms').doc(roomId);
       const messageRef = docRef.collection('messages').orderBy('createdAt', 'asc')
       let unsub = messageRef.onSnapshot((documentSnapshot) => {
         let allMessages = documentSnapshot.docs.map((doc) => doc.data());
@@ -90,7 +90,7 @@ const ChatScreen = () => {
       
       const roomId = route?.params?.userid ? getRoomID(user?.userId, route?.params?.userid) : item?.userId ? getRoomID(user?.userId, item?.userId) : null
       const id = route?.params?.userid ? route?.params?.userid : item?.userId
-      await firestore().collection('rooms').doc(roomId).set({
+      await firestore().collection('chat-rooms').doc(roomId).set({
         roomId,
         createdAt: firestore.Timestamp.fromDate(new Date())
       })
@@ -113,7 +113,7 @@ const ChatScreen = () => {
       : item?.userId
       ? getRoomID(user?.userId, item.userId)
       : null;
-      const docRef = firestore().collection('rooms').doc(roomId);
+      const docRef = firestore().collection('chat-rooms').doc(roomId);
       const messageRef = docRef.collection('messages')
       //textRef.current ="";
       if(inputRef) inputRef?.current?.clear();
