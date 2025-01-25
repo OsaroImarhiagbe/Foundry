@@ -5,12 +5,14 @@ import { useNavigation } from '@react-navigation/native';
 import messaging from '@react-native-firebase/messaging';
 import firestore from '@react-native-firebase/firestore';
 import App from '../App';
+import { useAuth } from './authContext';
 const NotificationContext = createContext();
 
 export const useNotification = () => useContext(NotificationContext);
 
 export const NotificationProvider = ({ children }) => {
   const [notification, setNotification] = useState(null);
+  const {user} = useAuth()
   const [visible,setVisible] = useState()
   const navigation = useNavigation();
 
@@ -22,7 +24,9 @@ export const NotificationProvider = ({ children }) => {
             await messaging().registerDeviceForRemoteMessages();
             await notifee.requestPermission();
             const token = await messaging().getToken();
-            // firestore().collection('users').
+            await firestore().collection('users').doc(user.userId).update({
+                token:token 
+            })
         }catch(error){
           console.error('Error grabbing token:',error.message)
         }
