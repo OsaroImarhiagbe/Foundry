@@ -49,7 +49,7 @@ const PostScreen = () => {
         post_id: newDoc.id
       })
       setTimeout(() => {
-        navigation.navigate('Main');
+        navigation.navigate('Dash');
         Alert.alert('Success!!', 'Post has been sent!!');
       }, 1000);
       dispatch(addPost({ id: newDoc.id, content: text }));
@@ -72,12 +72,12 @@ const PostScreen = () => {
           {
             text: 'Discard',
             style: 'destructive',
-            onPress: () => navigation.navigate('Main'),
+            onPress: () => navigation.navigate('Dash'),
           },
         ]
       );
     } else {
-      navigation.navigate('Main');
+      navigation.navigate('Dash');
     }
   };
   const pickImage = async () => {
@@ -95,7 +95,7 @@ const PostScreen = () => {
   }
   return (
     <TouchableWithoutFeedback onPress={() =>  Keyboard.dismiss()}>
-      <SafeAreaView style={styles.screen}>
+      <View style={styles.screen}>
       <View style={styles.container}>
         <TouchableOpacity onPress={handleCancel}>
           <View style={styles.cancelContainer}>
@@ -150,7 +150,7 @@ const PostScreen = () => {
         </TouchableOpacity>
        </View>
         </KeyboardAvoidingView>
-    </SafeAreaView>
+    </View>
     </TouchableWithoutFeedback>
     
   );
@@ -158,6 +158,7 @@ const PostScreen = () => {
 
 const styles = StyleSheet.create({
   screen: {
+    paddingTop:hp('10%'),
     flex: 1,
     backgroundColor: color.backgroundcolor,
   },

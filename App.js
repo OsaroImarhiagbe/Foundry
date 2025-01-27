@@ -102,7 +102,7 @@ export default function App() {
       onError: 'rgb(105, 0, 5)',
       errorContainer: 'rgb(147, 0, 10)',
       onErrorContainer: 'rgb(255, 180, 171)',
-      background: 'rgb(105, 211, 255)',
+      background: 'rgb(18, 18, 18)',
       onBackground: 'rgb(0, 53, 70)',
       surface: 'rgb(27, 27, 31)',
       onSurface: 'rgb(228, 225, 230)',
@@ -137,7 +137,7 @@ export default function App() {
 
   const colorScheme = useColorScheme()
   
-  const theme = colorScheme === 'dark' ? darkTheme : lightTheme;
+  const theme = colorScheme === 'light' ? darkTheme : lightTheme;
   console.log(colorScheme)
   
 

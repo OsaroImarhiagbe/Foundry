@@ -5,11 +5,9 @@ import React,
 }from 'react'
 import {
     View,
-    Text,
-    SafeAreaView,
     ScrollView,
     StyleSheet,
-    Platform,
+    TouchableOpacity,
     useWindowDimensions} from 'react-native'
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -22,7 +20,11 @@ import { useTheme } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
 import { TouchableWithoutFeedback } from 'react-native-gesture-handler';
 import { FAB } from 'react-native-paper';
-import Tts from 'react-native-tts';
+import Entypo from 'react-native-vector-icons/Entypo';
+import { FlashList } from '@shopify/flash-list';
+import { Text } from 'react-native-paper';
+//import Tts from 'react-native-tts';
+import LottieView from 'lottie-react-native';
 
 const Tab = createMaterialTopTabNavigator();
 
@@ -36,21 +38,46 @@ const DashBoardScreen = () => {
     const [speaking,setSpeaking] = useState(false)
     const theme = useTheme()
 
+    const skills = ['hello','hello','hello','hello','hello']
 
-    useEffect(()=>{
-      Tts.getInitStatus().then(() => {
-        Tts.addEventListener('tts-start', () => setSpeaking(true));
-        Tts.speak('Hello how are you!')
-      }).catch((error) => console.error('Error initilzing:',error));
-      return () => Tts.removeAllListeners()
-    },[])
+    // useEffect(()=>{
+    //   Tts.getInitStatus().then(() => {
+    //     Tts.addEventListener('tts-start', () => setSpeaking(true));
+    //     Tts.speak('Hello how are you!')
+    //     Tts.speak('I am Jay your AI assistant!')
+    //   }).catch((error) => console.error('Error initilzing:',error));
+    //   return () => Tts.removeAllListeners()
+    // },[])
 
-  const Projects = () => (
+  const AIScreen = () => (
     <ScrollView
     scrollEnabled
      style={{flex:1,backgroundColor:theme.colors.background}}>
       <View style={{flex:1}}>
-        
+       <View style={{alignItems:'center',justifyContent:'center',paddingTop:hp('15%')}}>
+        {speaking &&
+           <LottieView
+           style={{width:100,height:50,backgroundColor:theme.colors.backdrop,borderRadius:35,position:'absolute'}}
+           source={require('../assets/animations/JayAI.json')}
+           autoPlay
+           loop
+           /> }
+          </View>
+          <View style={{padding:10}}>
+            <Text
+            variant='titleMedium'
+            >Jay Actions</Text>
+            <FlashList
+            horizontal={true}
+            estimatedItemSize={200}
+            data={skills}
+            renderItem={({item,index})=>(
+              <View key={index } style={{backgroundColor:'red',padding:45,margin:5,borderRadius:30}}>
+                <Text>{item}</Text>
+              </View>
+            )}
+            />
+          </View>
     </View>
     </ScrollView>
     
@@ -59,7 +86,7 @@ const DashBoardScreen = () => {
     navigation.openDrawer();
   } 
   return (
-    <View style={{flex:1,paddingTop:hp(5),backgroundColor:'transparent'}}> 
+    <View style={{flex:1,paddingTop:hp(5),backgroundColor:theme.colors.background}}> 
         <View style={{alignItems:'center',paddingTop:20,flexDirection:'row',justifyContent:'space-between',padding:10,backgroundColor:'transparent'}}>
         <TouchableWithoutFeedback onPress={handlePress}>
         <Image
@@ -72,10 +99,13 @@ const DashBoardScreen = () => {
         source={require('../assets/images/icon.png')}
         style={styles.logo}
         />
-        <Image
-        source={require('../assets/images/icon.png')}
-        style={styles.logo}
-        />
+       <TouchableOpacity
+        style={styles.messageIcon}
+         onPress={() => navigation.navigate('Post')}>
+        <View style={styles.icon}>
+           <Entypo name='new-message' size={20} color={theme.colors.primary}/>
+        </View>
+        </TouchableOpacity>
         </View>
         <View style={{flex:1}}>
         <Tab.Navigator
@@ -89,11 +119,15 @@ const DashBoardScreen = () => {
             tabBarStyle:{
             backgroundColor:'transparent',
             },
+          tabBarActiveTintColor:theme.colors.text,
+          tabBarLabelStyle:{
+            fontSize:hp(1.5)
+          }
     }}
     >
         <Tab.Screen
         name='JAY'
-        component={Projects}
+        component={AIScreen}
         />
         <Tab.Screen
         name='Community'
@@ -116,6 +150,9 @@ const styles = StyleSheet.create({
     logo: {
         width: 40,
         height: 40, 
+    },
+    icon:{
+      margin:5
     },
 });
 
