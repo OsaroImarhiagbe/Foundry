@@ -7,7 +7,6 @@ import { ActivityIndicator, Platform } from 'react-native';
 import { Text, BottomNavigation,useTheme } from 'react-native-paper';
 import { CommonActions } from '@react-navigation/native';
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
-import DashBoardScreen from '../screen/DashBoardScreen';
 const NotificationScreen = lazy(() => import('../screen/NotificationScreen'))
 const SearchScreen = lazy(() => import('../screen/SearchScreen'))
 const StackNavigation = lazy(() => import('./StackNavigation'))
@@ -25,7 +24,7 @@ const StackNavigation = lazy(() => import('./StackNavigation'))
 
 const StackNavigationwrapper = (props) =>{
   return (
-    <Suspense fallback={<ActivityIndicator size='small' color='"#000'/>}>
+    <Suspense fallback={<ActivityIndicator size='small' color='#000'/>}>
     <StackNavigation/>
   </Suspense>
   )}
@@ -35,7 +34,7 @@ const StackNavigationwrapper = (props) =>{
 const SearchScreenWrapper = (props) => {
   
     return(
-      <Suspense fallback={<ActivityIndicator size='small' color='"#000'/>}>
+      <Suspense fallback={<ActivityIndicator size='small' color='#000'/>}>
         <SearchScreen/>
       </Suspense>
     )}
@@ -43,7 +42,7 @@ const SearchScreenWrapper = (props) => {
 const NotificationScreenWrapper = (props) => {
   
       return(
-        <Suspense fallback={<ActivityIndicator size='small' color='"#000'/>}>
+        <Suspense fallback={<ActivityIndicator size='small' color='#000'/>}>
         <NotificationScreen/>
       </Suspense>
       )}

@@ -1,12 +1,14 @@
 import React,{useEffect,useState} from 'react';
 import { StyleSheet, Image, View,Dimensions,SafeAreaView  } from 'react-native';
-import color from '../../config/color';
 import { ActivityIndicator } from 'react-native-paper';
+import { useTheme } from 'react-native-paper';
 
 
 const SplashScreen = () => {
 
     const [loading, setLoading] = useState(false);
+
+    const theme = useTheme();
 
   useEffect(() => {
     setLoading(true)
@@ -15,9 +17,9 @@ const SplashScreen = () => {
     },3000)
   },[])
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container,{backgroundColor:theme.colors.background}]}>
       <View style={{flex:1,justifyContent:'center',alignItems:'center'}}>
-        <ActivityIndicator size='large' animating={loading} color='#000'/>
+        <ActivityIndicator size='large' animating={loading} color={theme.colors.background ? '#000' :'#fff'}/>
       </View>
     </SafeAreaView>
   );
@@ -26,7 +28,6 @@ const SplashScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor:'#fff',
     alignItems:'center',
     justifyContent:'center'
   },

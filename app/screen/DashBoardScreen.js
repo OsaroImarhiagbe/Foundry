@@ -22,7 +22,7 @@ import { TouchableWithoutFeedback } from 'react-native-gesture-handler';
 import { FAB } from 'react-native-paper';
 import Entypo from 'react-native-vector-icons/Entypo';
 import { FlashList } from '@shopify/flash-list';
-import { Text } from 'react-native-paper';
+import { Avatar, Button, Card, Text } from 'react-native-paper';
 //import Tts from 'react-native-tts';
 import LottieView from 'lottie-react-native';
 
@@ -38,7 +38,7 @@ const DashBoardScreen = () => {
     const [speaking,setSpeaking] = useState(false)
     const theme = useTheme()
 
-    const skills = ['hello','hello','hello','hello','hello']
+    const skills = ['Quick Search','hello','hello','hello','hello']
 
     // useEffect(()=>{
     //   Tts.getInitStatus().then(() => {
@@ -48,33 +48,39 @@ const DashBoardScreen = () => {
     //   }).catch((error) => console.error('Error initilzing:',error));
     //   return () => Tts.removeAllListeners()
     // },[])
-
   const AIScreen = () => (
     <ScrollView
     scrollEnabled
      style={{flex:1,backgroundColor:theme.colors.background}}>
       <View style={{flex:1}}>
        <View style={{alignItems:'center',justifyContent:'center',paddingTop:hp('15%')}}>
-        {speaking &&
-           <LottieView
-           style={{width:100,height:50,backgroundColor:theme.colors.backdrop,borderRadius:35,position:'absolute'}}
+       <LottieView
+           style={{width:100,height:50,backgroundColor:theme.colors.primary,borderRadius:35,position:'absolute'}}
            source={require('../assets/animations/JayAI.json')}
            autoPlay
            loop
-           /> }
+           />  
+          
           </View>
           <View style={{padding:10}}>
             <Text
             variant='titleMedium'
             >Jay Actions</Text>
             <FlashList
+            showsHorizontalScrollIndicator={false}
             horizontal={true}
-            estimatedItemSize={200}
+            estimatedItemSize={420}
             data={skills}
             renderItem={({item,index})=>(
-              <View key={index } style={{backgroundColor:'red',padding:45,margin:5,borderRadius:30}}>
-                <Text>{item}</Text>
-              </View>
+              <Card key={index} style={{margin:5,width:wp('70%')}}>
+              <Card.Title title={item}/>
+              <Card.Content>
+                <Text variant="bodyMedium"></Text>
+              </Card.Content>
+              <Card.Actions>
+                <Button>Ok</Button>
+              </Card.Actions>
+              </Card>
             )}
             />
           </View>

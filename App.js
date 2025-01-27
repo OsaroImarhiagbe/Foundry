@@ -160,7 +160,7 @@ export default function App() {
         </PaperProvider>
         {/* </NotificationProvider> */}
       </AuthContextProvider>
-      <StatusBar style='dark' />
+      <StatusBar style={colorScheme === 'dark' ? 'dark':'light'} />
       </MenuProvider>
       </PersistGate>
     </Provider>
