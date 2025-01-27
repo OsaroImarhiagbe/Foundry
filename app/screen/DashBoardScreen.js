@@ -1,4 +1,8 @@
-import React from 'react'
+import React,
+{
+  useEffect,
+  useState
+}from 'react'
 import {
     View,
     Text,
@@ -18,6 +22,7 @@ import { useTheme } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
 import { TouchableWithoutFeedback } from 'react-native-gesture-handler';
 import { FAB } from 'react-native-paper';
+import Tts from 'react-native-tts';
 
 const Tab = createMaterialTopTabNavigator();
 
@@ -28,14 +33,24 @@ const DashBoardScreen = () => {
     const {width,height} = useWindowDimensions();
     const {user} = useAuth()
     const navigation = useNavigation()
+    const [speaking,setSpeaking] = useState(false)
     const theme = useTheme()
+
+
+    useEffect(()=>{
+      Tts.getInitStatus().then(() => {
+        Tts.addEventListener('tts-start', () => setSpeaking(true));
+        Tts.speak('Hello how are you!')
+      }).catch((error) => console.error('Error initilzing:',error));
+      return () => Tts.removeAllListeners()
+    },[])
 
   const Projects = () => (
     <ScrollView
     scrollEnabled
      style={{flex:1,backgroundColor:theme.colors.background}}>
       <View style={{flex:1}}>
-        <Text style={{color:'#000'}}>hi</Text>
+        
     </View>
     </ScrollView>
     
@@ -99,8 +114,8 @@ const DashBoardScreen = () => {
 
 const styles = StyleSheet.create({
     logo: {
-        width: 40, // Adjust size
-        height: 40, // Adjust size'
+        width: 40,
+        height: 40, 
     },
 });
 
