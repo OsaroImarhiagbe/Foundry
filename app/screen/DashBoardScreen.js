@@ -62,7 +62,7 @@ const DashBoardScreen = () => {
            />  
           
           </View>
-          <View style={{padding:10}}>
+          <View style={{padding:5}}>
             <Text
             variant='titleMedium'
             >Jay Actions</Text>

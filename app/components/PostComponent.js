@@ -205,6 +205,7 @@ const PostComponent = ({content,date,name,id,url,count,comment_count,mount,auth_
     color:'#000',
     marginLeft:30,
     marginVertical:5,
+    color:theme.colors.text
     }}
     >{content}</Text>
     </View>
