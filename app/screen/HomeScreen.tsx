@@ -26,13 +26,26 @@ import { addId } from '../features/user/userSlice.js';
 import { FlashList } from "@shopify/flash-list";
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import {ActivityIndicator,Text,Divider,useTheme} from 'react-native-paper'
+
+
 const PostComponent = lazy(() => import('../components/PostComponent.js'))
 
 
+// Type definitions
+type PostType = {
+  id: string;
+  auth_profile?: string;
+  like_count?: number;
+  imageUrl?: string;
+  post_id?: string;
+  name?: string;
+  content?: string;
+  createdAt: FirebaseFirestoreTypes.Timestamp; // Firebase timestamp
+  comment_count?: number;
+};
+
 const Post = () => (
-  <ScrollView
-  scrollEnabled
-   style={{flex:1,backgroundColor:color.backgroundcolor}}>
+  <ScrollView scrollEnabled style={{flex:1,backgroundColor:color.backgroundcolor}}>
     <View style={{flex:1,backgroundColor:color.backgroundcolor}}>
       <Text>hi</Text>
   </View>
@@ -47,14 +60,14 @@ const HomeScreen = () => {
   const navigation = useNavigation();
   const theme = useTheme()
   const dispatch = useDispatch()
-  const [refreshing, setRefreshing] = useState(false);
+  const [refreshing, setRefreshing] = useState<boolean>(false);
   const {user} = useAuth()
   const {height, width} = useWindowDimensions();
-  const [post, setPost] = useState([])
-  const [lastVisible,setLastVisible] = useState(null)
-  const [loadingMore, setLoadingMore] = useState(false);
-  const [hasMore, setHasMore] = useState(true);
-  const [mount, setMount] = useState(false)
+  const [post, setPost] = useState<PostType[]>([])
+  const [lastVisible,setLastVisible] = useState<boolean>(false)
+  const [loadingMore, setLoadingMore] = useState<boolean>(false);
+  const [hasMore, setHasMore] = useState<boolean>(true);
+  const [mount, setMount] = useState<boolean>(false)
   const scrollY = useState(new Animated.Value(0))[0];
 
 
@@ -81,7 +94,7 @@ const HomeScreen = () => {
                 setPost([]);
                 return;
               }
-              let data = [];
+              let data:PostType[]; 
               querySnapShot.forEach(documentSnapShot => {
                 data.push({ ...documentSnapShot.data(),id:documentSnapShot.id });
             } )
@@ -108,7 +121,7 @@ const HomeScreen = () => {
       try {
         const unsub = firestore().collection('posts').orderBy('createdAt', 'desc').limit(10)
           .onSnapshot(querySnapShot =>{
-            let data = [];
+            let data:PostType[];
             querySnapShot.forEach(documentSnapShot => {
               data.push({ ...documentSnapShot.data(),id:documentSnapShot.id });
           } )

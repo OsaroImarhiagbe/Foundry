@@ -1,4 +1,4 @@
-const color = {
+ const color = {
     light:"#f8f4f4",
     primary: '#E0FBFC',
     secondary: '#C2DFE3',

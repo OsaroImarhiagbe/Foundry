@@ -4,6 +4,7 @@
   "main": "node_modules/expo/AppEntry.js",
   "scripts": {
     "start": "expo start",
+    "tsc": "tsc",
     "android": "expo run:android",
     "ios": "expo run:ios",
     "web": "expo start --web"
@@ -30,6 +31,7 @@
     "@react-navigation/stack": "^7.0.18",
     "@reduxjs/toolkit": "^2.4.0",
     "@shopify/flash-list": "^1.7.2",
+    "@types/react-native": "^0.72.8",
     "@wdragon/react-native-voice": "^3.3.11",
     "axios": "^1.6.8",
     "cors": "^2.8.5",
