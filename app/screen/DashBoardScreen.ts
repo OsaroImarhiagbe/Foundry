@@ -62,9 +62,10 @@ const DashBoardScreen = () => {
            />  
           
           </View>
-          <View style={{padding:5}}>
+          <View>
             <Text
             variant='titleMedium'
+            style={{paddingLeft:10}}
             >Jay Actions</Text>
             <FlashList
             showsHorizontalScrollIndicator={false}

@@ -16,13 +16,13 @@ import {
   ScrollView,
   Animated,
 } from 'react-native'
-import color from '../../config/color';
+import color from '../../config/color.js';
 import { useNavigation } from '@react-navigation/native';
-import ChatRoomHeader from '../components/ChatRoomHeader';;
-import { useAuth } from '../authContext';
+import ChatRoomHeader from '../components/ChatRoomHeader.js';;
+import { useAuth } from '../authContext.js';
 import firestore from '@react-native-firebase/firestore'
 import { useDispatch} from 'react-redux';
-import { addId } from '../features/user/userSlice';
+import { addId } from '../features/user/userSlice.js';
 import { FlashList } from "@shopify/flash-list";
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import {ActivityIndicator,Text,Divider,useTheme} from 'react-native-paper'

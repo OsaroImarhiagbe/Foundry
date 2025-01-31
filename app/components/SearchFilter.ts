@@ -5,8 +5,8 @@ import {
   MenuOptions,
   MenuTrigger,
 } from 'react-native-popup-menu';
-import { MenuItems } from '../components/CustomMenu';
-import CustomCheckBox from '../components/CustomCheckBox';
+import { MenuItems } from './CustomMenu';
+import CustomCheckBox from './CustomCheckBox';
 import {View} from 'react-native'
 import color from '../../config/color'
 import { useDispatch} from 'react-redux';
