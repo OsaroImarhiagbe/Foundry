@@ -89,6 +89,9 @@ const DashBoardScreen = () => {
     </ScrollView>
     
   );
+  type Prop = {
+    navigation: DrawerNavigationProp<RootParamList, 'YourScreenName'>;
+  };
   const handlePress = () => {
     navigation.openDrawer();
   } 

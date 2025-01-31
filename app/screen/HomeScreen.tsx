@@ -13,7 +13,7 @@ import {
   Animated,
 } from 'react-native'
 import color from '../../config/color';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation,DrawerActionType } from '@react-navigation/native';
 import ChatRoomHeader from '../components/ChatRoomHeader.js';;
 import { useAuth } from 'app/authContext.js';
 import firestore, { FirebaseFirestoreTypes } from '@react-native-firebase/firestore'
@@ -22,6 +22,7 @@ import { addId } from '../features/user/userSlice.js';
 import { FlashList } from "@shopify/flash-list";
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import {ActivityIndicator,Text,Divider,useTheme} from 'react-native-paper'
+import { DrawerNavigationProp } from '@react-navigation/drawer';
 
 
 const PostComponent = lazy(() => import('../components/PostComponent'))
@@ -38,6 +39,7 @@ interface Post{
   content?: string;
   createdAt?: FirebaseFirestoreTypes.Timestamp
   comment_count?: number;
+  mount?:boolean
 };
 
 const Post = () => (
@@ -166,12 +168,7 @@ const fetchMorePost = async () => {
     setLoadingMore(false);
   }
 }
-  const handlePress = () => {
-    navigation.openDrawer();
-  }
-  const handleMessage = () => {
-    navigation.navigate('Message')
-  }
+
   return (
     <View
     style={[styles.screen,{backgroundColor:theme.colors.background}]}
@@ -236,7 +233,7 @@ const fetchMorePost = async () => {
       id={item.post_id}
       name={item.name}
       content={item.content}
-      date={item.createdAt.toDate().toLocaleString()}
+      date={item?.createdAt?.toDate().toLocaleString()}
       comment_count={item.comment_count}/>
       </Suspense>}
     keyExtractor={(item)=> item.post_id}

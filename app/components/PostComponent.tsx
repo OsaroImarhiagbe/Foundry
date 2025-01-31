@@ -14,7 +14,7 @@ import { Image } from 'expo-image';
 import EvilIcons from 'react-native-vector-icons/EvilIcons'
 import { useAuth } from '../authContext';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import firestore from '@react-native-firebase/firestore';
+import firestore, { FirebaseFirestoreTypes } from '@react-native-firebase/firestore';
 import { useSelector} from 'react-redux';
 import CommentComponent from './CommentComponent';
 import ReplyComponent from './ReplyComponent';
@@ -28,7 +28,31 @@ import { FlashList } from "@shopify/flash-list";
 import { ScrollView } from 'react-native-gesture-handler';
 import { useTheme } from 'react-native-paper';
 
-const PostComponent = ({content,date,name,id,url,count,comment_count,mount,auth_profile}) => {
+interface PostComponentProps {
+  auth_profile?: string;
+  count?: number;
+  url?: string;
+  id?: string;
+  name?: string;
+  content?: string;
+  date?: string;
+  comment_count?: number;
+  mount?: boolean;  // Optional 'mount' prop
+}
+
+const PostComponent: React.FC<PostComponentProps> = ({
+  auth_profile,
+  count,
+  url,
+  id,
+  name,
+  content,
+  date,
+  comment_count,
+  mount,
+}) => {
+
+ 
 
     const [press,setIsPress] = useState(false)
     const [isloading,setLoading] = useState(false)
