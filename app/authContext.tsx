@@ -1,15 +1,28 @@
-import React,{ createContext, useEffect, useState, useContext} from 'react'
+import React,{ createContext, useEffect, useState, useContext,ReactNode} from 'react'
 import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {GoogleOneTapSignIn,statusCodes,} from '@react-native-google-signin/google-signin';
-export const AuthContext = createContext();
+import {GoogleSignin,statusCodes,} from '@react-native-google-signin/google-signin';
+export const AuthContext = createContext<any>(null);
 
-export const AuthContextProvider = ({children}) => {
+interface User {
+    name:string,
+    username:string,
+    email:string,
+    uid:string,
+    profileUrl:string
+    
+}
 
-    const [user, setUser] = useState({})
-    const [loading,setLoading] = useState(false)
-    const [isAuthenticated, setIsAuthenticated] = useState(undefined)
+interface AuthContextProviderProps {
+    children: ReactNode;
+  }
+  
+export const AuthContextProvider = ({children}:AuthContextProviderProps) => {
+
+    const [user, setUser] = useState<User | {}>({})
+    const [loading,setLoading] = useState<boolean>(false)
+    const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false)
     useEffect(() => {
         const unsub = auth().onAuthStateChanged(async (user) => {
                     if(user){
@@ -20,21 +33,21 @@ export const AuthContextProvider = ({children}) => {
                             setUser({
                                 uid: user.uid,
                                 email: user.email,
-                                username: firestoreData.username,
-                                userId: firestoreData.userId,
-                                profileUrl:firestoreData.profileUrl
+                                username: firestoreData?.username,
+                                userId: firestoreData?.userId,
+                                profileUrl:firestoreData?.profileUrl
                             });
                         }
                         await AsyncStorage.setItem('authUser',user?.uid)
                     }else{
                         setIsAuthenticated(false)
-                        setUser(null)
+                        setUser({})
                     }
     })
         return () => unsub ()
     },[])
 
-    const login = async (email,pasword) => {
+    const login = async (email:string,pasword:string) => {
         setLoading(true)
         try{
             const response = await auth().signInWithEmailAndPassword(email,pasword)
@@ -46,45 +59,45 @@ export const AuthContextProvider = ({children}) => {
         }
     }
 
-    const googleSignIn = async () => {
-        try {
-            await GoogleOneTapSignIn.checkPlayServices();
-            await GoogleOneTapSignIn.hasPlayServices({ showPlayServicesUpdateDialog: true });
-            const signInResult = await GoogleOneTapSignIn.signIn();
-            idToken = signInResult.data?.idToken;
-            if (!idToken) {
-                idToken = signInResult.idToken;
-            }
-            if (!idToken) {
-                throw new Error('No ID token found');
-            }
-            const googleCredential = auth.GoogleAuthProvider.credential(signInResult.data.token);
-            return auth().signInWithCredential(googleCredential);
-          } catch (error) {
-            if (isErrorWithCode(error)) {
-              switch (error.code) {
-                case statusCodes.IN_PROGRESS:
-                  break;
-                case statusCodes.PLAY_SERVICES_NOT_AVAILABLE:
-                  break;
-                default:
-              }
-            } else {
-            }
-          }
+    // const googleSignIn = async () => {
+    //     try {
+    //         await GoogleSignin.hasPlayServices();
+    //         await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
+    //         const signInResult = await GoogleSignin.signIn();
+    //         let idToken = signInResult.data?.idToken;
+    //         if (!idToken) {
+    //             idToken = signInResult.idToken;
+    //         }
+    //         if (!idToken) {
+    //             throw new Error('No ID token found');
+    //         }
+    //         const googleCredential = auth.GoogleAuthProvider.credential(signInResult.data.token);
+    //         return auth().signInWithCredential(googleCredential);
+    //       } catch (error) {
+    //         if (isErrorWithCode(error)) {
+    //           switch (error.code) {
+    //             case statusCodes.IN_PROGRESS:
+    //               break;
+    //             case statusCodes.PLAY_SERVICES_NOT_AVAILABLE:
+    //               break;
+    //             default:
+    //           }
+    //         } else {
+    //         }
+    //       }
         
-    }
+    // }
 
     const logout = async () => {
         try{
             await auth().signOut();
             await AsyncStorage.removeItem('authUser')
             return {success:true,}
-        }catch(error){
+        }catch(error:any){
             return {success:false, message: error.message}
         }
     }
-    const register = async (username,email,password) => {
+    const register = async (username:string,email:string,password:string) => {
         try{
             const response = await auth().createUserWithEmailAndPassword(email,password)
             await firestore().collection('users').doc(response?.user?.uid).set({
@@ -92,28 +105,28 @@ export const AuthContextProvider = ({children}) => {
                 userId: response?.user?.uid
             })
             return {success:true, data: response?.user}
-        }catch(error){
+        }catch(error:any){
             console.error(`${error}`)
             return {success:false, msg: error.message}
         }   
     }
-    const resetpassword = async (email) => {
-        try{
-            await sendPasswordResetEmail(auth,email)
-            return { success: true, message: 'Password reset email sent successfully.' }
-        }catch(e){
-            console.error(e)
-        }
-    }
-    const updateUserData = async (userId) => {
-        const docSnap = await firestore().collection('users').doc(userId).get()
-        if(docSnap.exists()){
-           setUser((prevUser) => ({...prevUser.uid,username:docSnap.data().username, userId:docSnap.data().userId}))
-        }
-    }
+    // const resetpassword = async (email:string) => {
+    //     try{
+    //         await sendPasswordResetEmail(auth,email)
+    //         return { success: true, message: 'Password reset email sent successfully.' }
+    //     }catch(e){
+    //         console.error(e)
+    //     }
+    // }
+    // const updateUserData = async (userId:string) => {
+    //     const docSnap = await firestore().collection('users').doc(userId).get()
+    //     if(docSnap.exists()){
+    //        setUser((prevUser) => ({...prevUser.uid,username:docSnap.data().username, userId:docSnap.data().userId}))
+    //     }
+    // }s
 
     return (
-        <AuthContext.Provider value={{user,isAuthenticated,login,register,logout,resetpassword,updateUserData,googleSignIn}} >
+        <AuthContext.Provider value={{user,isAuthenticated,login,register,logout}} >
             {children}
         </AuthContext.Provider>
     )

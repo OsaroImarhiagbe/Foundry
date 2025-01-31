@@ -236,7 +236,7 @@ const fetchMorePost = async () => {
       date={item?.createdAt?.toDate().toLocaleString()}
       comment_count={item.comment_count}/>
       </Suspense>}
-    keyExtractor={(item)=> item.post_id}
+    keyExtractor={(item)=> item.post_id || ''}
     /> } 
     </View>
   )
