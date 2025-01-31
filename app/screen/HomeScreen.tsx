@@ -8,19 +8,15 @@ import React,{
 import {
   View,
   StyleSheet,
-  TouchableOpacity,
-  Platform,
   useWindowDimensions,
-  StatusBar,
-  SafeAreaView,
   ScrollView,
   Animated,
 } from 'react-native'
-import color from '../../config/color.js';
+import color from '../../config/color';
 import { useNavigation } from '@react-navigation/native';
 import ChatRoomHeader from '../components/ChatRoomHeader.js';;
-import { useAuth } from '../authContext.js';
-import firestore from '@react-native-firebase/firestore'
+import { useAuth } from 'app/authContext.js';
+import firestore, { FirebaseFirestoreTypes } from '@react-native-firebase/firestore'
 import { useDispatch} from 'react-redux';
 import { addId } from '../features/user/userSlice.js';
 import { FlashList } from "@shopify/flash-list";
@@ -28,11 +24,11 @@ import { createMaterialTopTabNavigator } from '@react-navigation/material-top-ta
 import {ActivityIndicator,Text,Divider,useTheme} from 'react-native-paper'
 
 
-const PostComponent = lazy(() => import('../components/PostComponent.js'))
+const PostComponent = lazy(() => import('../components/PostComponent'))
 
 
-// Type definitions
-type PostType = {
+
+interface Post{
   id: string;
   auth_profile?: string;
   like_count?: number;
@@ -40,7 +36,7 @@ type PostType = {
   post_id?: string;
   name?: string;
   content?: string;
-  createdAt: FirebaseFirestoreTypes.Timestamp; // Firebase timestamp
+  createdAt?: FirebaseFirestoreTypes.Timestamp
   comment_count?: number;
 };
 
@@ -54,7 +50,6 @@ const Post = () => (
 ); 
 const Tab = createMaterialTopTabNavigator();
 
-
 const HomeScreen = () => {
 
   const navigation = useNavigation();
@@ -63,13 +58,15 @@ const HomeScreen = () => {
   const [refreshing, setRefreshing] = useState<boolean>(false);
   const {user} = useAuth()
   const {height, width} = useWindowDimensions();
-  const [post, setPost] = useState<PostType[]>([])
-  const [lastVisible,setLastVisible] = useState<boolean>(false)
+  const [post, setPost] = useState<Post[]>([])
+  const [lastVisible, setLastVisible] = useState<FirebaseFirestoreTypes.QueryDocumentSnapshot<FirebaseFirestoreTypes.DocumentData> | null>(null);
   const [loadingMore, setLoadingMore] = useState<boolean>(false);
   const [hasMore, setHasMore] = useState<boolean>(true);
   const [mount, setMount] = useState<boolean>(false)
   const scrollY = useState(new Animated.Value(0))[0];
 
+
+  const memoPost = useMemo(() => {return post},[post])
 
   const headerOpacity = scrollY.interpolate({
     inputRange: [0, 250],
@@ -94,11 +91,11 @@ const HomeScreen = () => {
                 setPost([]);
                 return;
               }
-              let data:PostType[]; 
+              let data:Post[] = []; 
               querySnapShot.forEach(documentSnapShot => {
                 data.push({ ...documentSnapShot.data(),id:documentSnapShot.id });
             } )
-            setPost([...data]);
+            setPost(data);
             setLastVisible(querySnapShot.docs[querySnapShot.docs.length - 1]);
             setHasMore(querySnapShot.docs.length > 0);
           });
@@ -121,7 +118,7 @@ const HomeScreen = () => {
       try {
         const unsub = firestore().collection('posts').orderBy('createdAt', 'desc').limit(10)
           .onSnapshot(querySnapShot =>{
-            let data:PostType[];
+            let data:Post[] = [];
             querySnapShot.forEach(documentSnapShot => {
               data.push({ ...documentSnapShot.data(),id:documentSnapShot.id });
           } )
@@ -138,7 +135,7 @@ const HomeScreen = () => {
   }, [memoPost]);
   
 
-  const memoPost = useMemo(() => {return post},[post])
+  
   
 
 const fetchMorePost = async () => {
