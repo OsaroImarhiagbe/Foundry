@@ -6,7 +6,7 @@ import { useTheme } from 'react-native-paper';
 
 const SplashScreen = () => {
 
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState<boolean>(false);
 
     const theme = useTheme();
 

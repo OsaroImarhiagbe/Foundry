@@ -1,5 +1,15 @@
 import React,{useState, useEffect} from 'react'
-import {View, Text, StyleSheet,FlatList,Image, TouchableOpacity,ActivityIndicator, Platform,StatusBar,SafeAreaView} from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  FlatList,
+  Image,
+  TouchableOpacity,
+  ActivityIndicator,
+  Platform,
+  StatusBar,
+  } from 'react-native';
 import SearchComponent from '../components/SearchComponent';
 import color from '../../config/color';
 import { useNavigation } from '@react-navigation/native';
@@ -8,12 +18,22 @@ import { addsearchID } from '../features/search/searchSlice';
 import firestore from '@react-native-firebase/firestore';
 import useDebounce from '../hooks/useDebounce';
 import SearchFilter from '../components/SearchFilter';
+
+
+
+
+interface User{
+  id?:string,
+  username?:string,
+  profileUrl?:string,
+}
+
 const SearchScreen = () => {
 
   
   const [searchQuery, setSearchQuery] = useState('')
   const [results, setResults] = useState([]);
-  const [isloading,setLoading] = useState(false)
+  const [isloading,setLoading] = useState<boolean>(false)
   const navigation = useNavigation();
   const skills_array = useSelector((state) => state.skill.searchedSkills)
 
@@ -41,7 +61,7 @@ const SearchScreen = () => {
         queryRef = queryRef.where('skills','array-contains-any',skills_array)
       }
       const querySnapShot = await queryRef.get()
-      let user = []
+      let user:User[]= []
       querySnapShot.docs.forEach(documentSnapShot => {
         user.push({...documentSnapShot.data(),id:documentSnapShot.id})
         dispatch(addsearchID({searchID:documentSnapShot.id}))

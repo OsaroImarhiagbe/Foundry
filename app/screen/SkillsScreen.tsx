@@ -10,7 +10,7 @@ import {SkillsAPIKEY,SkillsAPIURL} from '@env'
 const SkillsScreen = () => {
     const [ query, setQuery ] = useState('');
     const [results,setResults] = useState([])
-    const [skills,setSkills] = useState([])
+    const [skills,setSkills] = useState<String[]>([])
     const [isloading,setLoading] = useState(false)
     const {user} = useAuth()
 
@@ -42,7 +42,7 @@ const SkillsScreen = () => {
     },[query])
 
 
-    const handleSubmit = async (item) => {
+    const handleSubmit = async (item:string) => {
         const userDoc = await firestore().collection('users').doc(user?.userId).get()
         const userskills = userDoc.data()?.skills || []
         try{
@@ -77,7 +77,7 @@ const SkillsScreen = () => {
       value={query}
       onChangeText={(text) => setQuery(text)}
       flatListProps={{
-        keyExtractor: (item) => Math.random(),
+        keyExtractor: (item,index) => index.toString(),
         renderItem: ({ item }) => <TouchableOpacity onPress={() => handleSubmit(item)}>
             <View style={{padding:5}}>
             <Text style={{fontSize:20,fontFamily:color.textFont}}>{item}</Text>
