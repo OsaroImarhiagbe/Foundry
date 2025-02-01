@@ -3,11 +3,11 @@ import {
     View,
     StyleSheet,
     SafeAreaView,
-    useWindowDimensions} from 'react-native';
+    useWindowDimensions,
+    GestureResponderEvent} from 'react-native';
 import { Formik} from 'formik';
 import AppTextInput from '../components/AppTextInput';
 import color from '../../config/color';
-//import Button from '../components/Button';
 import * as Yup from 'yup';
 import { useAuth} from '../authContext';
 import CustomKeyboardView from '../components/CustomKeyboardView';
@@ -17,17 +17,24 @@ import LottieView from 'lottie-react-native';
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import { TouchableWithoutFeedback } from 'react-native-gesture-handler';
 import { Button } from 'react-native-paper';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
 
 
+
+type NavigationProp = {
+    Onboarding:undefined
+  }
+  
+type Navigation = NativeStackNavigationProp<NavigationProp, 'Onboarding'>;
 
 const RegisterScreen = () => {
 
-    const [loading, setLoading] = useState(false);
-    const navigation = useNavigation();
+    const [loading, setLoading] = useState<boolean>(false);
+    const navigation = useNavigation<Navigation>();
     const {width,height} = useWindowDimensions()
     const { register } = useAuth();
-    const handleRegister = async (values, {resetForm} )=> {
+    const handleRegister = async (values:any, {resetForm}:any )=> {
         setLoading(true);
         try{
             let response = await register(values.username, values.email, values.password)
@@ -105,66 +112,67 @@ const RegisterScreen = () => {
                                     placeholder='Username'
                                      backgroundColor='transparent'
                                     borderColor='#8a8a8a'
-                                    value={values.username}
+                                    values={values.username}
                                     onChangeText={handleChange('username')}
                                     onBlur={() => setFieldTouched('username')}
                                     iconcolor={color.button}
                                 />
                                 {touched.username && errors.username &&( <HelperText
                                     type='error'
-                                    visible={errors}
+                                    visible
                                     style={styles.errormessage}>{errors.username}</HelperText>)}
                                 <AppTextInput
                                     icon='email'
-                                    keyboardType='email-address'
                                     placeholder='Email'
                                     backgroundColor='transparent'
                                     borderColor='#8a8a8a'
-                                    value={values.email}
+                                    values={values.email}
                                     onChangeText={handleChange('email')}
                                     onBlur={() => setFieldTouched('email')}
                                     iconcolor={color.button}
                                 />
-                                {touched.email && errors.email && (<HelperText type='error' visible={errors} style={styles.errormessage}>{errors.email}</HelperText>)}
+                                {touched.email && errors.email && (<HelperText type='error' visible style={styles.errormessage}>{errors.email}</HelperText>)}
                                 <AppTextInput
                                     icon='lock'
                                     secureTextEntry
                                     placeholder='Password'
                                     backgroundColor='transparent'
                                     borderColor='#8a8a8a'
-                                    value={values.password}
+                                    values={values.password}
                                     onChangeText={handleChange('password')}
                                     onBlur={() => setFieldTouched('password')}
                                     iconcolor={color.button}
                                     right={<TextInput.Icon  icon="eye" />}
                                 />
-                                {touched.password && errors.password  && (<HelperText  type='error' visible={errors} style={styles.errormessage}>{errors.password}</HelperText>)}
+                                {touched.password && errors.password  && (<HelperText  type='error' visible style={styles.errormessage}>{errors.password}</HelperText>)}
                                 <AppTextInput
                                     icon='lock'
                                     secureTextEntry
                                     placeholder='Confirm Password'
                                     backgroundColor='transparent'
                                     borderColor='#8a8a8a'
-                                    value={values.confirmPassword}
+                                    values={values.confirmPassword}
                                     onChangeText={handleChange('confirmPassword')}
                                     onBlur={() => setFieldTouched('confirmPassword')}
                                     iconcolor={color.button}
                                     right={<TextInput.Icon  icon="eye" />}
                                 />
-                                {touched.confirmPassword && errors.confirmPassword &&( <HelperText   type='error' visible={errors} style={styles.errormessage}>{errors.confirmPassword}</HelperText>)}
+                                {touched.confirmPassword && errors.confirmPassword &&( <HelperText   type='error' visible style={styles.errormessage}>{errors.confirmPassword}</HelperText>)}
                             </View>
                             <View style={styles.buttoncontainer}>
                                 <Button
                                 disabled={!isValid}
                                 loading={loading}
-                                onPress={handleSubmit}
+                                onPress={(e: GestureResponderEvent) => {
+                                    handleSubmit();
+                                  }}
                                 mode="contained">Sign Up</Button>
                             </View>
                             <View style={styles.textContainer}>
                                     <Text
                                     variant='bodySmall'
                                     style={{color:'#fff',textAlign:'center'}}>Have an account?</Text>
-                                <TouchableWithoutFeedback onPress={() => navigation.navigate('Login')}>
+                                <TouchableWithoutFeedback onPress={() => navigation.navigate('Login' as never )}>
                                     <Text
                                     variant='bodySmall'
                                     style={{color:'#fff',marginLeft:10,textAlign:'center'}}
@@ -187,7 +195,7 @@ const styles = StyleSheet.create({
     backImage:{
         width:wp('100%'),
         position:'absolute',
-        resizedMode: 'cover',
+        resizeMode: 'cover',
         backgroundColor:'#8a8a8a'
       }, 
     whitesheet:{
