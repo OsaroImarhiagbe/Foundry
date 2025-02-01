@@ -17,7 +17,7 @@ import AntDesign from 'react-native-vector-icons/AntDesign';
 import ChatRoomHeader from '../components/ChatRoomHeader';
 import SmallButton from '../components/SmallButton';
 import FollowComponent from '../components/FollowComponent';
-import firestore from '@react-native-firebase/firestore'
+import firestore, { FirebaseFirestoreTypes } from '@react-native-firebase/firestore'
 import { blurhash } from '../../utils/index';
 import { useSelector } from 'react-redux';
 import { useAuth } from '../authContext';
@@ -25,9 +25,9 @@ import { createMaterialTopTabNavigator } from '@react-navigation/material-top-ta
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import EvilIcons from 'react-native-vector-icons/EvilIcons';
-import { DocumentSnapshot } from '@react-native-firebase/app/lib/internal/web/firebaseFirestore';
 import { FlashList } from '@shopify/flash-list';
 import { Divider,Text } from 'react-native-paper';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 const PostComponent = lazy(() => import('../components/PostComponent'))
 
 
@@ -35,30 +35,65 @@ const PostComponent = lazy(() => import('../components/PostComponent'))
 
 const Tab = createMaterialTopTabNavigator();
   
+type NavigationProp = {
+  ProjectScreen:undefined,
+  Main:undefined,
+  Message:undefined,
+  Chat:{userid:string,name:string}
+}
+
+type Navigation = NativeStackNavigationProp<NavigationProp,"Chat">;
 
 
+interface User{
+  username?:string,
+  userId?:string,
+  profileUrl?:string,
+  projects?:number,
+  follow_state?:boolean,
+  connection?:string,
+
+}
+interface Post{
+  auth_profile?: string;
+  like_count?: number;
+  imageUrl?: string;
+  id?: string;
+  name?: string;
+  post_id?:string,
+  content?: string;
+  date?: string;
+  comment_count?: number;
+  mount?: boolean;
+  createdAt?: FirebaseFirestoreTypes.Timestamp
+}
+interface Project{
+  id?:string,
+  projects?:{project_name:string}[]
+}
 const OtherUserScreen = () => {
 
 
-    const [users, setUsers] = useState('')
+    const [users, setUsers] = useState<User | undefined>(undefined)
     const [isloading,setLoading] = useState(false)
-    const navigation = useNavigation();
+    const navigation = useNavigation<Navigation>();
     const [isPress,setPress] = useState(false)
-    const [projects,setProjects] = useState([])
-    const [posts,setPosts] = useState([])
+    const [projects,setProjects] = useState<Project[]>([])
+    const [posts,setPosts] = useState<Post[]>([])
     let route = useRoute()
     const {user} = useAuth()
-    const {userId} = route.params
-    const other_user_id = useSelector((state)=>state.search.searchID)
+    const {userId} = route?.params
+    const other_user_id = useSelector((state:any)=>state.search.searchID)
     const [refreshing, setRefreshing] = useState(false);
   
     console.log('other user:',users)
-    const follow_items = [{count:users.projects,content:'projects'},{count:users.connection,content:'connection'},{count:posts.length,content:'posts'}]
+    const follow_items = [{count:users?.projects,content:'projects'},{count:users?.connection,content:'connection'},{count:posts.length,content:'posts'}]
 
     console.log('user other id:',other_user_id)
+
     const onRefresh = useCallback(async () => {
     setRefreshing(true);
-    await fetchUser();
+    // await fetchUser();
     setRefreshing(false);
     }, [other_user_id]);
 
@@ -71,7 +106,7 @@ const OtherUserScreen = () => {
         .collection('projects')
         .where('id','==',users?.userId)
         .onSnapshot(snapShot => {
-          let data = []
+          let data:Project[] = []
           snapShot.forEach(doc => {
             data.push({...doc.data(),id:doc.id})
           })
@@ -92,14 +127,14 @@ const OtherUserScreen = () => {
         .where('name','==',users.username)
         .orderBy('createdAt','desc')
         .onSnapshot(documentSnapshot => {
-          let data = []
+          let data:Post[] = []
           documentSnapshot.forEach(doc => {
             data.push({...doc.data(),id:doc.id})
           })
           setPosts(data)
         })
         return () => unsub()
-      }catch(err){
+      }catch(err:any){
         console.error('error grabbing user post:',err.message)
       }
     },[users])
@@ -132,10 +167,11 @@ const OtherUserScreen = () => {
      style={{flex:1,backgroundColor:color.backgroundcolor}}>
       <SafeAreaView style={{flex:1,backgroundColor:color.backgroundcolor}}>
           <FlashList
-          ListEmptyComponent={() => (<Text style={{ color: '#fff', textAlign: 'center', fontFamily:color.textFont,fontSize:20}}>No posts available</Text>)}
+          ListEmptyComponent={() => 
+            (<Text style={{ color: '#fff', textAlign: 'center', fontFamily:color.textFont,fontSize:20}}>No posts available</Text>)}
           data={posts}
           ItemSeparatorComponent={() => <Divider/>}
-          keyExtractor={item => item.post_id.toString()}
+          keyExtractor={item => item?.post_id?.toString() || Math.random().toString()}
           estimatedItemSize={402}
           renderItem={({item}) => (
             <Suspense key={item.post_id} fallback={<ActivityIndicator size="small" color="#000" />}>
@@ -146,7 +182,7 @@ const OtherUserScreen = () => {
                   id={item.post_id}
                   name={item.name}
                   content={item.content}
-                  date={item.createdAt.toDate().toLocaleString('en-US',{
+                  date={item?.createdAt?.toDate().toLocaleString('en-US',{
                     year: 'numeric',
                     month: 'short',
                     day: '2-digit',
@@ -187,11 +223,11 @@ const OtherUserScreen = () => {
     try{
       const docRef = firestore().collection('users').doc(other_user_id)
       await firestore().runTransaction(async(transaction)=>{
-        const doc = await transaction.get()
-        if(!doc.exists()) throw new Error("Doc doesn't exists!")
+        const doc = await transaction.get(docRef)
+        if(!doc.exists) throw new Error("Doc doesn't exists!")
         
-        const currentConnectCount = doc.data().connection || 0
-        const follow_by = doc.data().follow_by || []
+        const currentConnectCount = doc?.data()?.connection || 0
+        const follow_by = doc?.data()?.follow_by || []
         const hasFollowed = follow_by.includes(user.userId)
 
         let newFollowed;
@@ -200,7 +236,7 @@ const OtherUserScreen = () => {
 
         if(hasFollowed){
           newFollowed = currentConnectCount - 1
-          updateFollow = follow_by.filter((id)=> id != user.userId)
+          updateFollow = follow_by.filter((id:string)=> id != user.userId)
           newState = false
           setPress(newState)
         }else{
@@ -243,12 +279,12 @@ const OtherUserScreen = () => {
               <View style={{flexDirection:'row', justifyContent:'space-between',paddingLeft:20}}>
               <Image
                   style={{height:hp(10), aspectRatio:1, borderRadius:100,}}
-                  source={users?.profileUrl}
+                  source={{uri:users?.profileUrl}}
                   placeholder={{blurhash}}
                   cachePolicy='none'
                   />
                   </View>
-                  <View style={{color:'#fff',marginLeft:10,padding:10}}>  {
+                  <View style={{marginLeft:10,padding:10}}>  {
                         other_user_id ? (<Text variant='titleSmall'
                            style={styles.username}>@{users?.username}</Text>) 
                         : (<Text variant='titleSmall' style={styles.username}>@{users?.username}</Text>)
@@ -258,7 +294,7 @@ const OtherUserScreen = () => {
                   <Text style={styles.title}>{users.jobtitle}</Text>
                   <Text style={styles.location}><EvilIcons name='location' size={20}/> {users.location}</Text>
                   </View> */}
-                  <View style={styles.textcontainer}>
+                  <View>
                     <View style={{flexDirection:'column',alignItems:'stretch'}}>
                       <View style={{flexDirection:'row', justifyContent:'space-around'}}>
                         {follow_items.map((item,index)=>{
@@ -270,7 +306,7 @@ const OtherUserScreen = () => {
                   <View style={styles.aboutContainer}>
                     <View style={{flexDirection:'row', justifyContent:'space-around'}}>
                       <TouchableOpacity onPressIn={handlePress}>
-                      <SmallButton name={users.follow_state ? 'Connecting...' : 'Connect'} isTrue={users.follow_state}/>
+                      <SmallButton name={users?.follow_state ? 'Connecting...' : 'Connect'} isTrue={users?.follow_state}/>
                       </TouchableOpacity>
                       <TouchableOpacity>
                         <SmallButton name='Mentor'/>
@@ -308,7 +344,6 @@ const OtherUserScreen = () => {
                     name='Projects'
                     component={Projects}
                     options={{
-                      lazy,
                       tabBarIcon:() => (
                         <MaterialIcons name='work' color='#00bf63' size={20}
                         />),

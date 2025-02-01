@@ -1,8 +1,12 @@
 import {View,Text} from 'react-native'
 import { Button } from 'react-native-paper'
 
+interface Button{
+  name?:string,
+  isTrue?:boolean
+}
 
-const SmallButton = ({name,isTrue}) => {
+const SmallButton: React.FC<Button> = ({name,isTrue}) => {
   return (
 
    
