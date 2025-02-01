@@ -18,15 +18,27 @@ import { addsearchID } from '../features/search/searchSlice';
 import firestore from '@react-native-firebase/firestore';
 import useDebounce from '../hooks/useDebounce';
 import SearchFilter from '../components/SearchFilter';
-
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
 
 
 interface Results{
+  userId?:string;
   id?:string,
   username?:string | undefined,
   profileUrl?:string,
 }
+
+type NavigationProp = {
+  Welcome: {
+    screen: string;
+    params: {
+      userId?: string;
+    };
+  };
+}
+
+type Navigation = NativeStackNavigationProp<NavigationProp, 'Welcome'>;
 
 const SearchScreen = () => {
 
@@ -34,8 +46,8 @@ const SearchScreen = () => {
   const [searchQuery, setSearchQuery] = useState('')
   const [results, setResults] = useState<Results[]>([]);
   const [isloading,setLoading] = useState<boolean>(false)
-  const navigation = useNavigation();
-  const skills_array = useSelector((state) => state.skill.searchedSkills)
+  const navigation = useNavigation<Navigation>();
+  const skills_array = useSelector((state:any) => state.skill.searchedSkills)
 
   const debouncedsearch = useDebounce(searchQuery,3000)
   const dispatch = useDispatch()
