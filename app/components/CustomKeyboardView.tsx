@@ -1,9 +1,17 @@
-import React from 'react'
+import React,{ReactNode} from 'react'
 import { KeyboardAvoidingView, Platform, ScrollView } from 'react-native'
 
 const ios = Platform.OS === 'ios'
 
-const CustomKeyboardView = ({children,inChat}) => {
+interface KeyboardProp {
+    children: ReactNode;
+}
+
+interface CustomKeyboardProp extends KeyboardProp{
+    inChat?:boolean
+
+}
+const CustomKeyboardView = ({children,inChat = false}: CustomKeyboardProp) => {
 
     
 

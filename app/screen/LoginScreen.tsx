@@ -19,18 +19,20 @@ statusCodes,
 import { TouchableWithoutFeedback } from 'react-native-gesture-handler'
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import LottieView from 'lottie-react-native';
+import { useNavigation } from '@react-navigation/native';
 
 
 
 
-const LoginScreen = ({navigation}) => {
-    const [isLoading, setLoading] = useState(false)
+const LoginScreen = () => {
+    const [isLoading, setLoading] = useState<boolean>(false)
     const { login,googleSignIn } = useAuth()
-    const [focus,setFocus] = useState('')
+    const [focus,setFocus] = useState<string>('')
     const {width,height} = useWindowDimensions();
+    const navigation = useNavigation()
     
     
-    const LoginPress = async (values,{resetForm}) => {
+    const LoginPress = async (values:any,{resetForm}:any) => {
         setLoading(true);
         try{
             const response = await login(values.email, values.password)
@@ -38,19 +40,18 @@ const LoginScreen = ({navigation}) => {
                 setTimeout(() => {
                     setLoading(false);
                     resetForm({values: ''})
-                    navigation.navigate('Drawer');
+                    navigation.navigate('Drawer' as never);
                 }, 2000); 
             }else{
                 setLoading(false)
             }
         }catch(error){
             setLoading(false)
-            console.log(`Unauthorized username and password ${error}`)
-            Alert.alert('Login failed','Invalid username or password')  
+            console.error(`Unauthorized username and password ${error}`)
         }
     }
     const RegisterPress = () => {
-        navigation.navigate('Register')
+        navigation.navigate('Register' as never)
     }
     const validationSchema = Yup.object().shape({
         email: Yup.string()
