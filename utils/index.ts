@@ -1,4 +1,4 @@
-export const getRoomID = (userdId1, userId2) => {
+export const getRoomID = (userdId1:string, userId2:string) => {
     const sortedId = [userdId1, userId2].sort();
 
     const roomId = sortedId.join('-')
@@ -11,7 +11,7 @@ export const blurhash =
   '|rF?hV%2WCj[ayj[a|j[az_NaeWBj@ayfRayfQfQM{M|azj[azf6fQfQfQIpWXofj[ayj[j[fQayWCoeoeaya}j[ayfQa{oLj?j[WVj[ayayj[fQoff7azayj[ayj[j[ayofayayayj[fQj[ayayj[ayfjj[j[ayjuayj[';
 
 
-export const formatDate = (date) => {
+export const formatDate = (date:Date) => {
     let day = date.getDate()
     let monthsNames = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"]
     let month = monthsNames[date.getMonth()]
