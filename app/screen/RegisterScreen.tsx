@@ -63,7 +63,7 @@ const RegisterScreen = () => {
         .required('Please enter your password')
         .matches(/^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$/),
         confirmPassword: Yup.string()
-        .oneOf([Yup.ref('password'), null], 'Passwords must match')
+        .oneOf([Yup.ref('password'), undefined], 'Passwords must match')
         .required('Please enter password again'),
       });
     const initialValues = {
