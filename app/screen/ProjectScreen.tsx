@@ -8,12 +8,24 @@ import firestore from '@react-native-firebase/firestore'
 import { useAuth } from '../authContext';
 import { Image } from 'expo-image';
 import { blurhash } from '../../utils';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
+interface Project{
+    id?:string,
+    skills?:{skill:string}[],
+    image?:string,
+    content?:string
+}
+type RootStackListProp = {
+    ProjectEntryScreen:undefined
+}
+
+type NavigationProp = NativeStackNavigationProp<RootStackListProp,'ProjectEntryScreen'>
 const ProjectScreen = () => {
-    const [projects, setProjects] = useState([])
+    const [projects, setProjects] = useState<Project[]>([])
     const {user} = useAuth()
 
-    const navigation = useNavigation()
+    const navigation = useNavigation<NavigationProp>()
 
 
     useEffect(() => {
@@ -23,11 +35,11 @@ const ProjectScreen = () => {
         .collection('projects')
         .where('project_name', '==', projectname)
         .onSnapshot(documentSnapShot => {
-            const data = []
+            const data:Project[] = []
             documentSnapShot.forEach((doc) => {
                 data.push({...doc.data(),id:doc.id})
             })
-            setProjects([...data])
+            setProjects(data)
         })
         return () => unsub()
     },[user])
@@ -63,11 +75,11 @@ const ProjectScreen = () => {
             <View style={{marginTop:20}}>
             <Text style={styles.textHeading}>Tech Used</Text>
             <View style={{padding:10}}>
-            {projects[0].skills.map((project,index)=>{
+            {projects[0]?.skills?.map((project,index)=>{
                 return (
                     <View style={{marginTop:5}}  key={index}>
                         <Text style={styles.text}>
-                            <Entypo name='code' size={15}/> {project.skill}</Text>
+                            <Entypo name='code' size={15}/>{project.skill}</Text>
                         </View>
                 )
             })}
