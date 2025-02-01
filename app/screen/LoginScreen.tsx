@@ -3,7 +3,7 @@ import {
     View,
     StyleSheet,
     Platform,
-    useWindowDimensions
+    useWindowDimensions,
     } from 'react-native'
 import AppTextInput from '../components/AppTextInput'
 import color from '../../config/color'
@@ -20,6 +20,7 @@ import { TouchableWithoutFeedback } from 'react-native-gesture-handler'
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import LottieView from 'lottie-react-native';
 import { useNavigation } from '@react-navigation/native';
+import { useTheme } from 'react-native-paper';
 
 
 
@@ -30,6 +31,7 @@ const LoginScreen = () => {
     const [focus,setFocus] = useState<string>('')
     const {width,height} = useWindowDimensions();
     const navigation = useNavigation()
+    const theme = useTheme()
     
     
     const LoginPress = async (values:any,{resetForm}:any) => {
@@ -82,7 +84,7 @@ const LoginScreen = () => {
   
    
            <CustomKeyboardView>
-            <SafeAreaView style={styles.screen}>
+            <SafeAreaView style={{flex:1,backgroundColor:theme.colors.background}}>
             <View>
             <Text>
                   <LottieView
@@ -96,8 +98,8 @@ const LoginScreen = () => {
                 source={require('../assets/animations/animation1.json')} autoPlay loop />;
                   </Text>
             </View>
-           <View style={styles.welcome}>
-            <View style={styles.welcomeHcontainer}>
+           <View style={{padding:5}}>
+            <View style={{flexDirection:'row',padding:8}}>
             <Text
             variant='titleLarge'
             style={{color:'#fff'}}>Welcome to </Text>
@@ -119,19 +121,18 @@ const LoginScreen = () => {
                    <>
                    <View style={{padding:20,alignItems:'center',justifyContent:'center'}}>
                    <AppTextInput
-                   keyboardTYpe='email-address'
                    icon='account' 
                    placeholder='E-mail' 
                    backgroundColor="transparnet"
                    borderColor={focus === 'email' ? '#00BF63' : '#8a8a8a'}
                    onChangeText={handleChange('email')}
                    onFocus={() => setFocus('email')}
-                   values={values.username}
+                   values={values.email}
                    onBlur={() => setFieldTouched('email')}
                    iconcolor={color.button}/>
                    {
-                       touched.username && errors.username && (
-                           <HelperText type='error' visible={errors} style={styles.errormessage}>{errors.username}</HelperText>
+                       touched.email && errors.email && (
+                           <HelperText type='error' visible style={styles.errormessage}>{errors.email}</HelperText>
                        )
                    }
                    <AppTextInput
@@ -148,7 +149,7 @@ const LoginScreen = () => {
                    right={<TextInput.Icon icon="eye"/>}
                    />
                    { touched.password && errors.password && (
-                       <HelperText type='error' visible={errors} style={styles.errormessage}>{errors.password}</HelperText>
+                       <HelperText type='error' visible style={styles.errormessage}>{errors.password}</HelperText>
                    )}
                    </View>
                    <View style={styles.LoginContainer}>
@@ -205,19 +206,6 @@ const LoginScreen = () => {
 
 
 const styles = StyleSheet.create({
-    screen:{
-        backgroundColor:color.backgroundcolor,
-        flex:1,
-    }
-    ,
-    welcome:{
-        padding:5,
-    },
-    welcomeHcontainer:{
-        padding:8,
-        flexDirection:'row'
-    }
-    ,
     errormessage:{
         color: color.danger,
         textAlign:'center',

@@ -2,7 +2,25 @@ import React from 'react'
 import {View, StyleSheet} from 'react-native'
 import { TextInput } from 'react-native-paper'
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
-const AppTextInput = ({placeholder,
+
+
+interface TextInputProp {
+  placeholder?: string;
+  backgroundColor?: string;
+  borderColor?: string;
+  secureTextEntry?: boolean;
+  icon?: string;
+  onChangeText?: (text: string) => void;
+  onBlur?: () => void;
+  textAlign?: 'left' | 'center' | 'right';
+  maxLength?: number;
+  iconcolor?: string;
+  values?: string | undefined;
+  onFocus?: () => void;
+  right?: any;
+}
+const AppTextInput:React.FC<TextInputProp> = ({
+  placeholder,
   backgroundColor,
   borderColor,
   secureTextEntry,
