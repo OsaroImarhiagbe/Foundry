@@ -4,6 +4,7 @@ import {
     StyleSheet,
     Platform,
     useWindowDimensions,
+    GestureResponderEvent,
     } from 'react-native'
 import AppTextInput from '../components/AppTextInput'
 import color from '../../config/color'
@@ -12,7 +13,11 @@ import * as Yup from 'yup';
 import { Formik} from 'formik';
 import { useAuth } from '../authContext'
 import CustomKeyboardView from '../components/CustomKeyboardView'
-import { Button,Text, TextInput,HelperText} from 'react-native-paper'
+import { 
+    Button,
+    Text, 
+    TextInput,
+    HelperText} from 'react-native-paper'
 import {GoogleSigninButton,
 statusCodes,
 } from '@react-native-google-signin/google-signin';
@@ -132,7 +137,7 @@ const LoginScreen = () => {
                    iconcolor={color.button}/>
                    {
                        touched.email && errors.email && (
-                           <HelperText type='error' visible style={styles.errormessage}>{errors.email}</HelperText>
+                           <HelperText type='error' visible style={{textAlign:'center',color:theme.colors.primary}}>{errors.email}</HelperText>
                        )
                    }
                    <AppTextInput
@@ -149,16 +154,18 @@ const LoginScreen = () => {
                    right={<TextInput.Icon icon="eye"/>}
                    />
                    { touched.password && errors.password && (
-                       <HelperText type='error' visible style={styles.errormessage}>{errors.password}</HelperText>
+                       <HelperText type='error' visible style={{textAlign:'center',color:theme.colors.primary}}>{errors.password}</HelperText>
                    )}
                    </View>
-                   <View style={styles.LoginContainer}>
+                   <View style={{padding:10,marginTop:5}}>
                     <Button
                     disabled={!isValid}
                     mode='contained'
-                    onPress={handleSubmit}
+                    onPress={(e: GestureResponderEvent) => {
+                        handleSubmit();
+                      }}
                     >Login</Button>
-                       <View style={styles.textContainer}>
+                       <View style={{marginTop:15,flexDirection:'row',alignSelf:'center'}}>
                            <Text
                            variant='bodySmall'
                            style={{color:color.grey,textAlign:'center'}}>
@@ -206,32 +213,18 @@ const LoginScreen = () => {
 
 
 const styles = StyleSheet.create({
-    errormessage:{
-        color: color.danger,
-        textAlign:'center',
-        fontFamily:color.textFont
-    },
     container:{
         flex:1,
-    },
-    LoginContainer:{
-        padding:10,
-        marginTop:5,
     },
     logo:{
         width:30,
         height:30,
-        alignSelf:'left',
+        alignSelf:'auto',
         marginBottom:20,
     },
     UserContainer:{
         marginTop:20,
         padding:10
-    },
-    textContainer:{
-        marginTop:15,
-        flexDirection:'row',
-        alignSelf:'center'
     },
     registercontainer:{
         marginTop:15
