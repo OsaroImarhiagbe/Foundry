@@ -22,9 +22,9 @@ import SearchFilter from '../components/SearchFilter';
 
 
 
-interface User{
+interface Results{
   id?:string,
-  username?:string,
+  username?:string | undefined,
   profileUrl?:string,
 }
 
@@ -32,7 +32,7 @@ const SearchScreen = () => {
 
   
   const [searchQuery, setSearchQuery] = useState('')
-  const [results, setResults] = useState([]);
+  const [results, setResults] = useState<Results[]>([]);
   const [isloading,setLoading] = useState<boolean>(false)
   const navigation = useNavigation();
   const skills_array = useSelector((state) => state.skill.searchedSkills)
@@ -61,7 +61,7 @@ const SearchScreen = () => {
         queryRef = queryRef.where('skills','array-contains-any',skills_array)
       }
       const querySnapShot = await queryRef.get()
-      let user:User[]= []
+      let user:Results[]= []
       querySnapShot.docs.forEach(documentSnapShot => {
         user.push({...documentSnapShot.data(),id:documentSnapShot.id})
         dispatch(addsearchID({searchID:documentSnapShot.id}))
@@ -89,14 +89,14 @@ const SearchScreen = () => {
         {isloading ? <ActivityIndicator size='small' color='#fff'/> :
                <FlatList
                data={results}
-               keyExtractor={(item) => item.id}
+               keyExtractor={(item) => item?.id?.toString() || Math.random().toString()}
                renderItem={({item}) =>
                  <TouchableOpacity onPress={() => navigation.navigate('Welcome',{screen:'SearchAccount',params:{userId:item.userId}})}>
                      <View style={{padding:10}}> 
                    <View style={styles.userContainer}>
                  <Image
                  style={styles.image}
-                 source={item?.profileUrl}/>
+                 source={{uri:item?.profileUrl}}/>
                <Text style={styles.text}>{item.username}</Text>
              </View>
              </View>
