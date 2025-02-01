@@ -1,5 +1,17 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, SafeAreaView, TextInput, Platform, Alert, ActivityIndicator, KeyboardAvoidingView,Keyboard, TouchableWithoutFeedback,TouchableOpacity} from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  SafeAreaView,
+  TextInput, 
+  Platform, 
+  Alert, 
+  ActivityIndicator, 
+  KeyboardAvoidingView,
+  Keyboard, 
+  TouchableWithoutFeedback,
+  TouchableOpacity} from 'react-native';
 import { Image } from 'expo-image';
 import { blurhash } from '../../utils/index';
 import { useAuth } from '../authContext';
@@ -12,16 +24,23 @@ import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import firestore from '@react-native-firebase/firestore'
 import color from '../../config/color';
 import storage from '@react-native-firebase/storage'
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+
+type NavigationProp = {
+  Dash:undefined
+}
+
+type Navigation = NativeStackNavigationProp<NavigationProp, 'Dash'>;
 const PostScreen = () => {
 
   const { user } = useAuth();
-  const [text, setText] = useState('');
-  const [image, setImage] = useState(null);
-  const [filename,setFileName] = useState(null)
-  const [loading,setLoading] = useState(false)
+  const [text, setText] = useState<string>('');
+  const [image, setImage] = useState<string | null>(null);
+  const [filename,setFileName] = useState<string | undefined>(undefined)
+  const [loading,setLoading] = useState<boolean>(false)
   const hasUnsavedChanges = Boolean(text);
-  const profileImage = useSelector((state) => state.user.profileImage)
-  const navigation = useNavigation();
+  const profileImage = useSelector((state:any) => state.user.profileImage)
+  const navigation = useNavigation<Navigation>();
   const dispatch = useDispatch();
 
   const handlePost = async () => {
@@ -55,7 +74,7 @@ const PostScreen = () => {
       dispatch(addPost({ id: newDoc.id, content: text }));
       setText('');
       setImage(null);
-    } catch (error) {
+    } catch (error:any) {
       console.error("Error creating room:", error.message);
     }finally{
       setLoading(false);
@@ -196,7 +215,7 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: 22,
     marginTop: 10,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)', // Optional background to separate text area
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
     borderRadius: 10,
     padding: 10,
   },
@@ -207,7 +226,7 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(255, 255, 255, 0.3)',
     borderRadius: 10,
     padding: 10,
-    marginBottom: 10, // Space between text and uploaded image
+    marginBottom: 10,
   },
   uploadedImage: {
     width: '100%',
