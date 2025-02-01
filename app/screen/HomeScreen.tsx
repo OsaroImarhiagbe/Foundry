@@ -22,7 +22,7 @@ import { addId } from '../features/user/userSlice.js';
 import { FlashList } from "@shopify/flash-list";
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import {ActivityIndicator,Text,Divider,useTheme} from 'react-native-paper'
-import { DrawerNavigationProp } from '@react-navigation/drawer';
+
 
 
 const PostComponent = lazy(() => import('../components/PostComponent'))

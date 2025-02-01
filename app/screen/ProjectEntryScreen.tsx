@@ -1,10 +1,17 @@
 import React,{useState} from 'react'
-import {View,StyleSheet,TextInput,TouchableWithoutFeedback,Keyboard,SafeAreaView} from 'react-native'
+import {
+  View,
+  StyleSheet,
+  TextInput,
+  TouchableWithoutFeedback,
+  Keyboard,
+  SafeAreaView,
+  TouchableOpacity} from 'react-native'
 import color from '../../config/color'
-import Button from '../components/Button';
+import { Button } from 'react-native-paper';
 import {useAuth} from '../authContext';
 import { blurhash } from '../../utils';
-import firestore from '@react-native-firebase/firestore'
+import firestore, { FirebaseFirestoreTypes } from '@react-native-firebase/firestore'
 import axios from 'axios';
 import * as ImagePicker from 'expo-image-picker';
 import { Image } from 'expo-image';
@@ -20,30 +27,30 @@ const ProjectEntryScreen = () => {
     const {user} = useAuth()
 
 
-    const uploadtoS3 = async (image) => {
-        try{
-          const formData = new FormData()
-          formData.append('file',{
-            uri: image,
-            type: "image/jpeg",
-            name: "photo.jpg"
-        })
-        formData.append('project_id', project_id)
-          const uploadResponse = await axios.post(DJANGO_PROJECT_URL,formData,{
-            headers:{
-              'Content-Type':'multipart/form-data'
-            }
-          })
-          if(uploadResponse.status === 201){
-            console.error('file uploaded to s3')
-            return uploadResponse.data.file
-          }else{
-            console.error('Failed to upload to s3')
-          }
-        }catch(err){
-          console.error('Error uploading to s3:',err)
-        }
-      }
+    // const uploadtoS3 = async (image) => {
+    //     try{
+    //       const formData = new FormData()
+    //       formData.append('file',{
+    //         uri: image,
+    //         type: "image/jpeg",
+    //         name: "photo.jpg"
+    //     })
+    //     formData.append('project_id', project_id)
+    //       const uploadResponse = await axios.post(DJANGO_PROJECT_URL,formData,{
+    //         headers:{
+    //           'Content-Type':'multipart/form-data'
+    //         }
+    //       })
+    //       if(uploadResponse.status === 201){
+    //         console.error('file uploaded to s3')
+    //         return uploadResponse.data.file
+    //       }else{
+    //         console.error('Failed to upload to s3')
+    //       }
+    //     }catch(err){
+    //       console.error('Error uploading to s3:',err)
+    //     }
+    //   }
     
       const pickImage = async () => {
         let results = await ImagePicker.launchImageLibraryAsync({
@@ -60,17 +67,20 @@ const ProjectEntryScreen = () => {
       }
 
     const handleSubmit = async () => {
-        const docRef = await firestore().collection('users').doc(user?.userId).collection('projects')
-        const projectSnapshot = await docRef.where('project_name', '==', projectname).get();
+        const docRef = firestore().collection('users').doc(user?.userId).collection('projects')
+        const projectDoc = await docRef.where('project_name', '==', projectname).get();
         let imageUrl = null;
-        if(image){
-            imageUrl = await uploadtoS3(image)
-        }
-        if(projectSnapshot.exists()){
+        // if(image){
+        //     imageUrl = await uploadtoS3(image)
+        // }
+        if(projectDoc){
+          const projectref = projectDoc.docs[0]
+          const projectId = projectref.id
             await firestore()
             .collection('users')
             .doc(user?.userId)
             .collection('projects')
+            .doc(projectId)
             .update({
                 project_name: projectname,
                 image:imageUrl,
@@ -78,9 +88,9 @@ const ProjectEntryScreen = () => {
                 skills: [{
                     skill: skills
                 }],
-                createdAt: Timestamp.fromDate(new Date())
+                createdAt: firestore.Timestamp.fromDate(new Date())
             })
-            setProject_id(projectSnapshot.id)
+            setProject_id(projectId)
         }else{
            const newDoc = await firestore()
             .collection('users')
@@ -91,7 +101,7 @@ const ProjectEntryScreen = () => {
                 image:imageUrl,
                 content: text,
                 skills: [{ skill: skills }],
-                createdAt: Timestamp.fromDate(new Date())
+                createdAt: firestore.Timestamp.fromDate(new Date())
             })
             setProject_id(newDoc.id)
         }
@@ -146,7 +156,7 @@ const ProjectEntryScreen = () => {
         </View>
         </View>
         <View style={{padding:50}}>
-        <Button title='Submit' onPress={handleSubmit}/>
+        <Button onPress={handleSubmit}>Submit</Button>
         </View>
     </SafeAreaView>
     </TouchableWithoutFeedback>

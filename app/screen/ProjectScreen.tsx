@@ -33,7 +33,7 @@ const ProjectScreen = () => {
         .collection('users')
         .doc(user?.userId)
         .collection('projects')
-        .where('project_name', '==', projectname)
+        .where('project_name', '==', 'projectname')
         .onSnapshot(documentSnapShot => {
             const data:Project[] = []
             documentSnapShot.forEach((doc) => {
