@@ -4,12 +4,45 @@ import firestore from '@react-native-firebase/firestore'
 import { useAuth } from '../authContext';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import color from '../../config/color';
+
+interface Notification{
+  id?:string,
+  title?:string,
+  body?:string
+}
 const NotificationScreen = () => {
   const {user} = useAuth()
-  const [messageNotifications,setMessageNotifications] = useState([])
-  const [notification,setNotification] = useState([])
-  const [refreshing, setRefreshing] = useState(false);
+  const [messageNotifications,setMessageNotifications] = useState<Notification[]>([])
+  const [notification,setNotification] = useState<Notification[]>([])
+  const [refreshing, setRefreshing] = useState<boolean>(false);
   const Tab = createMaterialTopTabNavigator()
+
+
+  const getNotifications = useCallback(() => {
+    try{
+      if(user){
+        const unsub = firestore()
+      .collection('users')
+      .doc(user?.uid)
+      .collection('notifications')
+      .onSnapshot((querySnapshot)=>{
+        let messageOnly:Notification[] = []
+        let all:Notification[] = []
+        querySnapshot.forEach((documentSnapshot)=>{
+          all.push({...documentSnapshot.data(),id:documentSnapshot.id})
+          if (documentSnapshot.data().notification_data == 'message'){
+            messageOnly.push({...documentSnapshot.data()})
+          }
+        })
+        setMessageNotifications([...messageOnly])
+        setNotification([...all])
+      })
+      return () => unsub()
+      }
+    }catch(err){
+      console.error('Error grabbing notifications',err)
+    }
+  },[user?.userId])
 
   const onRefresh = useCallback(() => {
     setRefreshing(true);
@@ -23,31 +56,7 @@ const NotificationScreen = () => {
   }, [getNotifications]);
 
 
-  const getNotifications = useCallback(() => {
-    try{
-      if(user){
-        const unsub = firestore()
-      .collection('users')
-      .doc(user?.uid)
-      .collection('notifications')
-      .onSnapshot((querySnapshot)=>{
-        let messageOnly = []
-        let all = []
-        querySnapshot.forEach((documentSnapshot)=>{
-          all.push({...documentSnapshot.data(),id:documentSnapshot.id})
-          if (documentSnapshot.data().notification_data == 'message'){
-            messageOnly.push({...doc.data()})
-          }
-        })
-        setMessageNotifications([...messageOnly])
-        setNotification([...all])
-      })
-      return () => unsub()
-      }
-    }catch(err){
-      console.error('Error grabbing notifications',err)
-    }
-  },[user?.userId])
+
 
   useEffect(() => {
     if(!messageNotifications || !notification){
@@ -57,7 +66,7 @@ const NotificationScreen = () => {
     }
     let unsub = () => {}
     const getNotif = () => {
-      unsub = getNotifications()
+     getNotifications()
     }
 
     getNotif()
@@ -121,7 +130,6 @@ const NotificationScreen = () => {
     <View style={{flex:1}}>
     <Tab.Navigator
   screenOptions={{
-    headerShown:false,
     swipeEnabled:true,
     tabBarIndicatorStyle:{
       backgroundColor:'#00BF63'

@@ -5,10 +5,18 @@ import LottieView from 'lottie-react-native';
 import color from '../../config/color';
 import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 const {width,height} = Dimensions.get('window')
+
+
+type NavigationProp ={
+    Drawer:{
+        screen:string
+    }
+}
+type Navigation = NativeStackNavigationProp<NavigationProp>
 const OnboardingScreen = () => {
-    const navigation = useNavigation()
+    const navigation = useNavigation<Navigation>()
 
     const handleDone = async () => {
         await AsyncStorage.setItem('onboarded','1')
