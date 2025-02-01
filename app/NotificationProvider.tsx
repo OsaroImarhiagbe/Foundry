@@ -5,6 +5,7 @@ import { useNavigation } from '@react-navigation/native';
 import messaging, { FirebaseMessagingTypes } from '@react-native-firebase/messaging';
 import firestore from '@react-native-firebase/firestore';
 import { useAuth } from './authContext';
+
 const NotificationContext = createContext<any>(null);
 
 export const useNotification = () => useContext(NotificationContext);
@@ -16,9 +17,8 @@ interface NotificationProp {
 interface NotificationData {
   title:string,
   message:string,
-  data:string
+  data: { [key: string]: any };
 }
-
 export const NotificationProvider = ({ children }:NotificationProp) => {
   const [notification, setNotification] = useState<NotificationData | null>(null);
   const {user} = useAuth()
@@ -26,7 +26,7 @@ export const NotificationProvider = ({ children }:NotificationProp) => {
   const navigation = useNavigation();
 
 
-  const showNotification = useCallback(async (title:string, message:string,data:string) => {
+  const showNotification = useCallback(async (title:string, message:string,data:any) => {
     try{
         await notifee.displayNotification({
             title: title,
@@ -73,8 +73,8 @@ export const NotificationProvider = ({ children }:NotificationProp) => {
 
     const handleNotificationClick = async (response:any) => {
         const screen = response?.notification?.request?.content?.data?.screen;
-        if (screen) {
-          navigation.navigate(`${screen}`);
+        if (screen && typeof screen == 'string') {
+          navigation.navigate(`${screen}` as never );
         }
     };
 
@@ -85,7 +85,7 @@ export const NotificationProvider = ({ children }:NotificationProp) => {
             }
         });
 
-        const Backunsubscribe = notifee.onBackgroundEvent(async ({type,detail})=>{
+        notifee.onBackgroundEvent(async ({type,detail})=>{
             if(type === EventType.PRESS){
                 await handleNotificationClick(detail.notification)
             }
@@ -93,7 +93,6 @@ export const NotificationProvider = ({ children }:NotificationProp) => {
 
         return () => {
             Foreunsubscribe()
-            Backunsubscribe()
           }
       },[handleNotificationClick])
 
@@ -105,7 +104,7 @@ export const NotificationProvider = ({ children }:NotificationProp) => {
           navigation
         );
         if (remoteMessage?.data?.screen) {
-          navigation.navigate(`${remoteMessage?.data?.screen}`);
+          navigation.navigate(`${remoteMessage?.data?.screen}` as never );
         }
       });
 
@@ -117,7 +116,7 @@ export const NotificationProvider = ({ children }:NotificationProp) => {
                 remoteMessage.notification
                 );
                 if (remoteMessage?.data?.screen) {
-                navigation.navigate(`${remoteMessage?.data?.screen}`);
+                navigation.navigate(`${remoteMessage?.data?.screen}` as never );
                 }
       }
     });
@@ -126,9 +125,12 @@ export const NotificationProvider = ({ children }:NotificationProp) => {
 
     },[handleNotificationClick])
     
-    const handlePushNotification = useCallback((remoteMessage:FirebaseMessagingTypes.RemoteMessage) => {
-      const {title,body,data } = remoteMessage.notification
-      showNotification(title,body,data)
+    const handlePushNotification = useCallback(async (remoteMessage:FirebaseMessagingTypes.RemoteMessage): Promise<void> => {
+      const notification = remoteMessage.notification
+      const data = remoteMessage?.data
+      if(notification?.title && notification?.body){
+        showNotification(notification?.title,notification?.body,data)
+      }
     },[showNotification])
 
     useEffect(() => {
