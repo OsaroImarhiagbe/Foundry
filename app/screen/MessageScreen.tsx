@@ -11,7 +11,7 @@ import {
   StatusBar,
   SafeAreaView} from 'react-native'
 import color from '../../config/color';
-import firestore from '@react-native-firebase/firestore'
+import firestore,{FirebaseFirestoreTypes} from '@react-native-firebase/firestore'
 import { useAuth } from '../authContext';
 import ChatRoomHeader from '../components/ChatRoomHeader';
 import { useNavigation } from '@react-navigation/native';
@@ -21,16 +21,21 @@ import { ActivityIndicator,Text } from 'react-native-paper';
 const ChatList = lazy(() => import('../../List/ChatList'))
 
 
+interface User{
+  id?:string
+}
+
 const MessageScreen = () => {
 
 
-  const [users, setUsers] = useState([]);
+  const [users, setUsers] = useState<User[]>([]);
   const navigation = useNavigation();
   const { user} = useAuth();
   const [refreshing, setRefreshing] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(true);
-  const list_of_ids = useSelector((state)=> state.message.messagesID)
+  const [lastVisible, setLastVisible] = useState<FirebaseFirestoreTypes.QueryDocumentSnapshot<FirebaseFirestoreTypes.DocumentData> | null>(null);
+  const list_of_ids = useSelector((state:any)=> state.message.messagesID)
 
   const onRefresh = useCallback(() => {
     setRefreshing(true);
@@ -39,7 +44,7 @@ const MessageScreen = () => {
   }, [list_of_ids]);
 
   useEffect(() => {
-    let unsub
+    let unsub:any;
     const fetchUser =  () => {
       unsub = grabUser(list_of_ids)
     }
@@ -48,7 +53,7 @@ const MessageScreen = () => {
     return () => {if(unsub) unsub()}
   },[list_of_ids])
 
-  const grabUser = (list_of_ids) => {
+  const grabUser = (list_of_ids:string[]) => {
     if (!list_of_ids || list_of_ids.length === 0) {
       setUsers([]);
       return;
@@ -57,7 +62,7 @@ const MessageScreen = () => {
     .collection('sent-message-id')
     .where('userId','!=',user.userId)
     .onSnapshot((documentSnapshot) =>{
-      let data = []
+      let data:User[] = []
       documentSnapshot.forEach(doc => {
         data.push({...doc.data()})
       })
@@ -69,29 +74,29 @@ const MessageScreen = () => {
   }
   
   const handlePress = () => {
-    navigation.navigate('Main');
+    navigation.navigate('Main' as never );
   }
  
   const fetchMorePost = async () => {
     if (loadingMore || !hasMore) return;
     if (!user?.userId) return;
-    if (post.length <= 2) {
+    if (users.length <= 2) {
       setHasMore(false);
       return;
     }
     setLoadingMore(true);
     try {
       const snapshot = await firestore()
-        .collection('posts')
+        .collection('sent-message-id')
         .orderBy('createdAt', 'desc')
         .startAfter(lastVisible)
         .limit(2)
         .get();
-      const newPosts = snapshot.docs.map(doc => ({
+      const newMessgae = snapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data(),
       }));
-      setPost(prevPosts => [...prevPosts, ...newPosts]);
+      setUsers(prev => [...prev, ...newMessgae]);
       setLastVisible(snapshot.docs[snapshot.docs.length - 1]);
       setHasMore(snapshot.docs.length > 0);
     } catch (e) {
