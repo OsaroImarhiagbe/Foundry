@@ -38,7 +38,7 @@ type NavigationProp = {
   };
 }
 
-type Navigation = NativeStackNavigationProp<NavigationProp, 'Welcome'>;
+type Navigation = NativeStackNavigationProp<NavigationProp>;
 
 const SearchScreen = () => {
 

@@ -26,9 +26,20 @@ import { useSelector} from 'react-redux';
 import { Appbar,ActivityIndicator } from 'react-native-paper';
 
 
+interface HeaderProp{
+  title?:string,
+  onPress?:() => void,
+  icon?:string,
+  onPress2?:() => void,
+  backgroundColor?:string,
+  icon2?:string,
+  iconColor?:string,
+  opacity?:string,
+  backColor?:string
 
+}
   
-const ChatRoomHeader = ({title,onPress,icon,onPress2,backgroundColor,icon2,iconColor,opacity,backColor}) => {
+const ChatRoomHeader:React.FC<HeaderProp> = ({title,onPress,icon,onPress2,backgroundColor,icon2,iconColor,opacity,backColor}) => {
 
     
 
@@ -38,7 +49,7 @@ const ChatRoomHeader = ({title,onPress,icon,onPress2,backgroundColor,icon2,iconC
     const [isLoading, setLoading] = useState(false)
     const theme = useTheme()
     const navigation = useNavigation();
-    const profileImage = useSelector((state) => state.user.profileimg)
+    const profileImage = useSelector((state:any) => state.user.profileimg)
 
     const Divider = () => {
         return (
@@ -50,7 +61,7 @@ const ChatRoomHeader = ({title,onPress,icon,onPress2,backgroundColor,icon2,iconC
       try{
         await logout();
         setTimeout(() => {
-          navigation.navigate('Login')
+          navigation.navigate('Login' as never)
           Alert.alert('Success!','you have logged out!!')
         }, 2000);
       }catch(error){
@@ -74,8 +85,7 @@ const ChatRoomHeader = ({title,onPress,icon,onPress2,backgroundColor,icon2,iconC
           source={require('../assets/images/icon.png')}
           />
         <TouchableOpacity
-        style={styles.messageIcon}
-         onPress={() => navigation.navigate('Post')}>
+         onPress={() => navigation.navigate('Post' as never)}>
         <View style={styles.icon}>
           {icon2 && <Entypo name={icon2} size={20} color={theme.colors.primary}/>}
         </View>

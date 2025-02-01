@@ -42,7 +42,7 @@ type NavigationProp = {
   Chat:{userid:string,name:string}
 }
 
-type Navigation = NativeStackNavigationProp<NavigationProp,"Chat">;
+type Navigation = NativeStackNavigationProp<NavigationProp, "Chat">;
 
 
 interface User{
@@ -69,7 +69,7 @@ interface Post{
 }
 interface Project{
   id?:string,
-  projects?:{project_name:string}[]
+  project_name?:string
 }
 const OtherUserScreen = () => {
 
@@ -82,7 +82,7 @@ const OtherUserScreen = () => {
     const [posts,setPosts] = useState<Post[]>([])
     let route = useRoute()
     const {user} = useAuth()
-    const {userId} = route?.params
+    const {userId} = route?.params as {userId:string}
     const other_user_id = useSelector((state:any)=>state.search.searchID)
     const [refreshing, setRefreshing] = useState(false);
   
@@ -209,7 +209,7 @@ const OtherUserScreen = () => {
         
           <TouchableOpacity key={index} onPress={()=>navigation.navigate('ProjectScreen')}>
              <View style={{ backgroundColor: '#252525', borderRadius: 25, padding: 30,marginBottom:10 }}>
-            <Text style={{ textAlign: 'center', color: '#fff' }}>{project?.projects?.project_name}</Text>
+            <Text style={{ textAlign: 'center', color: '#fff' }}>{project?.project_name }</Text>
           </View>
           </TouchableOpacity>
         ))) : <Text style={{ color: '#fff', textAlign: 'center', fontFamily:color.textFont,fontSize:20}}>No projects available</Text>
@@ -312,7 +312,7 @@ const OtherUserScreen = () => {
                         <SmallButton name='Mentor'/>
                       </TouchableOpacity>
                          {other_user_id && (
-                  <TouchableOpacity onPress={() => navigation.navigate('Chat',{userid:userId,name:users?.username})}>
+                  <TouchableOpacity onPress={() => navigation.navigate('Chat',{userid:userId,name:users?.username} as never)}>
                     <SmallButton name='Message'/>
                   </TouchableOpacity>)}
                     </View>
@@ -320,7 +320,6 @@ const OtherUserScreen = () => {
                     <View style={{flex: 1}}>
                   <Tab.Navigator
                 screenOptions={{
-                  headerShown:false,
                   swipeEnabled:true,
                   tabBarIndicatorStyle:{
                     backgroundColor:'#00BF63'
