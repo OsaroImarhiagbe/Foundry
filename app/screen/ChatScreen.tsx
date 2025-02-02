@@ -2,7 +2,7 @@
 import {
   View,
   StyleSheet,
-  TouchableOpacity,
+  TextInput,
   SafeAreaView}  from 'react-native'
 import color from'../../config/color';
 import React, { useState, useEffect, useRef} from 'react'
@@ -19,7 +19,8 @@ import { addID } from '../features/Message/messageidSlice';
 import firestore,{FirebaseFirestoreTypes} from '@react-native-firebase/firestore'
 import MessageItem from '../components/MessageItem';
 import { FlashList } from '@shopify/flash-list';
-import { TextInput } from 'react-native-paper';
+
+
 
 type ChatScreenRouteProp = RouteProp<{ Chat: { item: any,userid:string,name:string } }, 'Chat'>;
 
@@ -34,8 +35,8 @@ const ChatScreen = () => {
   const dispatch = useDispatch()
 
   const textRef = useRef('');
-  const inputRef = useRef(null);
-  const flashListRef = useRef(null);
+  const inputRef = useRef<TextInput>(null);
+  const flashListRef = useRef<FlashList<any> | null>(null);
 
   
   const recipentNamec = userid ? name  : item?.userId ? item.name : 'Unknown Recipient';
@@ -69,11 +70,11 @@ const ChatScreen = () => {
       const snapShot = await docRef.get()
         if(snapShot.exists){
           const data = snapShot.data()
-          setExpoPushToken(data.expoToken)
+          if(data) setExpoPushToken(data.expoToken)
         }else{
           console.error('No such document')
         }
-      }catch(err){
+      }catch(err:any){
         console.error('Error with grabbing token:',err)
 
       }
@@ -86,8 +87,8 @@ const ChatScreen = () => {
   const createRoom = async () => {
     try{
       
-      const roomId = userid ? getRoomID(user?.userId, userid) : item?.userId ? getRoomID(user?.userId, item?.userId) : null
-      const id = route?.params?.userid ? route?.params?.userid : item?.userId
+      const roomId = userid ? getRoomID(user?.userId, userid) : item?.userId ? getRoomID(user?.userId, item?.userId) : undefined
+      const id = userid ? userid : item?.userId
       await firestore().collection('chat-rooms').doc(roomId).set({
         roomId,
         createdAt: firestore.Timestamp.fromDate(new Date())
@@ -110,11 +111,11 @@ const ChatScreen = () => {
       ? getRoomID(user?.userId, userid)
       : item?.userId
       ? getRoomID(user?.userId, item.userId)
-      : null;
+      : undefined;
       const docRef = firestore().collection('chat-rooms').doc(roomId);
       const messageRef = docRef.collection('messages')
       //textRef.current ="";
-      if(inputRef) inputRef?.current?.clear();
+      if(inputRef?.current) inputRef?.current?.clear();
       await messageRef.add({
         userId:user?.userId,
         id:messageRef.doc().id,
@@ -129,7 +130,7 @@ const ChatScreen = () => {
 
       // Clear the input field after sending
       textRef.current = "";
-      if (inputRef) inputRef?.current?.clear();
+      if (inputRef?.current) inputRef?.current?.clear();
 
     }catch(error:any){
       console.error(`Error sending message:${error.message}`)
@@ -164,7 +165,7 @@ const ChatScreen = () => {
       </View>
       <View style={styles.inputContainer}>
         <View style={styles.messageInput}>
-          <TextInput
+          {/* <TextInput
           left={<TextInput.Icon icon='camera' style={styles.sendButton} rippleColor='rgba(30, 136, 229, 0.3)'/>}
           dense={true}
           mode='outlined'
@@ -177,7 +178,7 @@ const ChatScreen = () => {
             placeholder='Enter message....'
             right={<TextInput.Icon icon='send' style={styles.sendButton} onPress={handleSend} rippleColor='rgba(30, 136, 229, 0.3)'/>
             }
-          />
+          /> */}
            </View>
         </View>
       </View>

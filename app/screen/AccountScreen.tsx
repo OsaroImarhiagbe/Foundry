@@ -9,13 +9,13 @@ import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-nativ
 import ChatRoomHeader from '../components/ChatRoomHeader';
 import SmallButton from '../components/SmallButton';
 import FollowComponent from '../components/FollowComponent';
-import firestore from '@react-native-firebase/firestore';
+import firestore,{FirebaseFirestoreTypes} from '@react-native-firebase/firestore';
 import { blurhash } from '../../utils/index';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import EvilIcons from 'react-native-vector-icons/EvilIcons';
-
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
 
 const PostComponent = lazy(() => import('../components/PostComponent'))
@@ -28,21 +28,62 @@ const Tab = createMaterialTopTabNavigator();
  
 const AccountScreen = () => {
 
-  const [users, setUsers] = useState('')
-  const [isloading,setLoading] = useState(false)
-  const [posts,setPosts] = useState([])
-  const [projects,setProjects] = useState([])
+  const [users, setUsers] = useState<User | undefined>(undefined)
+  const [isloading,setLoading] = useState<boolean>(false)
+  const [projects,setProjects] = useState<Project[]>([])
+    const [posts,setPosts] = useState<Post[]>([])
   const { user } = useAuth();
-  const navigation = useNavigation();
+  const navigation = useNavigation<Navigation>();
   const isCurrentUser = user
   const [refreshing, setRefreshing] = useState(false);
 
+
+  type NavigationProp = {
+    ProjectScreen:undefined,
+    Main:undefined,
+    Message:undefined,
+    Edit:undefined,
+    SkillsScreen:undefined
+
+  }
   
-  const follow_items = [{count:projects?.projects?.length,content:'projects'},{count:users.connection,content:'connection'},{count:posts.length,content:'posts'}]
+  type Navigation = NativeStackNavigationProp<NavigationProp>;
+  
+  
+  interface User{
+    username?:string,
+    userId?:string,
+    profileUrl?:string,
+    projects?:number,
+    follow_state?:boolean,
+    connection?:string,
+    jobtitle?:string,
+    location?:string
+  
+  }
+  interface Post{
+    auth_profile?: string;
+    like_count?: number;
+    imageUrl?: string;
+    id?: string;
+    name?: string;
+    post_id?:string,
+    content?: string;
+    date?: string;
+    comment_count?: number;
+    mount?: boolean;
+    createdAt?: FirebaseFirestoreTypes.Timestamp
+  }
+  interface Project{
+    id?:string,
+    project_name?:string
+  }
+  
+  const follow_items = [{count:users?.projects,content:'projects'},{count:users?.connection,content:'connection'},{count:posts.length,content:'posts'}]
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
-    await fetchUser();
+    // await fetchUser();
     setRefreshing(false);
   }, [user]);
 
@@ -52,14 +93,14 @@ const AccountScreen = () => {
     try{
       const projectRef = firestore().collection('projects').where('id','==',user?.userId)
       const unsub = projectRef.onSnapshot((documentSnapshot) => {
-        let data = []
+        let data:Project[] = []
         documentSnapshot.forEach(doc => {
           data.push({...doc.data(),id:doc.id})
         })
         setProjects(data)
       })
       return () => unsub()
-    }catch(err){
+    }catch(err:any){
       console.error('error grabbing user post:',err.message)
     }
     
@@ -69,14 +110,14 @@ const AccountScreen = () => {
     try{
       const docRef = firestore().collection('posts').where('name','==',user?.username).orderBy('createdAt','desc')
       const unsub = docRef.onSnapshot((querySnapshot) => {
-        let data = []
+        let data:Post[] = []
         querySnapshot.forEach(documentSnapshot => {
           data.push({...documentSnapshot.data(),id:documentSnapshot.id})
         })
         setPosts(data)
       })
       return () => unsub()
-    }catch(err){
+    }catch(err:any){
       console.error('error grabbing user post:',err.message)
     }
     
@@ -90,10 +131,10 @@ const AccountScreen = () => {
         if(documentSnapshot.exists){
           setUsers(documentSnapshot.data())
         }else{
-          console.error(`No such document ${error.message}`)
+          console.error('No such document')
         }
       },
-        (error)=>{
+        (error:any)=>{
           console.error(`No such document ${error.message}`)
           setLoading(false)
         }
@@ -116,7 +157,7 @@ const AccountScreen = () => {
             posts.map((post) => (
               <Suspense key={post.id} fallback={<ActivityIndicator size="small" color="#000" />}>
                 <View style={{padding: 10 }}>
-                  <PostComponent auth_profile={post.auth_profile} count={post.like_count} url={post.imageUrl} id={post.id} name={post.name} content={post.content} date={post.createdAt.toDate().toLocaleString()} comment_count={post.comment_count} />
+                  <PostComponent auth_profile={post.auth_profile} count={post.like_count} url={post.imageUrl} id={post.id} name={post.name} content={post.content} date={post?.createdAt?.toDate().toLocaleString()} comment_count={post.comment_count} />
                 </View>
               </Suspense>
             ))) : <View style={{flex:1,justifyContent:'center',alignItems:'center',paddingTop:50}}>
@@ -135,7 +176,7 @@ const AccountScreen = () => {
         
           <TouchableOpacity key={index} onPress={()=>navigation.navigate('ProjectScreen')}>
              <View style={{ backgroundColor: '#252525', borderRadius: 25, padding: 30,marginBottom:10 }}>
-            <Text style={{ textAlign: 'center', color: '#fff' }}>{project?.projects?.project_name}</Text>
+            <Text style={{ textAlign: 'center', color: '#fff' }}>{project?.project_name}</Text>
           </View>
           </TouchableOpacity>
         ))) : <View style={{flex:1,justifyContent:'center',alignItems:'center'}}><Text style={{ color: '#fff', textAlign: 'center', fontFamily:color.textFont,fontSize:20}}>No projects available</Text></View>
@@ -167,7 +208,7 @@ const AccountScreen = () => {
           <View style={{flexDirection:'row', justifyContent:'space-between',paddingLeft:20}}>
           <Image
               style={{height:hp(10), aspectRatio:1, borderRadius:100,}}
-              source={users.profileUrl}
+              source={users?.profileUrl}
               placeholder={{blurhash}}
               cachePolicy='none'/>
               <View style={{marginTop:5,flexDirection:'row', justifyContent:'space-evenly',paddingRight:20}}>
@@ -178,8 +219,8 @@ const AccountScreen = () => {
               </View>
               </View>
               <View style={{alignItems:'flex-end',flexDirection:'column',marginBottom:20,paddingRight:20}}>
-              <Text style={styles.title}>{users.jobtitle}</Text>
-              <Text style={styles.location}><EvilIcons name='location' size={20}/> {users.location}</Text>
+              <Text style={styles.title}>{users?.jobtitle}</Text>
+              <Text style={styles.location}><EvilIcons name='location' size={20}/> {users?.location}</Text>
               </View>
               </View>
               <View style={styles.textcontainer}>
@@ -204,7 +245,6 @@ const AccountScreen = () => {
                 <View style={{flex: 1}}>
                   <Tab.Navigator
                 screenOptions={{
-                  headerShown:false,
                   swipeEnabled:true,
                   tabBarIndicatorStyle:{
                     backgroundColor:'#00BF63'
