@@ -7,7 +7,7 @@
  * See a full list of supported triggers at https://firebase.google.com/docs/functions
  */
 
-const {onRequest,onCall,HttpsError} = require("firebase-functions/v2/https");
+const {onCall,HttpsError} = require("firebase-functions/v2/https");
 const logger = require("firebase-functions/logger");
 const admin = require("firebase-admin/app");
 const { onDocumentCreated } = require("firebase-functions/firestore");
@@ -22,13 +22,13 @@ admin.initializeApp()
 // });
 
 
-exports.checkAuthuser = onCall((data,context)=>{
+exports.checkAuthuser = onCall((data: any,context: { auth: any; })=>{
     if(!context.auth){
         throw new HttpsError('unauthenticated','Endpoint requires authentication')
     }
 
 });
-exports.newMessage = onDocumentCreated('rooms/{roomId}/messages',async (event) =>{
+exports.newMessage = onDocumentCreated('rooms/{roomId}/messages',async (event: { data: any; }) =>{
         try {
             const snapShot = event.data;
             if(!snapShot) return
@@ -42,7 +42,7 @@ exports.newMessage = onDocumentCreated('rooms/{roomId}/messages',async (event) =
         }
       });
 
-async function sendNotification(userId, message) {
+async function sendNotification(userId:string, message:string) {
         const registrationToken = await getUserDeviceToken(userId);
         if (!registrationToken) {
             throw new Error('No device token found for user');
@@ -57,7 +57,7 @@ async function sendNotification(userId, message) {
         await admin.messaging().send(payload);
         logger.info(`Notification sent to ${userId}`);
     }
-async function getUserDeviceToken(userId) {
+async function getUserDeviceToken(userId:string) {
         const userDoc = await admin.firestore().collection('users').doc(userId).get();
 
         if (!userDoc.exists) {

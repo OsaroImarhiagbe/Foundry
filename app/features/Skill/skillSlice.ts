@@ -8,8 +8,8 @@ export const skillSlice = createSlice({
     },
     reducers:{
         addSkills:(state,action) =>{
-            if(!state.searchedSkills.includes(action.payload)){
-                state.searchedSkills.push(action.payload)
+            if(!state.searchedSkills.includes(action.payload as never )){
+                state.searchedSkills.push(action.payload as never )
             }
         }
     }
