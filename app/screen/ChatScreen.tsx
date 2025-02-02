@@ -25,7 +25,7 @@ const ChatScreen = () => {
   const [messages, setMessages] = useState([]);
   const [expoPushToken,setExpoPushToken] = useState('')
   const route = useRoute();
-  const { item,} = route.params;
+  const { item} = route.params;
   const { user } = useAuth();
 
   const navigation = useNavigation();
@@ -42,7 +42,7 @@ const ChatScreen = () => {
             ? item.name 
             : 'Unknown Recipient';
   useEffect(() => {
-    const loadMessages = (roomId) => {
+    const loadMessages = (roomId:string) => {
       const docRef = firestore().collection('chat-rooms').doc(roomId);
       const messageRef = docRef.collection('messages').orderBy('createdAt', 'asc')
       let unsub = messageRef.onSnapshot((documentSnapshot) => {
@@ -133,7 +133,7 @@ const ChatScreen = () => {
       textRef.current = "";
       if (inputRef) inputRef?.current?.clear();
 
-    }catch(error){
+    }catch(error:any){
       console.error(`Error sending message:${error.message}`)
     }
   }
@@ -141,7 +141,6 @@ const ChatScreen = () => {
   return (
     <CustomKeyboardView
     inChat={true}
-    style={styles.container}
     >
       <View style={{flex:1}}>
       <ChatRoomHeader 
