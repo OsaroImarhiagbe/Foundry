@@ -15,17 +15,17 @@ const EditPhoneScreen = lazy(() => import('../screen/EditPhoneScreen'))
 const EditJobScreen = lazy(() => import('../screen/EditJobScreen'))
 
 
-const MessageScreenWrapper = (props) => {
+const MessageScreenWrapper = () => {
   
   return (
     <Suspense fallback={<ActivityIndicator size='small' color='#000'/>}>
-    <MessageScreen  {...props}/>
+    <MessageScreen/>
   </Suspense>
 
   )
 
 }
-const ProfileScreenWrapper = (props) => {
+const ProfileScreenWrapper = () => {
   
   return (
     <Suspense fallback={<ActivityIndicator size='small' color='#000'/>}>
@@ -35,34 +35,34 @@ const ProfileScreenWrapper = (props) => {
   )
 
 }
-const PostScreenWrapper = (props) => {
+const PostScreenWrapper = () => {
   
   return (
     <Suspense fallback={<ActivityIndicator size='small' color='#000'/>}>
-    <PostScreen  {...props}/>
+    <PostScreen/>
   </Suspense>
 
   )
 
 }
 
-const HomeScreenWrapper = (props) => {
+const HomeScreenWrapper = () => {
   
   return(
     <Suspense fallback={<ActivityIndicator size='small' color='"#000'/>}>
-    <HomeScreen {...props}/>
+    <HomeScreen/>
   </Suspense>
   )}
 
-const EditScreenWrapper = (props) => {
+const EditScreenWrapper = () => {
   return (
     <Suspense fallback={<ActivityIndicator size='small' color='#000'/>}>
-    <EditScreen  {...props}/>
+    <EditScreen />
   </Suspense>
   )
 }
 
-const OtherUserScreenWrapper = (props) => {
+const OtherUserScreenWrapper = () => {
   
   return (
     <Suspense fallback={<ActivityIndicator size='small' color='#000'/>}>
@@ -124,9 +124,6 @@ const StackNavigation = () => {
 
   return (
     <Stack.Navigator
-    screenOptions={{
-      unmountOnBlur: true,
-    }}
     initialRouteName='Dash'>
         <Stack.Screen
         name='Dash'
@@ -134,39 +131,37 @@ const StackNavigation = () => {
         options={{
         headerShown: false, 
         gestureEnabled:false,
-        unmountOnBlur: true,}}
+       }}
       />
       <Stack.Screen
         name='Main'
         component={HomeScreenWrapper}
         options={{
         headerShown: false, 
-        gestureEnabled:false,
-        unmountOnBlur: true,}}
+        gestureEnabled:false
+        }}
       />
     <Stack.Screen 
      name='Message'
      component={MessageScreenWrapper}
      options={{
       headerShown:false,
-      gestureEnabled:false,
-      unmountOnBlur: true,
+      gestureEnabled:false
+      
      }}/>
       <Stack.Screen
       name='Profile'
       component={ProfileScreenWrapper}
       options={{
         headerShown:false,
-        gestureEnabled:false,
-        unmountOnBlur: true,
+        gestureEnabled:false
       }}/>
       <Stack.Screen
       name='Post'
       component={PostScreenWrapper}
       options={{
         headerShown:false,
-        gestureEnabled:false,
-        unmountOnBlur: true,
+        gestureEnabled:false
       }}
       />
        <Stack.Screen
@@ -174,8 +169,7 @@ const StackNavigation = () => {
       component={EditScreenWrapper}
       options={{
         headerShown:false,
-        gestureEnabled:false,
-        unmountOnBlur: true,
+        gestureEnabled:false
       }}
       />
         <Stack.Screen
@@ -183,8 +177,7 @@ const StackNavigation = () => {
       component={OtherUserScreenWrapper}
       options={{
         headerShown:false,
-        gestureEnabled:false,
-        unmountOnBlur: true,
+        gestureEnabled:false
       }}/>
       <Stack.Screen
       name='EditUser'
@@ -192,8 +185,7 @@ const StackNavigation = () => {
       options={{
         headerShown:false,
         gestureEnabled:false,
-        presentation:'modal',
-        unmountOnBlur: true,
+        presentation:'modal'
       }}/>
         <Stack.Screen
       name='EditEmail'
@@ -201,8 +193,7 @@ const StackNavigation = () => {
       options={{
         headerShown:false,
         gestureEnabled:false,
-        presentation:'modal',
-        unmountOnBlur: true,
+        presentation:'modal'
       }}/>
          <Stack.Screen
       name='EditPhone'
@@ -210,8 +201,7 @@ const StackNavigation = () => {
       options={{
         headerShown:false,
         gestureEnabled:false,
-        presentation:'modal',
-        unmountOnBlur: true,
+        presentation:'modal'
       }}/>
            <Stack.Screen
       name='EditJob'
@@ -219,8 +209,7 @@ const StackNavigation = () => {
       options={{
         headerShown:false,
         gestureEnabled:false,
-        presentation:'modal',
-        unmountOnBlur: true,
+        presentation:'modal'
       }}/>
     </Stack.Navigator>
   );

@@ -11,17 +11,17 @@ const Drawer = createDrawerNavigator();
 const TabNavigation = lazy(() => import('./TabNavigation'))
 
 
-const TabNavigationWrapper = (props) =>{
+const TabNavigationWrapper = () =>{
   return (
 
     <Suspense fallback={<ActivityIndicator size='small' color='#000' />}>
-    <TabNavigation {...props}/>
+    <TabNavigation/>
   </Suspense>
 
   )
 }
 
-const DrawerNavigation = ({route}) => {
+const DrawerNavigation = () => {
   const navigation = useNavigation();
 
   return (
@@ -36,7 +36,6 @@ const DrawerNavigation = ({route}) => {
       <Drawer.Screen
       name='Home'
       component={TabNavigationWrapper}
-      initialParams={{route}}
       options={{headerShown:false,
       }}/>
        <Drawer.Screen

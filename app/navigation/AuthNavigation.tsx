@@ -15,7 +15,16 @@ const ProjectEntryScreen = lazy(() => import('../screen/ProjectEntryScreen'))
 const SkillsScreen = lazy(() => import('../screen/SkillsScreen'))
 const OnboardingScreen = lazy(()=> import('../screen/OnboardingScreen'))
 const ChatScreen = lazy(() => import('../screen/ChatScreen'))
-const RegisterScreenWrapper = (props) => {
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+
+
+type NavigationProp = {
+  navigate(arg0: string, arg1: { screen: string; }): unknown;
+  Drawer:undefined,
+  Home:undefined
+}
+
+const RegisterScreenWrapper = () => {
   
     return (
       <Suspense fallback={<ActivityIndicator size='small' color='#fff'/>}>
@@ -25,7 +34,7 @@ const RegisterScreenWrapper = (props) => {
     )
 }
 
-const DrawerNavigationWrapper = (props) => {
+const DrawerNavigationWrapper = () => {
   
     return (
       <Suspense fallback={<ActivityIndicator size='small' color='#fff'/>}>
@@ -34,7 +43,7 @@ const DrawerNavigationWrapper = (props) => {
   
     )
 }
-const ReportBugScreenWrapper = (props) => {
+const ReportBugScreenWrapper = () => {
   
   return (
     <Suspense fallback={<ActivityIndicator size='small' color='#fff'/>}>
@@ -43,17 +52,17 @@ const ReportBugScreenWrapper = (props) => {
 
   )
 }
-const ChatScreenWrapper = (props) => {
+const ChatScreenWrapper = () => {
   
   return (
     <Suspense fallback={<ActivityIndicator size='small' color='#000'/>}>
-    <ChatScreen  {...props}/>
+    <ChatScreen />
   </Suspense>
 
   )
 
 }
-const ContactUsScreenWrapper = (props) => {
+const ContactUsScreenWrapper = () => {
   
   return (
     <Suspense fallback={<ActivityIndicator size='small' color='#fff'/>}>
@@ -62,7 +71,7 @@ const ContactUsScreenWrapper = (props) => {
 
   )
 }
-const SkillsScreenWrapper = (props) => {
+const SkillsScreenWrapper = () => {
   
   return (
     <Suspense fallback={<ActivityIndicator size='small' color='#fff'/>}>
@@ -72,7 +81,7 @@ const SkillsScreenWrapper = (props) => {
   )
 }
 
-const ProjectEntryScreenWrapper = (props) => {
+const ProjectEntryScreenWrapper = () => {
   
   return (
     <Suspense fallback={<ActivityIndicator size='small' color='#fff'/>}>
@@ -90,10 +99,10 @@ const OnboardingScreenWrapper = () =>{
   )
 }
 const AuthNavigation = () => {
-  const navigation = useNavigation()
-  const [loading,setLoading] = useState(null)
-  const [isAuthenticated, setIsAuthenticated] = useState(undefined)
-  const [showOnboarding,setShowOnboarding] = useState(false)
+  const navigation = useNavigation<NavigationProp>()
+  const [loading,setLoading] = useState<boolean>(false)
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean | undefined>(undefined)
+  const [showOnboarding,setShowOnboarding] = useState<boolean>(false)
 
   const {updateUserData} = useAuth()
 
@@ -119,7 +128,7 @@ const AuthNavigation = () => {
 
   const  checkifOnboard = async () => {
       const onboardkey = await AsyncStorage.getItem('onboarded')
-      if(onboardkey==1){
+      if(onboardkey=='1'){
         setShowOnboarding(false)
       }else{
         setShowOnboarding(true)
@@ -195,8 +204,7 @@ const AuthNavigation = () => {
               component={ChatScreenWrapper}
               options={{
                 headerShown:false,
-                gestureEnabled:false,
-                unmountOnBlur: true,
+                gestureEnabled:false
                 }}
                 />
           </Stack.Navigator>
@@ -283,8 +291,7 @@ const AuthNavigation = () => {
               component={ChatScreenWrapper}
               options={{
                 headerShown:false,
-                gestureEnabled:false,
-                unmountOnBlur: true,
+                gestureEnabled:false
               }}
               />
         </Stack.Navigator>
