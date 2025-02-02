@@ -1,4 +1,11 @@
-import {View,Text,StyleSheet, TouchableOpacity,FlatList,ScrollView,Switch,Modal,Button} from 'react-native'
+import {
+    View,
+    Text,
+    StyleSheet, 
+    TouchableOpacity,
+    ScrollView,
+    Switch,
+    Modal} from 'react-native'
 import { useState,useEffect } from 'react';
 import ChatRoomHeader from '../components/ChatRoomHeader';
 import color from '../../config/color';
@@ -17,25 +24,38 @@ import { addImage } from '../features/user/userSlice';
 import { Picker } from '@react-native-picker/picker';
 import { useTranslation } from 'react-i18next';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
   
 
+type NavigationProp = {
+    Profile:{user:any},
+    Message:undefined
+}
+
+type Navigation = NativeStackNavigationProp<NavigationProp>
+interface Edit {
+    id?:string,
+    name?:string,
+    jobTitle?:string,
+    email?:string,
+    phone?:string
+    profileUrl?:string
+}
   
 const EditScreen = () => {
 
 
     const {i18n,t} = useTranslation()
-    const [language, setLanguage] = useState('en');
-    const navigation = useNavigation();
-    const [edit,setEdit] = useState([])
+    const [language, setLanguage] = useState<string>('en');
+    const navigation = useNavigation<Navigation>();
+    const [edit,setEdit] = useState<Edit | null>(null)
     const [filename,setFile] = useState(null)
     const [image,setImage] = useState(null)
     const dispatch = useDispatch()
-    const [modalVisible, setModalVisible] = useState(false);
-    const profileImage = useSelector((state) => state.user.profileimg)
+    const [modalVisible, setModalVisible] = useState<boolean>(false);
+    const profileImage = useSelector((state:any) => state.user.profileimg)
     const {user} = useAuth()
 
-    console.log('edit screen:',user)
 
     const [form, setForm] = useState({
         darkMode:true,
@@ -51,6 +71,7 @@ const EditScreen = () => {
             items:[
                 {
                     id:1,
+
                     icon:'globe', 
                     color:'orange',
                     label:'Language', 
@@ -65,7 +86,7 @@ const EditScreen = () => {
                     type:'link',},
                 {
                     id:3,
-                    id:'showusers',
+                    tag:'showusers',
                     icon:'users',
                     color:'green',
                     label:'Show',
@@ -73,7 +94,7 @@ const EditScreen = () => {
                 },
                 {
                     id:4,
-                    id:'accessmode',
+                    tag:'accessmode',
                     icon:'airplay',
                     color:'#fd2d54',
                     label:'Access',
@@ -96,7 +117,7 @@ const EditScreen = () => {
           items:[{
               id:1,
               icon:'person',
-              name:edit.name,
+              name:edit?.name,
               type:'Username',
               screen:'EditUser',
               color:'#fff',
@@ -105,7 +126,7 @@ const EditScreen = () => {
           {
               id:2,
               icon:'email',
-              name:edit.email,
+              name:edit?.email,
               type:'Email',
               screen:'EditEmail',
               color:'#fff',
@@ -114,7 +135,7 @@ const EditScreen = () => {
           {
               id:3,
               icon:'phone',
-              name:edit.phone,
+              name:edit?.phone,
               type:'Phone',
               screen:'EditPhone',
               color:'#fff',
@@ -123,7 +144,7 @@ const EditScreen = () => {
           {
               id:4,
               icon:'work',
-              name:edit.jobTitle,
+              name:edit?.jobTitle,
               type:'Job title',
               screen:'EditJob',
               color:'#fff',
@@ -141,14 +162,13 @@ const EditScreen = () => {
         .doc(user?.userId)
         .onSnapshot((documentSnapshot) => {
         if(documentSnapshot.exists){
-            const data ={
+            const data:Edit ={
                 ...documentSnapshot.data(),
-                id:documentSnapshot.id
-            };
-            setEdit([data])
+                id:documentSnapshot.id};
+            setEdit(data)
         }else{
             console.error('Error doc doesnt exists:')
-            setEdit([])
+            setEdit(null)
             }
         }, (error) => {
             console.error('Error fetching document:',error.message)
@@ -177,12 +197,12 @@ const EditScreen = () => {
             }else{
                 console.error('user cancelled the image picker.')
             }
-        }catch(err){
+        }catch(err:any){
             console.error('Error picking image and uploading to s3:',err.message)
         }
         }
       
-    const handleLanguageChange = async (lang) => {
+    const handleLanguageChange = async (lang:string) => {
             i18n.changeLanguage(lang);
             setLanguage(lang);
             await AsyncStorage.setItem('language',lang)
@@ -210,7 +230,7 @@ const EditScreen = () => {
         <View style={{flexDirection:'row'}}>
         <Image
             style={{height:hp(5), aspectRatio:1, borderRadius:100}}
-            source={edit.profileUrl || user.profileUrl}
+            source={edit?.profileUrl || user.profileUrl}
             placeholder={{blurhash}}
             transition={500}
             cachePolicy='none'/>
@@ -228,7 +248,7 @@ const EditScreen = () => {
                   {header}
                         </Text>
                 {items.map(({id,icon,nav,name,type,screen})=>(
-                     <TouchableOpacity key={id} onPress={()=>navigation.navigate(screen)}>
+                     <TouchableOpacity key={id} onPress={()=>navigation.navigate(screen as never)}>
                       <View style={{ marginTop: 30, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
                       <View style={{ backgroundColor: '#3b3b3b', borderRadius: 5, width: 30, padding: 5 }}>
                           <View style={{ alignItems: 'center' }}>
@@ -256,10 +276,10 @@ const EditScreen = () => {
                 <View key={id}>
                     <Text style={{color:'#fff',fontSize:20,marginBottom:10}}>{header}</Text>
 
-                    {items.map(({id, icon,color, label, type,screen}) => (
+                    {items.map(({id, icon,tag, label, type,screen}) => (
                         <TouchableOpacity
                             key={id}
-                            onPress={label === 'Language' ? () => setModalVisible(true):() => navigation.navigate(screen)}>
+                            onPress={label === 'Language' ? () => setModalVisible(true):() => navigation.navigate(screen as never)}>
                         <View style={styles.row}>
                             <View style={{ backgroundColor: '#3b3b3b', borderRadius: 5, width: 30, padding: 5 }}>
                                 <View style={{ alignItems: 'center' }} >
@@ -269,7 +289,7 @@ const EditScreen = () => {
                             <Text style={{ fontSize: 18,color:'#fff',paddingLeft:10 }}>{label}</Text>
                             <View style={{flex:1}}/>
                             {type === 'toggle' && 
-                            <Switch value={form[id]}
+                            <Switch value={true}
                             onValueChange={value => setForm({...form,[id]: value})}/>}
                             {type === 'link' && 
                             <View style={{ backgroundColor: '#3b3b3b', borderRadius: 5, width: 30, padding: 5 }}>

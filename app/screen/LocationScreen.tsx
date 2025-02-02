@@ -20,7 +20,6 @@ const LocationScreen = () => {
         const city = data.structured_formatting.main_text
         const state = data.structured_formatting.secondary_text
         const formattedCity = `${city}, ${state.split(',')[0]}`;
-        const docRef = doc(db,'users',user.userId)
         await firestore().collection('users').doc(user?.userId).update({
           location:formattedCity
         })
