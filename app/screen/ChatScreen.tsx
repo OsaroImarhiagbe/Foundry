@@ -16,16 +16,16 @@ import ChatRoomHeader from '../components/ChatRoomHeader';
 import { useNavigation } from '@react-navigation/native';
 import { useDispatch } from 'react-redux';
 import { addID } from '../features/Message/messageidSlice';
-import firestore from '@react-native-firebase/firestore'
+import firestore,{FirebaseFirestoreTypes} from '@react-native-firebase/firestore'
 import MessageItem from '../components/MessageItem';
 import { FlashList } from '@shopify/flash-list';
 import {EXPOPUSHURL} from "@env"
 import { TextInput } from 'react-native-paper';
 const ChatScreen = () => {
-  const [messages, setMessages] = useState([]);
+  const [messages, setMessages] = useState<FirebaseFirestoreTypes.DocumentData[]>([]);
   const [expoPushToken,setExpoPushToken] = useState('')
   const route = useRoute();
-  const { item} = route.params;
+  const {item} = route.params;
   const { user } = useAuth();
 
   const navigation = useNavigation();
@@ -47,7 +47,7 @@ const ChatScreen = () => {
       const messageRef = docRef.collection('messages').orderBy('createdAt', 'asc')
       let unsub = messageRef.onSnapshot((documentSnapshot) => {
         let allMessages = documentSnapshot.docs.map((doc) => doc.data());
-        setMessages([...allMessages]);
+        setMessages(allMessages);
       });
       return unsub;
     };
@@ -160,7 +160,7 @@ const ChatScreen = () => {
             hour: '2-digit',
             minute: '2-digit',
             hour12: true
-          })} id={item.userId} message_text={item.text} currentUser={user}/>
+          })} id={item.userId} message_text={item.text} current_User={user}/>
         )}
         />
       </View>
