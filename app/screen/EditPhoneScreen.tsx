@@ -1,16 +1,21 @@
-import {SafeAreaView,TextInput,TouchableOpacity} from 'react-native'
+import {
+    SafeAreaView,
+    TextInput,
+    TouchableOpacity,
+    View
+} from 'react-native'
 import { useState } from 'react';
 import color from '../../config/color';
 import ChatRoomHeader from '../components/ChatRoomHeader';
 import { useNavigation } from '@react-navigation/native';
-import Button from '../components/Button';
+import { Button } from 'react-native-paper';
 import firestore from '@react-native-firebase/firestore'
 import { useAuth } from '../authContext';
 
 const EditPhoneScreen = () => {
     const navigation = useNavigation()
     const [phone,setPhone] = useState('')
-    const [isloading,setLoading] = useState(false)
+    const [isloading,setLoading] = useState<boolean>(false)
     const [focus,setFocus] = useState('')
     const {user} = useAuth()
 
@@ -21,7 +26,7 @@ const EditPhoneScreen = () => {
            await firestore()
            .collection('users')
            .doc(user.userId)
-            .pdateDoc({
+            .update({
                     phone:phone,
             })
         }catch(e){
@@ -50,11 +55,9 @@ const EditPhoneScreen = () => {
         />
         </View>
         <View style={{padding:40}}>
-        <TouchableOpacity onPress={handleSubmit}>
-            <Button
-            title={isloading ? 'Submitting...' : 'Submit'}
-            />
-            </TouchableOpacity>
+            <Button onPress={handleSubmit}>
+           {isloading ? 'Submitting...' : 'Submit'}
+            </Button>
         </View>
         </View>
     </SafeAreaView>

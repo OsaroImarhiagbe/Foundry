@@ -1,5 +1,5 @@
 import React from 'react'
-import {SafeAreaView,Text,StyleSheet} from 'react-native'
+import {SafeAreaView,Text,StyleSheet,View} from 'react-native'
 import color from '../../config/color';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 const ContactUsScreen = () => {

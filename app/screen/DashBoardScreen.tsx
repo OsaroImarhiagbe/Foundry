@@ -23,18 +23,29 @@ import { FAB } from 'react-native-paper';
 import Entypo from 'react-native-vector-icons/Entypo';
 import { FlashList } from '@shopify/flash-list';
 import { Avatar, Button, Card, Text } from 'react-native-paper';
+import { DrawerNavigationProp } from '@react-navigation/drawer';
 //import Tts from 'react-native-tts';
 import LottieView from 'lottie-react-native';
 
 const Tab = createMaterialTopTabNavigator();
 
 
+
+type RootDrawerParamList = {
+  Home: undefined;
+  Settings: undefined;
+  Post:undefined
+};
+
+
+type Prop = DrawerNavigationProp<RootDrawerParamList>;
+
 const DashBoardScreen = () => {
 
     const insets = useSafeAreaInsets(); 
     const {width,height} = useWindowDimensions();
     const {user} = useAuth()
-    const navigation = useNavigation()
+    const navigation = useNavigation<Prop>()
     const [speaking,setSpeaking] = useState(false)
     const theme = useTheme()
 
@@ -76,7 +87,7 @@ const DashBoardScreen = () => {
               <Card key={index} style={{margin:5,width:wp('70%')}}>
               <Card.Title title={item}/>
               <Card.Content>
-                <Text variant="bodyMedium"></Text>
+                <Text variant="bodyMedium">HI</Text>
               </Card.Content>
               <Card.Actions>
                 <Button>Ok</Button>
@@ -89,9 +100,6 @@ const DashBoardScreen = () => {
     </ScrollView>
     
   );
-  type Prop = {
-    navigation: DrawerNavigationProp<RootParamList, 'YourScreenName'>;
-  };
   const handlePress = () => {
     navigation.openDrawer();
   } 
@@ -110,7 +118,6 @@ const DashBoardScreen = () => {
         style={styles.logo}
         />
        <TouchableOpacity
-        style={styles.messageIcon}
          onPress={() => navigation.navigate('Post')}>
         <View style={styles.icon}>
            <Entypo name='new-message' size={20} color={theme.colors.primary}/>
@@ -120,7 +127,6 @@ const DashBoardScreen = () => {
         <View style={{flex:1}}>
         <Tab.Navigator
         screenOptions={{
-            headerShown:false,
             swipeEnabled:true,
             tabBarIndicatorStyle:{
             backgroundColor:'#000',
@@ -129,7 +135,7 @@ const DashBoardScreen = () => {
             tabBarStyle:{
             backgroundColor:'transparent',
             },
-          tabBarActiveTintColor:theme.colors.text,
+          tabBarActiveTintColor:theme.colors.primary,
           tabBarLabelStyle:{
             fontSize:hp(1.5)
           }

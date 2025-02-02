@@ -1,9 +1,9 @@
-import {SafeAreaView,TextInput,TouchableOpacity} from 'react-native'
+import {SafeAreaView,TextInput,TouchableOpacity,View} from 'react-native'
 import { useState } from 'react';
 import color from '../../config/color';
 import ChatRoomHeader from '../components/ChatRoomHeader';
 import { useNavigation } from '@react-navigation/native';
-import Button from '../components/Button';
+import {Button} from 'react-native-paper'
 import firestore from '@react-native-firebase/firestore'
 import { useAuth } from '../authContext';
 
@@ -49,11 +49,7 @@ const EditJobScreen = () => {
         />
         </View>
         <View style={{padding:40}}>
-        <TouchableOpacity onPress={handleSubmit}>
-            <Button
-            title={isloading ? 'Submitting...' : 'Submit'}
-            />
-            </TouchableOpacity>
+            <Button  onPress={handleSubmit}>{isloading ? 'Submitting...' : 'Submit'}</Button>
         </View>
         </View>
     </SafeAreaView>
