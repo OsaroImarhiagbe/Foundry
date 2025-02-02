@@ -9,7 +9,7 @@ import React, { useState, useEffect, useRef} from 'react'
 import MessageList  from '../components/MessageList';
 import { getRoomID } from '../../utils';
 import { useAuth } from '../authContext';
-import { useRoute } from '@react-navigation/native';
+import { useRoute,RouteProp } from '@react-navigation/native';
 import CustomKeyboardView from '../components/CustomKeyboardView';
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import ChatRoomHeader from '../components/ChatRoomHeader';
@@ -19,13 +19,15 @@ import { addID } from '../features/Message/messageidSlice';
 import firestore,{FirebaseFirestoreTypes} from '@react-native-firebase/firestore'
 import MessageItem from '../components/MessageItem';
 import { FlashList } from '@shopify/flash-list';
-import {EXPOPUSHURL} from "@env"
 import { TextInput } from 'react-native-paper';
+
+type ChatScreenRouteProp = RouteProp<{ Chat: { item: any,userid:string,name:string } }, 'Chat'>;
+
 const ChatScreen = () => {
   const [messages, setMessages] = useState<FirebaseFirestoreTypes.DocumentData[]>([]);
   const [expoPushToken,setExpoPushToken] = useState('')
-  const route = useRoute();
-  const {item} = route.params;
+  const route = useRoute<ChatScreenRouteProp>();
+  const {item,userid,name} = route?.params;
   const { user } = useAuth();
 
   const navigation = useNavigation();
@@ -36,11 +38,7 @@ const ChatScreen = () => {
   const flashListRef = useRef(null);
 
   
-  const recipentNamec = route?.params?.userid 
-            ? route?.params?.name 
-            : item?.userId 
-            ? item.name 
-            : 'Unknown Recipient';
+  const recipentNamec = userid ? name  : item?.userId ? item.name : 'Unknown Recipient';
   useEffect(() => {
     const loadMessages = (roomId:string) => {
       const docRef = firestore().collection('chat-rooms').doc(roomId);
@@ -52,16 +50,16 @@ const ChatScreen = () => {
       return unsub;
     };
   
-    const roomId = route?.params?.userid ? getRoomID(user?.userId, route?.params?.userid) : item?.userId ? getRoomID(user?.userId, item.userId) : null;
+    const roomId = userid ? getRoomID(user?.userId, userid) : item?.userId ? getRoomID(user?.userId, item.userId) : null;
   
     if (roomId) {
       createRoom();
-      dispatch(addID(route.params.userid));
+      dispatch(addID(userid));
       const unsubscribe = loadMessages(roomId);
       return () => unsubscribe();
     }
   
-  }, [route?.params?.userid, item?.userId]);
+  }, [userid, item?.userId]);
   
   useEffect(() => {
     const getToken = async () => {
@@ -88,7 +86,7 @@ const ChatScreen = () => {
   const createRoom = async () => {
     try{
       
-      const roomId = route?.params?.userid ? getRoomID(user?.userId, route?.params?.userid) : item?.userId ? getRoomID(user?.userId, item?.userId) : null
+      const roomId = userid ? getRoomID(user?.userId, userid) : item?.userId ? getRoomID(user?.userId, item?.userId) : null
       const id = route?.params?.userid ? route?.params?.userid : item?.userId
       await firestore().collection('chat-rooms').doc(roomId).set({
         roomId,
@@ -99,7 +97,7 @@ const ChatScreen = () => {
         name:recipentNamec,
         senderName:user?.username
       })
-    } catch (error) {
+    } catch (error:any) {
       console.error("Error creating room:", error.message);
     }
   };
@@ -108,8 +106,8 @@ const ChatScreen = () => {
     let message = textRef.current.trim();
     if(!message) return;
     try{
-      const roomId = route?.params?.userid
-      ? getRoomID(user?.userId, route?.params?.userid)
+      const roomId = userid
+      ? getRoomID(user?.userId, userid)
       : item?.userId
       ? getRoomID(user?.userId, item.userId)
       : null;

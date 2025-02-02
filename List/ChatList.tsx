@@ -10,7 +10,7 @@ type NavigationProp = {
 
 type Navigation = NativeStackNavigationProp<NavigationProp>
 interface List{
-  otherusers:any,
+  otherusers:any[],
   currentUser:any
 }
 const ChatList:React.FC<List> = ({otherusers,currentUser}) => {
@@ -18,12 +18,17 @@ const ChatList:React.FC<List> = ({otherusers,currentUser}) => {
 
   return (
    <View>
-    {otherusers.map((item:any) =>(
-      <View style={{padding:10}} key={Math.random()}>
+    {Array.isArray(otherusers) && otherusers.map((item:any) =>(
+      <View style={{padding:10}} key={item.id || item.userId}>
           <ChatRoom
                     
                     User={currentUser}
-                    onPress={() => navigation.navigate('Chat',{item})}
+                    onPress={() => {
+                      if(item){
+                        navigation.navigate('Chat',{item})
+                      }else{
+                        console.error('Item is undefined or null');
+                      }}}
                     next_item={item}
                    />
       </View>          
