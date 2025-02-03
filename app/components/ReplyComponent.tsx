@@ -8,11 +8,21 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import color from '../../config/color';
 import { useSelector } from 'react-redux';
 import firestore from '@react-native-firebase/firestore'
-const ReplyComponent = ({name,content,post_id,comment_id,reply_id,count}) => {
 
-    const [press,setIsPress] = useState(false)
+interface ReplyProp{
+  name?:string,
+  content?:string,
+  post_id?:string,
+  comment_id?:string,
+  reply_id?:string,
+  count?:number
+}
+const ReplyComponent:React.FC<ReplyProp> = ({name,content,post_id,comment_id,reply_id,count}) => {
+
+    const [press,setIsPress] = useState<boolean>(false)
+    const [isloading,setLoading] = useState<boolean>(false)
     const {user} = useAuth();
-    const profileImage = useSelector((state) => state.user.profileImage)
+    const profileImage = useSelector((state:any) => state.user.profileImage)
 
     const handleLike = async () => {
       if(isloading) return
@@ -28,10 +38,10 @@ const ReplyComponent = ({name,content,post_id,comment_id,reply_id,count}) => {
         .doc(reply_id);
         await firestore().runTransaction(async (transaction)=>{
           const doc = await transaction.get(docRef)
-          if (!doc.exists()) throw new Error ('Document doesnt exists');
+          if (!doc.exists) throw new Error ('Document doesnt exists');
 
-          const currentLikes = doc.data().like_count || 0
-          const likeBy = doc.data().liked_by || []
+          const currentLikes = doc?.data()?.like_count || 0
+          const likeBy = doc?.data()?.liked_by || []
           const hasliked = likeBy.includes(user.userId)
 
           let newlike
@@ -39,7 +49,7 @@ const ReplyComponent = ({name,content,post_id,comment_id,reply_id,count}) => {
 
           if(hasliked){
             newlike = currentLikes - 1
-            updatedLike = likeBy.filter((id)=> id != user?.userId)
+            updatedLike = likeBy.filter((id:string)=> id != user?.userId)
           }else{
             newlike = currentLikes + 1
             updatedLike = [...likeBy,user.userId]
@@ -157,7 +167,7 @@ const styles = StyleSheet.create({
     },
     postDate:{
       marginTop:5,
-      paddin:5,
+      padding:5,
       fontSize:9,
       color:'#8a8a8a',
       fontFamily:color.textFont,

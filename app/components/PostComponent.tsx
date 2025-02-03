@@ -27,6 +27,7 @@ import { Card,Text, TextInput,Divider} from 'react-native-paper';
 import { FlashList } from "@shopify/flash-list";
 import { ScrollView } from 'react-native-gesture-handler';
 import { useTheme } from 'react-native-paper';
+import { useNavigation } from '@react-navigation/native';
 
 interface PostComponentProps {
   auth_profile?: string;
@@ -38,6 +39,15 @@ interface PostComponentProps {
   date?: string;
   comment_count?: number;
   mount?: boolean;  // Optional 'mount' prop
+}
+interface Comment{
+  id?:string,
+  auth_profile?:string,
+  like_count?:number,
+  content?:string,
+  name?:string,
+  createdAt?:FirebaseFirestoreTypes.Timestamp
+
 }
 
 const PostComponent: React.FC<PostComponentProps> = ({
@@ -54,17 +64,18 @@ const PostComponent: React.FC<PostComponentProps> = ({
 
  
 
-    const [press,setIsPress] = useState(false)
-    const [isloading,setLoading] = useState(false)
-    const [modalVisible, setModalVisible] = useState(false);
-    const [comments, setComment] = useState([])
-    const [isReply,setReply] = useState(false)
+    const [press,setIsPress] = useState<boolean>(false)
+    const [isloading,setLoading] = useState<boolean>(false)
+    const [modalVisible, setModalVisible] = useState<boolean>(false);
+    const [comments, setComment] = useState<Comment[]>([])
+    const [isReply,setReply] = useState<string | null>(null)
     const [text,setText] = useState('')
     const {height, width} = useWindowDimensions();
     const dispatch = useDispatch();
     const theme = useTheme()
-    const profileImage = useSelector((state) => state.user.profileimg)
+    const profileImage = useSelector((state:any) => state.user.profileimg)
     const {user} = useAuth();
+    const navigation = useNavigation()
 
 
 
@@ -75,7 +86,7 @@ const PostComponent: React.FC<PostComponentProps> = ({
                 setComment([]);
                 return;
               }
-              let data = []
+              let data:Comment[] = []
               querySnapShot.forEach(documentSnapshot => {
                 data.push({ ...documentSnapshot.data(),id:documentSnapshot.id });
               })
@@ -107,8 +118,8 @@ const PostComponent: React.FC<PostComponentProps> = ({
           const doc = await transaction.get(docRef)
           if (!doc.exists) throw new Error ('Document doesnt exists');
 
-          const currentLikes = doc.data().like_count || 0
-          const likeBy = doc.data().liked_by || []
+          const currentLikes = doc?.data()?.like_count || 0
+          const likeBy = doc?.data()?.liked_by || []
           const hasliked = likeBy.includes(user.userId)
 
           let newlike
@@ -116,7 +127,7 @@ const PostComponent: React.FC<PostComponentProps> = ({
 
           if(hasliked){
             newlike = currentLikes - 1
-            updatedLike = likeBy.filter((id)=> id != user?.userId)
+            updatedLike = likeBy.filter((id:string)=> id != user?.userId)
           }else{
             newlike = currentLikes + 1
             updatedLike = [...likeBy,user.userId]
@@ -142,13 +153,13 @@ const PostComponent: React.FC<PostComponentProps> = ({
           .collection('posts')
           .doc(id)
           .collection('comments')
-          .doc(comments?.id)
+          .doc(id)
           .collection('replys')
           const newDoc = await docRef.add({
             id:user.userId,
             name: user?.username,
             content:text,
-            createdAt: Timestamp.fromDate(new Date()),
+            createdAt: firestore.Timestamp.fromDate(new Date()),
             parentId:id
           })
           await newDoc.update({
@@ -158,7 +169,6 @@ const PostComponent: React.FC<PostComponentProps> = ({
           setTimeout(() =>{
             setLoading(false)
             navigation.goBack()
-            Alert.alert('Success!!', 'post has sent!!');
           },1000)
         } catch (error) {
           setLoading(false)
@@ -185,7 +195,7 @@ const PostComponent: React.FC<PostComponentProps> = ({
         await firestore().runTransaction(async (transaction)=>{
           const doc = await transaction.get(postDocRef)
           if (!doc.exists) throw new Error('Doc does not exists!!')
-          const commentCount = doc.data().comment_count || 0
+          const commentCount = doc?.data()?.comment_count || 0
           transaction.update(postDocRef,{
             comment_count:commentCount + 1
           })
@@ -197,10 +207,9 @@ const PostComponent: React.FC<PostComponentProps> = ({
     }
   return (
     
-    <SafeAreaView style={styles.card}>
+    <SafeAreaView>
       <Card
       elevation={0}
-      mode='contained'
       style={{backgroundColor:'transparent'}}
       >
       <Card.Content>
@@ -220,16 +229,15 @@ const PostComponent: React.FC<PostComponentProps> = ({
     variant="bodySmall"
     style={{
       marginLeft:30,
-      color:theme.colors.text
+      color:theme.colors.primary
     }}
     >{name}</Text>
     <Text
     variant="bodyLarge"
     style={{
-    color:'#000',
     marginLeft:30,
     marginVertical:5,
-    color:theme.colors.text
+    color:theme.colors.primary
     }}
     >{content}</Text>
     </View>
@@ -247,8 +255,7 @@ const PostComponent: React.FC<PostComponentProps> = ({
       <Text
        variant="bodySmall"
        style={{
-        color:theme.colors.text,
-        maringTop:10,
+        color:theme.colors.primary
        }}>{date}</Text>
       <View style={styles.reactionContainer}>
     <TouchableHighlight
@@ -260,8 +267,7 @@ const PostComponent: React.FC<PostComponentProps> = ({
       <View style={{ flexDirection: 'row', alignItems: 'center' }}>
           <MaterialCommunityIcons name="heart" size={15} color={theme.colors.primary}/>
           <Text 
-          variant='bodySmall'
-          style={styles.reactionText}>{count}</Text>
+          variant='bodySmall'>{count}</Text>
         </View>
         </TouchableHighlight>
         <TouchableOpacity onPress={() => setModalVisible(true)} style={styles.reactionIcon}>
@@ -289,7 +295,6 @@ const PostComponent: React.FC<PostComponentProps> = ({
     transparent={true}
     visible={modalVisible}>
     <KeyboardAvoidingView
-      sh
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       keyboardVerticalOffset={0}
       style={styles.centeredView}>
@@ -315,7 +320,7 @@ const PostComponent: React.FC<PostComponentProps> = ({
             <FlashList
             data={comments}
             estimatedItemSize={366}
-            keyExtractor={(item) => item.id}
+            keyExtractor={(item) => item?.id?.toString() || Math.random().toString()}
             renderItem={({item}) => (
               <CommentComponent
                     auth_profile={item.auth_profile}
@@ -324,7 +329,7 @@ const PostComponent: React.FC<PostComponentProps> = ({
                     name={item.name}
                     comment_id={item.id}
                     post_id={id}
-                    date={item.createdAt.toDate().toLocaleString()}/>)}/></ScrollView>
+                    date={item?.createdAt?.toDate().toLocaleString()}/>)}/></ScrollView>
             <View style={{bottom:0,padding:20}}>
               <TextInput
                 value={text}
