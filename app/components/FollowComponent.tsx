@@ -3,7 +3,7 @@ import { Text } from 'react-native-paper'
 
 interface Follow{
   content?:string,
-  count?:number
+  count?:string | number 
 }
 const FollowComponent:React.FC<Follow> = ({content,count}) => {
   return (

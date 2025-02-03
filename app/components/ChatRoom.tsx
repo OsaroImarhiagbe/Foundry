@@ -4,24 +4,32 @@ import { useAuth } from '../authContext';
 import { blurhash } from '../../utils/index';
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import { Image } from 'expo-image';
-import firestore from '@react-native-firebase/firestore';
+import firestore, { FirebaseFirestoreTypes } from '@react-native-firebase/firestore';
 import { getRoomID,formatDate } from '../../utils';
 import Swipeable from 'react-native-gesture-handler/ReanimatedSwipeable';
 import { useDispatch} from 'react-redux';
 import {removeID} from '../features/Message/messageidSlice';
 
-const ChatRoom = ({next_item, onPress,User}) => {
+interface ChatRoomProp{
+  next_item?:any,
+  onPress?:()=>void,
+  User?:any
+}
+
+interface Message {
+  userId?: string;
+  text?: string;
+  createdAt?: FirebaseFirestoreTypes.Timestamp
+}
+
+const ChatRoom:React.FC<ChatRoomProp> = ({next_item, onPress,User}) => {
 
   
  
 
     const {user } = useAuth();
     const dispatch = useDispatch()
-
-
-  
- 
-    const [lastMessage, setLastMessage] = useState(undefined);
+    const [lastMessage, setLastMessage] = useState<Message | null>(null);
     useEffect(() => {
         const roomId = getRoomID(User?.userId,next_item?.userId)
         const docRef = firestore().collection('chat-rooms').doc(roomId);
@@ -37,7 +45,7 @@ const ChatRoom = ({next_item, onPress,User}) => {
       },[User?.userId, next_item?.userId])
 
       const renderTime = () => {
-        if(lastMessage){
+        if(lastMessage?.createdAt){
             let date = lastMessage?.createdAt
             return formatDate(new Date(date?.seconds * 1000))
         }
@@ -76,7 +84,7 @@ const ChatRoom = ({next_item, onPress,User}) => {
       };
       
 
-      const renderRightActions = (progress,dragX) =>{
+      const renderRightActions = () =>{
         return (
           <View style={{borderRadius:15,backgroundColor: '#252525', justifyContent: 'center', alignItems: 'center', paddingHorizontal: 20 }}>
               <TouchableOpacity onPress={handleDelete} >
