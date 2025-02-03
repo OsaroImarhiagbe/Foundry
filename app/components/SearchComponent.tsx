@@ -3,7 +3,15 @@ import { TextInput, View, StyleSheet, TouchableOpacity } from 'react-native'
 import AntDesign from 'react-native-vector-icons/AntDesign'
 import color from '../../config/color';
 
-const SearchComponent = ({backgroundColor,color,onPress, setSearchQuery,searchQuery}) => {
+interface SearchProp{
+  backgroundColor?:string,
+  color?:string,
+  onPress?:() => void,
+  setSearchQuery?:() => void,
+  searchQuery?:string
+}
+
+const SearchComponent:React.FC<SearchProp> = ({backgroundColor,color,onPress, setSearchQuery,searchQuery}) => {
   return (
    <View style={[styles.searchContainer,{backgroundColor:backgroundColor}]}>
     <TextInput

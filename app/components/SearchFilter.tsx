@@ -12,8 +12,10 @@ import color from '../../config/color'
 import { useDispatch} from 'react-redux';
 import { addSkills } from '../features/Skill/skillSlice';
 
+
+
 const SearchFilter = () => {
-    const [searchSkills,setSearchSkills] = useState([])
+    const [searchSkills,setSearchSkills] = useState<string[]>([])
     const dispatch = useDispatch()
 
     useEffect(()=>{
@@ -26,7 +28,7 @@ const SearchFilter = () => {
         )
     }
 
-    const handleToggleSkill = (skill,isSelected) => {
+    const handleToggleSkill = (skill:string,isSelected:boolean) => {
         if(isSelected){
           setSearchSkills((prev)=>[...prev,skill])
           dispatch(addSkills(skill))
@@ -58,28 +60,28 @@ const SearchFilter = () => {
             <CustomCheckBox label='python' onSkillToggle={handleToggleSkill} />
             <MenuItems 
             text='Python'
-            value={null}/>
+            />
             </View>
             <Divider/>
             <View style={{flexDirection:'row',justifyContent:'space-between',alignItems:'center',padding:5}}>
             <CustomCheckBox label='Javascript' onSkillToggle={handleToggleSkill}/>
             <MenuItems 
             text='Javascript'
-            value={null}/>
+            />
             </View>
               <Divider/>
               <View style={{flexDirection:'row',justifyContent:'space-between',alignItems:'center',padding:5}}>
             <CustomCheckBox label='React' onSkillToggle={handleToggleSkill}/>
             <MenuItems 
             text='React'
-            value={null}/>
+            />
             </View>
             <Divider/>
             <View style={{flexDirection:'row',justifyContent:'space-between',alignItems:'center',padding:5}}>
             <CustomCheckBox label='React Native' onSkillToggle={handleToggleSkill}/>
             <MenuItems 
             text='React Native'
-            value={null}/>
+            />
             </View>
           </MenuOptions>
         </Menu>

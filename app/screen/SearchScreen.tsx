@@ -91,7 +91,6 @@ const SearchScreen = () => {
     <View style={styles.screen}>
         <View style={{padding:30, marginTop:40,flexDirection:'row',justifyContent:'space-between',alignItems:'center'}}>
           <SearchComponent 
-          setSearchQuery={setSearchQuery}
           backgroundColor={color.grey}
           color='#00bf63'
           onPress={handleSearch}

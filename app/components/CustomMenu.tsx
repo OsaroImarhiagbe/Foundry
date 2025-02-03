@@ -4,7 +4,14 @@ import {
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import { View,Text,StyleSheet } from 'react-native'
 import color from '../../config/color';
-export const MenuItems = ({text, action,value,icon}) => {
+
+interface Menu {
+  text?:string,
+  action?:() => void,
+  value?:string,
+  icon?:string
+}
+export const MenuItems:React.FC<Menu> = ({text, action,value,icon}) => {
     return (
        
         
