@@ -4,7 +4,14 @@ import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-nat
 import color from '../../config/color';
 import {Text} from 'react-native-paper'
 
-const MessageItem = ({ message_text, current_User,date,id}) => {
+interface Messageitem{
+    message_text?:any,
+    current_User?:any,
+    date?:any,
+    id?:string
+}
+
+const MessageItem:React.FC<Messageitem> = ({ message_text, current_User,date,id}) => {
     
     if (current_User?.userId !== id) {
         return (
@@ -51,7 +58,7 @@ const styles = StyleSheet.create({
     textContainer: {
         padding:10,
         borderRadius: 30,
-        felx:1,
+        flex:1,
         alignSelf:'flex-end',
     },
     leftcontainer: {

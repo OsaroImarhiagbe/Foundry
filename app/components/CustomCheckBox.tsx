@@ -3,7 +3,12 @@ import { TouchableOpacity, View, Text, StyleSheet } from 'react-native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import color from '../../config/color';
 
-const CustomCheckBox = ({label,onSkillToggle}) => {
+interface CustomeCheckBoxProp{
+  label?:string,
+  onSkillToggle:any,
+}
+
+const CustomCheckBox:React.FC<CustomeCheckBoxProp> = ({label,onSkillToggle}) => {
     const [isChecked, setIsChecked] = useState(false);
     const handleChecked = () => {
         setIsChecked(!isChecked);

@@ -1,11 +1,16 @@
 import React,{useState} from 'react'
 import { Banner } from 'react-native-paper';
 
-const NotificationBanner = ({title,message,visible}) => {
-    const [isvisible,setVisible] = useState()
+interface Notification{
+  title?:string,
+  message?:string,
+  visiable?:any
+}
+const NotificationBanner:React.FC<Notification> = ({title,message,visiable}) => {
+    const [isvisible,setVisible] = useState(false)
   return (
     <Banner
-    visible={visible}
+    visible={visiable}
     actions={[
         {
           label: 'Fix it',

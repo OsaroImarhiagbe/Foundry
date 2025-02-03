@@ -142,7 +142,7 @@ export const NotificationProvider = ({ children }:NotificationProp) => {
       {children}
       {notification && (
         <NotificationBanner
-        visible={visible}
+        visiable={visible}
         title={notification.title}
         message={notification.message}
         />
