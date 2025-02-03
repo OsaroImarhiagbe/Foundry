@@ -7,8 +7,8 @@ export const messageidSlice = createSlice({
     },
     reducers:{
         addID: (state,action) =>{
-            if(!state.messagesID.includes(action.payload)){
-                state.messagesID.push(action.payload)
+            if(!state.messagesID.includes(action.payload as never )){
+                state.messagesID.push(action.payload as never)
             }
         },
         removeID: (state,action) => {
