@@ -14,7 +14,6 @@ import {
 } from 'react-native'
 import color from '../../config/color';
 import { useNavigation,DrawerActionType } from '@react-navigation/native';
-import ChatRoomHeader from '../components/ChatRoomHeader.js';;
 import { useAuth } from 'app/authContext.js';
 import firestore, { FirebaseFirestoreTypes } from '@react-native-firebase/firestore'
 import { useDispatch} from 'react-redux';
@@ -22,6 +21,7 @@ import { addId } from '../features/user/userSlice.js';
 import { FlashList } from "@shopify/flash-list";
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import {ActivityIndicator,Text,Divider,useTheme} from 'react-native-paper'
+import {Skeleton} from 'moti/skeleton';
 
 
 
@@ -173,37 +173,6 @@ const fetchMorePost = async () => {
     <View
     style={[styles.screen,{backgroundColor:theme.colors.background}]}
     >
-{/*       
-           <ChatRoomHeader
-          onPress={handlePress}
-          icon='menu'
-          iconColor='#00bf63'
-          icon2='new-message'
-          onPress2={handleMessage}
-          backgroundColor={color.button}
-          /> 
-        <View style={[styles.link,{borderBottomWidth:0.5,borderBottomColor:theme.colors.primary,backgroundColor:'transparent'}]}>
-          <TouchableOpacity onPress={() => console.log('text pressed')}>
-          <Text
-           variant='titleMedium'
-           style={{color:theme.colors.text}}
-           >Resources</Text></TouchableOpacity>
-          <TouchableOpacity onPress={() => console.log('text pressed')}>
-          <Text
-          variant='titleMedium'
-          style={{color:theme.colors.text}}
-          >Community</Text></TouchableOpacity>
-          <TouchableOpacity onPress={() => console.log('text pressed')}>
-          <Text
-           variant='titleMedium'
-           style={{color:theme.colors.text}}
-           >Code</Text></TouchableOpacity>
-          <TouchableOpacity onPress={() => console.log('test pressed')}>
-          <Text
-           variant='titleMedium'
-           style={{color:theme.colors.text}}
-           >AI Assistant</Text></TouchableOpacity>
-        </View> */}
    {mount ? Array.from({length:5}).map((_,index) => (
     <PostComponent key={index} mount={mount}/>
    ))
