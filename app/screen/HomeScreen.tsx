@@ -14,7 +14,7 @@ import {
   useColorScheme
 } from 'react-native'
 import color from '../../config/color';
-import { useNavigation,DrawerActionType } from '@react-navigation/native';
+import { useNavigation} from '@react-navigation/native';
 import { useAuth } from 'app/authContext.js';
 import firestore, { FirebaseFirestoreTypes } from '@react-native-firebase/firestore'
 import { useDispatch} from 'react-redux';
@@ -24,6 +24,7 @@ import { createMaterialTopTabNavigator } from '@react-navigation/material-top-ta
 import {ActivityIndicator,Text,Divider,useTheme} from 'react-native-paper'
 import {Skeleton} from 'moti/skeleton';
 import { MotiView } from 'moti';
+import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 
 
 const PostComponent = lazy(() => import('../components/PostComponent'))
@@ -183,7 +184,7 @@ const fetchMorePost = async () => {
     style={[styles.container, styles.padded]}
     animate={{ backgroundColor: dark_or_light ? '#000000' : '#ffffff' }}
   >
-    <Skeleton colorMode='light' radius="round" height={75} width={75} />
+    <Skeleton colorMode='light' radius="round" height={hp(4.3)}/>
     <Spacer />
     <Skeleton colorMode='light' width={250} />
     <Spacer height={8} />

@@ -7,7 +7,7 @@ KeyboardAvoidingView,
 Platform,
 Modal,
 useWindowDimensions,
-TouchableWithoutFeedback} from 'react-native'
+} from 'react-native'
 import { blurhash } from '../../utils/index'
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import { Image } from 'expo-image';
