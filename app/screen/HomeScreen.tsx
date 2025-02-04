@@ -11,6 +11,7 @@ import {
   useWindowDimensions,
   ScrollView,
   Animated,
+  useColorScheme
 } from 'react-native'
 import color from '../../config/color';
 import { useNavigation,DrawerActionType } from '@react-navigation/native';
@@ -22,13 +23,13 @@ import { FlashList } from "@shopify/flash-list";
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import {ActivityIndicator,Text,Divider,useTheme} from 'react-native-paper'
 import {Skeleton} from 'moti/skeleton';
-
+import { MotiView } from 'moti';
 
 
 const PostComponent = lazy(() => import('../components/PostComponent'))
 
 
-
+const Spacer = ({ height = 16 }) => <View style={{ height }} />;
 interface Post{
   id: string;
   auth_profile?: string;
@@ -66,6 +67,7 @@ const HomeScreen = () => {
   const [hasMore, setHasMore] = useState<boolean>(true);
   const [mount, setMount] = useState<boolean>(false)
   const scrollY = useState(new Animated.Value(0))[0];
+  const dark_or_light = useColorScheme()
 
 
   const memoPost = useMemo(() => {return post},[post])
@@ -174,7 +176,21 @@ const fetchMorePost = async () => {
     style={[styles.screen,{backgroundColor:theme.colors.background}]}
     >
    {mount ? Array.from({length:5}).map((_,index) => (
-    <PostComponent key={index} mount={mount}/>
+    <MotiView
+    transition={{
+      type: 'timing',
+    }}
+    style={[styles.container, styles.padded]}
+    animate={{ backgroundColor: dark_or_light ? '#000000' : '#ffffff' }}
+  >
+    <Skeleton colorMode='light' radius="round" height={75} width={75} />
+    <Spacer />
+    <Skeleton colorMode='light' width={250} />
+    <Spacer height={8} />
+    <Skeleton colorMode='light' width={'100%'} />
+    <Spacer height={8} />
+    <Skeleton colorMode='light' width={'100%'} />
+  </MotiView>
    ))
    : <FlashList
     contentContainerStyle={{padding:0}}
@@ -222,6 +238,12 @@ const styles = StyleSheet.create({
     screen:{
       flex:1,
   },
+  padded: {
+    padding: 16,
+  },
+  container:{
+    flex:1
+  }
 })
 
 export default HomeScreen
