@@ -12,7 +12,7 @@ import { I18nextProvider } from 'react-i18next';
 import i18n from './app/Language/i18n';
 import { PaperProvider, DefaultTheme,MD3DarkTheme as DarkTheme } from 'react-native-paper';
 import { useColorScheme } from 'react-native';
-//import { NotificationProvider } from './app/NotificationProvider';
+import { NotificationProvider } from './app/NotificationProvider';
 
 
 
@@ -152,13 +152,13 @@ export default function App() {
       <PersistGate loading={isloading} persistor={persistor}>
         <MenuProvider>
           <AuthContextProvider>
-          {/* <NotificationProvider> */}
         <PaperProvider theme={theme}>
         <NavigationContainer>
+        <NotificationProvider>
           {isloading ? <SplashScreen/> :   <AuthNavigation/> }
+          </NotificationProvider>
         </NavigationContainer>
         </PaperProvider>
-        {/* </NotificationProvider> */}
       </AuthContextProvider>
       <StatusBar style={colorScheme === 'dark' ? 'dark':'light'} />
       </MenuProvider>

@@ -6,9 +6,12 @@ import messaging, { FirebaseMessagingTypes } from '@react-native-firebase/messag
 import firestore from '@react-native-firebase/firestore';
 import { useAuth } from './authContext';
 
+
 const NotificationContext = createContext<any>(null);
 
-export const useNotification = () => useContext(NotificationContext);
+export const useNotification = () => {
+  return useContext(NotificationContext);
+};
 
 interface NotificationProp {
   children: ReactNode

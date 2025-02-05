@@ -15,10 +15,10 @@ import {
 } from 'react-native'
 import color from '../../config/color';
 import { useNavigation} from '@react-navigation/native';
-import { useAuth } from 'app/authContext.js';
+import { useAuth } from 'app/authContext';
 import firestore, { FirebaseFirestoreTypes } from '@react-native-firebase/firestore'
 import { useDispatch} from 'react-redux';
-import { addId } from '../features/user/userSlice.js';
+import { addId } from '../features/user/userSlice.ts';
 import { FlashList } from "@shopify/flash-list";
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import {ActivityIndicator,Text,Divider,useTheme} from 'react-native-paper'
@@ -178,6 +178,7 @@ const fetchMorePost = async () => {
     >
    {mount ? Array.from({length:5}).map((_,index) => (
     <MotiView
+    key={index}
     transition={{
       type: 'timing',
     }}
