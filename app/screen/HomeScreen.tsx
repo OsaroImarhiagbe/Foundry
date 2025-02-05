@@ -180,7 +180,7 @@ const fetchMorePost = async () => {
     <MotiView
     key={index}
     transition={{
-      type: 'timing',
+      delay:300
     }}
     style={[styles.container, styles.padded]}
     animate={{ backgroundColor: dark_or_light ? '#000000' : '#ffffff' }}
