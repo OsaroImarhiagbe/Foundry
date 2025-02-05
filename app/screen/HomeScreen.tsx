@@ -20,10 +20,9 @@ import firestore, { FirebaseFirestoreTypes } from '@react-native-firebase/firest
 import { useDispatch} from 'react-redux';
 import { addId } from '../features/user/userSlice.ts';
 import { FlashList } from "@shopify/flash-list";
-import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import {ActivityIndicator,Text,Divider,useTheme} from 'react-native-paper'
-import {Skeleton} from 'moti/skeleton';
 import { MotiView } from 'moti';
+import { Skeleton } from 'moti/skeleton';
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 
 
@@ -31,6 +30,7 @@ const PostComponent = lazy(() => import('../components/PostComponent'))
 
 
 const Spacer = ({ height = 16 }) => <View style={{ height }} />;
+
 interface Post{
   id: string;
   auth_profile?: string;
@@ -52,7 +52,6 @@ const Post = () => (
   </ScrollView>
   
 ); 
-const Tab = createMaterialTopTabNavigator();
 
 const HomeScreen = () => {
 
@@ -177,6 +176,7 @@ const fetchMorePost = async () => {
     style={[styles.screen,{backgroundColor:theme.colors.background}]}
     >
    {mount ? Array.from({length:5}).map((_,index) => (
+    
     <MotiView
     key={index}
     transition={{
@@ -223,7 +223,7 @@ const fetchMorePost = async () => {
       date={item?.createdAt?.toDate().toLocaleString()}
       comment_count={item.comment_count}/>
       </Suspense>}
-    keyExtractor={(item)=> item.post_id || ''}
+    keyExtractor={(item)=> item?.post_id?.toString() || Math.random().toString()}
     /> } 
     </View>
   )

@@ -116,9 +116,10 @@ const config = {
   },
 };
 
-const Stack = createNativeStackNavigator();
+
 
 const StackNavigation = () => {
+  const Stack = createNativeStackNavigator();
 
  
 
