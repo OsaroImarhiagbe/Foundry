@@ -139,7 +139,7 @@ export default function App() {
   const colorScheme = useColorScheme()
   
   const theme = colorScheme === 'dark' ? darkTheme : lightTheme;
-  console.log(colorScheme)
+  console.log('App:',colorScheme)
   
 
 
@@ -155,9 +155,9 @@ export default function App() {
           <AuthContextProvider>
         <PaperProvider theme={theme}>
         <NavigationContainer>
-        {/* <NotificationProvider> */}
+        <NotificationProvider>
           {isloading ? <SplashScreen/> :   <AuthNavigation/> }
-          {/* </NotificationProvider> */}
+          </NotificationProvider>
         </NavigationContainer>
         </PaperProvider>
       </AuthContextProvider>

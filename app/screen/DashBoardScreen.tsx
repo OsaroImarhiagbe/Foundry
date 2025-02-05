@@ -8,7 +8,8 @@ import {
     ScrollView,
     StyleSheet,
     TouchableOpacity,
-    useWindowDimensions} from 'react-native'
+    useWindowDimensions,
+    useColorScheme} from 'react-native'
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
@@ -25,11 +26,13 @@ import { FlashList } from '@shopify/flash-list';
 import { Avatar, Button, Card, Text } from 'react-native-paper';
 import { DrawerNavigationProp } from '@react-navigation/drawer';
 //import Tts from 'react-native-tts';
+import { MotiView } from 'moti';
+import { Skeleton } from 'moti/skeleton';
 import LottieView from 'lottie-react-native';
 
 const Tab = createMaterialTopTabNavigator();
 
-
+const Spacer = ({ height = 16 }) => <View style={{ height }} />;
 
 type RootDrawerParamList = {
   Home: undefined;
@@ -47,9 +50,18 @@ const DashBoardScreen = () => {
     const {user} = useAuth()
     const navigation = useNavigation<Prop>()
     const [speaking,setSpeaking] = useState(false)
+    const [loading,setLoading] = useState<boolean>(false)
     const theme = useTheme()
+    const dark_or_light = useColorScheme()
 
     const skills = ['Quick Search','hello','hello','hello','hello']
+
+    useEffect(() => {
+      setLoading(true)
+      setTimeout( () => {
+        setLoading(false)
+      },3000)
+    },[])
 
     // useEffect(()=>{
     //   Tts.getInitStatus().then(() => {
@@ -78,7 +90,19 @@ const DashBoardScreen = () => {
             variant='titleMedium'
             style={{paddingLeft:10}}
             >Jay Actions</Text>
-            <FlashList
+            {
+              loading ? <MotiView
+              transition={{
+                delay:300
+              }}
+              style={[styles.container, styles.padded]}
+            >
+              <Skeleton colorMode={dark_or_light ? 'dark' :'light'} width={250} />
+              <Spacer height={8} />
+              <Skeleton colorMode={dark_or_light ? 'dark' :'light'} width={'100%'} />
+              <Spacer height={8} />
+              <Skeleton colorMode={dark_or_light ? 'dark' :'light'} width={'100%'} />
+            </MotiView> :    <FlashList
             showsHorizontalScrollIndicator={false}
             horizontal={true}
             estimatedItemSize={420}
@@ -95,6 +119,7 @@ const DashBoardScreen = () => {
               </Card>
             )}
             />
+            }
           </View>
     </View>
     </ScrollView>
@@ -170,6 +195,12 @@ const styles = StyleSheet.create({
     icon:{
       margin:5
     },
+    padded: {
+      padding: 16,
+    },
+    container:{
+      flex:1
+    }
 });
 
 export default DashBoardScreen

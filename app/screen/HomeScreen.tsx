@@ -185,13 +185,13 @@ const fetchMorePost = async () => {
     style={[styles.container, styles.padded]}
     animate={{ backgroundColor: dark_or_light ? '#000000' : '#ffffff' }}
   >
-    <Skeleton colorMode='light' radius="round" height={hp(4.3)}/>
+    <Skeleton colorMode={dark_or_light ? 'dark' :'light'} radius="round" height={hp(4.3)}/>
     <Spacer />
-    <Skeleton colorMode='light' width={250} />
+    <Skeleton colorMode={dark_or_light ? 'dark' :'light'} width={250} />
     <Spacer height={8} />
-    <Skeleton colorMode='light' width={'100%'} />
+    <Skeleton colorMode={dark_or_light ? 'dark' :'light'} width={'100%'} />
     <Spacer height={8} />
-    <Skeleton colorMode='light' width={'100%'} />
+    <Skeleton colorMode={dark_or_light ? 'dark' :'light'} width={'100%'} />
   </MotiView>
    ))
    : <FlashList

@@ -60,7 +60,7 @@ export const NotificationProvider = ({ children }:NotificationProp) => {
       const fetchToken = async () => {
         try{
           
-            await messaging().registerDeviceForRemoteMessages();
+            //await messaging().registerDeviceForRemoteMessages();
             await notifee.requestPermission();
             const token = await messaging().getToken();
             await firestore().collection('users').doc(user.userId).update({
