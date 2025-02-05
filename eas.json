@@ -21,6 +21,9 @@
       "distribution": "internal",
       "autoIncrement": true,
       "environment": "preview",
+      "ios": {
+        "simulator": true
+      },
       "env": {
         "ENV_FILE": "uat"
       },
