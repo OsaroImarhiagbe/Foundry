@@ -1,7 +1,9 @@
 import React,
 {
   useEffect,
-  useState
+  useState,
+  lazy,
+  Suspense
 }from 'react'
 import {
     View,
@@ -23,15 +25,16 @@ import { TouchableWithoutFeedback } from 'react-native-gesture-handler';
 import { FAB } from 'react-native-paper';
 import Entypo from 'react-native-vector-icons/Entypo';
 import { FlashList } from '@shopify/flash-list';
-import { Avatar, Button, Card, Text } from 'react-native-paper';
+import { Avatar, Button, Card, Text,ActivityIndicator } from 'react-native-paper';
 import { DrawerNavigationProp } from '@react-navigation/drawer';
-//import Tts from 'react-native-tts';
+import { FirebaseFirestoreTypes } from '@react-native-firebase/firestore';
 import { MotiView } from 'moti';
 import { Skeleton } from 'moti/skeleton';
 import LottieView from 'lottie-react-native';
 
-const Tab = createMaterialTopTabNavigator();
 
+const Tab = createMaterialTopTabNavigator();
+const PostComponent = lazy(() => import('../components/PostComponent'))
 const Spacer = ({ height = 16 }) => <View style={{ height }} />;
 
 type RootDrawerParamList = {
@@ -40,6 +43,19 @@ type RootDrawerParamList = {
   Post:undefined
 };
 
+
+interface Post{
+  id: string;
+  auth_profile?: string;
+  like_count?: number;
+  imageUrl?: string;
+  post_id?: string;
+  name?: string;
+  content?: string;
+  createdAt?: FirebaseFirestoreTypes.Timestamp
+  comment_count?: number;
+  mount?:boolean
+};
 
 type Prop = DrawerNavigationProp<RootDrawerParamList>;
 
@@ -53,6 +69,7 @@ const DashBoardScreen = () => {
     const [loading,setLoading] = useState<boolean>(false)
     const theme = useTheme()
     const dark_or_light = useColorScheme()
+    const [post, setPost] = useState<Post[]>([])
 
     const skills = ['Quick Search','hello','hello','hello','hello']
 
@@ -106,20 +123,20 @@ const DashBoardScreen = () => {
             showsHorizontalScrollIndicator={false}
             horizontal={true}
             estimatedItemSize={420}
-            data={skills}
-            renderItem={({item,index})=>(
-              <Card key={index} style={{margin:5,width:wp('70%')}}>
-              <Card.Title title={item}/>
-              <Card.Content>
-                <Text variant="bodyMedium">HI</Text>
-              </Card.Content>
-              <Card.Actions>
-                <Button>Ok</Button>
-              </Card.Actions>
-              </Card>
-            )}
-            />
-            }
+            data={post}
+            renderItem={({item}) => <Suspense fallback={<ActivityIndicator size='small' color='#000'/>}>
+            <PostComponent
+            auth_profile={item.auth_profile}
+            count={item.like_count}
+            url={item.imageUrl}
+            id={item.post_id}
+            name={item.name}
+            content={item.content}
+            date={item?.createdAt?.toDate().toLocaleString()}
+            comment_count={item.comment_count}/>
+            </Suspense>}
+          keyExtractor={(item)=> item?.post_id?.toString() || Math.random().toString()}
+          />}
           </View>
     </View>
     </ScrollView>
