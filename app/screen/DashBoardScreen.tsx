@@ -25,12 +25,11 @@ import { TouchableWithoutFeedback } from 'react-native-gesture-handler';
 import { FAB } from 'react-native-paper';
 import Entypo from 'react-native-vector-icons/Entypo';
 import { FlashList } from '@shopify/flash-list';
-import { Avatar, Button, Card, Text,ActivityIndicator } from 'react-native-paper';
+import {Text,ActivityIndicator,Divider } from 'react-native-paper';
 import { DrawerNavigationProp } from '@react-navigation/drawer';
 import { FirebaseFirestoreTypes } from '@react-native-firebase/firestore';
 import { MotiView } from 'moti';
 import { Skeleton } from 'moti/skeleton';
-import LottieView from 'lottie-react-native';
 
 
 const Tab = createMaterialTopTabNavigator();
@@ -79,27 +78,16 @@ const DashBoardScreen = () => {
         setLoading(false)
       },3000)
     },[])
-  const AIScreen = () => (
+  const FeedScreen = () => (
     <ScrollView
     scrollEnabled
      style={{flex:1,backgroundColor:theme.colors.background}}>
       <View style={{flex:1}}>
-       <View style={{alignItems:'center',justifyContent:'center',paddingTop:hp('15%')}}>
-       <LottieView
-           style={{width:100,height:50,backgroundColor:theme.colors.primary,borderRadius:35,position:'absolute'}}
-           source={require('../assets/animations/JayAI.json')}
-           autoPlay
-           loop
-           />  
-          
-          </View>
-          <View>
-            <Text
-            variant='titleMedium'
-            style={{paddingLeft:10}}
-            >Jay Actions</Text>
             {
-              loading ? <MotiView
+              loading ?
+              Array.from({length:5}).map((_,index)=> (
+                <MotiView
+                key={index}
               transition={{
                 delay:300
               }}
@@ -110,11 +98,19 @@ const DashBoardScreen = () => {
               <Skeleton colorMode={dark_or_light ? 'dark' :'light'} width={'100%'} />
               <Spacer height={8} />
               <Skeleton colorMode={dark_or_light ? 'dark' :'light'} width={'100%'} />
-            </MotiView> :    <FlashList
+            </MotiView>
+              )) :    <FlashList
             showsHorizontalScrollIndicator={false}
             horizontal={true}
             estimatedItemSize={420}
             data={post}
+            ListEmptyComponent={(item) => (
+              <View style={{flex:1,alignItems:'center',justifyContent:'center'}}><Text>No Post</Text></View>
+              
+            )}
+            ItemSeparatorComponent={()=> (
+              <Divider/>
+            )}
             renderItem={({item}) => <Suspense fallback={<ActivityIndicator size='small' color='#000'/>}>
             <PostComponent
             auth_profile={item.auth_profile}
@@ -129,7 +125,6 @@ const DashBoardScreen = () => {
           keyExtractor={(item)=> item?.post_id?.toString() || Math.random().toString()}
           />}
           </View>
-    </View>
     </ScrollView>
     
   );
@@ -175,8 +170,8 @@ const DashBoardScreen = () => {
     }}
     >
         <Tab.Screen
-        name='JAY'
-        component={AIScreen}
+        name='Network'
+        component={FeedScreen}
         />
         <Tab.Screen
         name='Community'
