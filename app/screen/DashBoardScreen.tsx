@@ -79,15 +79,6 @@ const DashBoardScreen = () => {
         setLoading(false)
       },3000)
     },[])
-
-    // useEffect(()=>{
-    //   Tts.getInitStatus().then(() => {
-    //     Tts.addEventListener('tts-start', () => setSpeaking(true));
-    //     Tts.speak('Hello how are you!')
-    //     Tts.speak('I am Jay your AI assistant!')
-    //   }).catch((error) => console.error('Error initilzing:',error));
-    //   return () => Tts.removeAllListeners()
-    // },[])
   const AIScreen = () => (
     <ScrollView
     scrollEnabled
