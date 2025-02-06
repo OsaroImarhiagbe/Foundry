@@ -72,16 +72,16 @@ const HomeScreen = () => {
 
   const memoPost = useMemo(() => {return post},[post])
 
-  const headerOpacity = scrollY.interpolate({
-    inputRange: [0, 250],
-    outputRange: [1, 0],
-    extrapolate: 'clamp',
-  });
-  const headerBackgroundColor = scrollY.interpolate({
-    inputRange: [0, 250],
-    outputRange: ['rgba(0, 0, 0, 0)', 'rgba(0, 0,0,0)'], // Adjust the color
-    extrapolate: 'clamp',
-  });
+  // const headerOpacity = scrollY.interpolate({
+  //   inputRange: [0, 250],
+  //   outputRange: [1, 0],
+  //   extrapolate: 'clamp',
+  // });
+  // const headerBackgroundColor = scrollY.interpolate({
+  //   inputRange: [0, 250],
+  //   outputRange: ['rgba(0, 0, 0, 0)', 'rgba(0, 0,0,0)'], // Adjust the color
+  //   extrapolate: 'clamp',
+  // });
 
   useEffect(() => {
     if (!user?.userId) return;

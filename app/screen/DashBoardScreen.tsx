@@ -94,10 +94,11 @@ const DashBoardScreen = () => {
               style={[styles.container, styles.padded]}
             >
               <Skeleton colorMode={dark_or_light ? 'dark' :'light'} width={250} />
-              <Spacer height={8} />
+              <Spacer height={8}/>
               <Skeleton colorMode={dark_or_light ? 'dark' :'light'} width={'100%'} />
-              <Spacer height={8} />
+              <Spacer height={8}/>
               <Skeleton colorMode={dark_or_light ? 'dark' :'light'} width={'100%'} />
+              <Divider/>
             </MotiView>
               )) :    <FlashList
             showsHorizontalScrollIndicator={false}
@@ -157,7 +158,7 @@ const DashBoardScreen = () => {
         screenOptions={{
             swipeEnabled:true,
             tabBarIndicatorStyle:{
-            backgroundColor:'#000',
+            backgroundColor:theme.colors.primary,
             width:wp('50%'),
             },
             tabBarStyle:{
