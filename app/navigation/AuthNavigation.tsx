@@ -15,7 +15,7 @@ const ProjectEntryScreen = lazy(() => import('../screen/ProjectEntryScreen'))
 const SkillsScreen = lazy(() => import('../screen/SkillsScreen'))
 const OnboardingScreen = lazy(()=> import('../screen/OnboardingScreen'))
 const ChatScreen = lazy(() => import('../screen/ChatScreen'))
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+
 
 
 type NavigationProp = {
