@@ -3,7 +3,6 @@ import {
   View,
   Text,
   StyleSheet,
-  SafeAreaView,
   TextInput, 
   Platform, 
   Alert, 
@@ -25,15 +24,17 @@ import firestore from '@react-native-firebase/firestore'
 import color from '../../config/color';
 import storage from '@react-native-firebase/storage'
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { useTheme,Icon } from 'react-native-paper';
 
 type NavigationProp = {
-  Dash:undefined
+  Main:undefined
 }
 
-type Navigation = NativeStackNavigationProp<NavigationProp, 'Dash'>;
+type Navigation = NativeStackNavigationProp<NavigationProp, 'Main'>;
 const PostScreen = () => {
 
   const { user } = useAuth();
+  const theme = useTheme()
   const [text, setText] = useState<string>('');
   const [image, setImage] = useState<string | null>(null);
   const [filename,setFileName] = useState<string | undefined>(undefined)
@@ -68,7 +69,7 @@ const PostScreen = () => {
         post_id: newDoc.id
       })
       setTimeout(() => {
-        navigation.navigate('Dash');
+        navigation.navigate('Main');
         Alert.alert('Success!!', 'Post has been sent!!');
       }, 1000);
       dispatch(addPost({ id: newDoc.id, content: text }));
@@ -91,12 +92,12 @@ const PostScreen = () => {
           {
             text: 'Discard',
             style: 'destructive',
-            onPress: () => navigation.navigate('Dash'),
+            onPress: () => navigation.navigate('Main'),
           },
         ]
       );
     } else {
-      navigation.navigate('Dash');
+      navigation.navigate('Main');
     }
   };
   const pickImage = async () => {
@@ -114,15 +115,27 @@ const PostScreen = () => {
   }
   return (
     <TouchableWithoutFeedback onPress={() =>  Keyboard.dismiss()}>
-      <View style={styles.screen}>
+      <View style={[styles.screen,{backgroundColor:theme.colors.background}]}>
       <View style={styles.container}>
+        <View style={{flexDirection:'row'}}>
         <TouchableOpacity onPress={handleCancel}>
-          <View style={styles.cancelContainer}>
-            <Text style={styles.text}>Cancel</Text>
-          </View>
+         <Icon
+         source='close'
+         size={25}/>
         </TouchableOpacity>
+        <Image
+          source={user?.profileUrl}
+          placeholder={{blurhash}}
+          style={{height:hp(3.3), aspectRatio:1, borderRadius:100}}
+          transition={500}
+          />
+        </View>
+        <View style={{flexDirection:'row'}}>
+        <Icon
+         source='close'
+         size={25}/>
         <TouchableOpacity onPress={handlePost}>
-          <View style={styles.postContainer}>
+          <View style={[styles.postContainer,{backgroundColor:theme.colors.primary}]}>
             {loading ? (
               <ActivityIndicator size='small' color='#fff' />
             ) : (
@@ -130,16 +143,7 @@ const PostScreen = () => {
             )}
           </View>
         </TouchableOpacity>
-      </View>
-      <View>
-        <View style={{paddingLeft:10}}>
-        <Image
-          source={user?.profileUrl}
-          placeholder={{blurhash}}
-          style={{height:hp(4.3), aspectRatio:1, borderRadius:100}}
-          transition={500}
-                />
-       </View>
+        </View>
       </View>
       <View style={styles.textContainer}>
         <TextInput
@@ -179,31 +183,21 @@ const styles = StyleSheet.create({
   screen: {
     paddingTop:hp('10%'),
     flex: 1,
-    backgroundColor: color.backgroundcolor,
   },
   container: {
     padding: 10,
-    marginTop: 10,
     flexDirection: 'row',
-    height: 60,
     paddingHorizontal: 15,
-    justifyContent: 'space-between',
+    justifyContent:'space-between'
   },
   postContainer: {
     borderRadius: 10,
     padding: 10,
     width: 90,
-    backgroundColor: '#00bf63',
   },
   loading: {
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  cancelContainer: {
-    padding: 10,
-    borderRadius: 10,
-    width: 90,
-    backgroundColor: '#8a8a8a',
   },
   text: {
     textAlign: 'center',
@@ -214,16 +208,12 @@ const styles = StyleSheet.create({
   textContainer: {
     flex: 1,
     paddingHorizontal: 22,
-    marginTop: 10,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
     borderRadius: 10,
     padding: 10,
   },
   textArea: {
     flex: 1,
     color: '#ffffff',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.3)',
     borderRadius: 10,
     padding: 10,
     marginBottom: 10,

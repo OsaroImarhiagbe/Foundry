@@ -8,8 +8,7 @@ const RegisterScreen = lazy(() => import('../screen/RegisterScreen'))
 const DrawerNavigation = lazy(() => import('./DrawerNavigation'))
 const OnboardingScreen = lazy(()=> import('../screen/OnboardingScreen'))
 const LoginScreen = lazy(()=> import('../screen/LoginScreen'));
-
-
+const SecondStackNavigation = lazy(() => import('../navigation/SecondStackNavigation'))
 type NavigationProp = {
   navigate(arg0: string, arg1: { screen: string; }): unknown;
   Drawer:undefined,
@@ -47,7 +46,13 @@ const DrawerNavigationWrapper = () => {
 }
 
 
-
+const SecondStackNavigationWrapper = () => {
+  return (
+    <Suspense fallback={<ActivityIndicator size='small' color='#000'/>}>
+    <SecondStackNavigation/>
+  </Suspense>
+  )
+}
 const OnboardingScreenWrapper = () =>{
   return (
     <Suspense fallback={<ActivityIndicator size='small' color='#fff'/>}>
@@ -93,8 +98,6 @@ const AuthNavigation = () => {
     }
   
 
-
-
     const Stack = createStackNavigator()
 
 
@@ -106,7 +109,7 @@ const AuthNavigation = () => {
           <Stack.Navigator
           initialRouteName='Drawer'
           >
-             <Stack.Screen
+          <Stack.Screen
             name='Drawer'
             component={DrawerNavigationWrapper}
             options={{
@@ -114,6 +117,13 @@ const AuthNavigation = () => {
               gestureEnabled:false,
               animation:'fade_from_bottom'
             }}/>
+       <Stack.Screen
+       name='SecondStack'
+       component={SecondStackNavigationWrapper}
+       options={{
+         headerShown:false,
+         gestureEnabled:false,
+       }}/>
           </Stack.Navigator>
         )
     }else{
@@ -151,6 +161,13 @@ const AuthNavigation = () => {
             gestureEnabled:false,
             animation:'fade_from_bottom'
           }}/>
+       <Stack.Screen
+      name='SecondStack'
+      component={SecondStackNavigationWrapper}
+      options={{
+        headerShown:false,
+        gestureEnabled:false,
+      }}/>
         </Stack.Navigator>
       )
     }

@@ -136,7 +136,7 @@ const DashBoardScreen = () => {
         source={user?.profileUrl}
         placeholder={{blurhash}}
         cachePolicy='none'/>
-        </TouchableWithoutFeedback>
+        </TouchableWithoutFeedback >
         <Image
         source={require('../assets/images/icon.png')}
         style={styles.logo}
