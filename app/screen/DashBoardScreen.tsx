@@ -31,17 +31,15 @@ import { FirebaseFirestoreTypes } from '@react-native-firebase/firestore';
 import { MotiView } from 'moti';
 import { Skeleton } from 'moti/skeleton';
 
-
+type NavigationProp = {
+  openDrawer(): unknown;
+  navigate(arg0: string, arg1: { screen: string; }): unknown;
+  SecondStack:undefined,
+  Home:undefined
+}
 const Tab = createMaterialTopTabNavigator();
 const PostComponent = lazy(() => import('../components/PostComponent'))
 const Spacer = ({ height = 16 }) => <View style={{ height }} />;
-
-type RootDrawerParamList = {
-  Home: undefined;
-  Settings: undefined;
-  Post:undefined
-};
-
 
 interface Post{
   id: string;
@@ -56,15 +54,12 @@ interface Post{
   mount?:boolean
 };
 
-type Prop = DrawerNavigationProp<RootDrawerParamList>;
-
 const DashBoardScreen = () => {
 
     const insets = useSafeAreaInsets(); 
     const {width,height} = useWindowDimensions();
     const {user} = useAuth()
-    const navigation = useNavigation<Prop>()
-    const [speaking,setSpeaking] = useState(false)
+    const navigation = useNavigation<NavigationProp>()
     const [loading,setLoading] = useState<boolean>(false)
     const theme = useTheme()
     const dark_or_light = useColorScheme()
@@ -147,7 +142,7 @@ const DashBoardScreen = () => {
         style={styles.logo}
         />
        <TouchableOpacity
-         onPress={() => navigation.navigate('Post')}>
+         onPress={() => navigation.navigate('SecondStack',{screen:'Post'})}>
         <View style={styles.icon}>
            <Entypo name='new-message' size={20} color={theme.colors.primary}/>
         </View>

@@ -1,21 +1,13 @@
 import { createStackNavigator } from '@react-navigation/stack';
-import LoginScreen from '../screen/LoginScreen';
 import { lazy,Suspense, useEffect,useState } from 'react';
 import { ActivityIndicator } from 'react-native';
-import ProjectScreen from '../screen/ProjectScreen';
-import LocationScreen from '../screen/LocationScreen';
 import { useNavigation } from '@react-navigation/native';
 import {useAuth} from '../authContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 const RegisterScreen = lazy(() => import('../screen/RegisterScreen'))
 const DrawerNavigation = lazy(() => import('./DrawerNavigation'))
-const ReportBugScreen = lazy(() => import('../screen/ReportBugScreen'))
-const ContactUsScreen = lazy(() => import('../screen/ContactUsScreen'))
-const ProjectEntryScreen = lazy(() => import('../screen/ProjectEntryScreen'))
-const SkillsScreen = lazy(() => import('../screen/SkillsScreen'))
 const OnboardingScreen = lazy(()=> import('../screen/OnboardingScreen'))
-const ChatScreen = lazy(() => import('../screen/ChatScreen'))
-
+const LoginScreen = lazy(()=> import('../screen/LoginScreen'));
 
 
 type NavigationProp = {
@@ -34,6 +26,16 @@ const RegisterScreenWrapper = () => {
     )
 }
 
+const LoginScreenWrapper = () => {
+  
+  return (
+    <Suspense fallback={<ActivityIndicator size='small' color='#fff'/>}>
+    <LoginScreen/>
+  </Suspense>
+
+  )
+}
+
 const DrawerNavigationWrapper = () => {
   
     return (
@@ -43,53 +45,8 @@ const DrawerNavigationWrapper = () => {
   
     )
 }
-const ReportBugScreenWrapper = () => {
-  
-  return (
-    <Suspense fallback={<ActivityIndicator size='small' color='#fff'/>}>
-    <ReportBugScreen/>
-  </Suspense>
 
-  )
-}
-const ChatScreenWrapper = () => {
-  
-  return (
-    <Suspense fallback={<ActivityIndicator size='small' color='#000'/>}>
-    <ChatScreen />
-  </Suspense>
 
-  )
-
-}
-const ContactUsScreenWrapper = () => {
-  
-  return (
-    <Suspense fallback={<ActivityIndicator size='small' color='#fff'/>}>
-    <ContactUsScreen/>
-  </Suspense>
-
-  )
-}
-const SkillsScreenWrapper = () => {
-  
-  return (
-    <Suspense fallback={<ActivityIndicator size='small' color='#fff'/>}>
-    <SkillsScreen/>
-  </Suspense>
-
-  )
-}
-
-const ProjectEntryScreenWrapper = () => {
-  
-  return (
-    <Suspense fallback={<ActivityIndicator size='small' color='#fff'/>}>
-    <ProjectEntryScreen/>
-  </Suspense>
-
-  )
-}
 
 const OnboardingScreenWrapper = () =>{
   return (
@@ -157,56 +114,6 @@ const AuthNavigation = () => {
               gestureEnabled:false,
               animation:'fade_from_bottom'
             }}/>
-              <Stack.Screen
-            name="ProjectScreen"
-            component={ProjectScreen}
-            options={{
-              headerShown:false,
-              presentation:'modal',
-            }}/>
-                <Stack.Screen
-            name="LocationScreen"
-            component={LocationScreen}
-            options={{
-              headerShown:false,
-              presentation:'modal',
-            }}/>
-            <Stack.Screen
-            name="ReportBugScreen"
-            component={ReportBugScreenWrapper}
-            options={{
-              headerShown:false,
-              presentation:'modal',
-            }}/>
-              <Stack.Screen
-            name="ContactUsScreen"
-            component={ContactUsScreenWrapper}
-            options={{
-              headerShown:false,
-              presentation:'modal',
-            }}/>
-            <Stack.Screen
-            name="ProjectEntryScreen"
-            component={ProjectEntryScreenWrapper}
-            options={{
-              headerShown:false,
-              presentation:'modal',
-            }}/>
-             <Stack.Screen
-            name="SkillsScreen"
-            component={SkillsScreenWrapper}
-            options={{
-              headerShown:false,
-              presentation:'modal',
-            }}/>
-            <Stack.Screen
-              name='Chat'
-              component={ChatScreenWrapper}
-              options={{
-                headerShown:false,
-                gestureEnabled:false
-                }}
-                />
           </Stack.Navigator>
         )
     }else{
@@ -214,7 +121,7 @@ const AuthNavigation = () => {
         <Stack.Navigator initialRouteName='Login'>    
           <Stack.Screen
             name="Login"
-            component={LoginScreen}
+            component={LoginScreenWrapper}
             options={{
               headerShown:false,
               gestureEnabled:false,
@@ -244,56 +151,6 @@ const AuthNavigation = () => {
             gestureEnabled:false,
             animation:'fade_from_bottom'
           }}/>
-            <Stack.Screen
-          name="ProjectScreen"
-          component={ProjectScreen}
-          options={{
-            headerShown:false,
-            presentation:'modal',
-          }}/>
-              <Stack.Screen
-          name="LocationScreen"
-          component={LocationScreen}
-          options={{
-            headerShown:false,
-            presentation:'modal',
-          }}/>
-          <Stack.Screen
-          name="ReportBugScreen"
-          component={ReportBugScreenWrapper}
-          options={{
-            headerShown:false,
-            presentation:'modal',
-          }}/>
-            <Stack.Screen
-          name="ContactUsScreen"
-          component={ContactUsScreenWrapper}
-          options={{
-            headerShown:false,
-            presentation:'modal',
-          }}/>
-          <Stack.Screen
-          name="ProjectEntryScreen"
-          component={ProjectEntryScreenWrapper}
-          options={{
-            headerShown:false,
-            presentation:'modal',
-          }}/>
-           <Stack.Screen
-          name="SkillsScreen"
-          component={SkillsScreenWrapper}
-          options={{
-            headerShown:false,
-            presentation:'modal',
-          }}/>
-             <Stack.Screen
-              name='Chat'
-              component={ChatScreenWrapper}
-              options={{
-                headerShown:false,
-                gestureEnabled:false
-              }}
-              />
         </Stack.Navigator>
       )
     }

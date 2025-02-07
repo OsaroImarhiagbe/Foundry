@@ -6,14 +6,13 @@ import  DashBoardScreen  from '../screen/DashBoardScreen';
 const HomeScreen = lazy(() => import('../screen/HomeScreen'))
 const MessageScreen = lazy(() => import('../screen/MessageScreen'))
 const AccountScreen = lazy(() => import('../screen/AccountScreen'))
-const PostScreen = lazy(() => import('../screen/PostScreen'))
 const EditScreen = lazy(() => import('../screen/EditScreen'))
 const OtherUserScreen = lazy(() => import('../screen/OtherUserScreen'))
 const EditInputScreen = lazy(() => import('../screen/EditInputScreen'))
 const EditEmailScreen = lazy(() => import('../screen/EditEmailScreen'))
 const EditPhoneScreen = lazy(() => import('../screen/EditPhoneScreen'))
 const EditJobScreen = lazy(() => import('../screen/EditJobScreen'))
-
+const SecondStackNavigation = lazy(() => import('../navigation/SecondStackNavigation'))
 
 const MessageScreenWrapper = () => {
   
@@ -35,17 +34,13 @@ const ProfileScreenWrapper = () => {
   )
 
 }
-const PostScreenWrapper = () => {
-  
+const SecondStackNavigationWrapper = () => {
   return (
     <Suspense fallback={<ActivityIndicator size='small' color='#000'/>}>
-    <PostScreen/>
+    <SecondStackNavigation/>
   </Suspense>
-
   )
-
 }
-
 const HomeScreenWrapper = () => {
   
   return(
@@ -157,14 +152,6 @@ const StackNavigation = () => {
         headerShown:false,
         gestureEnabled:false
       }}/>
-      <Stack.Screen
-      name='Post'
-      component={PostScreenWrapper}
-      options={{
-        headerShown:false,
-        gestureEnabled:false
-      }}
-      />
        <Stack.Screen
       name='Edit'
       component={EditScreenWrapper}
@@ -211,6 +198,13 @@ const StackNavigation = () => {
         headerShown:false,
         gestureEnabled:false,
         presentation:'modal'
+      }}/>
+      <Stack.Screen
+      name='SecondStack'
+      component={SecondStackNavigationWrapper}
+      options={{
+        headerShown:false,
+        gestureEnabled:false,
       }}/>
     </Stack.Navigator>
   );
