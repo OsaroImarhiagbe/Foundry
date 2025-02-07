@@ -90,16 +90,7 @@ const SecondStackNavigation = () => {
  
 
     return (
-      <Stack.Navigator
-      initialRouteName='Dash'>
-    <Stack.Screen
-    name='Dash'
-    component={DashBoardScreenWrapper}
-    options={{
-    headerShown: false, 
-    gestureEnabled:false,
-    }}
-    />
+      <Stack.Navigator>
     <Stack.Screen
       name='Post'
       component={PostScreenWrapper}

@@ -1,7 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState,useEffect,useRef } from 'react';
 import {
   View,
-  Text,
   StyleSheet,
   TextInput, 
   Platform, 
@@ -24,13 +23,13 @@ import firestore from '@react-native-firebase/firestore'
 import color from '../../config/color';
 import storage from '@react-native-firebase/storage'
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { useTheme,Icon } from 'react-native-paper';
-
+import { useTheme,Icon,Text,Button } from 'react-native-paper';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 type NavigationProp = {
-  Main:undefined
+  Dash:undefined
 }
 
-type Navigation = NativeStackNavigationProp<NavigationProp, 'Main'>;
+type Navigation = NativeStackNavigationProp<NavigationProp, 'Dash'>;
 const PostScreen = () => {
 
   const { user } = useAuth();
@@ -40,10 +39,20 @@ const PostScreen = () => {
   const [filename,setFileName] = useState<string | undefined>(undefined)
   const [loading,setLoading] = useState<boolean>(false)
   const hasUnsavedChanges = Boolean(text);
+  const {top} = useSafeAreaInsets()
   const profileImage = useSelector((state:any) => state.user.profileImage)
   const navigation = useNavigation<Navigation>();
-  const dispatch = useDispatch();
+  const textInputRef = useRef<TextInput>(null);
 
+ 
+  const dispatch = useDispatch();
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      textInputRef.current?.focus();
+    }, 100);
+
+    return () => clearTimeout(timeout);
+  }, []);
   const handlePost = async () => {
     if(text.trim() === '') return
     setLoading(true);
@@ -69,7 +78,7 @@ const PostScreen = () => {
         post_id: newDoc.id
       })
       setTimeout(() => {
-        navigation.navigate('Main');
+        navigation.navigate('Dash');
         Alert.alert('Success!!', 'Post has been sent!!');
       }, 1000);
       dispatch(addPost({ id: newDoc.id, content: text }));
@@ -92,12 +101,12 @@ const PostScreen = () => {
           {
             text: 'Discard',
             style: 'destructive',
-            onPress: () => navigation.navigate('Main'),
+            onPress: () => navigation.goBack(),
           },
         ]
       );
     } else {
-      navigation.navigate('Main');
+      navigation.goBack();
     }
   };
   const pickImage = async () => {
@@ -114,15 +123,15 @@ const PostScreen = () => {
     }
   }
   return (
-    <TouchableWithoutFeedback onPress={() =>  Keyboard.dismiss()}>
-      <View style={[styles.screen,{backgroundColor:theme.colors.background}]}>
+      <View style={[styles.screen,{backgroundColor:theme.colors.background,paddingTop:Platform.OS === 'ios' ? top : 0}]}>
       <View style={styles.container}>
-        <View style={{flexDirection:'row'}}>
+        <View style={{flexDirection:'row',alignItems:'center'}}>
         <TouchableOpacity onPress={handleCancel}>
          <Icon
          source='close'
          size={25}/>
         </TouchableOpacity>
+        <View style={{paddingLeft:15}}>
         <Image
           source={user?.profileUrl}
           placeholder={{blurhash}}
@@ -130,16 +139,30 @@ const PostScreen = () => {
           transition={500}
           />
         </View>
-        <View style={{flexDirection:'row'}}>
+        </View>
+        <View style={{flexDirection:'row',alignItems:'center'}}>
+        <View style={{paddingRight:15,flexDirection:'row',alignItems:'center'}}>
+        <Text
+        variant='bodyMedium'
+        >Category</Text>
+        <TouchableWithoutFeedback onPress={() => console.log('press')}>
         <Icon
-         source='close'
+         source='menu-down'
          size={25}/>
+        </TouchableWithoutFeedback>
+        </View>
         <TouchableOpacity onPress={handlePost}>
           <View style={[styles.postContainer,{backgroundColor:theme.colors.primary}]}>
             {loading ? (
               <ActivityIndicator size='small' color='#fff' />
             ) : (
-              <Text style={styles.text}>Post</Text>
+              <Text
+              variant='bodyMedium'
+              style={{
+                textAlign:'center',
+                color:'#000',
+              }}
+              >Post</Text>
             )}
           </View>
         </TouchableOpacity>
@@ -147,13 +170,14 @@ const PostScreen = () => {
       </View>
       <View style={styles.textContainer}>
         <TextInput
+          ref={textInputRef}
           style={styles.textArea}
           value={text}
           onChangeText={(text) => setText(text)}
           numberOfLines={10}
           multiline={true}
-          placeholder='Enter a post......'
-          placeholderTextColor='#ffffff'
+          placeholder='Share your ideas....'
+          placeholderTextColor='grey'
         />
          {image && 
         <View style={{borderRadius:30}}>
@@ -165,23 +189,33 @@ const PostScreen = () => {
       </View>
         <KeyboardAvoidingView 
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        keyboardVerticalOffset={60}
+        keyboardVerticalOffset={0}
         >
-        <View style={{flexDirection:'row',justifyContent:'center',alignItems:'center',marginTop:10}}>
-          <TouchableOpacity style={styles.uploadImageButton} onPress={pickImage}>
-          <MaterialIcons name='camera-alt' size={15} color='#fff' />
-        </TouchableOpacity>
+        <View style={{flexDirection:'row',justifyContent:'space-between'}}>
+          <View style={{flexDirection:'row',alignItems:'center',padding:10}}>
+          <Button
+           mode='contained'
+          >Write With AI</Button>
+          <View style={{paddingLeft:5}}>
+          <Text
+          variant='bodySmall'
+          > 0/20</Text>
+          </View>
+          </View>
+          <View style={{flexDirection:'row',alignItems:'center',padding:10}}>
+          <TouchableWithoutFeedback style={styles.uploadImageButton} onPress={pickImage}>
+          <MaterialIcons name='camera-alt' size={25} color='#fff' />
+        </TouchableWithoutFeedback>
+        <Icon source='plus' size={30}/>
+          </View>
        </View>
         </KeyboardAvoidingView>
     </View>
-    </TouchableWithoutFeedback>
-    
   );
 };
 
 const styles = StyleSheet.create({
   screen: {
-    paddingTop:hp('10%'),
     flex: 1,
   },
   container: {
@@ -191,9 +225,9 @@ const styles = StyleSheet.create({
     justifyContent:'space-between'
   },
   postContainer: {
-    borderRadius: 10,
+    borderRadius: 30,
     padding: 10,
-    width: 90,
+    width:50,
   },
   loading: {
     justifyContent: 'center',
@@ -206,7 +240,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
   },
   textContainer: {
-    flex: 1,
+    flex:1,
     paddingHorizontal: 22,
     borderRadius: 10,
     padding: 10,
@@ -220,19 +254,12 @@ const styles = StyleSheet.create({
   },
   uploadedImage: {
     width: '100%',
-    height: hp(25),
     borderRadius: 10,
     alignSelf: 'center',
     marginTop: 10,
   },
   uploadImageButton: {
-    position: 'absolute',
-    backgroundColor: '#00bf63',
     padding: 12,
-    alignItems: 'center',
-    borderRadius: 50,
-    justifyContent: 'center',
-    top: 5,
   },
 });
 

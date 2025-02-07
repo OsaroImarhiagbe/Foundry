@@ -32,7 +32,7 @@ import { MotiView } from 'moti';
 import { Skeleton } from 'moti/skeleton';
 
 type NavigationProp = {
-  openDrawer(): unknown;
+  openDrawer(): undefined;
   navigate(arg0: string, arg1: { screen: string; }): unknown;
   SecondStack:undefined,
   Home:undefined
