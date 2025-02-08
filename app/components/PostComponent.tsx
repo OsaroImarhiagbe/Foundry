@@ -28,6 +28,7 @@ import { FlashList } from "@shopify/flash-list";
 import { ScrollView } from 'react-native-gesture-handler';
 import { useTheme } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
+import {removeID} from '../features/Message/messageidSlice';
 import {
   Menu,
   MenuOptions,
@@ -212,6 +213,17 @@ const PostComponent: React.FC<PostComponentProps> = ({
         console.error('Error with sending comments:',e)
       }
     }
+
+
+    const handleDelete = async () => {
+      try {
+        const messagesRef = firestore().collection('posts').doc(id)
+        await messagesRef.delete()
+      } catch (error) {
+        console.error('Error deleting document: ', error);
+
+      }
+    }
   return (
     
     <SafeAreaView>
@@ -316,7 +328,7 @@ const PostComponent: React.FC<PostComponentProps> = ({
       >
         <MenuItems 
         text='Delete'
-        action={()=>setCategory('Anyone')}/>
+        action={handleDelete}/>
         <Divider/>
          <MenuItems 
         text='Edit Post'
