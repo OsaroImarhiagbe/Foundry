@@ -28,7 +28,12 @@ import { FlashList } from "@shopify/flash-list";
 import { ScrollView } from 'react-native-gesture-handler';
 import { useTheme } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
-
+import {
+  Menu,
+  MenuOptions,
+  MenuTrigger,
+} from 'react-native-popup-menu';
+import { MenuItems } from '../components/CustomMenu'
 interface PostComponentProps {
   auth_profile?: string;
   count?: number;
@@ -76,6 +81,8 @@ const PostComponent: React.FC<PostComponentProps> = ({
     const profileImage = useSelector((state:any) => state.user.profileimg)
     const {user} = useAuth();
     const navigation = useNavigation()
+    const [category, setCategory] = useState<string>('')
+
 
 
 
@@ -236,7 +243,6 @@ const PostComponent: React.FC<PostComponentProps> = ({
     >{name}</Text>
       </View>
     <View style={{paddingLeft:40}}>
-   
     </View>
     </View>
     <Text
@@ -289,11 +295,42 @@ const PostComponent: React.FC<PostComponentProps> = ({
             }}>{comment_count}</Text>
           </View>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.reactionIcon}>
-          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+        <Menu style={styles.reactionIcon}>
+      <MenuTrigger>
+      <View style={{ flexDirection: 'row', alignItems: 'center' }}>
           <Icon source='dots-horizontal' size={15} color={theme.colors.primary}/>
           </View>
-        </TouchableOpacity>
+      </MenuTrigger>
+      <MenuOptions
+        customStyles={{
+            optionsContainer:{
+                borderRadius:10,
+                marginTop:40,
+                marginLeft:-30,
+                borderCurve:'continuous',
+                backgroundColor:color.white,
+                position:'relative'
+            }
+        }}
+      
+      >
+        <MenuItems 
+        text='Delete'
+        action={()=>setCategory('Anyone')}/>
+        <Divider/>
+         <MenuItems 
+        text='Edit Post'
+        action={()=>setCategory('Creativity and Innovation')}/>
+      <Divider/>
+      <MenuItems 
+        text='Flag'
+        action={()=>setCategory('Collaboration and Community')}/>
+       <Divider/> 
+      <MenuItems 
+        text='Promote'
+        action={()=>setCategory('Statup and Busniess')}/>
+      </MenuOptions>
+    </Menu> 
       </View>
     </View>
     <View>
