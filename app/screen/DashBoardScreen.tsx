@@ -33,9 +33,10 @@ import { Skeleton } from 'moti/skeleton';
 
 type NavigationProp = {
   openDrawer(): undefined;
-  navigate(arg0: string, arg1: { screen: string; }): unknown;
+  navigate(arg0?: string, arg1?: { screen: string; }): unknown;
   SecondStack:undefined,
-  Home:undefined
+  Home:undefined,
+  Post:undefined
 }
 const Tab = createMaterialTopTabNavigator();
 const PostComponent = lazy(() => import('../components/PostComponent'))
@@ -142,7 +143,7 @@ const DashBoardScreen = () => {
         style={styles.logo}
         />
        <TouchableOpacity
-         onPress={() => navigation.navigate('SecondStack',{screen:'Post'})}>
+         onPress={() => navigation.navigate('Message')}>
         <View style={styles.icon}>
            <Entypo name='new-message' size={20} color={theme.colors.primary}/>
         </View>
@@ -159,7 +160,7 @@ const DashBoardScreen = () => {
             tabBarStyle:{
             backgroundColor:'transparent',
             },
-          tabBarActiveTintColor:theme.colors.primary,
+          tabBarActiveTintColor:theme.colors.tertiary,
           tabBarLabelStyle:{
             fontSize:hp(1.5)
           }
@@ -175,11 +176,11 @@ const DashBoardScreen = () => {
         />
         </Tab.Navigator>
         <FAB
-          icon="robot"
+          icon="plus"
           variant='surface'
           size='medium'
           style={{width:wp('20%'),position:'absolute',right:16,top:hp(65),alignItems:'center',borderRadius:30}}
-          onPress={() => console.log('Pressed')}
+          onPress={() => navigation.navigate('SecondStack',{screen:'Post'})}
         />
         </View>
     </View>

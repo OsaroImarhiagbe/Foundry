@@ -10,7 +10,7 @@ import AuthNavigation from './app/navigation/AuthNavigation';
 import { PersistGate } from 'redux-persist/integration/react';
 import { I18nextProvider } from 'react-i18next';
 import i18n from './app/Language/i18n';
-import { PaperProvider, DefaultTheme,MD3DarkTheme as DarkTheme } from 'react-native-paper';
+import { PaperProvider, MD3LightTheme as DefaultTheme,MD3DarkTheme as DarkTheme } from 'react-native-paper';
 import { useColorScheme } from 'react-native';
 import { NotificationProvider } from './app/NotificationProvider';
 import 'react-native-reanimated'
@@ -91,11 +91,11 @@ export default function App() {
       onPrimary: 'rgb(5, 41, 122)',
       primaryContainer: 'rgb(38, 65, 145)',
       onPrimaryContainer: 'rgb(220, 225, 255)',
-      secondary: 'rgb(255, 170, 245)',
+      secondary: 'rgb(84, 95, 113)',
       onSecondary: 'rgb(87, 13, 87)',
       secondaryContainer: 'rgb(114, 40, 111)',
       onSecondaryContainer: 'rgb(255, 215, 246)',
-      tertiary: 'rgb(227, 186, 218)',
+      tertiary: 'rgb(247, 247, 247)',
       onTertiary: 'rgb(67, 39, 64)',
       tertiaryContainer: 'rgb(91, 61, 87)',
       onTertiaryContainer: 'rgb(255, 215, 246)',

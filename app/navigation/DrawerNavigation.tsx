@@ -53,7 +53,7 @@ const DrawerNavigation = () => {
     screenOptions={{
       drawerType:'back',
       drawerStyle:{
-        backgroundColor:theme.colors.secondary,
+        backgroundColor:theme.colors.background,
         paddingTop:hp(5),
       },
     }}>
@@ -63,6 +63,9 @@ const DrawerNavigation = () => {
         options={{
           headerShown:false,
           drawerLabel:`${user.username}`,
+          drawerLabelStyle:{
+            color:theme.colors.tertiary
+          },
           drawerIcon:({focused,color,size}) => (
             <Image
               style={{height:hp(3.3), aspectRatio:1, borderRadius:100,}}
@@ -79,9 +82,12 @@ const DrawerNavigation = () => {
         drawerIcon:({focused,color,size}) => (
           <Icon
           source="home"
-          color="#000"
+          color={theme.colors.secondary}
           size={20}/>
         ),
+        drawerLabelStyle:{
+          color:theme.colors.tertiary
+        },
         headerShown:false,
       }}/>
        <Drawer.Screen
@@ -90,10 +96,13 @@ const DrawerNavigation = () => {
       options={{
         drawerIcon:({focused,color,size}) => (
           <Icon
-          source="home"
-          color="#000"
+          source="source-branch"
+          color={theme.colors.secondary}
           size={20}/>
         ),
+        drawerLabelStyle:{
+          color:theme.colors.tertiary
+        },
         headerShown:false,
       }}/>
        <Drawer.Screen
@@ -102,10 +111,13 @@ const DrawerNavigation = () => {
       options={{
         drawerIcon:({focused,color,size}) => (
           <Icon
-          source="home"
-          color="#000"
+          source="code-tags"
+          color={theme.colors.secondary}
           size={20}/>
         ),
+        drawerLabelStyle:{
+          color:theme.colors.tertiary
+        },
         headerShown:false,
       }}/>
     </Drawer.Navigator>
