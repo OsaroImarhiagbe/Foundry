@@ -23,7 +23,7 @@ import { useDispatch } from 'react-redux';
 import { addComment } from '../features/PostandComments/socialSlice';
 import Feather from 'react-native-vector-icons/Feather';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Card,Text, TextInput,Divider} from 'react-native-paper';
+import { Card,Text, TextInput,Divider,Icon} from 'react-native-paper';
 import { FlashList } from "@shopify/flash-list";
 import { ScrollView } from 'react-native-gesture-handler';
 import { useTheme } from 'react-native-paper';
@@ -138,7 +138,7 @@ const PostComponent: React.FC<PostComponentProps> = ({
           })
         })
       }catch(err){
-        console.log('error liking comment:',err)
+        console.error('error liking comment:',err)
       }finally{
         setLoading(false)
       }
@@ -225,13 +225,20 @@ const PostComponent: React.FC<PostComponentProps> = ({
         placeholder={{blurhash}}
         cachePolicy='none'/>}
     <View>
-    <Text
+    <View style={{flexDirection:'row',alignItems:'center'}}>
+      <View style={{flexDirection:'row',alignItems:'center'}}>
+      <Text
     variant="bodySmall"
     style={{
       marginLeft:30,
       color:theme.colors.primary
     }}
     >{name}</Text>
+      </View>
+    <View style={{paddingLeft:40}}>
+   
+    </View>
+    </View>
     <Text
     variant="bodyLarge"
     style={{
@@ -284,7 +291,7 @@ const PostComponent: React.FC<PostComponentProps> = ({
         </TouchableOpacity>
         <TouchableOpacity style={styles.reactionIcon}>
           <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-          <EvilIcons name='retweet' size={15} color={theme.colors.primary}/>
+          <Icon source='dots-horizontal' size={15} color={theme.colors.primary}/>
           </View>
         </TouchableOpacity>
       </View>

@@ -9,9 +9,9 @@ interface Menu {
   text?:string,
   action?:() => void,
   value?:string,
-  icon?:string
+  icon?:any
 }
-export const MenuItems:React.FC<Menu> = ({text, action,value,icon}) => {
+export const MenuItems:React.FC<Menu> = ({text, action,icon}) => {
     return (
        
         

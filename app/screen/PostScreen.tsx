@@ -7,7 +7,6 @@ import {
   Alert, 
   ActivityIndicator, 
   KeyboardAvoidingView,
-  Keyboard, 
   TouchableWithoutFeedback,
   TouchableOpacity} from 'react-native';
 import { Image } from 'expo-image';
@@ -23,8 +22,15 @@ import firestore from '@react-native-firebase/firestore'
 import color from '../../config/color';
 import storage from '@react-native-firebase/storage'
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { useTheme,Icon,Text,Button } from 'react-native-paper';
+import { useTheme,Icon,Text,Button,Divider } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
+import {
+  Menu,
+  MenuOptions,
+  MenuTrigger,
+} from 'react-native-popup-menu';
+import { MenuItems } from '../components/CustomMenu'
 type NavigationProp = {
   Dash:undefined
 }
@@ -43,6 +49,7 @@ const PostScreen = () => {
   const profileImage = useSelector((state:any) => state.user.profileImage)
   const navigation = useNavigation<Navigation>();
   const textInputRef = useRef<TextInput>(null);
+  const [category, setCategory] = useState<string>('')
 
  
   const dispatch = useDispatch();
@@ -142,14 +149,46 @@ const PostScreen = () => {
         </View>
         <View style={{flexDirection:'row',alignItems:'center'}}>
         <View style={{paddingRight:15,flexDirection:'row',alignItems:'center'}}>
-        <Text
-        variant='bodyMedium'
-        >Category</Text>
-        <TouchableWithoutFeedback onPress={() => console.log('press')}>
+          <Menu>
+      <MenuTrigger>
+      <View style={{flexDirection:'row',alignItems:'center'}}>
+      <Text
+        variant='bodyLarge'
+        >{category ? category : 'Anyone'}</Text>
         <Icon
          source='menu-down'
          size={25}/>
-        </TouchableWithoutFeedback>
+      </View>
+      </MenuTrigger>
+      <MenuOptions
+        customStyles={{
+            optionsContainer:{
+                borderRadius:10,
+                marginTop:40,
+                marginLeft:-30,
+                borderCurve:'continuous',
+                backgroundColor:color.white,
+                position:'relative'
+            }
+        }}
+      
+      >
+        <MenuItems 
+        text='Anyone'
+        action={()=>setCategory('Anyone')}/>
+        <Divider/>
+         <MenuItems 
+        text='Creativity and Innovation'
+        action={()=>setCategory('Creativity and Innovation')}/>
+      <Divider/>
+      <MenuItems 
+        text='Collaboration and Community'
+        action={()=>setCategory('Collaboration and Community')}/>
+      <MenuItems 
+        text='Startup and Busniess'
+        action={()=>setCategory('Statup and Busniess')}/>
+      </MenuOptions>
+    </Menu> 
         </View>
         <TouchableOpacity onPress={handlePost}>
           <View style={[styles.postContainer,{backgroundColor:theme.colors.primary}]}>
@@ -169,6 +208,9 @@ const PostScreen = () => {
         </View>
       </View>
       <View style={styles.textContainer}>
+        <Text
+        variant='bodyLarge'
+        >{category}</Text>
         <TextInput
           ref={textInputRef}
           style={styles.textArea}
@@ -236,7 +278,6 @@ const styles = StyleSheet.create({
   text: {
     textAlign: 'center',
     color: '#ffffff',
-    fontFamily: color.textFont,
     fontSize: 12,
   },
   textContainer: {
