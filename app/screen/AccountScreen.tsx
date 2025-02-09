@@ -48,11 +48,12 @@ const AccountScreen = () => {
 
   type NavigationProp = {
     ProjectScreen:undefined,
-    Main:undefined,
+    Home:{
+      screen?:string
+    },
     Message:undefined,
     Edit:undefined,
-    SkillsScreen:undefined
-
+    SkillsScreen:undefined,
   }
   
   type Navigation = NativeStackNavigationProp<NavigationProp>;
@@ -200,7 +201,7 @@ const AccountScreen = () => {
     <View style={[styles.screen,{backgroundColor:theme.colors.background}]}>
       <ChatRoomHeader
         iconColor='#00bf63' 
-        onPress={()=>navigation.navigate('Main')} 
+        onPress={()=>navigation.navigate('Home',{screen:'Dash'})} 
         backgroundColor={color.button} 
         icon='keyboard-backspace' 
         />
@@ -211,14 +212,14 @@ const AccountScreen = () => {
         contentContainerStyle={{flexGrow:1}}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh}/>}
         >
-          <View style={{flexDirection:'row', justifyContent:'space-between',paddingLeft:20}}>
+          <View style={{flexDirection:'row',paddingLeft:20}}>
           <Image
               style={{height:hp(9.5), aspectRatio:1, borderRadius:100,}}
               source={users?.profileUrl}
               placeholder={{blurhash}}
               cachePolicy='none'/>
               </View>
-              <View style={{marginTop:5,flexDirection:'row',paddingRight:20}}>
+              <View style={{marginTop:5,flexDirection:'column',paddingRight:20,alignContent:'stretch'}}>
               <View
               style={{
                 paddingLeft:20,
@@ -235,10 +236,12 @@ const AccountScreen = () => {
                         color:theme.colors.onTertiary
                       }}>@{users?.username}</Text>)
                   }</Text></View>
-                   <View style={{flexDirection:'column'}}>
+                   <View style={{paddingLeft:20}}>
+                    <View>
                     {follow_items.map((item,index)=>{
                       return <FollowComponent key={index} count={item.count} content={item.content}/>
                     })}
+                    </View>
                 </View>
               </View>
               {/* <View style={{alignItems:'flex-end',flexDirection:'column',marginBottom:20,paddingRight:20}}>

@@ -8,10 +8,10 @@ interface Follow{
 const FollowComponent:React.FC<Follow> = ({content,count}) => {
   const theme = useTheme()
   return (
-    <View style={{flexDirection:'row', justifyContent:'space-around'}}>
-                  <View style={{flexDirection:'column',alignItems:'center'}}>
-                  <Text variant='bodyMedium' style={{color:'#fff'}}>{count}</Text>
-                  <Text variant='bodyMedium'style={{color:'#fff'}}>{content}</Text>
+    <View>
+                  <View style={{flexDirection:'row'}}>
+                  <Text variant='bodySmall' style={{color:theme.colors.onTertiary}}>{count}</Text>
+                  <Text variant='bodySmall'style={{color:theme.colors.onTertiary}}>{content}</Text>
                   </View>
                   </View>
   )
