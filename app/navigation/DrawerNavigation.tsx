@@ -101,7 +101,7 @@ const DrawerNavigation = () => {
           size={20}/>
         ),
         drawerLabelStyle:{
-          color:theme.colors.tertiary
+          color:theme.colors.tertiary,
         },
         headerShown:false,
       }}/>

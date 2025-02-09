@@ -18,12 +18,13 @@ import color from '../../config/color';
 
 interface CommentProp{
   content?:string,
-  name?:string,
-  comment_id?:string,
+  name?:string | any,
+  comment_id?:string | any,
   post_id?:string,
   date?:string,
   auth_profile?:string,
-  count?:number
+  count?:number,
+  onReplyPress: (comment_id: string, name: string) => void;
 }
 
 interface Reply{
@@ -35,7 +36,7 @@ interface Reply{
   createdAt?:FirebaseFirestoreTypes.Timestamp
 
 }
-const CommentComponent:React.FC<CommentProp> = ({content,name,comment_id,post_id,count,date,auth_profile}) => {
+const CommentComponent:React.FC<CommentProp> = ({content,name,comment_id,post_id,count,date,auth_profile,onReplyPress}) => {
     const [press,setIsPress] = useState(false)
     const [isloading,setLoading] = useState<boolean>(false)
     const [showReply,setShowReply] = useState<boolean>(false)
@@ -43,6 +44,35 @@ const CommentComponent:React.FC<CommentProp> = ({content,name,comment_id,post_id
     const [reply,setReply] = useState<Reply[]>([])
     const {user} = useAuth();
     const profileImage = useSelector((state:any) => state.user.profileImage)
+    const [replyingTo, setReplyingTo] = useState<string | any>('');
+
+
+  
+    useEffect(() => {
+      const fetchReply = () => {
+        try {
+          const docRef = firestore()
+          .collection('posts')
+          .doc(post_id)
+          .collection('comments')
+          .doc(comment_id)
+          .collection('replys')
+          .orderBy('createdAt', 'desc')
+          const unsub = docRef.onSnapshot((querySnapshot)=>{
+            let data:Reply[] = [];
+            querySnapshot.forEach(documentSnapshot => {
+              data.push({ ...documentSnapshot.data(),id:documentSnapshot.id });
+            })
+            setReply(data);
+          })
+          return () => unsub()
+        }  catch (e) {
+        console.error(`Error: ${e}`);
+      }
+    };
+
+    fetchReply()
+    },[comment_id,post_id])
 
     const handleLike = async () => {
 
@@ -79,43 +109,6 @@ const CommentComponent:React.FC<CommentProp> = ({content,name,comment_id,post_id
       }
   
     }
-
-    useEffect(() => {
-      const fetchReply = () => {
-        try {
-          const docRef = firestore()
-          .collection('posts')
-          .doc(post_id)
-          .collection('comments')
-          .doc(comment_id)
-          .collection('replys')
-          .orderBy('createdAt', 'desc')
-          const unsub = docRef.onSnapshot((querySnapshot)=>{
-            let data:Reply[] = [];
-            querySnapshot.forEach(documentSnapshot => {
-              data.push({ ...documentSnapshot.data(),id:documentSnapshot.id });
-            })
-            setReply(data);
-          })
-          return () => unsub()
-        }  catch (e) {
-        console.error(`Error: ${e}`);
-      }
-    };
-
-    fetchReply()
-    },[comment_id,post_id])
-
-    const toggleReply = () => {
-      setShowReply(!showReply)
-    }
-    
-    // const handleComment = async () => {
-    //   setIsRely(true)
-    //   await AsyncStorage.setItem('reply',isReply)
-    // }
- 
-
   return (
     <Card
     mode='contained'
@@ -154,13 +147,9 @@ const CommentComponent:React.FC<CommentProp> = ({content,name,comment_id,post_id
                      <Text style={styles.reactionText}>{count}</Text>
                  </View>
                  </TouchableHighlight>
-        {/* <TouchableOpacity onPress={handleComment} style={styles.reactionIcon}>
-            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                <MaterialCommunityIcons name="comment-processing-outline" size={20}/>
-                <Text style={styles.reactionText}>{reply.length}</Text>
-            </View>
-        </TouchableOpacity> */}
-        <TouchableOpacity onPress={toggleReply}>
+        <TouchableOpacity onPress={() => {
+          onReplyPress(comment_id, name) 
+          setShowReply(!showReply)}}>
         <View style={styles.replycontainer}>
        <Divider style={{borderBottomWidth:0.5,width:25,borderColor:'#8a8a8a '}}/>
         <Text
@@ -170,7 +159,7 @@ const CommentComponent:React.FC<CommentProp> = ({content,name,comment_id,post_id
         </View>
       </TouchableOpacity>
       </View>
-      { showReply && reply.map((replies) => {
+      {showReply && reply.map((replies) => {
         return <ReplyComponent
         key={replies.id}
         reply_id={replies.id}

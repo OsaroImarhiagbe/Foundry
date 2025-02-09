@@ -6,6 +6,7 @@ SafeAreaView,
 KeyboardAvoidingView,
 Platform,
 Modal,
+Alert,
 useWindowDimensions,
 } from 'react-native'
 import { blurhash } from '../../utils/index'
@@ -23,10 +24,10 @@ import { useDispatch } from 'react-redux';
 import { addComment } from '../features/PostandComments/socialSlice';
 import Feather from 'react-native-vector-icons/Feather';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Card,Text, TextInput,Divider,Icon} from 'react-native-paper';
+import { Card,Text,Divider,Icon} from 'react-native-paper';
 import { FlashList } from "@shopify/flash-list";
 import { ScrollView } from 'react-native-gesture-handler';
-import { useTheme } from 'react-native-paper';
+import { useTheme,TextInput } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
 import {removeID} from '../features/Message/messageidSlice';
 import {
@@ -44,9 +45,19 @@ interface PostComponentProps {
   content?: string;
   date?: string;
   comment_count?: number;
-  mount?: boolean;  // Optional 'mount' prop
+  mount?: boolean;
 }
 interface Comment{
+  id?:string | any,
+  auth_profile?:string,
+  like_count?:number,
+  content?:string,
+  name?:string | any,
+  createdAt?:FirebaseFirestoreTypes.Timestamp
+
+}
+
+interface Reply{
   id?:string,
   auth_profile?:string,
   like_count?:number,
@@ -74,18 +85,20 @@ const PostComponent: React.FC<PostComponentProps> = ({
     const [isloading,setLoading] = useState<boolean>(false)
     const [modalVisible, setModalVisible] = useState<boolean>(false);
     const [comments, setComment] = useState<Comment[]>([])
-    const [isReply,setReply] = useState<string | null>(null)
     const [text,setText] = useState('')
     const {height, width} = useWindowDimensions();
+    const [reply,setReply] = useState<Reply[]>([])
     const dispatch = useDispatch();
     const theme = useTheme()
     const profileImage = useSelector((state:any) => state.user.profileimg)
     const {user} = useAuth();
     const navigation = useNavigation()
     const [category, setCategory] = useState<string>('')
+    const [comment_id,setCommentID] = useState('')
+    const [replyingTo, setReplyingTo] = useState<string | null>(null);
+    const [replyingToUsername, setReplyingToUsername] = useState<string | undefined>(undefined);
 
-
-
+ 
 
     useEffect(() => {
       const docRef = firestore().collection('posts').doc(id)
@@ -103,20 +116,9 @@ const PostComponent: React.FC<PostComponentProps> = ({
           return () => subscriber()
     },[id])
 
-    useEffect(() => {
-      const relpyStatus = async () =>{
-        try{
-          const status = await AsyncStorage.getItem('reply');
-        setReply(status)
-        }catch(error){
-          console.error('Error grabbing async:',error)
-        }
-      }
 
-      relpyStatus()
-    },[id])
-
-  
+ 
+ 
     const handleLike = async () => {
 
       setLoading(true)
@@ -151,74 +153,70 @@ const PostComponent: React.FC<PostComponentProps> = ({
         setLoading(false)
       }
     }
-    
-    
-    const handlePost = async () => {
-      if(!text) return;
-      setLoading(true)
-        try{
-          const docRef = firestore()
-          .collection('posts')
-          .doc(id)
-          .collection('comments')
-          .doc(id)
-          .collection('replys')
-          const newDoc = await docRef.add({
-            id:user.userId,
-            name: user?.username,
-            content:text,
-            createdAt: firestore.Timestamp.fromDate(new Date()),
-            parentId:id
-          })
-          await newDoc.update({
-            id:newDoc.id
-          })
-          setText('')
-          setTimeout(() =>{
-            setLoading(false)
-            navigation.goBack()
-          },1000)
-        } catch (error) {
-          setLoading(false)
-          console.error("Error with reply:", error);
-        }
-      };
-    
-
     const handleSend = async () => {
-      if(text.trim() === " ") return;
-      try{
-        const docRef = firestore().collection('posts').doc(id).collection('comments')
-        const newDoc = await docRef.add({
-          parentId:null,
-          content:text,
-          auth_profile:auth_profile,
-          name:user?.username,
-          createdAt: firestore.Timestamp.fromDate(new Date())
-        })
-        await newDoc.update({
-          id:newDoc.id
-        })
-        const postDocRef = firestore().collection('posts').doc(id)
-        await firestore().runTransaction(async (transaction)=>{
-          const doc = await transaction.get(postDocRef)
-          if (!doc.exists) throw new Error('Doc does not exists!!')
-          const commentCount = doc?.data()?.comment_count || 0
-          transaction.update(postDocRef,{
-            comment_count:commentCount + 1
-          })
-        })
-        setText('')
-      }catch(e){
-        console.error('Error with sending comments:',e)
-      }
+      if(replyingTo){
+        if(!text) return;
+        setLoading(true)
+          try{
+            const docRef = firestore()
+            .collection('posts')
+            .doc(id)
+            .collection('comments')
+            .doc(replyingTo)
+            .collection('replys')
+            const newDoc = await docRef.add({
+              id:user.userId,
+              name: user?.username,
+              content:text,
+              createdAt: firestore.Timestamp.fromDate(new Date()),
+              parentId:replyingTo
+            })
+            await newDoc.update({
+              id:newDoc.id
+            })
+            setText('');
+            setReplyingTo(null);
+            setReplyingToUsername(undefined);
+          } catch (error) {
+            setLoading(false)
+            console.error("Error with reply:", error);
+          }
+        }else{
+          if(text.trim() === " ") return;
+          try{
+            const docRef = firestore().collection('posts').doc(id).collection('comments')
+            const newDoc = await docRef.add({
+              parentId:null,
+              content:text,
+              auth_profile:auth_profile,
+              name:user?.username,
+              createdAt: firestore.Timestamp.fromDate(new Date())
+            })
+            await newDoc.update({
+              id:newDoc.id
+            })
+            const postDocRef = firestore().collection('posts').doc(id)
+            await firestore().runTransaction(async (transaction)=>{
+              const doc = await transaction.get(postDocRef)
+              if (!doc.exists) throw new Error('Doc does not exists!!')
+              const commentCount = doc?.data()?.comment_count || 0
+              transaction.update(postDocRef,{
+                comment_count:commentCount + 1
+              })
+            })
+            setText('')
+          }catch(e){
+            console.error('Error with sending comments:',e)
+          }
     }
+  }
 
 
     const handleDelete = async () => {
       try {
         const messagesRef = firestore().collection('posts').doc(id)
         await messagesRef.delete()
+        Alert.alert('Post Deleted!')
       } catch (error) {
         console.error('Error deleting document: ', error);
 
@@ -361,7 +359,7 @@ const PostComponent: React.FC<PostComponentProps> = ({
               variant='titleMedium'
               onPress={() => setModalVisible(!modalVisible)}
               style={{ fontFamily:color.textFont}}>Comments</Text>
-              <TouchableOpacity onPress={isReply ? handlePost : handleSend}>
+              <TouchableOpacity onPress={handleSend}>
                 <View style={styles.sendButton}>
                   <Feather name="send" size={hp(2.0)} color="#000" />
                 </View>
@@ -375,7 +373,7 @@ const PostComponent: React.FC<PostComponentProps> = ({
              >
             <FlashList
             data={comments}
-            estimatedItemSize={366}
+            estimatedItemSize={460}
             keyExtractor={(item) => item?.id?.toString() || Math.random().toString()}
             renderItem={({item}) => (
               <CommentComponent
@@ -385,16 +383,20 @@ const PostComponent: React.FC<PostComponentProps> = ({
                     name={item.name}
                     comment_id={item.id}
                     post_id={id}
-                    date={item?.createdAt?.toDate().toLocaleString()}/>)}/></ScrollView>
-            <View style={{bottom:0,padding:20}}>
-              <TextInput
-                value={text}
-                onChangeText={(text) => setText(text)}
-                style={styles.textinput}
-                placeholder="Comment...."
-                placeholderTextColor="#000"
-              />
-            </View>
+                    date={item?.createdAt?.toDate().toLocaleString()}
+                    onReplyPress={(id,name) => {
+                      setReplyingTo(id);
+                      setReplyingToUsername(name);
+                    }}/>)}/></ScrollView>
+           <View style={{ bottom: 0, padding: 20 }}>
+                <TextInput
+                  value={replyingTo ? replyingToUsername : text}
+                  onChangeText={(text) => setText(text)}
+                  style={styles.textinput}
+                  placeholder="Write a comment..."
+                  placeholderTextColor="#000"
+                />
+              </View>
           </View>
         </View>
     </KeyboardAvoidingView>

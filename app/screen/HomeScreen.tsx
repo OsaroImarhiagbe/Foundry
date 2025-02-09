@@ -197,7 +197,7 @@ const fetchMorePost = async () => {
    : <FlashList
     contentContainerStyle={{padding:0}}
     data={memoPost}
-    estimatedItemSize={402}
+    estimatedItemSize={460}
     onRefresh={onRefresh}
     onScroll={Animated.event(
       [{ nativeEvent: { contentOffset: { y: scrollY } } }],
