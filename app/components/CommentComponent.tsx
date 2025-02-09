@@ -153,7 +153,7 @@ const CommentComponent:React.FC<CommentProp> = ({content,name,comment_id,post_id
                  style={styles.reactionIcon}
                  >
                  <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                     <MaterialCommunityIcons name="heart" size={15}/>
+                     <MaterialCommunityIcons name="heart" size={15} color={theme.colors.onTertiary}/>
                      <Text
                      variant='bodySmall'
                      style={styles.reactionText}>{count}</Text>

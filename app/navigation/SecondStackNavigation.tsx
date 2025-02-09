@@ -96,7 +96,7 @@ const SecondStackNavigation = () => {
       component={PostScreenWrapper}
       options={{
         headerShown:false,
-        gestureEnabled:false
+        gestureEnabled:false,
       }}
       />
     <Stack.Screen

@@ -443,7 +443,7 @@ const styles = StyleSheet.create({
       paddingHorizontal: 15,
       paddingTop: 20,
       width:wp('100%'),
-      height:hp('70%'),
+      height:hp('55%'),
     },
     centeredView: {
       flex: 1,
