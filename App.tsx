@@ -88,7 +88,7 @@ export default function App() {
     colors: {
       ...DarkTheme.colors,
       primary: 'rgb(182, 196, 255)',
-      onPrimary: 'rgb(5, 41, 122)',
+      onPrimary: 'rgb(247, 247, 247)',
       primaryContainer: 'rgb(38, 65, 145)',
       onPrimaryContainer: 'rgb(220, 225, 255)',
       secondary: 'rgb(84, 95, 113)',
@@ -96,7 +96,7 @@ export default function App() {
       secondaryContainer: 'rgb(114, 40, 111)',
       onSecondaryContainer: 'rgb(255, 215, 246)',
       tertiary: 'rgb(247, 247, 247)',
-      onTertiary: 'rgb(67, 39, 64)',
+      onTertiary: 'rgb(128, 128, 128)',
       tertiaryContainer: 'rgb(91, 61, 87)',
       onTertiaryContainer: 'rgb(255, 215, 246)',
       error: 'rgb(255, 180, 171)',

@@ -246,7 +246,7 @@ const PostComponent: React.FC<PostComponentProps> = ({
     variant="bodySmall"
     style={{
       marginLeft:30,
-      color:theme.colors.primary
+      color:theme.colors.tertiary
     }}
     >{name}</Text>
       </View>
@@ -258,7 +258,7 @@ const PostComponent: React.FC<PostComponentProps> = ({
     style={{
     marginLeft:30,
     marginVertical:5,
-    color:theme.colors.primary
+    color:theme.colors.tertiary
     }}
     >{content}</Text>
     </View>
@@ -276,7 +276,7 @@ const PostComponent: React.FC<PostComponentProps> = ({
       <Text
        variant="bodySmall"
        style={{
-        color:theme.colors.primary
+        color:theme.colors.tertiary
        }}>{date}</Text>
       <View style={styles.reactionContainer}>
     <TouchableHighlight
@@ -286,18 +286,18 @@ const PostComponent: React.FC<PostComponentProps> = ({
       style={styles.reactionIcon}
       >
       <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-          <MaterialCommunityIcons name="heart" size={15} color={theme.colors.primary}/>
+          <MaterialCommunityIcons name="heart" size={15} color={theme.colors.onTertiary}/>
           <Text 
           variant='bodySmall'>{count}</Text>
         </View>
         </TouchableHighlight>
         <TouchableOpacity onPress={() => setModalVisible(true)} style={styles.reactionIcon}>
           <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-            <MaterialCommunityIcons name="comment-processing-outline" size={15} color={theme.colors.primary}/>
+            <MaterialCommunityIcons name="comment-processing-outline" size={15} color={theme.colors.onTertiary}/>
             <Text
             variant='bodySmall'
             style={{
-              color:theme.colors.primary,
+              color:theme.colors.onPrimary,
               marginLeft:5,
               marginBottom:5
             }}>{comment_count}</Text>
@@ -306,7 +306,7 @@ const PostComponent: React.FC<PostComponentProps> = ({
         <Menu style={styles.reactionIcon}>
       <MenuTrigger>
       <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-          <Icon source='dots-horizontal' size={15} color={theme.colors.primary}/>
+          <Icon source='dots-horizontal' size={15} color={theme.colors.onTertiary}/>
           </View>
       </MenuTrigger>
       <MenuOptions

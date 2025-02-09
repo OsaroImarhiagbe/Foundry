@@ -125,14 +125,14 @@ const CommentComponent:React.FC<CommentProp> = ({content,name,comment_id,post_id
     variant='bodySmall'
     style={{
       marginLeft:30,
-      color:theme.colors.primary
+      color:theme.colors.onPrimary
     }}>{name}</Text>
     <Text
     variant='bodySmall'
     style={{
       marginLeft:30,
       marginVertical:5,
-      color:theme.colors.primary
+      color:theme.colors.onPrimary
       }}>{content}
     </Text>
     </View>
@@ -141,7 +141,7 @@ const CommentComponent:React.FC<CommentProp> = ({content,name,comment_id,post_id
       <Text
       variant='bodySmall'
       style={{
-        color:theme.colors.primary
+        color:theme.colors.onPrimary
        }}>{date}</Text>
     </View>
       <View style={styles.reactionContainer}>
@@ -153,7 +153,7 @@ const CommentComponent:React.FC<CommentProp> = ({content,name,comment_id,post_id
                  style={styles.reactionIcon}
                  >
                  <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                     <MaterialCommunityIcons name={press ? "heart" : "cards-heart-outline"} size={20}/>
+                     <MaterialCommunityIcons name="heart" size={15}/>
                      <Text
                      variant='bodySmall'
                      style={styles.reactionText}>{count}</Text>
