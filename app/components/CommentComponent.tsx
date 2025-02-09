@@ -13,7 +13,7 @@ import ReplyComponent from './ReplyComponent';
 import firestore, { FirebaseFirestoreTypes } from '@react-native-firebase/firestore';
 import { useSelector } from 'react-redux';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {Text,Divider,Card} from 'react-native-paper'
+import {Text,Divider,Card,useTheme} from 'react-native-paper'
 import color from '../../config/color';
 
 interface CommentProp{
@@ -45,6 +45,7 @@ const CommentComponent:React.FC<CommentProp> = ({content,name,comment_id,post_id
     const {user} = useAuth();
     const profileImage = useSelector((state:any) => state.user.profileImage)
     const [replyingTo, setReplyingTo] = useState<string | any>('');
+    const theme = useTheme()
 
 
   
@@ -124,15 +125,26 @@ const CommentComponent:React.FC<CommentProp> = ({content,name,comment_id,post_id
     <View>
     <Text
     variant='bodySmall'
-    style={styles.userPost}>{name}</Text>
+    style={{
+      marginLeft:30,
+      color:theme.colors.primary
+    }}>{name}</Text>
     <Text
-    variant='bodyMedium'
-    style={styles.postText}>{content}
+    variant='bodySmall'
+    style={{
+      marginLeft:30,
+      marginVertical:5,
+      color:theme.colors.primary
+      }}>{content}
     </Text>
     </View>
     </View>
     <View style={{paddingLeft:5}}>
-      <Text style={styles.postDate}>{date}</Text>
+      <Text
+      variant='bodySmall'
+      style={{
+        color:theme.colors.primary
+       }}>{date}</Text>
     </View>
       <View style={styles.reactionContainer}>
     <TouchableHighlight
@@ -144,7 +156,9 @@ const CommentComponent:React.FC<CommentProp> = ({content,name,comment_id,post_id
                  >
                  <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                      <MaterialCommunityIcons name={press ? "heart" : "cards-heart-outline"} size={20}/>
-                     <Text style={styles.reactionText}>{count}</Text>
+                     <Text
+                     variant='bodySmall'
+                     style={styles.reactionText}>{count}</Text>
                  </View>
                  </TouchableHighlight>
         <TouchableOpacity onPress={() => {
@@ -159,6 +173,7 @@ const CommentComponent:React.FC<CommentProp> = ({content,name,comment_id,post_id
         </View>
       </TouchableOpacity>
       </View>
+      <View>
       {showReply && reply.map((replies) => {
         return <ReplyComponent
         key={replies.id}
@@ -169,6 +184,7 @@ const CommentComponent:React.FC<CommentProp> = ({content,name,comment_id,post_id
         comment_id={comment_id}
         count={replies.like_count}/>
       })}
+      </View>
     </Card.Content>
   </Card>
   )
@@ -182,43 +198,12 @@ const styles = StyleSheet.create({
     },
     imageText:{
       flexDirection:'row',
-      marginBottom:10
+      marginBottom:5
       
-    }
-    ,
-    userPost:{
-      fontFamily:'Helvetica-light',
-      color:'#fff',
-      marginLeft:20
-    }
-    ,
-    userTime:{
-      fontFamily:'Helvetica-light',
-      color:'#fff',
-      marginLeft:50,
-      marginTop:5,
-      fontSize:10
-    
     },
- 
-    postText:{
-      fontFamily:'Helvetica-light',
-      color:'#fff',
-      marginLeft:20
-    },
-    postDate:{
-      marginTop:5,
-      padding:5,
-      fontSize:9,
-      color:'#8a8a8a',
-      fontFamily:'Helvetica-light',
-    },
-
     reactionContainer:{
       flexDirection:'row',
       justifyContent:'space-around',
-      marginTop:2
-
     },
     reactionIcon:{
       padding:5,

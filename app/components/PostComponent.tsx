@@ -390,11 +390,13 @@ const PostComponent: React.FC<PostComponentProps> = ({
                     }}/>)}/></ScrollView>
            <View style={{ bottom: 0, padding: 20 }}>
                 <TextInput
-                  value={replyingTo ? replyingToUsername : text}
-                  onChangeText={(text) => setText(text)}
-                  style={styles.textinput}
-                  placeholder="Write a comment..."
-                  placeholderTextColor="#000"
+                mode='outlined'
+                outlineStyle={{borderRadius:30}}
+                value={replyingTo ? replyingToUsername : text}
+                onChangeText={(text) => setText(text)}
+                style={styles.textinput}
+                placeholder="Write a comment..."
+                placeholderTextColor="#000"
                 />
               </View>
           </View>
@@ -413,14 +415,6 @@ const styles = StyleSheet.create({
     imageText:{
       flexDirection:'row',
       marginBottom:5
-    },
-    userTime:{
-      fontFamily:'Helvetica-light',
-      color:'#ffffff',
-      marginLeft:50,
-      marginTop:5,
-      fontSize:10
-    
     },
     scrollViewContent: {
       flexGrow: 1,
@@ -452,7 +446,7 @@ const styles = StyleSheet.create({
       paddingHorizontal: 15,
       paddingTop: 20,
       width:wp('100%'),
-      height:hp('55%'),
+      height:hp('70%'),
     },
     centeredView: {
       flex: 1,

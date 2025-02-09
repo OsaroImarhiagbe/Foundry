@@ -1,5 +1,5 @@
 import React,{useState} from 'react'
-import {View,StyleSheet,Text,TouchableOpacity,TouchableHighlight} from 'react-native'
+import {View,StyleSheet,TouchableOpacity,TouchableHighlight} from 'react-native'
 import { blurhash } from '../../utils/index'
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import { Image } from 'expo-image';
@@ -8,6 +8,7 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import color from '../../config/color';
 import { useSelector } from 'react-redux';
 import firestore from '@react-native-firebase/firestore'
+import { Card,Text,useTheme } from 'react-native-paper';
 
 interface ReplyProp{
   name?:string,
@@ -22,6 +23,7 @@ const ReplyComponent:React.FC<ReplyProp> = ({name,content,post_id,comment_id,rep
     const [press,setIsPress] = useState<boolean>(false)
     const [isloading,setLoading] = useState<boolean>(false)
     const {user} = useAuth();
+    const theme = useTheme()
     const profileImage = useSelector((state:any) => state.user.profileImage)
 
     const handleLike = async () => {
@@ -68,24 +70,34 @@ const ReplyComponent:React.FC<ReplyProp> = ({name,content,post_id,comment_id,rep
     }
 
 return (
-    <View style={styles.card}>
-    <View style={styles.postContainer}>
+    <Card
+    mode='contained'
+    style={{backgroundColor:color.grey}}>
+    <Card.Content style={styles.postContainer}>
     <View style={styles.imageText}>
     <Image
-        style={{height:hp(4.3), aspectRatio:1, borderRadius:100}}
+        style={{height:hp(3.3), aspectRatio:1, borderRadius:100}}
         source={profileImage}
-        placeholder={{blurhash}}
-        transition={500}/>
+        cachePolicy='none'
+        placeholder={{blurhash}}/>
     <View>
-    <Text style={styles.userPost}>{name}</Text>
-    <View style={styles.userLocationContainer}>
-    <Text style={styles.userTime}>Time</Text>
-    <Text style={styles.userLocation}>Near Domain Street</Text>
+    <Text
+    variant='bodySmall'
+    style={{
+      marginLeft:30,
+      color:theme.colors.primary
+    }}
+    >{name}</Text>
+    <Text
+    variant='bodySmall'
+    style={{
+      marginLeft:30,
+      marginVertical:5,
+      color:theme.colors.primary
+      }}>{content}
+    </Text>
     </View>
     </View>
-    </View>
-      <Text style={styles.postText}>{content}
-      </Text>
       <View style={styles.reactionContainer}>
     <TouchableHighlight
                  onShowUnderlay={() => setIsPress(true)}
@@ -96,18 +108,22 @@ return (
                  >
                  <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                      <MaterialCommunityIcons name={press ? "heart" : "cards-heart-outline"} size={20}/>
-                     <Text style={styles.reactionText}>{count}</Text>
+                     <Text
+                     variant='bodySmall'
+                     style={styles.reactionText}>{count}</Text>
                  </View>
                  </TouchableHighlight>
         <TouchableOpacity style={styles.reactionIcon}>
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                 <MaterialCommunityIcons name="comment-processing-outline" size={20}/>
-                <Text style={styles.reactionText}>0</Text>
+                <Text
+                variant='bodySmall'
+                style={styles.reactionText}>{count}</Text>
             </View>
         </TouchableOpacity>
       </View>
-    </View>
-  </View>
+    </Card.Content>
+  </Card>
   )
 }
 
@@ -115,6 +131,7 @@ return (
 const styles = StyleSheet.create({
     card:{
         padding:10,
+        marginTop:5,
       },
       image:{
         width:30,
@@ -123,35 +140,9 @@ const styles = StyleSheet.create({
     },
     imageText:{
       flexDirection:'row',
-      marginBottom:20
-      
+      marginBottom:5
     }
     ,
-    userPost:{
-      fontFamily:color.textFont,
-      color:'#000',
-      marginLeft:50
-    
-    }
-    ,
-    userTime:{
-      fontFamily:color.textFont,
-      color:'#000',
-      marginLeft:50,
-      marginTop:5,
-      fontSize:10
-    
-    },
-    userLocationContainer:{
-        flexDirection:'row',
-    },
-    userLocation:{
-        fontFamily:color.textFont,
-        color:'#000',
-        marginLeft:100,
-        marginTop:5,
-        fontSize:10,
-    },
     postContainer:{
       marginTop:10,
       padding:20,
@@ -161,25 +152,10 @@ const styles = StyleSheet.create({
       borderTopLeftRadius:4
     
     },
-    postText:{
-      fontFamily:color.textFont,
-      color:'#000',
-    },
-    postDate:{
-      marginTop:5,
-      padding:5,
-      fontSize:9,
-      color:'#8a8a8a',
-      fontFamily:color.textFont,
-      
-
-    },
-
     reactionContainer:{
       flexDirection:'row',
       justifyContent:'space-around',
-      marginTop:20
-
+      marginTop:2
     },
     reactionIcon:{
       padding:5,
