@@ -408,16 +408,13 @@ const PostComponent: React.FC<PostComponentProps> = ({
 const styles = StyleSheet.create({
     imageText:{
       flexDirection:'row',
-      marginBottom:5
     },
     scrollViewContent: {
       flexGrow: 1,
       paddingBottom: 60,
     },
     postContainer:{
-      marginTop:5,
-      padding:5,
-    
+      marginTop:5,  
     },
     reactionContainer:{
       flexDirection:'row',

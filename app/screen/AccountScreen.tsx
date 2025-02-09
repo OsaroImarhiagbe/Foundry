@@ -4,6 +4,7 @@ import {
   ScrollView, 
   TouchableOpacity,
   ActivityIndicator,
+  SafeAreaView,
   RefreshControl} from 'react-native'
 import {lazy,Suspense} from 'react'
 import color from '../../config/color';
@@ -22,7 +23,7 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import EvilIcons from 'react-native-vector-icons/EvilIcons';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { useTheme,Text } from 'react-native-paper';
+import { useTheme,Text,Icon } from 'react-native-paper';
 
 
 const PostComponent = lazy(() => import('../components/PostComponent'))
@@ -88,7 +89,7 @@ const AccountScreen = () => {
     project_name?:string
   }
   
-  const follow_items = [{count:users?.projects,content:'projects'},{count:users?.connection,content:'connection'},{count:posts.length,content:'posts'}]
+  const follow_items = [{count:users?.projects,content:' projects'},{count:users?.connection,content:' connection'},{count:posts.length,content:' posts'}]
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
@@ -181,7 +182,7 @@ const AccountScreen = () => {
                 </View>
               </Suspense>
             ))) : <View style={{flex:1,justifyContent:'center',alignItems:'center',paddingTop:50}}>
-              <Text style={{ color: '#fff', textAlign: 'center', fontFamily:color.textFont,fontSize:20}}>No posts available</Text></View>}
+              <Text variant='bodySmall' style={{ color: '#fff', textAlign: 'center'}}>No posts available</Text></View>}
     </View>
     </ScrollView>
     
@@ -199,23 +200,34 @@ const AccountScreen = () => {
             <Text style={{ textAlign: 'center', color: '#fff' }}>{project?.project_name}</Text>
           </View>
           </TouchableOpacity>
-        ))) : <View style={{flex:1,justifyContent:'center',alignItems:'center'}}><Text style={{ color: '#fff', textAlign: 'center', fontFamily:color.textFont,fontSize:20}}>No projects available</Text></View>
+        ))) : <View style={{flex:1,justifyContent:'center',alignItems:'center'}}><Text variant='bodySmall' style={{ color: '#fff', textAlign: 'center',}}>No projects available</Text></View>
+      }
+      
+    </View>
+    </ScrollView>
+  );
+  const ProjectsScreen = () => (
+    <ScrollView scrollEnabled style={{flex:1,backgroundColor:theme.colors.background}}>
+    <View style={{flex:1,backgroundColor:theme.colors.background,padding:50}}>
+      {
+        projects && projects.length > 0 ? (
+          projects.map((project, index) => (
+        
+          <TouchableOpacity key={index} onPress={()=>navigation.navigate('ProjectScreen')}>
+             <View style={{ backgroundColor: '#252525', borderRadius: 25, padding: 30,marginBottom:10 }}>
+            <Text style={{ textAlign: 'center', color: '#fff' }}>{project?.project_name}</Text>
+          </View>
+          </TouchableOpacity>
+        ))) : <View style={{flex:1,justifyContent:'center',alignItems:'center'}}><Text variant='bodySmall' style={{ color: '#fff', textAlign: 'center',}}>No projects available</Text></View>
       }
       
     </View>
     </ScrollView>
   );
 
-
   return (
   
-    <View style={[styles.screen,{backgroundColor:theme.colors.background}]}>
-      <ChatRoomHeader
-        iconColor='#00bf63' 
-        onPress={()=>navigation.navigate('Home',{screen:'Dash'})} 
-        backgroundColor={color.button} 
-        icon='keyboard-backspace' 
-        />
+    <SafeAreaView style={[styles.screen,{backgroundColor:theme.colors.background}]}>
       <ScrollView
         scrollEnabled={true}
         showsVerticalScrollIndicator={false}
@@ -223,12 +235,21 @@ const AccountScreen = () => {
         contentContainerStyle={{flexGrow:1}}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh}/>}
         >
-          <View style={{flexDirection:'row',paddingLeft:20}}>
+          <TouchableOpacity onPress={() => navigation.navigate('Home',{screen:'Dash'})} style={{padding:10}}>
+            <Icon
+            source='arrow-left-circle'
+            size={25}
+            />
+          </TouchableOpacity>
+          <View style={{flexDirection:'row',paddingLeft:20,marginTop:10,justifyContent:'space-between',padding:5}}>
           <Image
               style={{height:hp(9.5), aspectRatio:1, borderRadius:100,}}
               source={users?.profileUrl}
               placeholder={{blurhash}}
               cachePolicy='none'/>
+               <TouchableOpacity onPress={() => navigation.navigate('Edit')}>
+                    {isCurrentUser &&  <SmallButton name='Edit Profile'/>}
+                  </TouchableOpacity>
               </View>
               <View style={{marginTop:5,flexDirection:'column',paddingRight:20,alignContent:'stretch'}}>
               <View
@@ -274,7 +295,7 @@ const AccountScreen = () => {
                 screenOptions={{
                   swipeEnabled:true,
                   tabBarIndicatorStyle:{
-                    backgroundColor:theme.colors.primary
+                    backgroundColor:theme.colors.onPrimary
                   },
                   tabBarStyle:{
                     backgroundColor:theme.colors.background
@@ -287,7 +308,7 @@ const AccountScreen = () => {
                     component={Post}
                     options={{
                       tabBarIcon:() => (
-                        <MaterialCommunityIcons name='post' color={theme.colors.primary} size={25}
+                        <MaterialCommunityIcons name='post' color={theme.colors.onPrimary} size={20}
                         />),
                     }}
                     />
@@ -296,14 +317,23 @@ const AccountScreen = () => {
                     component={Projects}
                     options={{
                       tabBarIcon:() => (
-                        <MaterialIcons name='work' color={theme.colors.primary} size={25}
+                        <MaterialIcons name='work' color={theme.colors.onPrimary} size={20}
+                        />),
+                    }}
+                    />
+                  <Tab.Screen
+                    name='ProjectsScreen'
+                    component={ProjectsScreen}
+                    options={{
+                      tabBarIcon:() => (
+                        <MaterialIcons name='work' color={theme.colors.onPrimary} size={20}
                         />),
                     }}
                     />
                   </Tab.Navigator>
                 </View>
                 </ScrollView> 
-    </View>
+    </SafeAreaView>
   )
 }
 
