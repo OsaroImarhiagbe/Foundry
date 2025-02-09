@@ -8,7 +8,7 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import color from '../../config/color';
 import { useSelector } from 'react-redux';
 import firestore from '@react-native-firebase/firestore'
-import { Card,Text,useTheme } from 'react-native-paper';
+import { Card,Text,useTheme,Divider } from 'react-native-paper';
 
 interface ReplyProp{
   name?:string,
@@ -72,7 +72,7 @@ const ReplyComponent:React.FC<ReplyProp> = ({name,content,post_id,comment_id,rep
 return (
     <Card
     mode='contained'
-    style={{backgroundColor:color.grey}}>
+    style={{backgroundColor:theme.colors.onSecondary}}>
     <Card.Content style={styles.postContainer}>
     <View style={styles.imageText}>
     <Image
@@ -100,27 +100,26 @@ return (
     </View>
       <View style={styles.reactionContainer}>
     <TouchableHighlight
-                 onShowUnderlay={() => setIsPress(true)}
-                 onHideUnderlay={() => setIsPress(false)}
-                 underlayColor='#0097b2'
-                 onPress={handleLike}
-                 style={styles.reactionIcon}
-                 >
-                 <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                     <MaterialCommunityIcons name={press ? "heart" : "cards-heart-outline"} size={20}/>
-                     <Text
-                     variant='bodySmall'
-                     style={styles.reactionText}>{count}</Text>
-                 </View>
-                 </TouchableHighlight>
-        <TouchableOpacity style={styles.reactionIcon}>
-            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                <MaterialCommunityIcons name="comment-processing-outline" size={20}/>
-                <Text
-                variant='bodySmall'
-                style={styles.reactionText}>{count}</Text>
-            </View>
-        </TouchableOpacity>
+      onShowUnderlay={() => setIsPress(true)}
+      onHideUnderlay={() => setIsPress(false)}
+      underlayColor='#0097b2'
+      onPress={handleLike}
+      style={styles.reactionIcon}
+      >
+      <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+          <MaterialCommunityIcons name={press ? "heart" : "cards-heart-outline"} size={20}/>
+          <Text
+          variant='bodySmall'
+          style={styles.reactionText}>{count}</Text>
+      </View>
+      </TouchableHighlight>
+      <View style={styles.replycontainer}>
+       <Divider style={{borderBottomWidth:0.5,width:25,borderColor:'#8a8a8a '}}/>
+        <Text
+        variant='bodySmall'
+        style={styles.replies}>
+              Reply</Text>
+        </View>
       </View>
     </Card.Content>
   </Card>
@@ -171,11 +170,17 @@ const styles = StyleSheet.create({
       textAlign:'center',
     },
     replies:{
-      textAlign:'center',
-      fontSize:10
+      marginLeft:5,
+      textAlign:'center'
     },
     repliesContainer:{
       marginTop:10
-    }
+    },
+    replycontainer:{
+      marginTop:5,
+      flexDirection:'row',
+      justifyContent:'center',
+      alignItems:'center'
+      }
 })
 export default ReplyComponent

@@ -92,7 +92,7 @@ export default function App() {
       primaryContainer: 'rgb(38, 65, 145)',
       onPrimaryContainer: 'rgb(220, 225, 255)',
       secondary: 'rgb(84, 95, 113)',
-      onSecondary: 'rgb(87, 13, 87)',
+      onSecondary: 'rgb(69, 90, 100)',
       secondaryContainer: 'rgb(114, 40, 111)',
       onSecondaryContainer: 'rgb(255, 215, 246)',
       tertiary: 'rgb(247, 247, 247)',

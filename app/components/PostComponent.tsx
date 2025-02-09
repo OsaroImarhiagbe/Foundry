@@ -87,14 +87,12 @@ const PostComponent: React.FC<PostComponentProps> = ({
     const [comments, setComment] = useState<Comment[]>([])
     const [text,setText] = useState('')
     const {height, width} = useWindowDimensions();
-    const [reply,setReply] = useState<Reply[]>([])
     const dispatch = useDispatch();
     const theme = useTheme()
     const profileImage = useSelector((state:any) => state.user.profileimg)
     const {user} = useAuth();
     const navigation = useNavigation()
     const [category, setCategory] = useState<string>('')
-    const [comment_id,setCommentID] = useState('')
     const [replyingTo, setReplyingTo] = useState<string | null>(null);
     const [replyingToUsername, setReplyingToUsername] = useState<string | undefined>(undefined);
 
@@ -353,7 +351,7 @@ const PostComponent: React.FC<PostComponentProps> = ({
       keyboardVerticalOffset={0}
       style={styles.centeredView}>
         <View style={styles.commentView}>
-          <View style={styles.modalView}>
+          <View style={[styles.modalView,{backgroundColor:theme.colors.onSecondary}]}>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between',alignItems:'center' }}>
               <Text
               variant='titleMedium'
@@ -440,7 +438,6 @@ const styles = StyleSheet.create({
       alignItems: 'center',
     },
     modalView: {
-      backgroundColor: color.grey,
       borderTopRightRadius: 40,
       borderTopLeftRadius: 40,
       paddingHorizontal: 15,
@@ -459,12 +456,7 @@ const styles = StyleSheet.create({
       color: '#000',
       flexDirection: 'row',
       paddingHorizontal: 10,
-      backgroundColor: '#fff',
-      borderTopRightRadius:30,
-      borderTopLeftRadius:30,
-      borderBottomLeftRadius:30,
-      borderBottomRightRadius:30
-      
+      backgroundColor: '#fff',    
     },
     sendButton: {
       padding: 10,

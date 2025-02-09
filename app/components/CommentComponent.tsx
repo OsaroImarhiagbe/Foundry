@@ -40,11 +40,9 @@ const CommentComponent:React.FC<CommentProp> = ({content,name,comment_id,post_id
     const [press,setIsPress] = useState(false)
     const [isloading,setLoading] = useState<boolean>(false)
     const [showReply,setShowReply] = useState<boolean>(false)
-    const [isReply,setIsRely] = useState<boolean>(false)
     const [reply,setReply] = useState<Reply[]>([])
     const {user} = useAuth();
     const profileImage = useSelector((state:any) => state.user.profileImage)
-    const [replyingTo, setReplyingTo] = useState<string | any>('');
     const theme = useTheme()
 
 
@@ -113,7 +111,7 @@ const CommentComponent:React.FC<CommentProp> = ({content,name,comment_id,post_id
   return (
     <Card
     mode='contained'
-    style={{backgroundColor:color.grey}}
+    style={{backgroundColor:theme.colors.onSecondary}}
     >
     <Card.Content>
     <View style={styles.imageText}>
