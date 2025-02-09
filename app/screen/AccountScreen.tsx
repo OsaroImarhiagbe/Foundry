@@ -1,4 +1,10 @@
-import {View, Text, StyleSheet, ScrollView, TouchableOpacity,Dimensions,ActivityIndicator,RefreshControl,SafeAreaView} from 'react-native'
+import {
+  View,
+  StyleSheet, 
+  ScrollView, 
+  TouchableOpacity,
+  ActivityIndicator,
+  RefreshControl} from 'react-native'
 import {lazy,Suspense} from 'react'
 import color from '../../config/color';
 import { useNavigation } from '@react-navigation/native';
@@ -16,6 +22,7 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import EvilIcons from 'react-native-vector-icons/EvilIcons';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { useTheme,Text } from 'react-native-paper';
 
 
 const PostComponent = lazy(() => import('../components/PostComponent'))
@@ -36,6 +43,7 @@ const AccountScreen = () => {
   const navigation = useNavigation<Navigation>();
   const isCurrentUser = user
   const [refreshing, setRefreshing] = useState(false);
+  const theme = useTheme()
 
 
   type NavigationProp = {
@@ -150,8 +158,8 @@ const AccountScreen = () => {
   const Post = () => (
     <ScrollView
     scrollEnabled
-     style={{flex:1,backgroundColor:color.backgroundcolor}}>
-      <View style={{flex:1,backgroundColor:color.backgroundcolor}}>
+     style={{flex:1,backgroundColor:theme.colors.background}}>
+      <View style={{flex:1,backgroundColor:theme.colors.background}}>
         {
         posts && posts.length > 0 ? (
             posts.map((post) => (
@@ -168,8 +176,8 @@ const AccountScreen = () => {
   ); 
   
   const Projects = () => (
-    <ScrollView scrollEnabled style={{flex:1,backgroundColor:color.backgroundcolor}}>
-    <View style={{flex:1,backgroundColor:color.backgroundcolor,padding:50}}>
+    <ScrollView scrollEnabled style={{flex:1,backgroundColor:theme.colors.background}}>
+    <View style={{flex:1,backgroundColor:theme.colors.background,padding:50}}>
       {
         projects && projects.length > 0 ? (
           projects.map((project, index) => (
@@ -189,50 +197,55 @@ const AccountScreen = () => {
 
   return (
   
-    <SafeAreaView style={styles.screen}>
+    <View style={[styles.screen,{backgroundColor:theme.colors.background}]}>
       <ChatRoomHeader
         iconColor='#00bf63' 
         onPress={()=>navigation.navigate('Main')} 
         backgroundColor={color.button} 
         icon='keyboard-backspace' 
-        onPress2={() => navigation.navigate('Message')}
         />
       <ScrollView
-      scrollEnabled={true}
+        scrollEnabled={true}
         showsVerticalScrollIndicator={false}
         style={styles.screen}
         contentContainerStyle={{flexGrow:1}}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh}/>}
         >
-        <View style={styles.profileContainer}>
           <View style={{flexDirection:'row', justifyContent:'space-between',paddingLeft:20}}>
           <Image
-              style={{height:hp(10), aspectRatio:1, borderRadius:100,}}
+              style={{height:hp(9.5), aspectRatio:1, borderRadius:100,}}
               source={users?.profileUrl}
               placeholder={{blurhash}}
               cachePolicy='none'/>
-              <View style={{marginTop:5,flexDirection:'row', justifyContent:'space-evenly',paddingRight:20}}>
-              <Text style={{fontSize:30, color:'#fff'}}>  {
-                    isCurrentUser ? (<Text style={styles.username}>@{users?.username}</Text>) 
-                    : (<Text style={styles.username}>@{users?.username}</Text>)
-                  }</Text>
               </View>
-              </View>
-              <View style={{alignItems:'flex-end',flexDirection:'column',marginBottom:20,paddingRight:20}}>
-              <Text style={styles.title}>{users?.jobtitle}</Text>
-              <Text style={styles.location}><EvilIcons name='location' size={20}/> {users?.location}</Text>
-              </View>
-              </View>
-              <View style={styles.textcontainer}>
-                <View style={{flexDirection:'column',alignItems:'stretch'}}>
-                  <View style={{flexDirection:'row', justifyContent:'space-around'}}>
+              <View style={{marginTop:5,flexDirection:'row',paddingRight:20}}>
+              <View
+              style={{
+                paddingLeft:20,
+                marginTop:5
+              }}>  <Text>{
+                    isCurrentUser ? (<Text
+                    variant='bodySmall'
+                      style={{
+                        color:theme.colors.onTertiary
+                      }}>@{users?.username}</Text>) 
+                    : (<Text
+                    variant='bodySmall'
+                      style={{
+                        color:theme.colors.onTertiary
+                      }}>@{users?.username}</Text>)
+                  }</Text></View>
+                   <View style={{flexDirection:'column'}}>
                     {follow_items.map((item,index)=>{
                       return <FollowComponent key={index} count={item.count} content={item.content}/>
                     })}
-                  </View>
                 </View>
               </View>
-              <View style={styles.aboutContainer}>
+              {/* <View style={{alignItems:'flex-end',flexDirection:'column',marginBottom:20,paddingRight:20}}>
+              <Text style={styles.title}>{users?.jobtitle}</Text>
+              <Text style={styles.location}><EvilIcons name='location' size={20}/> {users?.location}</Text>
+              </View> */}
+              {/* <View style={styles.aboutContainer}>
                 <View style={{flexDirection:'row', justifyContent:'space-around'}}>
                   <TouchableOpacity onPress={() => navigation.navigate('SkillsScreen')}>
                   <SmallButton name='Skills'/>
@@ -241,16 +254,16 @@ const AccountScreen = () => {
                     {isCurrentUser &&  <SmallButton name='Edit Profile'/>}
                   </TouchableOpacity>
                 </View>
-                </View>
+                </View> */}
                 <View style={{flex: 1}}>
                   <Tab.Navigator
                 screenOptions={{
                   swipeEnabled:true,
                   tabBarIndicatorStyle:{
-                    backgroundColor:'#00BF63'
+                    backgroundColor:theme.colors.primary
                   },
                   tabBarStyle:{
-                    backgroundColor:color.backgroundcolor,
+                    backgroundColor:theme.colors.background
                   },
                   tabBarShowLabel:false
                 }}
@@ -260,7 +273,7 @@ const AccountScreen = () => {
                     component={Post}
                     options={{
                       tabBarIcon:() => (
-                        <MaterialCommunityIcons name='post' color='#00bf63' size={25}
+                        <MaterialCommunityIcons name='post' color={theme.colors.primary} size={25}
                         />),
                     }}
                     />
@@ -269,14 +282,14 @@ const AccountScreen = () => {
                     component={Projects}
                     options={{
                       tabBarIcon:() => (
-                        <MaterialIcons name='work' color='#00bf63' size={25}
+                        <MaterialIcons name='work' color={theme.colors.primary} size={25}
                         />),
                     }}
                     />
                   </Tab.Navigator>
                 </View>
                 </ScrollView> 
-    </SafeAreaView>
+    </View>
   )
 }
 
@@ -289,12 +302,7 @@ const styles = StyleSheet.create({
     fontSize:15,
     fontWeight:'bold'
   },
-  profileContainer:{
-    marginTop:10,
-    padding:10,
-  },
   screen:{
-    backgroundColor:color.backgroundcolor,
     flex:1
   },
   text:{
@@ -303,25 +311,16 @@ const styles = StyleSheet.create({
     letterSpacing:1,
     padding:5
   },
-  textcontainer:{
-    marginTop:5,
-    padding:10,
-  },
   username:{
-    fontSize:30,
     letterSpacing:1,
-    fontWeight:'bold',
-   fontFamily:color.textFont
   },
   location:{
     fontSize:15,
     color:'#fff',
-    fontFamily:color.textFont
   },
   title:{
     fontSize:15,
     color:'#fff',
-    fontFamily:color.textFont
   },
 
 

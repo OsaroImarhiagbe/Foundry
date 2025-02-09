@@ -80,10 +80,6 @@ const ChatRoomHeader:React.FC<HeaderProp> = ({title,onPress,icon,onPress2,backgr
           { icon && <MaterialCommunityIcons name={icon} color={theme.colors.primary} size={20} />}
           </View>
         </TouchableOpacity>
-          <Image
-          style={{width:wp(10),height:hp(4.3),alignItems:'center',justifyContent:'center'}}
-          source={require('../assets/images/icon.png')}
-          />
         <TouchableOpacity
          onPress={() => navigation.navigate('Post' as never)}>
         <View style={styles.icon}>
