@@ -89,10 +89,7 @@ const PostComponent: React.FC<PostComponentProps> = ({
     const {height, width} = useWindowDimensions();
     const dispatch = useDispatch();
     const theme = useTheme()
-    const profileImage = useSelector((state:any) => state.user.profileimg)
     const {user} = useAuth();
-    const navigation = useNavigation()
-    const [category, setCategory] = useState<string>('')
     const [replyingTo, setReplyingTo] = useState<string | null>(null);
     const [replyingToUsername, setReplyingToUsername] = useState<string | undefined>(undefined);
 
@@ -320,7 +317,6 @@ const PostComponent: React.FC<PostComponentProps> = ({
                 position:'relative'
             }
         }}
-      
       >
         <MenuItems 
         text='Delete'
@@ -328,15 +324,15 @@ const PostComponent: React.FC<PostComponentProps> = ({
         <Divider/>
          <MenuItems 
         text='Edit Post'
-        action={()=>setCategory('Creativity and Innovation')}/>
+        action={()=>console.log('edit')}/>
       <Divider/>
       <MenuItems 
         text='Flag'
-        action={()=>setCategory('Collaboration and Community')}/>
+        action={()=>console.log('flag')}/>
        <Divider/> 
       <MenuItems 
         text='Promote'
-        action={()=>setCategory('Statup and Busniess')}/>
+        action={()=>console.log('promote')}/>
       </MenuOptions>
     </Menu> 
       </View>

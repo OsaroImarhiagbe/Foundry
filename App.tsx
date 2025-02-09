@@ -30,7 +30,7 @@ export default function App() {
 
 
   const lightTheme = {
-    ...DefaultTheme, // React Native Paper's default theme
+    ...DefaultTheme,
     colors: {
       ...DefaultTheme.colors,
       primary: 'rgb(5, 126, 230)',
@@ -161,7 +161,7 @@ export default function App() {
         </NavigationContainer>
         </PaperProvider>
       </AuthContextProvider>
-      <StatusBar style={colorScheme === 'dark' ? 'dark':'light'} />
+      <StatusBar style={colorScheme === 'dark' ? 'light':'dark'} />
       </MenuProvider>
       </PersistGate>
     </Provider>

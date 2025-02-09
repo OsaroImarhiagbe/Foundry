@@ -12,9 +12,7 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import ReplyComponent from './ReplyComponent';
 import firestore, { FirebaseFirestoreTypes } from '@react-native-firebase/firestore';
 import { useSelector } from 'react-redux';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import {Text,Divider,Card,useTheme} from 'react-native-paper'
-import color from '../../config/color';
 
 interface CommentProp{
   content?:string,
@@ -36,7 +34,15 @@ interface Reply{
   createdAt?:FirebaseFirestoreTypes.Timestamp
 
 }
-const CommentComponent:React.FC<CommentProp> = ({content,name,comment_id,post_id,count,date,auth_profile,onReplyPress}) => {
+const CommentComponent:React.FC<CommentProp> = ({
+  content,
+  name,
+  comment_id,
+  post_id,
+  count,
+  date,
+  auth_profile,
+  onReplyPress}) => {
     const [press,setIsPress] = useState(false)
     const [isloading,setLoading] = useState<boolean>(false)
     const [showReply,setShowReply] = useState<boolean>(false)
