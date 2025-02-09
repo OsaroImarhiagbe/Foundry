@@ -165,8 +165,19 @@ const AccountScreen = () => {
         posts && posts.length > 0 ? (
             posts.map((post) => (
               <Suspense key={post.id} fallback={<ActivityIndicator size="small" color="#000" />}>
-                <View style={{padding: 10 }}>
-                  <PostComponent auth_profile={post.auth_profile} count={post.like_count} url={post.imageUrl} id={post.id} name={post.name} content={post.content} date={post?.createdAt?.toDate().toLocaleString()} comment_count={post.comment_count} />
+                <View>
+                  <PostComponent
+                  auth_profile={post.auth_profile}
+                  count={post.like_count}
+                  url={post.imageUrl} 
+                  id={post.id} 
+                  name={post.name} 
+                  content={post.content} 
+                  date={post?.createdAt?.toDate().toLocaleString('en-US', {
+                  hour: '2-digit',
+                  minute: '2-digit',
+                  hour12: true})}
+                  comment_count={post.comment_count} />
                 </View>
               </Suspense>
             ))) : <View style={{flex:1,justifyContent:'center',alignItems:'center',paddingTop:50}}>

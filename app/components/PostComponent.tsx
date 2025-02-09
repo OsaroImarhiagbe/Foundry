@@ -242,7 +242,7 @@ const PostComponent: React.FC<PostComponentProps> = ({
       <Text
     variant="bodySmall"
     style={{
-      marginLeft:30,
+      marginLeft:10,
       color:theme.colors.tertiary
     }}
     >{name}</Text>
@@ -253,7 +253,7 @@ const PostComponent: React.FC<PostComponentProps> = ({
     <Text
     variant="bodyLarge"
     style={{
-    marginLeft:30,
+    marginLeft:10,
     marginVertical:5,
     color:theme.colors.tertiary
     }}
