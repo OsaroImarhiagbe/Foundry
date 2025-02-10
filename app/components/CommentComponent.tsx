@@ -12,7 +12,8 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import ReplyComponent from './ReplyComponent';
 import firestore, { FirebaseFirestoreTypes } from '@react-native-firebase/firestore';
 import { useSelector } from 'react-redux';
-import {Text,Divider,Card,useTheme} from 'react-native-paper'
+import {Text,Card,useTheme} from 'react-native-paper'
+import { TouchableWithoutFeedback } from 'react-native-gesture-handler';
 
 interface CommentProp{
   content?:string,
@@ -127,29 +128,35 @@ const CommentComponent:React.FC<CommentProp> = ({
         cachePolicy='none'
         placeholder={{blurhash}}/>
     <View>
-    <Text
+     <View style={{flexDirection:'row',alignItems:'center',justifyContent:'center'}}>
+     <Text
     variant='bodySmall'
     style={{
-      marginLeft:30,
+      marginLeft:10,
       color:theme.colors.onPrimary
     }}>{name}</Text>
+     <View style={{paddingLeft:5}}>
+      <Text
+      variant='bodySmall'
+      style={{
+        fontSize:10,
+        color:theme.colors.onPrimary
+       }}>{date}</Text>
+      </View> 
+    </View> 
     <Text
     variant='bodySmall'
     style={{
-      marginLeft:30,
+      marginLeft:10,
       marginVertical:5,
       color:theme.colors.onPrimary
       }}>{content}
     </Text>
     </View>
     </View>
-    <View style={{paddingLeft:5}}>
-      <Text
-      variant='bodySmall'
-      style={{
-        color:theme.colors.onPrimary
-       }}>{date}</Text>
-    </View>
+    <TouchableWithoutFeedback onPress={() => setShowReply(!showReply)} style={{justifyContent:'flex-end',alignContent:'center',flexDirection:'row'}}>
+      <Text>View Replies</Text>
+    </TouchableWithoutFeedback>
       <View style={styles.reactionContainer}>
     <TouchableHighlight
                  onShowUnderlay={() => setIsPress(true)}
@@ -166,10 +173,8 @@ const CommentComponent:React.FC<CommentProp> = ({
                  </View>
                  </TouchableHighlight>
         <TouchableOpacity onPress={() => {
-          onReplyPress(comment_id, name) 
-          setShowReply(!showReply)}}>
+          onReplyPress(comment_id, name)}}>
         <View style={styles.replycontainer}>
-       <Divider style={{borderBottomWidth:0.5,width:25,borderColor:'#8a8a8a '}}/>
         <Text
         variant='bodySmall'
         style={styles.replies}>
@@ -197,13 +202,10 @@ const CommentComponent:React.FC<CommentProp> = ({
 
 const styles = StyleSheet.create({
     card:{
-        padding:5,
         marginTop:5,
     },
     imageText:{
-      flexDirection:'row',
-      marginBottom:5
-      
+      flexDirection:'row',    
     },
     reactionContainer:{
       flexDirection:'row',
@@ -218,7 +220,6 @@ const styles = StyleSheet.create({
     reactionText:{
       color:'#fff',
       marginLeft:10,
-      fontFamily:'Helvetica-light',
       fontSize:10,
       textAlign:'center',
     },

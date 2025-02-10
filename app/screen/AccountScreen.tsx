@@ -24,6 +24,7 @@ import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import EvilIcons from 'react-native-vector-icons/EvilIcons';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useTheme,Text,Icon } from 'react-native-paper';
+import TabNavigation from 'app/navigation/TabNavigation';
 
 
 const PostComponent = lazy(() => import('../components/PostComponent'))

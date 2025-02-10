@@ -377,7 +377,10 @@ const PostComponent: React.FC<PostComponentProps> = ({
                     name={item.name}
                     comment_id={item.id}
                     post_id={id}
-                    date={item?.createdAt?.toDate().toLocaleString()}
+                    date={item?.createdAt?.toDate().toLocaleString('en-US', {
+                  hour: '2-digit',
+                  minute: '2-digit',
+                  hour12: true})}
                     onReplyPress={(id,name) => {
                       setReplyingTo(id);
                       setReplyingToUsername(name);
