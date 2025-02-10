@@ -1,4 +1,4 @@
-import { createDrawerNavigator } from '@react-navigation/drawer';
+import { createDrawerNavigator, DrawerItem } from '@react-navigation/drawer';
 import color from '../../config/color';
 import { useNavigation } from '@react-navigation/native';
 import { lazy,Suspense } from 'react';
@@ -9,7 +9,6 @@ import { Image } from 'expo-image';
 import { blurhash } from 'utils';
 import { useAuth } from 'app/authContext';
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
-import { TouchableWithoutFeedback } from 'react-native-gesture-handler';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Icon,useTheme} from 'react-native-paper';
 const Drawer = createDrawerNavigator();
@@ -49,7 +48,6 @@ const DrawerNavigation = () => {
   return (
 
     <Drawer.Navigator 
-    initialRouteName='Home'
     screenOptions={{
       drawerType:'back',
       drawerStyle:{

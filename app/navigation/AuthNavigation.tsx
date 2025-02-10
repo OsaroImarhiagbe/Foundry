@@ -128,7 +128,7 @@ const AuthNavigation = () => {
         )
     }else{
       return (
-        <Stack.Navigator initialRouteName='Login'>    
+        <Stack.Navigator>    
           <Stack.Screen
             name="Login"
             component={LoginScreenWrapper}
@@ -162,11 +162,11 @@ const AuthNavigation = () => {
             animation:'fade_from_bottom'
           }}/>
        <Stack.Screen
-      name='SecondStack'
-      component={SecondStackNavigationWrapper}
-      options={{
-        headerShown:false,
-        gestureEnabled:false,
+        name='SecondStack'
+        component={SecondStackNavigationWrapper}
+        options={{
+          headerShown:false,
+          gestureEnabled:false,
       }}/>
         </Stack.Navigator>
       )

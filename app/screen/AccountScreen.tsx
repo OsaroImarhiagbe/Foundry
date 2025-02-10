@@ -24,7 +24,6 @@ import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import EvilIcons from 'react-native-vector-icons/EvilIcons';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useTheme,Text,Icon } from 'react-native-paper';
-import TabNavigation from 'app/navigation/TabNavigation';
 
 
 const PostComponent = lazy(() => import('../components/PostComponent'))
@@ -50,7 +49,7 @@ const AccountScreen = () => {
 
   type NavigationProp = {
     ProjectScreen:undefined,
-    Home:{
+    Welcome:{
       screen?:string
     },
     Message:undefined,
@@ -236,7 +235,7 @@ const AccountScreen = () => {
         contentContainerStyle={{flexGrow:1}}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh}/>}
         >
-          <TouchableOpacity onPress={() => navigation.navigate('Home',{screen:'Dash'})} style={{padding:10}}>
+          <TouchableOpacity onPress={() => navigation.navigate('Welcome',{screen:'Dash'})} style={{padding:10}}>
             <Icon
             source='arrow-left-circle'
             size={25}

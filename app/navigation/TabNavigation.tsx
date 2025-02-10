@@ -4,10 +4,16 @@ import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { lazy,Suspense } from 'react';
 import { ActivityIndicator, Platform } from 'react-native';
-import { useTheme } from 'react-native-paper';
+import { useTheme,} from 'react-native-paper';
+import { Image
+ } from 'expo-image';
+ import { blurhash } from 'utils';
+import { useAuth } from 'app/authContext';
+import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 const NotificationScreen = lazy(() => import('../screen/NotificationScreen'))
 const SearchScreen = lazy(() => import('../screen/SearchScreen'))
 const StackNavigation = lazy(() => import('./StackNavigation'))
+const ProfileScreen = lazy(() => import('../screen/AccountScreen'))
 
 
 const StackNavigationwrapper = () =>{
@@ -17,7 +23,15 @@ const StackNavigationwrapper = () =>{
   </Suspense>
   )}
 
-
+  const ProfileScreenWrapper = () =>{
+    return (
+  
+      <Suspense fallback={<ActivityIndicator size='small' color='#000' />}>
+      <ProfileScreen/>
+    </Suspense>
+  
+    )
+  }
 
 const SearchScreenWrapper = () => {
   
@@ -39,6 +53,7 @@ const NotificationScreenWrapper = () => {
 const TabNavigation = () => {
   const Tab = createBottomTabNavigator()
   const theme = useTheme()
+  const {user} = useAuth()
 
   return (
  
@@ -78,6 +93,18 @@ const TabNavigation = () => {
         tabBarLabel: 'Notification',
         tabBarIcon:() => <MaterialIcons name='notifications' color={theme.colors.tertiary} size={25}/>
      }}
+     />
+     <Tab.Screen 
+        name="Profile"
+        component={ProfileScreenWrapper}
+        options={{
+          tabBarIcon:({focused,color,size}) => (
+            <Image
+            style={{height:hp(3.3), aspectRatio:1, borderRadius:100,}}
+            source={{uri:user?.profileUrl}}
+            placeholder={{blurhash}}
+            />
+          )}}
      />
       </Tab.Navigator>
   
