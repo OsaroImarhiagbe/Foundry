@@ -121,8 +121,11 @@ const CommentComponent:React.FC<CommentProp> = ({
     style={{backgroundColor:theme.colors.onSecondary}}
     >
     <Card.Content>
-    <View style={styles.imageText}>
-    <Image
+    <View style={{
+      flexDirection:'row',
+    }}>
+     <View style={{flexDirection:'row',alignItems:'center'}}>
+     <Image
         style={{height:hp(3.3), aspectRatio:1, borderRadius:100}}
         source={auth_profile}
         cachePolicy='none'
@@ -153,10 +156,13 @@ const CommentComponent:React.FC<CommentProp> = ({
       }}>{content}
     </Text>
     </View>
-    </View>
-    <TouchableWithoutFeedback onPress={() => setShowReply(!showReply)} style={{justifyContent:'flex-end',alignContent:'center',flexDirection:'row'}}>
+    {
+      reply && <TouchableWithoutFeedback onPress={() => setShowReply(!showReply)} style={{marginLeft:150}}>
       <Text>View Replies</Text>
     </TouchableWithoutFeedback>
+    }
+      </View> 
+    </View>
       <View style={styles.reactionContainer}>
     <TouchableHighlight
                  onShowUnderlay={() => setIsPress(true)}
@@ -203,9 +209,6 @@ const CommentComponent:React.FC<CommentProp> = ({
 const styles = StyleSheet.create({
     card:{
         marginTop:5,
-    },
-    imageText:{
-      flexDirection:'row',    
     },
     reactionContainer:{
       flexDirection:'row',
