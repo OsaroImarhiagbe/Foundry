@@ -47,7 +47,8 @@ const DrawerNavigation = () => {
   const theme = useTheme()
   return (
 
-    <Drawer.Navigator 
+    <Drawer.Navigator
+    initialRouteName='Home' 
     screenOptions={{
       drawerType:'back',
       drawerStyle:{

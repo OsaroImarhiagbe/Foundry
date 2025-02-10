@@ -9,11 +9,7 @@ const DrawerNavigation = lazy(() => import('./DrawerNavigation'))
 const OnboardingScreen = lazy(()=> import('../screen/OnboardingScreen'))
 const LoginScreen = lazy(()=> import('../screen/LoginScreen'));
 const SecondStackNavigation = lazy(() => import('../navigation/SecondStackNavigation'))
-type NavigationProp = {
-  navigate(arg0: string, arg1: { screen: string; }): unknown;
-  Drawer:undefined,
-  Home:undefined
-}
+
 
 const RegisterScreenWrapper = () => {
   
@@ -61,28 +57,8 @@ const OnboardingScreenWrapper = () =>{
   )
 }
 const AuthNavigation = () => {
-  const navigation = useNavigation<NavigationProp>()
-  const [loading,setLoading] = useState<boolean>(false)
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean | undefined>(undefined)
   const [showOnboarding,setShowOnboarding] = useState<boolean>(false)
-
-  const {updateUserData} = useAuth()
-
-    useEffect(() =>{
-      setLoading(true)
-      const getAuthState = async () => {
-          const currentUser = await AsyncStorage.getItem('authUser')
-          if(currentUser !== null){
-              setIsAuthenticated(true)
-              navigation.navigate('Drawer',{screen:'Home'})
-              setLoading(false)
-          }else{
-              setIsAuthenticated(false);
-              setLoading(false)
-          }
-      }
-      getAuthState()
-  },[])
+  const {isAuthenticated} = useAuth()
 
   useEffect(()=>{
     checkifOnboard()
@@ -96,40 +72,20 @@ const AuthNavigation = () => {
         setShowOnboarding(true)
       }
     }
-  
-
     const Stack = createStackNavigator()
 
-
-    if(showOnboarding==null){
-      return null
-    }
-    if(isAuthenticated && showOnboarding){
       return (
-          <Stack.Navigator
-          initialRouteName='Drawer'
-          >
-          <Stack.Screen
+        <Stack.Navigator>
+          {
+            isAuthenticated && showOnboarding ? 
+            <Stack.Screen
             name='Drawer'
             component={DrawerNavigationWrapper}
             options={{
               headerShown:false,
               gestureEnabled:false,
               animation:'fade_from_bottom'
-            }}/>
-       <Stack.Screen
-       name='SecondStack'
-       component={SecondStackNavigationWrapper}
-       options={{
-         headerShown:false,
-         gestureEnabled:false,
-       }}/>
-          </Stack.Navigator>
-        )
-    }else{
-      return (
-        <Stack.Navigator>    
-          <Stack.Screen
+            }}/> :  <Stack.Screen
             name="Login"
             component={LoginScreenWrapper}
             options={{
@@ -139,6 +95,7 @@ const AuthNavigation = () => {
               
             }}
           /> 
+          }
           <Stack.Screen
           name="Register"
           component={RegisterScreenWrapper}
@@ -153,14 +110,6 @@ const AuthNavigation = () => {
           options={{
             headerShown:false,
           }}/>
-          <Stack.Screen
-          name='Drawer'
-          component={DrawerNavigationWrapper}
-          options={{
-            headerShown:false,
-            gestureEnabled:false,
-            animation:'fade_from_bottom'
-          }}/>
        <Stack.Screen
         name='SecondStack'
         component={SecondStackNavigationWrapper}
@@ -171,7 +120,5 @@ const AuthNavigation = () => {
         </Stack.Navigator>
       )
     }
-
-  }
 
 export default AuthNavigation
