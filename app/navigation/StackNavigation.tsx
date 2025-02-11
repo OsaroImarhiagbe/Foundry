@@ -138,13 +138,13 @@ const StackNavigation = () => {
       gestureEnabled:false
       
      }}/>
-      <Stack.Screen
+      {/* <Stack.Screen
       name='Profile'
       component={ProfileScreenWrapper}
       options={{
         headerShown:false,
         gestureEnabled:false
-      }}/>
+      }}/> */}
        <Stack.Screen
       name='Edit'
       component={EditScreenWrapper}
