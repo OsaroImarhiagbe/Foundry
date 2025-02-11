@@ -61,6 +61,7 @@ export const NotificationProvider = ({ children }:NotificationProp) => {
         try{
             await notifee.requestPermission();
             const token = await messaging().getToken();
+            if (!token) throw new Error('Failed to get FCM token');      
             await firestore().collection('users').doc(user.userId).update({
                 token:token 
             })
@@ -69,7 +70,7 @@ export const NotificationProvider = ({ children }:NotificationProp) => {
         }
       }
       fetchToken()
-      }, []);
+      }, [user.userId]);
 
 
     const handleNotificationClick = async (response:any) => {

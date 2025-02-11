@@ -60,11 +60,13 @@ const TabNavigation = () => {
   <Tab.Navigator 
   initialRouteName='Welcome'
   screenOptions={{
-    headerShown: false, 
+    headerShown: false,
     tabBarShowLabel: false,
-    tabBarStyle:{
-      borderTopWidth:0,
-      backgroundColor:theme.colors.background
+    tabBarStyle: {
+      borderTopWidth: 0,
+      backgroundColor: theme.colors.background,
+      elevation: 0, // for Android
+      shadowOpacity: 0, // for iOS
     }
   }}
 >
@@ -95,7 +97,7 @@ const TabNavigation = () => {
      }}
      />
      <Tab.Screen 
-        name="Profile"
+        name="Account"
         component={ProfileScreenWrapper}
         options={{
           tabBarIcon:({focused,color,size}) => (
