@@ -243,18 +243,20 @@ const PostComponent: React.FC<PostComponentProps> = ({
     variant="bodySmall"
     style={{
       marginLeft:10,
-      color:theme.colors.tertiary
+      fontSize:16,
+      color:theme.colors.onTertiary
     }}
-    >{name}</Text>
+    >@{name}</Text>
       </View>
     <View style={{paddingLeft:40}}>
     </View>
     </View>
     <Text
-    variant="bodyLarge"
+    variant="bodySmall"
     style={{
     marginLeft:10,
     marginVertical:5,
+    fontSize:16,
     color:theme.colors.tertiary
     }}
     >{content}</Text>

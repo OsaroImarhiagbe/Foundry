@@ -7,23 +7,21 @@ import {
   SafeAreaView,
   RefreshControl} from 'react-native'
 import {lazy,Suspense} from 'react'
-import color from '../../config/color';
 import { useNavigation } from '@react-navigation/native';
 import {useState, useEffect,useCallback} from 'react';
 import { useAuth } from '../authContext';
 import { Image } from 'expo-image';
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
-import ChatRoomHeader from '../components/ChatRoomHeader';
-import SmallButton from '../components/SmallButton';
 import FollowComponent from '../components/FollowComponent';
 import firestore,{FirebaseFirestoreTypes} from '@react-native-firebase/firestore';
 import { blurhash } from '../../utils/index';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-import EvilIcons from 'react-native-vector-icons/EvilIcons';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { useTheme,Text,Icon } from 'react-native-paper';
+import { useTheme,Text,Icon,Button } from 'react-native-paper';
+import EvilIcons from 'react-native-vector-icons/EvilIcons';
+import SmallButton from 'app/components/SmallButton';
 
 
 const PostComponent = lazy(() => import('../components/PostComponent'))
@@ -200,13 +198,13 @@ const AccountScreen = () => {
             <Text style={{ textAlign: 'center', color: '#fff' }}>{project?.project_name}</Text>
           </View>
           </TouchableOpacity>
-        ))) : <View style={{flex:1,justifyContent:'center',alignItems:'center'}}><Text variant='bodySmall' style={{ color: '#fff', textAlign: 'center',}}>No projects available</Text></View>
+        ))) : <View style={{flex:1,justifyContent:'center',alignItems:'center'}}><Text variant='bodySmall' style={{ color: '#fff', textAlign: 'center',fontSize:16}}>No projects available</Text></View>
       }
       
     </View>
     </ScrollView>
   );
-  const ProjectsScreen = () => (
+  const SkillsScreen = () => (
     <ScrollView scrollEnabled style={{flex:1,backgroundColor:theme.colors.background}}>
     <View style={{flex:1,backgroundColor:theme.colors.background,padding:50}}>
       {
@@ -218,7 +216,7 @@ const AccountScreen = () => {
             <Text style={{ textAlign: 'center', color: '#fff' }}>{project?.project_name}</Text>
           </View>
           </TouchableOpacity>
-        ))) : <View style={{flex:1,justifyContent:'center',alignItems:'center'}}><Text variant='bodySmall' style={{ color: '#fff', textAlign: 'center',}}>No projects available</Text></View>
+        ))) : <View style={{flex:1,justifyContent:'center',alignItems:'center'}}><Text variant='bodySmall' style={{ color: '#fff', textAlign: 'center',fontSize:16}}>No skills available</Text></View>
       }
       
     </View>
@@ -243,20 +241,21 @@ const AccountScreen = () => {
           </TouchableOpacity>
           <View style={{flexDirection:'row',paddingLeft:20,marginTop:10,justifyContent:'space-between',padding:5}}>
           <Image
-              style={{height:hp(9.5), aspectRatio:1, borderRadius:100,}}
+              style={{height:hp(7), aspectRatio:1, borderRadius:100,}}
               source={users?.profileUrl}
               placeholder={{blurhash}}
               cachePolicy='none'/>
-               <TouchableOpacity onPress={() => navigation.navigate('Edit')}>
-                    {isCurrentUser &&  <SmallButton name='Edit Profile'/>}
-                  </TouchableOpacity>
+            {isCurrentUser &&  <Button 
+            onPress={() => navigation.navigate('Edit')}
+            mode='outlined' style={{
+            backgroundColor:'transparent', 
+            borderRadius:100,
+            borderWidth:1,
+            borderColor:theme.colors.tertiary}}>Edit Profile</Button>}
               </View>
-              <View style={{marginTop:5,flexDirection:'column',paddingRight:20,alignContent:'stretch'}}>
-              <View
-              style={{
-                paddingLeft:20,
-                marginTop:5
-              }}>  <Text>{
+              <View style={{marginTop:5,flexDirection:'column',paddingRight:20}}>
+              <View style={{paddingLeft:20}}>
+               <Text>{
                     isCurrentUser ? (<Text
                     variant='bodySmall'
                       style={{
@@ -267,29 +266,22 @@ const AccountScreen = () => {
                       style={{
                         color:theme.colors.onTertiary
                       }}>@{users?.username}</Text>)
-                  }</Text></View>
-                   <View style={{paddingLeft:20}}>
-                    <View>
+                  }</Text>
+                  {users?.jobtitle &&   <Text
+                  variant='bodySmall'
+                  style={{
+                    color:theme.colors.onPrimary
+                  }}>{users?.jobtitle}</Text>}
+                  {users?.location &&    <Text
+                  variant='bodySmall'
+                  style={{
+                    color:theme.colors.onPrimary
+                  }}><EvilIcons name='location' size={15} color={theme.colors.onTertiary}/>{users?.location}</Text>}
                     {follow_items.map((item,index)=>{
                       return <FollowComponent key={index} count={item.count} content={item.content}/>
                     })}
-                    </View>
                 </View>
               </View>
-              {/* <View style={{alignItems:'flex-end',flexDirection:'column',marginBottom:20,paddingRight:20}}>
-              <Text style={styles.title}>{users?.jobtitle}</Text>
-              <Text style={styles.location}><EvilIcons name='location' size={20}/> {users?.location}</Text>
-              </View> */}
-              {/* <View style={styles.aboutContainer}>
-                <View style={{flexDirection:'row', justifyContent:'space-around'}}>
-                  <TouchableOpacity onPress={() => navigation.navigate('SkillsScreen')}>
-                  <SmallButton name='Skills'/>
-                  </TouchableOpacity>
-                  <TouchableOpacity onPress={() => navigation.navigate('Edit')}>
-                    {isCurrentUser &&  <SmallButton name='Edit Profile'/>}
-                  </TouchableOpacity>
-                </View>
-                </View> */}
                 <View style={{flex: 1}}>
                   <Tab.Navigator
                 screenOptions={{
@@ -300,34 +292,36 @@ const AccountScreen = () => {
                   tabBarStyle:{
                     backgroundColor:theme.colors.background
                   },
-                  tabBarShowLabel:false
                 }}
                 >
                   <Tab.Screen
-                    name='Post'
+                    name='Posts'
                     component={Post}
                     options={{
-                      tabBarIcon:() => (
-                        <MaterialCommunityIcons name='post' color={theme.colors.onPrimary} size={20}
-                        />),
+                      tabBarLabelStyle:{
+                        fontSize:20,
+                        color:theme.colors.onPrimary
+                      }
                     }}
                     />
                     <Tab.Screen
                     name='Projects'
                     component={Projects}
                     options={{
-                      tabBarIcon:() => (
-                        <MaterialIcons name='work' color={theme.colors.onPrimary} size={20}
-                        />),
+                      tabBarLabelStyle:{
+                        fontSize:20,
+                        color:theme.colors.onPrimary
+                      }
                     }}
                     />
                   <Tab.Screen
-                    name='ProjectsScreen'
-                    component={ProjectsScreen}
+                    name='Skills'
+                    component={SkillsScreen}
                     options={{
-                      tabBarIcon:() => (
-                        <MaterialIcons name='work' color={theme.colors.onPrimary} size={20}
-                        />),
+                      tabBarLabelStyle:{
+                        fontSize:20,
+                        color:theme.colors.onPrimary
+                      }
                     }}
                     />
                   </Tab.Navigator>
@@ -358,15 +352,5 @@ const styles = StyleSheet.create({
   username:{
     letterSpacing:1,
   },
-  location:{
-    fontSize:15,
-    color:'#fff',
-  },
-  title:{
-    fontSize:15,
-    color:'#fff',
-  },
-
-
 })
 export default AccountScreen

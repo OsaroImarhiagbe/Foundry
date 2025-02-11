@@ -63,7 +63,8 @@ const TabNavigation = () => {
     headerShown: false,
     tabBarShowLabel: false,
     tabBarStyle: {
-      borderTopWidth: 0,
+      borderTopWidth: 0.5,
+      borderColor:theme.colors.primary,
       backgroundColor: theme.colors.background,
       elevation: 0, 
       shadowOpacity: 0, 
