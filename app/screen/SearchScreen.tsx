@@ -4,7 +4,6 @@ import {
   Text,
   StyleSheet,
   FlatList,
-  Image,
   TouchableOpacity,
   ActivityIndicator,
   Platform,
@@ -19,6 +18,11 @@ import firestore from '@react-native-firebase/firestore';
 import useDebounce from '../hooks/useDebounce';
 import SearchFilter from '../components/SearchFilter';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { useTheme } from 'react-native-paper';
+import { Image } from 'expo-image';
+import { blurhash } from 'utils';
+import { useAuth } from 'app/authContext';
+import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 
 
 
@@ -48,6 +52,8 @@ const SearchScreen = () => {
   const [isloading,setLoading] = useState<boolean>(false)
   const navigation = useNavigation<Navigation>();
   const skills_array = useSelector((state:any) => state.skill.searchedSkills)
+  const theme = useTheme()
+  const {user} = useAuth()
 
   const debouncedsearch = useDebounce(searchQuery,3000)
   const dispatch = useDispatch()
@@ -88,8 +94,13 @@ const SearchScreen = () => {
   }
 
   return (
-    <View style={styles.screen}>
-        <View style={{padding:30, marginTop:40,flexDirection:'row',justifyContent:'space-between',alignItems:'center'}}>
+    <View style={[styles.screen,{backgroundColor:theme.colors.background}]}>
+        <View style={{padding:10, marginTop:50,flexDirection:'row',justifyContent:'space-between',alignItems:'center'}}>
+          <Image
+          style={{height:hp(4.3), aspectRatio:1, borderRadius:100,}}
+          source={{uri:user.profileUrl}}
+          placeholder={{blurhash}}
+          />
           <SearchComponent 
           backgroundColor={color.grey}
           color='#00bf63'
@@ -123,7 +134,6 @@ const SearchScreen = () => {
 const styles = StyleSheet.create({
   screen:{
     flex:1,
-    backgroundColor:color.backgroundcolor,
     paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 10,
   },
   image:{

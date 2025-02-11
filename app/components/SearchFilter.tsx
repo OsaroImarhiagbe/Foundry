@@ -41,7 +41,7 @@ const SearchFilter = () => {
     <Menu>
           <MenuTrigger>
           <View>
-          <MaterialCommunityIcons name='filter-variant' size={30} color='#fff'/>
+          <MaterialCommunityIcons name='filter-variant' size={20} color='#fff'/>
           </View>
       </MenuTrigger>
           <MenuOptions

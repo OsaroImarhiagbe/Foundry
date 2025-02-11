@@ -1,9 +1,17 @@
 import React,{useState,useEffect,lazy,Suspense,useCallback} from 'react'
-import {View,Text, StyleSheet,FlatList,ScrollView,ActivityIndicator,RefreshControl,SafeAreaView} from 'react-native'
+import {
+  View, 
+  StyleSheet,
+  FlatList,
+  ScrollView,
+  ActivityIndicator,
+  RefreshControl,
+  SafeAreaView} from 'react-native'
 import firestore from '@react-native-firebase/firestore'
 import { useAuth } from '../authContext';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import color from '../../config/color';
+import { useTheme,Text } from 'react-native-paper';
 
 interface Notification{
   id?:string,
@@ -16,6 +24,7 @@ const NotificationScreen = () => {
   const [notification,setNotification] = useState<Notification[]>([])
   const [refreshing, setRefreshing] = useState<boolean>(false);
   const Tab = createMaterialTopTabNavigator()
+  const theme = useTheme()
 
 
   const getNotifications = useCallback(() => {
@@ -81,8 +90,8 @@ const NotificationScreen = () => {
     <ScrollView
     refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh}/>}
     scrollEnabled={true}
-     style={{flex:1,backgroundColor:color.backgroundcolor}}>
-      <SafeAreaView style={{flex:1,backgroundColor:color.backgroundcolor}}>
+     style={{flex:1,backgroundColor:theme.colors.background}}>
+      <SafeAreaView style={{flex:1,backgroundColor:theme.colors.background}}>
         {
         messageNotifications &&  messageNotifications.length > 0 ? (
             messageNotifications.map((message,index) => (
@@ -104,8 +113,30 @@ const NotificationScreen = () => {
     <ScrollView
     refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh}/>}
     scrollEnabled={true}
-     style={{flex:1,backgroundColor:color.backgroundcolor}}>
-      <SafeAreaView style={{flex:1,backgroundColor:color.backgroundcolor}}>
+     style={{flex:1,backgroundColor:theme.colors.background}}>
+      <SafeAreaView style={{flex:1,backgroundColor:theme.colors.background}}>
+        {
+        notification && notification.length > 0 ? (
+            notification.map((notifications,index) => (
+              <Suspense key={index} fallback={<ActivityIndicator size="large" color="#fff" />}>
+                <View style={{padding: 10}}>
+                  <View style={{backgroundColor:color.grey,padding:20,borderRadius:20}}>
+                  <Text style={styles.notificationTitle}>{notifications.title}</Text>
+                  <Text style={styles.notificationText}>{notifications.body}</Text>
+                  </View>
+                </View>
+              </Suspense>
+            ))) : <View style={{paddingTop:20}}><Text style={{ color: '#fff', textAlign: 'center', fontFamily:color.textFont,fontSize:20}}>No Notifications Available</Text></View>}
+    </SafeAreaView>
+    </ScrollView>
+    
+  );
+  const Mentions = () => (
+    <ScrollView
+    refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh}/>}
+    scrollEnabled={true}
+     style={{flex:1,backgroundColor:theme.colors.background}}>
+      <SafeAreaView style={{flex:1,backgroundColor:theme.colors.background}}>
         {
         notification && notification.length > 0 ? (
             notification.map((notifications,index) => (
@@ -123,19 +154,25 @@ const NotificationScreen = () => {
     
   );
   return (
-   <View style={styles.screen}>
+   <View style={[styles.screen,{backgroundColor:theme.colors.background}]}>
     <View style={styles.headingContainer}>
-    <Text style={styles.headingText}>Notifications</Text>
+    <Text
+    variant='titleLarge'
+    style={{
+      fontSize:24,
+      textAlign:'center',
+      color:theme.colors.onPrimary
+    }}>Notifications</Text>
     </View>
     <View style={{flex:1}}>
     <Tab.Navigator
   screenOptions={{
     swipeEnabled:true,
     tabBarIndicatorStyle:{
-      backgroundColor:'#00BF63'
+      backgroundColor:theme.colors.primary
     },
     tabBarStyle:{
-      backgroundColor:color.backgroundcolor,
+      backgroundColor:theme.colors.background
     },
   }}
   >
@@ -145,8 +182,7 @@ const NotificationScreen = () => {
       options={{
         tabBarLabel:'Messages',
         tabBarLabelStyle:{
-          color:color.textcolor,
-          fontFamily:color.textFont,
+          color:theme.colors.onPrimary,
           fontSize:20
         }
       }}
@@ -157,8 +193,18 @@ const NotificationScreen = () => {
       options={{
         tabBarLabel:'All',
         tabBarLabelStyle:{
-          color:color.textcolor,
-          fontFamily:color.textFont,
+          color:theme.colors.onPrimary,
+          fontSize:20
+        }
+      }}
+      />
+        <Tab.Screen
+      name='Mentions'
+      component={Mentions}
+      options={{
+        tabBarLabel:'Mentions',
+        tabBarLabelStyle:{
+          color:theme.colors.onPrimary,
           fontSize:20
         }
       }}
@@ -171,17 +217,10 @@ const NotificationScreen = () => {
 const styles = StyleSheet.create({
     screen:{
       flex:1,
-      backgroundColor:color.backgroundcolor
     },
     headingContainer:{
       paddingTop:90,
       padding:10,
-    },
-    headingText:{
-      color:color.textcolor,
-      fontSize:30,
-      fontFamily:color.textFont,
-      paddingLeft:10
     },
     notificationTitle:{
       color:color.textcolor,
