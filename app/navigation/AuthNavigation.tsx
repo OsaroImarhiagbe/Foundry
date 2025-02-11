@@ -1,7 +1,6 @@
 import { createStackNavigator } from '@react-navigation/stack';
 import { lazy,Suspense, useEffect,useState } from 'react';
 import { ActivityIndicator } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
 import {useAuth} from '../authContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 const RegisterScreen = lazy(() => import('../screen/RegisterScreen'))
@@ -61,10 +60,7 @@ const AuthNavigation = () => {
   const {isAuthenticated} = useAuth()
 
   useEffect(()=>{
-    checkifOnboard()
-  },[])
-
-  const  checkifOnboard = async () => {
+    const  checkifOnboard = async () => {
       const onboardkey = await AsyncStorage.getItem('onboarded')
       if(onboardkey=='1'){
         setShowOnboarding(false)
@@ -72,8 +68,9 @@ const AuthNavigation = () => {
         setShowOnboarding(true)
       }
     }
+    checkifOnboard()
+  },[])
     const Stack = createStackNavigator()
-
       return (
         <Stack.Navigator>
           {

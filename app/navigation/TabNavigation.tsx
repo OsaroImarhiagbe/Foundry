@@ -65,8 +65,8 @@ const TabNavigation = () => {
     tabBarStyle: {
       borderTopWidth: 0,
       backgroundColor: theme.colors.background,
-      elevation: 0, // for Android
-      shadowOpacity: 0, // for iOS
+      elevation: 0, 
+      shadowOpacity: 0, 
     }
   }}
 >
@@ -100,7 +100,7 @@ const TabNavigation = () => {
         name="Account"
         component={ProfileScreenWrapper}
         options={{
-          tabBarIcon:({focused,color,size}) => (
+          tabBarIcon:() => (
             <Image
             style={{height:hp(3.3), aspectRatio:1, borderRadius:100,}}
             source={{uri:user?.profileUrl}}

@@ -9,12 +9,12 @@ import { blurhash } from 'utils';
 import { useAuth } from 'app/authContext';
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import { Icon,useTheme,} from 'react-native-paper';
+
+
+
+
 const Drawer = createDrawerNavigator();
-
-
-
 const TabNavigation = lazy(() => import('./TabNavigation'))
-const ProfileScreen = lazy(() => import('../screen/AccountScreen'))
 
 const TabNavigationWrapper = () =>{
   return (
@@ -43,7 +43,7 @@ const DrawerNavigation = () => {
             placeholder={{blurhash}}
             />
             </TouchableWithoutFeedback> 
-          </View>
+          </View>xw
           <DrawerItemList {...props} />
           <DrawerItem
               label="Something"
@@ -73,7 +73,7 @@ const DrawerNavigation = () => {
           <Icon
           source="home"
           color={theme.colors.secondary}
-          size={20}/>
+          size={size}/>
         ),
         drawerLabelStyle:{
           color:theme.colors.tertiary
@@ -88,7 +88,7 @@ const DrawerNavigation = () => {
           <Icon
           source="source-branch"
           color={theme.colors.secondary}
-          size={20}/>
+          size={size}/>
         ),
         drawerLabelStyle:{
           color:theme.colors.tertiary,
@@ -103,7 +103,7 @@ const DrawerNavigation = () => {
           <Icon
           source="code-tags"
           color={theme.colors.secondary}
-          size={20}/>
+          size={size}/>
         ),
         drawerLabelStyle:{
           color:theme.colors.tertiary

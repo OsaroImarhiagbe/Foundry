@@ -2,7 +2,6 @@ import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { lazy,Suspense } from 'react';
 import { ActivityIndicator } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
 const ReportBugScreen = lazy(() => import('../screen/ReportBugScreen'))
 const ContactUsScreen = lazy(() => import('../screen/ContactUsScreen'))
 const ProjectEntryScreen = lazy(() => import('../screen/ProjectEntryScreen'))
@@ -29,21 +28,10 @@ const ReportBugScreenWrapper = () => {
       <Suspense fallback={<ActivityIndicator size='small' color='#000'/>}>
       <ChatScreen />
     </Suspense>
-  
     )
   
   }
 
-  const DashBoardScreenWrapper = () => {
-    
-    return (
-      <Suspense fallback={<ActivityIndicator size='small' color='#000'/>}>
-      <DashBoardScreen />
-    </Suspense>
-  
-    )
-  
-  }
   const ContactUsScreenWrapper = () => {
     
     return (
@@ -142,12 +130,12 @@ const SecondStackNavigation = () => {
        
     }}/>
     <Stack.Screen
-        name='Chat'
-        component={ChatScreenWrapper}
-        options={{
-        headerShown:false,
-        gestureEnabled:false
-        }}
+      name='Chat'
+      component={ChatScreenWrapper}
+      options={{
+      headerShown:false,
+      gestureEnabled:false
+      }}
         />
       </Stack.Navigator>
     );

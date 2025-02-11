@@ -5,7 +5,6 @@ import { ActivityIndicator } from 'react-native';
 import  DashBoardScreen  from '../screen/DashBoardScreen';
 const HomeScreen = lazy(() => import('../screen/HomeScreen'))
 const MessageScreen = lazy(() => import('../screen/MessageScreen'))
-const AccountScreen = lazy(() => import('../screen/AccountScreen'))
 const EditScreen = lazy(() => import('../screen/EditScreen'))
 const OtherUserScreen = lazy(() => import('../screen/OtherUserScreen'))
 const EditInputScreen = lazy(() => import('../screen/EditInputScreen'))
@@ -19,16 +18,6 @@ const MessageScreenWrapper = () => {
   return (
     <Suspense fallback={<ActivityIndicator size='small' color='#000'/>}>
     <MessageScreen/>
-  </Suspense>
-
-  )
-
-}
-const ProfileScreenWrapper = () => {
-  
-  return (
-    <Suspense fallback={<ActivityIndicator size='small' color='#000'/>}>
-    <AccountScreen/>
   </Suspense>
 
   )
@@ -92,20 +81,6 @@ const EditJobScreenWrapper = () => {
   </Suspense>
   )
 }
-const config = {
-  animation: 'spring',
-  config: {
-    stiffness: 1000,
-    damping: 500,
-    mass: 3,
-    overshootClamping: true,
-    restDisplacementThreshold: 0.01,
-    restSpeedThreshold: 0.01,
-  },
-};
-
-
-
 const StackNavigation = () => {
   const Stack = createNativeStackNavigator();
 
@@ -138,13 +113,6 @@ const StackNavigation = () => {
       gestureEnabled:false
       
      }}/>
-      {/* <Stack.Screen
-      name='Profile'
-      component={ProfileScreenWrapper}
-      options={{
-        headerShown:false,
-        gestureEnabled:false
-      }}/> */}
        <Stack.Screen
       name='Edit'
       component={EditScreenWrapper}
@@ -166,7 +134,6 @@ const StackNavigation = () => {
       options={{
         headerShown:false,
         gestureEnabled:false,
-        presentation:'modal'
       }}/>
         <Stack.Screen
       name='EditEmail'
@@ -174,7 +141,6 @@ const StackNavigation = () => {
       options={{
         headerShown:false,
         gestureEnabled:false,
-        presentation:'modal'
       }}/>
          <Stack.Screen
       name='EditPhone'
@@ -182,7 +148,6 @@ const StackNavigation = () => {
       options={{
         headerShown:false,
         gestureEnabled:false,
-        presentation:'modal'
       }}/>
            <Stack.Screen
       name='EditJob'
@@ -190,7 +155,6 @@ const StackNavigation = () => {
       options={{
         headerShown:false,
         gestureEnabled:false,
-        presentation:'modal'
       }}/>
     
     </Stack.Navigator>
