@@ -28,7 +28,6 @@ export const NotificationProvider = ({ children }:NotificationProp) => {
   const [visible,setVisible] = useState<boolean>(false)
   const navigation = useNavigation();
 
-
   const showNotification = useCallback(async (title:string, message:string,data:any) => {
     try{
         await notifee.displayNotification({
@@ -54,23 +53,24 @@ export const NotificationProvider = ({ children }:NotificationProp) => {
     }catch(error:any){
         console.error('Error with notification permission:',error.message)
     }
-  }, []);
+  }, [notification]);
    
     useEffect(() => {
+      if (!user?.userId) return;
       const fetchToken = async () => {
         try{
             await notifee.requestPermission();
             const token = await messaging().getToken();
             if (!token) throw new Error('Failed to get FCM token');      
-            await firestore().collection('users').doc(user.userId).update({
+            await firestore().collection('users').doc(user.userId).set({
                 token:token 
-            })
-        }catch(error:any){
-          console.error('Error grabbing token:',error.message)
+            },{merge:true})
+        }catch(error){
+          console.error('Error grabbing token:',error)
         }
       }
       fetchToken()
-      }, [user.userId]);
+      }, [user?.userId]);
 
 
     const handleNotificationClick = async (response:any) => {

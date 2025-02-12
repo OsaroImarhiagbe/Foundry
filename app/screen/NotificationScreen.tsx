@@ -103,7 +103,10 @@ const NotificationScreen = () => {
                   </View>
                 </View>
               </Suspense>
-            ))) : <View style={{paddingTop:20}}><Text style={{ color: '#fff', textAlign: 'center', fontFamily:color.textFont,fontSize:20}}>No Notifications Available</Text></View>}
+            ))) : <View style={{paddingTop:20}}>
+              <Text 
+            variant='bodySmall' 
+            style={{ color: '#fff', textAlign: 'center',fontSize:16}}>No Notifications Available</Text></View>}
     </SafeAreaView>
     </ScrollView>
     
@@ -126,7 +129,10 @@ const NotificationScreen = () => {
                   </View>
                 </View>
               </Suspense>
-            ))) : <View style={{paddingTop:20}}><Text style={{ color: '#fff', textAlign: 'center', fontFamily:color.textFont,fontSize:20}}>No Notifications Available</Text></View>}
+            ))) : <View style={{paddingTop:20}}>
+              <Text
+              variant='bodySmall'
+            style={{ color: '#fff', textAlign: 'center',fontSize:16}}>No Notifications Available</Text></View>}
     </SafeAreaView>
     </ScrollView>
     
