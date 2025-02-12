@@ -72,7 +72,7 @@ const AuthNavigation = () => {
   },[])
     const Stack = createStackNavigator()
       return (
-        <Stack.Navigator>
+        <Stack.Navigator initialRouteName={isAuthenticated && showOnboarding ? 'Drawer':'Login'}>
           {
             isAuthenticated && showOnboarding ? 
             <Stack.Screen

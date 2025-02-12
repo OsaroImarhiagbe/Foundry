@@ -114,6 +114,7 @@ const RegisterScreen = () => {
                                      backgroundColor='transparent'
                                     borderColor='#8a8a8a'
                                     values={values.username}
+                                     color='#fff'
                                     onChangeText={handleChange('username')}
                                     onBlur={() => setFieldTouched('username')}
                                     iconcolor={color.button}
@@ -124,6 +125,7 @@ const RegisterScreen = () => {
                                     style={styles.errormessage}>{errors.username}</HelperText>)}
                                 <AppTextInput
                                     icon='email'
+                                     color='#fff'
                                     placeholder='Email'
                                     backgroundColor='transparent'
                                     borderColor='#8a8a8a'
@@ -137,6 +139,7 @@ const RegisterScreen = () => {
                                     icon='lock'
                                     secureTextEntry
                                     placeholder='Password'
+                                     color='#fff'
                                     backgroundColor='transparent'
                                     borderColor='#8a8a8a'
                                     values={values.password}
@@ -152,6 +155,7 @@ const RegisterScreen = () => {
                                     placeholder='Confirm Password'
                                     backgroundColor='transparent'
                                     borderColor='#8a8a8a'
+                                    color='#fff'
                                     values={values.confirmPassword}
                                     onChangeText={handleChange('confirmPassword')}
                                     onBlur={() => setFieldTouched('confirmPassword')}
@@ -160,7 +164,7 @@ const RegisterScreen = () => {
                                 />
                                 {touched.confirmPassword && errors.confirmPassword &&( <HelperText   type='error' visible style={styles.errormessage}>{errors.confirmPassword}</HelperText>)}
                             </View>
-                            <View style={styles.buttoncontainer}>
+                            <View>
                                 <Button
                                 disabled={!isValid}
                                 loading={loading}
@@ -209,9 +213,6 @@ const styles = StyleSheet.create({
         borderTopRightRadius: 60,
         padding:20
   } ,
-    buttoncontainer:{
-        padding:30
-    },
     errormessage:{
         color: color.danger,
         textAlign:'center',

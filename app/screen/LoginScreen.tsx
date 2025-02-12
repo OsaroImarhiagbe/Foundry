@@ -1,5 +1,4 @@
 import {
-    SafeAreaView,
     View,
     StyleSheet,
     Platform,
@@ -17,6 +16,7 @@ import {
     Button,
     Text, 
     TextInput,
+    useTheme ,
     HelperText} from 'react-native-paper'
 import {GoogleSigninButton,
 statusCodes,
@@ -25,7 +25,7 @@ import { TouchableWithoutFeedback } from 'react-native-gesture-handler'
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import LottieView from 'lottie-react-native';
 import { useNavigation } from '@react-navigation/native';
-import { useTheme } from 'react-native-paper';
+
 
 
 
@@ -88,11 +88,11 @@ const LoginScreen = () => {
    
   
    
-           <CustomKeyboardView>
-            <SafeAreaView style={{flex:1,backgroundColor:theme.colors.background}}>
-            <View>
+          <CustomKeyboardView>
+        
+            <View style={{flex:1,backgroundColor:theme.colors.background}}>
             <Text>
-                  <LottieView
+            <LottieView
                style={{
                 paddingTop:Platform.OS === 'ios' ? 30: 0,
                 width:width*0.9,
@@ -101,22 +101,11 @@ const LoginScreen = () => {
                 justifyContent:'center'}}
                 renderMode={'SOFTWARE'}
                 source={require('../assets/animations/animation1.json')} autoPlay loop />;
-                  </Text>
-            </View>
-           <View style={{padding:5}}>
-            <View style={{flexDirection:'row',padding:8}}>
-            <Text
-            variant='titleLarge'
-            style={{color:'#fff'}}>Welcome to </Text>
-            <Text
-            variant='titleLarge'
-            style={{color:'#7ed957'}}>DevGuiide</Text>
-            </View>
-            <Text
-            variant='titleMedium'
-            style={{color:'#fff',marginLeft:10}}>The Most Popular Social Media App For All.</Text>
+            </Text>
+            <View style={{padding:5}}>
+            <Text variant='titleLarge' style={{textAlign:'center'}}>Foundry</Text>
            </View>
-           <SafeAreaView>
+           <View>
            <Formik
            initialValues={initialValues}
            onSubmit={LoginPress}
@@ -181,7 +170,7 @@ const LoginScreen = () => {
                    </>
            )}
            </Formik>
-           </SafeAreaView>
+           </View>
            <View style={{justifyContent:'center',alignItems:'center',paddingTop:50}}>
            <Text
            variant='bodySmall'
@@ -202,9 +191,9 @@ const LoginScreen = () => {
             color={GoogleSigninButton.Color.Light}
             size={GoogleSigninButton.Size.Icon}/>
             </View>
-            </SafeAreaView>
-    </CustomKeyboardView>
-        
+            </View>
+   
+        </CustomKeyboardView>
   
  
   

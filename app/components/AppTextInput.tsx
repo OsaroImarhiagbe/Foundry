@@ -10,6 +10,7 @@ interface TextInputProp {
   borderColor?: string;
   secureTextEntry?: boolean;
   icon?: string;
+  color?:string;
   onChangeText?: (text: string) => void;
   onBlur?: () => void;
   textAlign?: 'left' | 'center' | 'right';
@@ -31,6 +32,7 @@ const AppTextInput:React.FC<TextInputProp> = ({
   maxLength,
   iconcolor,
   values,
+  color,
   onFocus,right}) => {
   return (
     
@@ -45,7 +47,7 @@ const AppTextInput:React.FC<TextInputProp> = ({
     secureTextEntry={secureTextEntry}
     textAlign={textAlign}
     maxLength={maxLength}
-    style={[styles.Container,{backgroundColor:backgroundColor,color:'#fff'}]}
+    style={[styles.Container,{backgroundColor:backgroundColor,color:color,}]}
     placeholder={placeholder}
     placeholderTextColor='#8a8a8a'
     onChangeText={onChangeText}

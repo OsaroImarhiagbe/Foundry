@@ -59,7 +59,7 @@ export const NotificationProvider = ({ children }:NotificationProp) => {
       if (!user?.userId) return;
       const fetchToken = async () => {
         try{
-            await messaging().registerDeviceForRemoteMessages();
+            //await messaging().registerDeviceForRemoteMessages();
             await notifee.requestPermission();
             const token = await messaging().getToken();
             if (!token) throw new Error('Failed to get FCM token');      

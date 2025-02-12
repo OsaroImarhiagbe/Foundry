@@ -1,5 +1,6 @@
 import React,{ReactNode} from 'react'
 import { KeyboardAvoidingView, Platform, ScrollView } from 'react-native'
+import { useTheme } from 'react-native-paper';
 
 const ios = Platform.OS === 'ios'
 
@@ -12,6 +13,7 @@ interface CustomKeyboardProp extends KeyboardProp{
 
 }
 const CustomKeyboardView = ({children,inChat = false}: CustomKeyboardProp) => {
+    const theme = useTheme()
 
     
 
@@ -25,8 +27,8 @@ const CustomKeyboardView = ({children,inChat = false}: CustomKeyboardProp) => {
   return (
    <KeyboardAvoidingView
    behavior='padding'
-   keyboardVerticalOffset={60}
-   style={{flex:1,backgroundColor: inChat ? '#121212':'#1f1f1f'}}
+   keyboardVerticalOffset={10}
+   style={{flex:1,backgroundColor:theme.colors.background}}
    {...kavConfig}
    >
     <ScrollView
