@@ -49,7 +49,7 @@ async function sendNotification(userId:string, message:string) {
         }
         const payload = {
             notification: {
-            title: 'BlueJay Notification',
+            title: 'Foundry Notification',
             body: message,
             },
             token: registrationToken,
