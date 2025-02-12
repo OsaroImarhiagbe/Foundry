@@ -21,50 +21,152 @@ admin.initializeApp()
 //   response.send("Hello from Firebase!");
 // });
 
+interface NotificationPayload {
+    title: string;
+    body: string;
+    data?: Record<string, string>;
+  }
+  
+  interface MessageData {
+    senderId: string;
+    text: string;
+  }
+  
+  const CONFIG = {
+    NOTIFICATION: {
+      DEFAULT_TITLE: 'Foundry Notification',
+      COLLECTION: {
+        USERS: 'users',
+        ROOMS: 'chat-rooms',
+        MESSAGES: 'messages',
+      },
+    },
+  } as const;
 
-exports.checkAuthuser = onCall((data: any,context: { auth: any; })=>{
-    if(!context.auth){
-        throw new HttpsError('unauthenticated','Endpoint requires authentication')
+  async function getUserDeviceToken(userId: string): Promise<string | null> {
+    try {
+      const userDoc = await admin.firestore()
+        .collection(CONFIG.NOTIFICATION.COLLECTION.USERS)
+        .doc(userId)
+        .get();
+  
+      if (!userDoc.exists) {
+        logger.warn(`No user found with ID: ${userId}`);
+        return null;
+      }
+  
+      const token = userDoc.data()?.token;
+      if (!token) {
+        logger.warn(`No token found for user: ${userId}`);
+        return null;
+      }
+  
+      return token;
+    } catch (error) {
+      logger.error('Error fetching user device token:', error);
+      throw new Error('Failed to fetch device token');
     }
-
-});
-exports.newMessage = onDocumentCreated('rooms/{roomId}/messages',async (event: { data: any; }) =>{
-        try {
-            const snapShot = event.data;
-            if(!snapShot) return
-            const newMessage = snapShot.data()
-            const userId = newMessage.userId
-            await sendNotification(userId, 'You have a new message!');
-            return { success: true };
-        } catch (error) {
-          logger.error('Error sending notification:', error);
-          throw new Error('Notification failed');
+  }
+  
+  async function sendNotification(
+    userId: string,
+    notification: NotificationPayload
+  ): Promise<void> {
+    try {
+      const token = await getUserDeviceToken(userId);
+      if (!token) {
+        throw new Error('No valid device token found for user');
+      }
+  
+      const payload = {
+        notification: {
+          title: notification.title || CONFIG.NOTIFICATION.DEFAULT_TITLE,
+          body: notification.body,
+        },
+        data: notification.data,
+        token,
+      };
+  
+      await admin.messaging().send(payload);
+      logger.info(`Notification sent successfully to user: ${userId}`);
+    } catch (error) {
+      logger.error('Error sending notification:', error);
+      throw new Error('Failed to send notification');
+    }
+  }
+  exports.checkAuthUser = onCall((data: any, context: { auth: any }) => {
+    if (!context.auth) {
+      throw new HttpsError(
+        'unauthenticated',
+        'This endpoint requires authentication'
+      );
+    }
+    return { authenticated: true, uid: context.auth.uid };
+  });
+  
+  exports.newMessage = onDocumentCreated(
+    `${CONFIG.NOTIFICATION.COLLECTION.ROOMS}/{roomId}/${CONFIG.NOTIFICATION.COLLECTION.MESSAGES}`,
+    async (event: { data:any}) => {
+      try {
+        const snapshot = event.data;
+        if (!snapshot) {
+          logger.warn('No data associated with the event');
+          return { success: false, error: 'No data found' };
         }
+  
+        const messageData = snapshot.data() as MessageData;
+        const roomId = event.data.id;
+  
+        const roomDoc = await admin.firestore()
+          .collection(CONFIG.NOTIFICATION.COLLECTION.ROOMS)
+          .doc(roomId)
+          .get();
+  
+        if (!roomDoc.exists) {
+          logger.warn(`Room ${roomId} not found`);
+          return { success: false, error: 'Room not found' };
+        }
+  
+        const roomData = roomDoc.data();
+        const participantsToNotify = roomData.participants.filter(
+          (participantId: string) => participantId !== messageData.senderId
+        );
+        const notificationPromises = participantsToNotify.map((participantId: string) =>
+          sendNotification(participantId, {
+            title: 'New Message',
+            body: `You have a new message in ${roomData.name}`,
+            data: {
+              roomId,
+              messageId: snapshot.id,
+              type: 'new_message'
+            }
+          })
+        );
+  
+        await Promise.all(notificationPromises);
+        
+        return { success: true };
+      } catch (error) {
+        logger.error('Error processing new message:', error);
+        throw new Error('Failed to process new message notification');
+      }
+    }
+  );
+  exports.sendTestNotification = onCall(async (data: any, context: { auth: any }) => {
+    if (!context.auth) {
+      throw new HttpsError('unauthenticated', 'Authentication required');
+    }
+  
+    try {
+      await sendNotification(context.auth.uid, {
+        title: 'Test Notification',
+        body: 'This is a test notification',
+        data: { type: 'test' }
       });
-
-async function sendNotification(userId:string, message:string) {
-        const registrationToken = await getUserDeviceToken(userId);
-        if (!registrationToken) {
-            throw new Error('No device token found for user');
-        }
-        const payload = {
-            notification: {
-            title: 'Foundry Notification',
-            body: message,
-            },
-            token: registrationToken,
-        };
-        await admin.messaging().send(payload);
-        logger.info(`Notification sent to ${userId}`);
+      
+      return { success: true };
+    } catch (error) {
+      logger.error('Error sending test notification:', error);
+      throw new HttpsError('internal', 'Failed to send test notification');
     }
-async function getUserDeviceToken(userId:string) {
-        const userDoc = await admin.firestore().collection('users').doc(userId).get();
-
-        if (!userDoc.exists) {
-            logger.error(`No user found with ID: ${userId}`);
-            return null;
-        }
-        const token = userDoc.data().token
-
-        return token;
-    }
+  });

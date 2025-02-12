@@ -19,6 +19,7 @@ import { addID } from '../features/Message/messageidSlice';
 import firestore,{FirebaseFirestoreTypes} from '@react-native-firebase/firestore'
 import MessageItem from '../components/MessageItem';
 import { FlashList } from '@shopify/flash-list';
+//import { TextInput } from 'react-native-paper';
 
 
 
@@ -104,6 +105,7 @@ const ChatScreen = () => {
   };
 
   const handleSend = async () => {
+    const id = userid ? userid : item?.userId
     let message = textRef.current.trim();
     if(!message) return;
     try{
@@ -114,10 +116,10 @@ const ChatScreen = () => {
       : undefined;
       const docRef = firestore().collection('chat-rooms').doc(roomId);
       const messageRef = docRef.collection('messages')
-      //textRef.current ="";
       if(inputRef?.current) inputRef?.current?.clear();
       await messageRef.add({
-        userId:user?.userId,
+        senderId:user?.userId,
+        recipentId:id,
         id:messageRef.doc().id,
         text:message,
         senderName: user?.username,
@@ -127,8 +129,6 @@ const ChatScreen = () => {
       if (flashListRef.current) {
         flashListRef.current.scrollToEnd({ animated: true });
       }
-
-      // Clear the input field after sending
       textRef.current = "";
       if (inputRef?.current) inputRef?.current?.clear();
 
@@ -165,7 +165,7 @@ const ChatScreen = () => {
       </View>
       <View style={styles.inputContainer}>
         <View style={styles.messageInput}>
-          {/* <TextInput
+           {/* <TextInput
           left={<TextInput.Icon icon='camera' style={styles.sendButton} rippleColor='rgba(30, 136, 229, 0.3)'/>}
           dense={true}
           mode='outlined'
@@ -178,7 +178,7 @@ const ChatScreen = () => {
             placeholder='Enter message....'
             right={<TextInput.Icon icon='send' style={styles.sendButton} onPress={handleSend} rippleColor='rgba(30, 136, 229, 0.3)'/>
             }
-          /> */}
+          />  */}
            </View>
         </View>
       </View>

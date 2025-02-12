@@ -9,7 +9,7 @@ import {
   StyleSheet,
   Platform,
   StatusBar,
-  SafeAreaView} from 'react-native'
+  } from 'react-native'
 import color from '../../config/color';
 import firestore,{FirebaseFirestoreTypes} from '@react-native-firebase/firestore'
 import { useAuth } from '../authContext';
@@ -17,7 +17,8 @@ import ChatRoomHeader from '../components/ChatRoomHeader';
 import { useNavigation } from '@react-navigation/native';
 import { useSelector } from 'react-redux';
 import { FlashList } from '@shopify/flash-list';
-import { ActivityIndicator,Text } from 'react-native-paper';
+import { ActivityIndicator,Text,useTheme } from 'react-native-paper';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 const ChatList = lazy(() => import('../../List/ChatList'))
 
 
@@ -25,17 +26,23 @@ interface User{
   id?:string
 }
 
+type NavigationProp = {
+  Dash?:undefined
+}
+
+type Navigation = NativeStackNavigationProp<NavigationProp>
 const MessageScreen = () => {
 
 
   const [users, setUsers] = useState<User[]>([]);
-  const navigation = useNavigation();
+  const navigation = useNavigation<Navigation>();
   const { user} = useAuth();
   const [refreshing, setRefreshing] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const [lastVisible, setLastVisible] = useState<FirebaseFirestoreTypes.QueryDocumentSnapshot<FirebaseFirestoreTypes.DocumentData> | null>(null);
   const list_of_ids = useSelector((state:any)=> state.message.messagesID)
+  const theme = useTheme()
 
   const onRefresh = useCallback(() => {
     setRefreshing(true);
@@ -73,10 +80,6 @@ const MessageScreen = () => {
     return unsub
   }
   
-  const handlePress = () => {
-    navigation.navigate('Main' as never );
-  }
- 
   const fetchMorePost = async () => {
     if (loadingMore || !hasMore) return;
     if (!user?.userId) return;
@@ -108,8 +111,8 @@ const MessageScreen = () => {
 
 
   return (
-    <SafeAreaView style={styles.screen}>
-      <ChatRoomHeader title='Message' onPress={handlePress} icon='keyboard-backspace' backgroundColor={color.button} iconColor='#00bf63'/>
+    <View style={[styles.screen,{backgroundColor:theme.colors.background}]}>
+      <ChatRoomHeader title='Message' onPress={() => navigation.navigate('Dash')} icon='keyboard-backspace' backgroundColor={color.button} iconColor='#00bf63'/>
       <View style={{marginTop:5,flex:1}}>
       <FlashList
       estimatedItemSize={460}
@@ -131,7 +134,7 @@ const MessageScreen = () => {
       )}
       />
       </View>
-  </SafeAreaView>
+  </View>
   )
 }
 
@@ -140,7 +143,6 @@ const styles = StyleSheet.create({
     screen:{
       paddingTop: Platform.OS === 'ios' ? StatusBar.currentHeight : 0,
       flex:1,
-      backgroundColor:color.backgroundcolor
     },
     text:{
       color:'#fff',

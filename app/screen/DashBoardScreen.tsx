@@ -26,7 +26,6 @@ import { FAB } from 'react-native-paper';
 import Entypo from 'react-native-vector-icons/Entypo';
 import { FlashList } from '@shopify/flash-list';
 import {Text,ActivityIndicator,Divider } from 'react-native-paper';
-import { DrawerNavigationProp } from '@react-navigation/drawer';
 import { FirebaseFirestoreTypes } from '@react-native-firebase/firestore';
 import { MotiView } from 'moti';
 import { Skeleton } from 'moti/skeleton';

@@ -16,7 +16,7 @@ import { TextInput,Text,HelperText,ActivityIndicator} from 'react-native-paper';
 import LottieView from 'lottie-react-native';
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import { TouchableWithoutFeedback } from 'react-native-gesture-handler';
-import { Button } from 'react-native-paper';
+import { Button,useTheme } from 'react-native-paper';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
 
@@ -26,7 +26,7 @@ type NavigationProp = {
     Onboarding:undefined
   }
   
-type Navigation = NativeStackNavigationProp<NavigationProp, 'Onboarding'>;
+type Navigation = NativeStackNavigationProp<NavigationProp>;
 
 const RegisterScreen = () => {
 
@@ -34,6 +34,7 @@ const RegisterScreen = () => {
     const navigation = useNavigation<Navigation>();
     const {width,height} = useWindowDimensions()
     const { register } = useAuth();
+    const theme = useTheme()
     const handleRegister = async (values:any, {resetForm}:any )=> {
         setLoading(true);
         try{
