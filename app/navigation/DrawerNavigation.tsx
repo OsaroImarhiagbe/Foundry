@@ -1,6 +1,6 @@
 import { createDrawerNavigator, DrawerItem,DrawerContentScrollView,DrawerItemList } from '@react-navigation/drawer';
-import { NavigatorScreenParams} from '@react-navigation/native';
-import { lazy,Suspense } from 'react';
+import { NavigatorScreenParams,useNavigation} from '@react-navigation/native';
+import { lazy,Suspense, useState } from 'react';
 import { ActivityIndicator,TouchableWithoutFeedback,View, } from 'react-native';
 import TestScreen from '../screen/TestScreen';
 import React from 'react';
@@ -28,7 +28,25 @@ const TabNavigationWrapper = () =>{
 
 const DrawerNavigation = () => {
   const theme = useTheme()
-  const {user} = useAuth()
+  const {user,logout} = useAuth()
+  const [loading,setLoading] = useState<boolean>(false)
+  const navigation = useNavigation()
+
+
+  const handleLogout = async () => {
+    setLoading(true)
+    try{
+      await logout();
+      setTimeout(() => {
+        navigation.navigate('Login' as never)
+      }, 2000);
+    }catch(error){
+      console.error(` Error failed: ${error}`)
+    }finally{
+      setLoading(false);
+    }
+
+  }
   return (
 
     <Drawer.Navigator
@@ -43,18 +61,19 @@ const DrawerNavigation = () => {
             placeholder={{blurhash}}
             />
             </TouchableWithoutFeedback> 
-          </View>xw
+          </View>
           <DrawerItemList {...props} />
           <DrawerItem
-              label="Something"
+              label="Logout"
               labelStyle={{
-                color:theme.colors.onPrimary
+                color:'#000'
               }}
+              
               icon={ () => (<Icon
                 source="home"
                 color={theme.colors.secondary}
                 size={20}/>)}
-              onPress={() => console.log('hello')}
+              onPress={handleLogout}
           />
       </DrawerContentScrollView>
     )}

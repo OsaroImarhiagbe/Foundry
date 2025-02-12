@@ -88,7 +88,7 @@ const LoginScreen = () => {
    
   
    
-          <CustomKeyboardView>
+          <CustomKeyboardView inChat={true}>
         
             <View style={{flex:1,backgroundColor:theme.colors.background}}>
             <Text>

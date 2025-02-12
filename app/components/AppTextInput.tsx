@@ -43,11 +43,12 @@ const AppTextInput:React.FC<TextInputProp> = ({
     borderRadius: 10,
     marginVertical:10}}>
     <TextInput
+    textColor={color}
     value={values}
     secureTextEntry={secureTextEntry}
     textAlign={textAlign}
     maxLength={maxLength}
-    style={[styles.Container,{backgroundColor:backgroundColor,color:color,}]}
+    style={[styles.Container,{backgroundColor:backgroundColor}]}
     placeholder={placeholder}
     placeholderTextColor='#8a8a8a'
     onChangeText={onChangeText}

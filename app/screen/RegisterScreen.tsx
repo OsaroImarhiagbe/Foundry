@@ -100,13 +100,14 @@ const RegisterScreen = () => {
                      >Create a new account</Text>
                 </View>
                 <CustomKeyboardView>
+                 <View>  
                 <Formik
                    initialValues={initialValues}
                     onSubmit={handleRegister}
                     validationSchema={validationSchema}
                 >
                     {({handleChange, handleSubmit, values, setFieldTouched,touched, errors, isValid}) => (
-                        <>
+                        <View>
                             <View>
                             <AppTextInput
                                     icon='account'
@@ -184,9 +185,10 @@ const RegisterScreen = () => {
                                     >Login</Text>
                                 </TouchableWithoutFeedback>
                             </View>
-                        </>
+                        </View>
                     )}
                 </Formik>
+                </View>
                 </CustomKeyboardView>
                 </View>
             </SafeAreaView>

@@ -63,13 +63,13 @@ const AuthNavigation = () => {
     const  checkifOnboard = async () => {
       const onboardkey = await AsyncStorage.getItem('onboarded')
       if(onboardkey=='1'){
-        setShowOnboarding(false)
-      }else{
         setShowOnboarding(true)
+      }else{
+        setShowOnboarding(false)
       }
     }
     checkifOnboard()
-  },[])
+  },[showOnboarding])
     const Stack = createStackNavigator()
       return (
         <Stack.Navigator initialRouteName={isAuthenticated && showOnboarding ? 'Drawer':'Login'}>
