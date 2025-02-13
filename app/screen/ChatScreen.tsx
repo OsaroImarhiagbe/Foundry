@@ -2,10 +2,8 @@
 import {
   View,
   StyleSheet,
-  SafeAreaView}  from 'react-native'
-import color from'../../config/color';
+  }  from 'react-native'
 import React, { useState, useEffect, useRef} from 'react'
-import MessageList  from '../components/MessageList';
 import { getRoomID } from '../../utils';
 import { useAuth } from '../authContext';
 import { useRoute,RouteProp } from '@react-navigation/native';
