@@ -15,7 +15,6 @@ import firestore,{FirebaseFirestoreTypes} from '@react-native-firebase/firestore
 import { useAuth } from '../authContext';
 import ChatRoomHeader from '../components/ChatRoomHeader';
 import { useNavigation } from '@react-navigation/native';
-import { useSelector } from 'react-redux';
 import { FlashList } from '@shopify/flash-list';
 import { ActivityIndicator,Text,useTheme } from 'react-native-paper';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -41,33 +40,32 @@ const MessageScreen = () => {
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const [lastVisible, setLastVisible] = useState<FirebaseFirestoreTypes.QueryDocumentSnapshot<FirebaseFirestoreTypes.DocumentData> | null>(null);
-  const list_of_ids = useSelector((state:any)=> state.message.messagesID)
   const theme = useTheme()
 
   const onRefresh = useCallback(() => {
     setRefreshing(true);
-    grabUser(list_of_ids); 
+    grabUser(); 
     setRefreshing(false); 
-  }, [list_of_ids]);
+  }, [users]);
 
   useEffect(() => {
     let unsub:any;
     const fetchUser =  () => {
-      unsub = grabUser(list_of_ids)
+      unsub = grabUser()
     }
 
     fetchUser()
     return () => {if(unsub) unsub()}
-  },[list_of_ids])
+  },[users])
 
-  const grabUser = (list_of_ids:string[]) => {
-    if (!list_of_ids || list_of_ids.length === 0) {
+  const grabUser = () => {
+    if (!users) {
       setUsers([]);
       return;
     }
     const unsub = firestore()
     .collection('chat-rooms')
-    .where('recipentName','!=',user.username)
+    .where('senderName','!=',user.username)
     .onSnapshot((documentSnapshot) =>{
       let data:User[] = []
       documentSnapshot.forEach(doc => {

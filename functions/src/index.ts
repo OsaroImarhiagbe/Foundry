@@ -10,7 +10,7 @@
 const {onCall,HttpsError} = require("firebase-functions/v2/https");
 const logger = require("firebase-functions/logger");
 const admin = require("firebase-admin/app");
-const { onDocumentCreated } = require("firebase-functions/firestore");
+const { onDocumentCreated,} = require("firebase-functions/firestore");
 
 admin.initializeApp()
 // Create and deploy your first functions
@@ -31,6 +31,14 @@ interface NotificationPayload {
     recipentId?:string,
     senderId?:string,
   }
+
+  interface UserData{
+    userId?:string | any
+  }
+
+  // interface CommentsData{
+  //   id?:string
+  // }
   
   const CONFIG = {
     NOTIFICATION: {
@@ -39,6 +47,8 @@ interface NotificationPayload {
         USERS: 'users',
         ROOMS: 'chat-rooms',
         MESSAGES: 'messages',
+        POSTS:'posts',
+        COMMENTS:'comments'
       },
     },
   } as const;
@@ -104,6 +114,32 @@ interface NotificationPayload {
     return { authenticated: true, uid: context.auth.uid };
   });
   
+  exports.newUser = onDocumentCreated(
+    `${CONFIG.NOTIFICATION.COLLECTION.USERS}/{userId}`,
+  async (event:{data:any}) => {
+    try {
+      const snapshot = event.data;
+      if (!snapshot) {
+        logger.warn('No data associated with the event');
+        return { success: false, error: 'No data found' };
+      }
+      const userData = snapshot.data() as UserData
+      const userId = userData.userId
+        sendNotification(userId, {
+          title: 'Foundry',
+          body: `Welcome to Foundry`,
+          data: {
+            messageId: snapshot.id,
+            type: 'new_message'
+          }
+        }
+      );
+      return { success: true };
+    } catch (error) {
+      logger.error('Error processing new message:', error);
+      throw new Error('Failed to process new message notification');
+    }
+  })
   exports.newMessage = onDocumentCreated(
     `${CONFIG.NOTIFICATION.COLLECTION.ROOMS}/{roomId}/${CONFIG.NOTIFICATION.COLLECTION.MESSAGES}`,
     async (event: { data:any}) => {
