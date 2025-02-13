@@ -111,16 +111,15 @@ const ChatScreen = () => {
       await messageRef.add({
         senderId:user?.userId,
         recipentId:id,
-        id:messageRef.doc().id,
         text:messageText,
         senderName: user?.username,
         recipentName:recipentNamec,
         createdAt: firestore.Timestamp.fromDate(new Date())
       })
+      setMessageText('');
       if (flashListRef.current) {
         flashListRef.current.scrollToEnd({ animated: true });
       }
-      setMessageText('');
     }catch(error:unknown){
       console.error(`Error sending message:${error}`)
     }

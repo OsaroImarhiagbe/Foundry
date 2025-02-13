@@ -11,7 +11,7 @@ import color from '../../config/color';
 import * as Yup from 'yup';
 import { useAuth} from '../authContext';
 import CustomKeyboardView from '../components/CustomKeyboardView';
-import { useNavigation } from '@react-navigation/native';
+import { ThemeContext, useNavigation } from '@react-navigation/native';
 import { TextInput,Text,HelperText,ActivityIndicator} from 'react-native-paper';
 import LottieView from 'lottie-react-native';
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
@@ -76,7 +76,7 @@ const RegisterScreen = () => {
     return (
             <SafeAreaView style={styles.screen}>
                 <View
-                style={styles.backImage}
+                style={[styles.backImage,{backgroundColor:theme.colors.backdrop}]}
                 >
                   <Text>
                   <LottieView
@@ -89,17 +89,17 @@ const RegisterScreen = () => {
                 source={require('../assets/animations/animation1.json')} autoPlay loop />;
                   </Text>
                 </View>
-                <View style={styles.whitesheet}>
+                <View style={[styles.whitesheet,{backgroundColor:theme.colors.background}]}>
                 <View style={styles.headingcontainer}>
                     <Text
                     variant='titleLarge'
-                    style={{textAlign:'center',color:'#fff',fontFamily:color.textFont}}>Register</Text>
+                    style={{textAlign:'center',color:theme.colors.tertiary,fontFamily:color.textFont}}>Register</Text>
                     <Text
                     variant='titleMedium'
-                    style={{textAlign:'center',color:'#fff',fontFamily:color.textFont}}
+                    style={{textAlign:'center',color:theme.colors.tertiary,fontFamily:color.textFont}}
                      >Create a new account</Text>
                 </View>
-                <CustomKeyboardView>
+                <CustomKeyboardView inChat={true}>
                  <View>  
                 <Formik
                    initialValues={initialValues}
@@ -165,23 +165,24 @@ const RegisterScreen = () => {
                                 />
                                 {touched.confirmPassword && errors.confirmPassword &&( <HelperText   type='error' visible style={styles.errormessage}>{errors.confirmPassword}</HelperText>)}
                             </View>
-                            <View>
+                            <View style={{marginTop:5}}>
                                 <Button
                                 disabled={!isValid}
                                 loading={loading}
+                                textColor={theme.colors.tertiary}
                                 onPress={(e: GestureResponderEvent) => {
                                     handleSubmit();
                                   }}
-                                mode="contained">Sign Up</Button>
+                                mode="outlined">Sign Up</Button>
                             </View>
                             <View style={styles.textContainer}>
                                     <Text
                                     variant='bodySmall'
-                                    style={{color:'#fff',textAlign:'center'}}>Have an account?</Text>
+                                    style={{color:theme.colors.tertiary,textAlign:'center'}}>Have an account?</Text>
                                 <TouchableWithoutFeedback onPress={() => navigation.navigate('Login' as never )}>
                                     <Text
                                     variant='bodySmall'
-                                    style={{color:'#fff',marginLeft:10,textAlign:'center'}}
+                                    style={{color:theme.colors.tertiary,marginLeft:10,textAlign:'center'}}
                                     >Login</Text>
                                 </TouchableWithoutFeedback>
                             </View>
@@ -202,15 +203,13 @@ const styles = StyleSheet.create({
     backImage:{
         width:wp('100%'),
         position:'absolute',
-        resizeMode: 'cover',
-        backgroundColor:'#8a8a8a'
+        resizeMode: 'cover'
       }, 
     whitesheet:{
         width:wp('100%'),
         height:hp('65%'),
         position:'absolute',
         bottom:0,
-        backgroundColor:'#1f1f1f',
         borderTopLeftRadius: 60,
         borderTopRightRadius: 60,
         padding:20
@@ -228,6 +227,7 @@ const styles = StyleSheet.create({
        padding:30
     },
     textContainer:{
+        marginTop:10,
         flexDirection:'row',
         alignSelf:'center'
     },

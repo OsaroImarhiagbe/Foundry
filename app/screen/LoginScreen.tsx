@@ -2,6 +2,7 @@ import {
     View,
     StyleSheet,
     Platform,
+    SafeAreaView,
     useWindowDimensions,
     GestureResponderEvent,
     } from 'react-native'
@@ -25,6 +26,8 @@ import { TouchableWithoutFeedback } from 'react-native-gesture-handler'
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import LottieView from 'lottie-react-native';
 import { useNavigation } from '@react-navigation/native';
+import { Image } from 'expo-image';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 
 
@@ -37,6 +40,7 @@ const LoginScreen = () => {
     const {width,height} = useWindowDimensions();
     const navigation = useNavigation()
     const theme = useTheme()
+    const {top} = useSafeAreaInsets()
     
     
     const LoginPress = async (values:any,{resetForm}:any) => {
@@ -89,23 +93,24 @@ const LoginScreen = () => {
   
    
           <CustomKeyboardView inChat={true}>
-        
-            <View style={{flex:1,backgroundColor:theme.colors.background}}>
-            <Text>
-            <LottieView
-               style={{
-                paddingTop:Platform.OS === 'ios' ? 30: 0,
-                width:width*0.9,
-                height:hp('30%'),
-                alignItems:'center',
-                justifyContent:'center'}}
-                renderMode={'SOFTWARE'}
-                source={require('../assets/animations/animation1.json')} autoPlay loop />;
-            </Text>
+            <SafeAreaView style={{flex:1,backgroundColor:theme.colors.background,marginVertical:40}}>
+            <View style={{
+                alignItems:
+                'center',
+                justifyContent:
+                'center',
+                paddingTop:Platform.OS === 'ios' ? top: 0,}}>
+            <Image
+              source={require('../assets/images/icon.png')}
+              style={{
+                width:100,
+                height:100}}
+              /> 
+            </View> 
             <View style={{padding:5}}>
-            <Text variant='titleLarge' style={{textAlign:'center'}}>Foundry</Text>
+            <Text variant='titleLarge' style={{textAlign:'center',color:theme.colors.tertiary,fontSize:30}}>Foundry</Text>
            </View>
-           <View>
+           <View style={{marginVertical:40}}>
            <Formik
            initialValues={initialValues}
            onSubmit={LoginPress}
@@ -149,7 +154,8 @@ const LoginScreen = () => {
                    <View style={{padding:10,marginTop:5}}>
                     <Button
                     disabled={!isValid}
-                    mode='contained'
+                    mode='outlined'
+                    textColor={theme.colors.tertiary}
                     onPress={(e: GestureResponderEvent) => {
                         handleSubmit();
                       }}
@@ -157,13 +163,13 @@ const LoginScreen = () => {
                        <View style={{marginTop:15,flexDirection:'row',alignSelf:'center'}}>
                            <Text
                            variant='bodySmall'
-                           style={{color:color.grey,textAlign:'center'}}>
+                           style={{color:theme.colors.tertiary,textAlign:'center'}}>
                                Don't have an account?
                            </Text>
                            <TouchableWithoutFeedback onPress={RegisterPress}>
                            <Text
                            variant='bodySmall'
-                           style={{color:color.grey,textAlign:'center',marginLeft:5}}>Sign Up</Text>
+                           style={{color:theme.colors.tertiary,textAlign:'center',marginLeft:5}}>Sign Up</Text>
                            </TouchableWithoutFeedback>
                        </View>
                        </View> 
@@ -174,7 +180,7 @@ const LoginScreen = () => {
            <View style={{justifyContent:'center',alignItems:'center',paddingTop:50}}>
            <Text
            variant='bodySmall'
-           style={{fontFamily:color.textFont,textAlign:'center',color:color.grey}}>Or Login with</Text>
+           style={{textAlign:'center',color:theme.colors.tertiary}}>Or Login with</Text>
            </View>
            <View style={{marginVertical:10,flexDirection:'row',justifyContent:'space-between',padding:30}}>
             <GoogleSigninButton
@@ -191,7 +197,7 @@ const LoginScreen = () => {
             color={GoogleSigninButton.Color.Light}
             size={GoogleSigninButton.Size.Icon}/>
             </View>
-            </View>
+            </SafeAreaView>
    
         </CustomKeyboardView>
   

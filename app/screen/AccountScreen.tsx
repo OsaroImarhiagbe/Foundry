@@ -298,7 +298,7 @@ const AccountScreen = () => {
                     options={{
                       tabBarLabelStyle:{
                         fontSize:20,
-                        color:theme.colors.onPrimary
+                        color:theme.colors.tertiary
                       }
                     }}
                     />
@@ -308,7 +308,7 @@ const AccountScreen = () => {
                     options={{
                       tabBarLabelStyle:{
                         fontSize:20,
-                        color:theme.colors.onPrimary
+                        color:theme.colors.tertiary
                       }
                     }}
                     />
@@ -318,7 +318,7 @@ const AccountScreen = () => {
                     options={{
                       tabBarLabelStyle:{
                         fontSize:20,
-                        color:theme.colors.onPrimary
+                        color:theme.colors.tertiary
                       }
                     }}
                     />

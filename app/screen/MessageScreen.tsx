@@ -67,7 +67,7 @@ const MessageScreen = () => {
     }
     const unsub = firestore()
     .collection('chat-rooms')
-    .where('senderId','!=',user.userId)
+    .where('recipentName','!=',user.username)
     .onSnapshot((documentSnapshot) =>{
       let data:User[] = []
       documentSnapshot.forEach(doc => {
