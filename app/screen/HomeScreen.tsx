@@ -220,7 +220,10 @@ const fetchMorePost = async () => {
       id={item.post_id}
       name={item.name}
       content={item.content}
-      date={item?.createdAt?.toDate().toLocaleString()}
+      date={item?.createdAt?.toDate().toLocaleString('en-US', {
+          hour: '2-digit',
+          minute: '2-digit',
+          hour12: true})}
       comment_count={item.comment_count}/>
       </Suspense>}
     keyExtractor={(item)=> item?.post_id?.toString() || Math.random().toString()}

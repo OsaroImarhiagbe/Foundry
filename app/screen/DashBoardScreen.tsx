@@ -161,7 +161,8 @@ const DashBoardScreen = () => {
             },
           tabBarActiveTintColor:theme.colors.tertiary,
           tabBarLabelStyle:{
-            fontSize:hp(1.5)
+            fontSize:hp(1.5),
+            color:theme.colors.tertiary
           }
     }}
     >

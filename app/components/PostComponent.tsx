@@ -228,11 +228,11 @@ const PostComponent: React.FC<PostComponentProps> = ({
       <View style={styles.postContainer}>
     <View style={styles.imageText}>
       {mount ? <Image
-        style={{height:hp(4.3), aspectRatio:1, borderRadius:100}}
+        style={{height:hp(3.3), aspectRatio:1, borderRadius:100}}
         source=''
         placeholder={{blurhash}}
         cachePolicy='none'/> : <Image
-        style={{height:hp(4.3), aspectRatio:1, borderRadius:100}}
+        style={{height:hp(3.3), aspectRatio:1, borderRadius:100}}
         source={auth_profile}
         placeholder={{blurhash}}
         cachePolicy='none'/>}
@@ -243,8 +243,7 @@ const PostComponent: React.FC<PostComponentProps> = ({
     variant="bodySmall"
     style={{
       marginLeft:10,
-      fontSize:16,
-      color:theme.colors.onTertiary
+      color:theme.colors.tertiary
     }}
     >@{name}</Text>
       </View>
@@ -256,7 +255,6 @@ const PostComponent: React.FC<PostComponentProps> = ({
     style={{
     marginLeft:10,
     marginVertical:5,
-    fontSize:16,
     color:theme.colors.tertiary
     }}
     >{content}</Text>
@@ -285,27 +283,27 @@ const PostComponent: React.FC<PostComponentProps> = ({
       style={styles.reactionIcon}
       >
       <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-          <MaterialCommunityIcons name="heart" size={15} color={theme.colors.onTertiary}/>
+          <MaterialCommunityIcons name="heart" size={15} color={theme.colors.tertiary}/>
           <Text 
-          variant='bodySmall'>{count}</Text>
+          variant='bodySmall'
+          style={{color:theme.colors.tertiary}}>{count}</Text>
         </View>
         </TouchableHighlight>
         <TouchableOpacity onPress={() => setModalVisible(true)} style={styles.reactionIcon}>
           <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-            <MaterialCommunityIcons name="comment-processing-outline" size={15} color={theme.colors.onTertiary}/>
+            <MaterialCommunityIcons name="comment-processing-outline" size={15} color={theme.colors.tertiary}/>
             <Text
             variant='bodySmall'
             style={{
-              color:theme.colors.onPrimary,
-              marginLeft:5,
-              marginBottom:5
+              paddingLeft:5,
+              color:theme.colors.tertiary,
             }}>{comment_count}</Text>
           </View>
         </TouchableOpacity>
         <Menu style={styles.reactionIcon}>
       <MenuTrigger>
       <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-          <Icon source='dots-horizontal' size={15} color={theme.colors.onTertiary}/>
+          <Icon source='dots-horizontal' size={15} color={theme.colors.tertiary}/>
           </View>
       </MenuTrigger>
       <MenuOptions
