@@ -8,7 +8,7 @@ import { Image } from 'expo-image';
 import { blurhash } from 'utils';
 import { useAuth } from 'app/authContext';
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
-import { Icon,useTheme,} from 'react-native-paper';
+import { Icon,useTheme,Text} from 'react-native-paper';
 
 
 
@@ -53,7 +53,7 @@ const DrawerNavigation = () => {
     initialRouteName='Home'
     drawerContent={props => (
       <DrawerContentScrollView {...props}>
-          <View style={{ padding: 10 }}>
+          <View style={{ padding: 10,flexDirection:'row',alignItems:'center',justifyContent:'space-between'}}>
            <TouchableWithoutFeedback  onPress={() => props.navigation.navigate('Home',{screen:'Account'})}>
            <Image
             style={{height:hp(3.3), aspectRatio:1, borderRadius:100,}}
@@ -61,17 +61,18 @@ const DrawerNavigation = () => {
             placeholder={{blurhash}}
             />
             </TouchableWithoutFeedback> 
+            <Text>{user?.username}</Text>
           </View>
           <DrawerItemList {...props} />
           <DrawerItem
               label="Logout"
               labelStyle={{
-                color:'#000'
+                color:theme.colors.tertiary
               }}
               
               icon={ () => (<Icon
                 source="home"
-                color={theme.colors.secondary}
+                color={theme.colors.tertiary}
                 size={20}/>)}
               onPress={handleLogout}
           />
@@ -91,7 +92,7 @@ const DrawerNavigation = () => {
         drawerIcon:({focused,color,size}) => (
           <Icon
           source="home"
-          color={theme.colors.secondary}
+          color={theme.colors.tertiary}
           size={size}/>
         ),
         drawerLabelStyle:{
@@ -106,7 +107,7 @@ const DrawerNavigation = () => {
         drawerIcon:({focused,color,size}) => (
           <Icon
           source="source-branch"
-          color={theme.colors.secondary}
+          color={theme.colors.tertiary}
           size={size}/>
         ),
         drawerLabelStyle:{
@@ -121,7 +122,7 @@ const DrawerNavigation = () => {
         drawerIcon:({focused,color,size}) => (
           <Icon
           source="code-tags"
-          color={theme.colors.secondary}
+          color={theme.colors.tertiary}
           size={size}/>
         ),
         drawerLabelStyle:{

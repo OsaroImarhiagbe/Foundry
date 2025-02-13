@@ -101,7 +101,7 @@ const DashBoardScreen = () => {
             estimatedItemSize={420}
             data={post}
             ListEmptyComponent={(item) => (
-              <View style={{flex:1,alignItems:'center',justifyContent:'center'}}><Text>No Post</Text></View>
+              <View style={{flex:1,alignItems:'center',justifyContent:'center'}}><Text variant='bodySmall' style={{color:theme.colors.tertiary}}>No Post</Text></View>
               
             )}
             ItemSeparatorComponent={()=> (
@@ -161,13 +161,12 @@ const DashBoardScreen = () => {
             },
           tabBarActiveTintColor:theme.colors.tertiary,
           tabBarLabelStyle:{
-            fontSize:hp(1.5),
             color:theme.colors.tertiary
           }
     }}
     >
         <Tab.Screen
-        name='Network'
+        name='For You'
         component={FeedScreen}
         />
         <Tab.Screen
@@ -179,6 +178,7 @@ const DashBoardScreen = () => {
           icon="plus"
           variant='surface'
           size='medium'
+          color={theme.colors.primary}
           style={{width:wp('20%'),position:'absolute',right:16,top:hp(65),alignItems:'center',borderRadius:30}}
           onPress={() => navigation.navigate('SecondStack',{screen:'Post'})}
         />

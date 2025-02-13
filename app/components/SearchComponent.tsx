@@ -20,7 +20,7 @@ const SearchComponent:React.FC<SearchProp> = ({backgroundColor,color,onPress, se
     placeholder="Search"
     style={{
     justifyContent:'space-between',
-    width:wp('75%'),
+    width:wp('70%'),
     backgroundColor:theme.colors.onTertiary
     }}
     onChangeText={setSearchQuery}

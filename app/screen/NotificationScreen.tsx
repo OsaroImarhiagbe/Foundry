@@ -167,7 +167,7 @@ const NotificationScreen = () => {
     style={{
       fontSize:24,
       textAlign:'center',
-      color:theme.colors.onPrimary
+      color:theme.colors.tertiary
     }}>Notifications</Text>
     </View>
     <View style={{flex:1}}>
@@ -175,7 +175,7 @@ const NotificationScreen = () => {
   screenOptions={{
     swipeEnabled:true,
     tabBarIndicatorStyle:{
-      backgroundColor:theme.colors.primary
+      backgroundColor:theme.colors.tertiary
     },
     tabBarStyle:{
       backgroundColor:theme.colors.background
@@ -188,7 +188,7 @@ const NotificationScreen = () => {
       options={{
         tabBarLabel:'Messages',
         tabBarLabelStyle:{
-          color:theme.colors.onPrimary,
+          color:theme.colors.tertiary,
           fontSize:20
         }
       }}
@@ -199,7 +199,7 @@ const NotificationScreen = () => {
       options={{
         tabBarLabel:'All',
         tabBarLabelStyle:{
-          color:theme.colors.onPrimary,
+          color:theme.colors.tertiary,
           fontSize:20
         }
       }}
@@ -210,7 +210,7 @@ const NotificationScreen = () => {
       options={{
         tabBarLabel:'Mentions',
         tabBarLabelStyle:{
-          color:theme.colors.onPrimary,
+          color:theme.colors.tertiary,
           fontSize:20
         }
       }}
