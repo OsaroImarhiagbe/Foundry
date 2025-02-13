@@ -23,7 +23,7 @@ import { useTheme } from 'react-native-paper';
 import { MenuItems } from './CustomMenu';
 import Entypo from 'react-native-vector-icons/Entypo';
 import { useSelector} from 'react-redux';
-import { Appbar,ActivityIndicator } from 'react-native-paper';
+import { Appbar,ActivityIndicator,Text } from 'react-native-paper';
 
 
 interface HeaderProp{
@@ -35,11 +35,12 @@ interface HeaderProp{
   icon2?:string,
   iconColor?:string,
   opacity?:string,
-  backColor?:string
+  backColor?:string,
+  icon3?:string
 
 }
   
-const ChatRoomHeader:React.FC<HeaderProp> = ({title,onPress,icon,onPress2,backgroundColor,icon2,iconColor,opacity,backColor}) => {
+const ChatRoomHeader:React.FC<HeaderProp> = ({title,onPress,icon,onPress2,backgroundColor,icon2,iconColor,opacity,backColor,icon3}) => {
 
     
 
@@ -74,61 +75,25 @@ const ChatRoomHeader:React.FC<HeaderProp> = ({title,onPress,icon,onPress2,backgr
     return (
     <Appbar.Header
     mode='center-aligned'
-    style={[styles.container,{backgroundColor:'transparent'}]}>
+    style={[styles.container,{backgroundColor:backgroundColor,opacity:0.5}]}>
          <TouchableOpacity onPress={onPress}>
           <View style={styles.icon}>
           { icon && <MaterialCommunityIcons name={icon} color={theme.colors.primary} size={20} />}
           </View>
         </TouchableOpacity>
+        <Text>{title}</Text>
         <TouchableOpacity
          onPress={() => navigation.navigate('Post' as never)}>
         <View style={styles.icon}>
           {icon2 && <Entypo name={icon2} size={20} color={theme.colors.primary}/>}
         </View>
         </TouchableOpacity>
-        {/* <Menu>
-      <MenuTrigger>
-        <View>
-        <Image
-        style={{height:hp(4.3), aspectRatio:1, borderRadius:100}}
-        source={user?.profileUrl}
-        placeholder={{blurhash}}
-        cachePolicy='none'/>
+        <TouchableOpacity
+         onPress={() => navigation.navigate('Post' as never)}>
+        <View style={styles.icon}>
+          {icon3 && <Entypo name={icon3} size={20} color={theme.colors.primary}/>}
         </View>
-      </MenuTrigger>
-      <MenuOptions
-        customStyles={{
-            optionsContainer:{
-                borderRadius:10,
-                marginTop:40,
-                marginLeft:-30,
-                borderCurve:'continuous',
-                backgroundColor:color.white,
-                position:'relative'
-            }
-        }}
-      
-      >
-        <MenuItems 
-        text='Profile'
-        value={null}
-        icon={<MaterialCommunityIcons name='account' size={20} color={color.textcolor}/>}
-        action={() => navigation.navigate('Profile')}/>
-        <Divider/>
-         <MenuItems 
-        text='Message'
-        value={null}
-        action={onPress2}
-        icon={<MaterialCommunityIcons name='android-messages' size={20} color={color.textcolor}/>}/>
-          <Divider/>
-          {isLoading ? (<ActivityIndicator animating={isLoading} size='large' color='#000'/> ):(
-             <MenuItems 
-        text='Sign out'
-        value={null}
-        action={handleLogout}
-        icon={<AntDesign name='logout' size={20} color={color.textcolor}/>}/>)}
-      </MenuOptions>
-    </Menu> */}
+        </TouchableOpacity>
     </Appbar.Header>
   )
 }

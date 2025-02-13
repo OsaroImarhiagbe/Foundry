@@ -30,6 +30,7 @@ import { Divider,Text,useTheme,Button,Icon } from 'react-native-paper';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import EvilIcons from 'react-native-vector-icons/EvilIcons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { NavigatorScreenParams } from '@react-navigation/native';
 
 const PostComponent = lazy(() => import('../components/PostComponent'))
 
@@ -37,22 +38,26 @@ const PostComponent = lazy(() => import('../components/PostComponent'))
 
 
 const Tab = createMaterialTopTabNavigator();
+
+type SecondStackParamList = {
+  Chat?: {
+    userid?: string;
+    name?: string;
+  };
+}
   
-type NavigationProp = {
-  ProjectScreen:undefined,
-  Main:undefined,
-  Message:undefined,
-  Edit:undefined,
-  Welcome:{
-    screen:string
-  }
-  SecondStack:{
-    screen:string
-  },
-  Chat:{userid:string,name:string}
+type RootStackParamList = {
+  ProjectScreen?: undefined;
+  Main?: undefined;
+  Message?: undefined;
+  Edit?: undefined;
+  Welcome?: {
+    screen?: string;
+  };
+  SecondStack?: NavigatorScreenParams<SecondStackParamList>;
 }
 
-type Navigation = NativeStackNavigationProp<NavigationProp, "Chat">;
+type Navigation = NativeStackNavigationProp<RootStackParamList>;
 
 
 interface User{
@@ -309,7 +314,13 @@ const OtherUserScreen = () => {
               placeholder={{blurhash}}
               cachePolicy='none'/>
             {other_user_id &&  <Button 
-            onPress={() => navigation.navigate('SecondStack',{screen:'Chat'})}
+            onPress={() => navigation.navigate('SecondStack',{
+              screen:'Chat',
+              params:{
+                userid:userId,
+                name:users?.username
+              }
+            })}
             mode='outlined' style={{
             backgroundColor:'transparent', 
             borderRadius:100,

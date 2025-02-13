@@ -5,7 +5,7 @@ import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
 type NavigationProp = {
-  Chat:{item:any}
+  Chat:{item:string | undefined}
 }
 
 type Navigation = NativeStackNavigationProp<NavigationProp>

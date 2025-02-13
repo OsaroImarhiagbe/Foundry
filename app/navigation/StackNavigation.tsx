@@ -164,13 +164,6 @@ const StackNavigation = () => {
         headerShown:false,
         gestureEnabled:false,
       }}/>
-      <Stack.Screen
-        name='SecondStack'
-        component={SecondStackNavigationWrapper}
-        options={{
-          headerShown:false,
-          gestureEnabled:false,
-      }}/>
     </Stack.Navigator>
   );
 }

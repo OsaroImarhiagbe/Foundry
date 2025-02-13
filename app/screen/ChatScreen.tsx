@@ -2,7 +2,6 @@
 import {
   View,
   StyleSheet,
-  TextInput,
   SafeAreaView}  from 'react-native'
 import color from'../../config/color';
 import React, { useState, useEffect, useRef} from 'react'
@@ -19,8 +18,7 @@ import { addID } from '../features/Message/messageidSlice';
 import firestore,{FirebaseFirestoreTypes} from '@react-native-firebase/firestore'
 import MessageItem from '../components/MessageItem';
 import { FlashList } from '@shopify/flash-list';
-//import { TextInput } from 'react-native-paper';
-
+import { TextInput } from 'react-native-paper';
 
 
 type ChatScreenRouteProp = RouteProp<{ Chat: { item: any,userid:string,name:string } }, 'Chat'>;
@@ -31,12 +29,10 @@ const ChatScreen = () => {
   const route = useRoute<ChatScreenRouteProp>();
   const {item,userid,name} = route?.params;
   const { user } = useAuth();
-
+  const [messageText, setMessageText] = useState('');
   const navigation = useNavigation();
   const dispatch = useDispatch()
-
-  const textRef = useRef('');
-  const inputRef = useRef<TextInput>(null);
+  const inputRef = useRef<React.ComponentProps<typeof TextInput>>(null);
   const flashListRef = useRef<FlashList<any> | null>(null);
 
   
@@ -106,8 +102,7 @@ const ChatScreen = () => {
 
   const handleSend = async () => {
     const id = userid ? userid : item?.userId
-    let message = textRef.current.trim();
-    if(!message) return;
+    if(!messageText.trim()) return;
     try{
       const roomId = userid
       ? getRoomID(user?.userId, userid)
@@ -116,12 +111,11 @@ const ChatScreen = () => {
       : undefined;
       const docRef = firestore().collection('chat-rooms').doc(roomId);
       const messageRef = docRef.collection('messages')
-      if(inputRef?.current) inputRef?.current?.clear();
       await messageRef.add({
         senderId:user?.userId,
         recipentId:id,
         id:messageRef.doc().id,
-        text:message,
+        text:messageText,
         senderName: user?.username,
         recipentName:recipentNamec,
         createdAt: firestore.Timestamp.fromDate(new Date())
@@ -129,9 +123,7 @@ const ChatScreen = () => {
       if (flashListRef.current) {
         flashListRef.current.scrollToEnd({ animated: true });
       }
-      textRef.current = "";
-      if (inputRef?.current) inputRef?.current?.clear();
-
+      setMessageText('');
     }catch(error:any){
       console.error(`Error sending message:${error.message}`)
     }
@@ -144,9 +136,11 @@ const ChatScreen = () => {
       <View style={{flex:1}}>
       <ChatRoomHeader 
       title={recipentNamec}
-      backgroundColor={color.button} 
+      backgroundColor='transparent'
       icon='keyboard-backspace'
       iconColor='#00bf63'
+      icon2='camera'
+      icon3='phone'
       onPress={() => navigation.goBack()}/>
       <View style={styles.messagesContainer}>
         <FlashList
@@ -163,23 +157,33 @@ const ChatScreen = () => {
         )}
         />
       </View>
+      <View>
       <View style={styles.inputContainer}>
         <View style={styles.messageInput}>
-           {/* <TextInput
-          left={<TextInput.Icon icon='camera' style={styles.sendButton} rippleColor='rgba(30, 136, 229, 0.3)'/>}
+           <TextInput
+          left={<TextInput.Icon 
+            icon='camera'
+            size={25} 
+            style={[styles.sendButton,{alignSelf:'center',paddingBottom:5}]} 
+            rippleColor='rgba(30, 136, 229, 0.3)'/>}
           dense={true}
           mode='outlined'
           outlineStyle={{borderRadius:100}}
           textColor='#000'
           placeholderTextColor='#000'
-          style={[styles.textinput,{fontSize:hp(2),backgroundColor:color.grey}]}
-            ref={inputRef}
-            onChangeText={value => textRef.current = value}
-            placeholder='Enter message....'
-            right={<TextInput.Icon icon='send' style={styles.sendButton} onPress={handleSend} rippleColor='rgba(30, 136, 229, 0.3)'/>
-            }
-          />  */}
+          style={[styles.textinput,{fontSize:16,backgroundColor:'transparent'}]}
+          onChangeText={setMessageText}
+          placeholder='Message....'
+          right={<TextInput.Icon 
+            icon='send'
+            size={25}
+            style={[styles.sendButton,{alignSelf:'center',paddingBottom:5}]} 
+            onPress={handleSend} 
+            rippleColor='rgba(30, 136, 229, 0.3)'/>
+          }
+          /> 
            </View>
+        </View>
         </View>
       </View>
     </CustomKeyboardView>
@@ -198,25 +202,20 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent:'space-between',
     alignItems:'flex-end',
-    marginRight:5,
-    marginLeft:5,
   },
   messageInput: {
     flexDirection:'row',
-    padding:40,
+    padding:20,
   },
   textinput:{
     flexDirection:'row',
     marginRight:2,
-    padding:5,
     height:35,
-    borderRadius:30,
-    borderTopLeftRadius:30,
-    borderTopRightRadius:30
   },
   sendButton: {
     marginRight:1,
-    paddingTop:10
+    paddingTop:10,
+    justifyContent:'center'
   },
 });
 
