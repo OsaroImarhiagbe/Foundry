@@ -8,10 +8,8 @@ const ProjectEntryScreen = lazy(() => import('../screen/ProjectEntryScreen'))
 const SkillsScreen = lazy(() => import('../screen/SkillsScreen'))
 const ChatScreen = lazy(() => import('../screen/ChatScreen'))
 const PostScreen = lazy(() => import('../screen/PostScreen'))
-const DashBoardScreen = lazy(()=>import('../screen/DashBoardScreen'))
 const ProjectScreen  = lazy(()=>import('../screen/ProjectScreen'))
 const LocationScreen = lazy(()=>import('../screen/LocationScreen'))
-
   
 const ReportBugScreenWrapper = () => {
     

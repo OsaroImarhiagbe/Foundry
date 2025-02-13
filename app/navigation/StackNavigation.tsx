@@ -11,6 +11,7 @@ const EditInputScreen = lazy(() => import('../screen/EditInputScreen'))
 const EditEmailScreen = lazy(() => import('../screen/EditEmailScreen'))
 const EditPhoneScreen = lazy(() => import('../screen/EditPhoneScreen'))
 const EditJobScreen = lazy(() => import('../screen/EditJobScreen'))
+const SecondStackNavigation = lazy(() => import('../navigation/SecondStackNavigation'))
 
 
 const MessageScreenWrapper = () => {
@@ -48,6 +49,13 @@ const OtherUserScreenWrapper = () => {
 
   )
 
+}
+const SecondStackNavigationWrapper = () => {
+  return (
+    <Suspense fallback={<ActivityIndicator size='small' color='#000'/>}>
+    <SecondStackNavigation/>
+  </Suspense>
+  )
 }
 
 const EditInputScreenWrapper = () =>{
@@ -156,7 +164,13 @@ const StackNavigation = () => {
         headerShown:false,
         gestureEnabled:false,
       }}/>
-    
+      <Stack.Screen
+        name='SecondStack'
+        component={SecondStackNavigationWrapper}
+        options={{
+          headerShown:false,
+          gestureEnabled:false,
+      }}/>
     </Stack.Navigator>
   );
 }

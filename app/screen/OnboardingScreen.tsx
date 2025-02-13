@@ -35,9 +35,9 @@ const OnboardingScreen = () => {
                 fontFamily:color.textFont
             },
             image:(
-                <View>
+                <Text>
                <LottieView style={styles.lottie} renderMode={'SOFTWARE'} source={require('../assets/animations/animation1.json')} autoPlay loop />;
-               </View>
+               </Text>
             ),
             title: <Text style={styles.title}>Welcome to DevGuides</Text>,
             subtitle: <Text style={styles.subtitle}>Your journey to becoming a better developer starts here!</Text>,
@@ -48,9 +48,9 @@ const OnboardingScreen = () => {
                     fontFamily:color.textFont
                 },
                 image:(
-                    <View>
+                    <Text>
                     <LottieView style={styles.lottie} renderMode={'SOFTWARE'} source={require('../assets/animations/animation4.json')} autoPlay loop />;
-                    </View>
+                    </Text>
                 ),
                 title: <Text style={{fontSize: 24,color: '#000',fontFamily:'Helvetica-light' }}>Launch Your Next Big Idea</Text>,
                 subtitle: <Text style={{color:'#000',fontSize: 16,textAlign:'center',paddingTop:5,fontFamily:'Helvetica-light'}}>Turn your side projects into real-world applications with DevGuides.</Text>,
@@ -61,9 +61,9 @@ const OnboardingScreen = () => {
                 fontFamily:color.textFont
             },
             image:(
-                <View>
+                <Text>
                 <LottieView style={styles.lottie} renderMode={'SOFTWARE'} source={require('../assets/animations/animation3.json')} autoPlay loop />;
-                </View>
+                </Text>
             ),
             title: <Text style={styles.title}>Bring Your Ideas to Life</Text>,
             subtitle: <Text style={styles.subtitle}>From concepts to code, DevGuides is here to help you make it happen.</Text>
@@ -74,9 +74,9 @@ const OnboardingScreen = () => {
                     fontFamily:color.textFont
                 },
                 image:(
-                    <View>
+                    <Text>
                     <LottieView style={styles.lottie} renderMode={'SOFTWARE'} source={require('../assets/animations/animation2.json')} autoPlay loop />;
-                    </View>
+                    </Text>
                 ),
                 title: <Text style={styles.title}>Connect with Developers Worldwide</Text>,
                 subtitle: <Text style={styles.subtitle}>Collaborate with developers from all skill levels and backgrounds.</Text>
@@ -87,9 +87,9 @@ const OnboardingScreen = () => {
                 fontFamily:color.textFont
             },
             image:(
-                <View>
+                <Text>
                     <LottieView style={styles.lottie} source={require('../assets/animations/animation5.json')} autoPlay loop />;
-                </View>
+                </Text>
                 
             ),
             title: <Text style={{fontSize: 24,color: '#000',fontFamily:'Helvetica-light' }}>Join the DevGuides Community</Text>,

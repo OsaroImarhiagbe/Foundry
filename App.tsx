@@ -34,7 +34,7 @@ export default function App() {
     colors: {
       ...DefaultTheme.colors,
       primary: 'rgb(5, 126, 230)',
-      onPrimary: 'rgb(255, 255, 255)',
+      onPrimary: 'rgb(5, 126, 230)',
       primaryContainer: 'rgb(220, 225, 255)',
       onPrimaryContainer: 'rgb(0, 22, 78)',
       secondary: 'rgb(141, 65, 137)',

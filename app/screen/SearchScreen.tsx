@@ -55,7 +55,7 @@ const SearchScreen = () => {
   const theme = useTheme()
   const {user} = useAuth()
 
-  const debouncedsearch = useDebounce(searchQuery,3000)
+  const debouncedsearch = useDebounce(searchQuery,5000)
   const dispatch = useDispatch()
 
   useEffect(() => {
@@ -101,7 +101,8 @@ const SearchScreen = () => {
           source={{uri:user.profileUrl}}
           placeholder={{blurhash}}
           />
-          <SearchComponent 
+          <SearchComponent
+          setSearchQuery={setSearchQuery} 
           backgroundColor={color.grey}
           color='#00bf63'
           onPress={handleSearch}

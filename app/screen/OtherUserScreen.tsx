@@ -5,6 +5,7 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   RefreshControl,
+  Platform,
   SafeAreaView} from 'react-native'
 import {lazy,Suspense} from 'react'
 import color from '../../config/color';
@@ -24,10 +25,12 @@ import { useAuth } from '../authContext';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-import EvilIcons from 'react-native-vector-icons/EvilIcons';
 import { FlashList } from '@shopify/flash-list';
-import { Divider,Text } from 'react-native-paper';
+import { Divider,Text,useTheme,Button,Icon } from 'react-native-paper';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import EvilIcons from 'react-native-vector-icons/EvilIcons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
 const PostComponent = lazy(() => import('../components/PostComponent'))
 
 
@@ -39,6 +42,13 @@ type NavigationProp = {
   ProjectScreen:undefined,
   Main:undefined,
   Message:undefined,
+  Edit:undefined,
+  Welcome:{
+    screen:string
+  }
+  SecondStack:{
+    screen:string
+  },
   Chat:{userid:string,name:string}
 }
 
@@ -52,6 +62,8 @@ interface User{
   projects?:number,
   follow_state?:boolean,
   connection?:string,
+  jobtitle?:string,
+  location?:string
 
 }
 interface Post{
@@ -85,11 +97,11 @@ const OtherUserScreen = () => {
     const {userId} = route?.params as {userId:string}
     const other_user_id = useSelector((state:any)=>state.search.searchID)
     const [refreshing, setRefreshing] = useState(false);
-  
-    console.log('other user:',users)
+    const theme = useTheme()
+    const {top} = useSafeAreaInsets()
+
     const follow_items = [{count:users?.projects,content:'projects'},{count:users?.connection,content:'connection'},{count:posts.length,content:'posts'}]
 
-    console.log('user other id:',other_user_id)
 
     const onRefresh = useCallback(async () => {
     setRefreshing(true);
@@ -164,8 +176,8 @@ const OtherUserScreen = () => {
   const Post = () => (
     <ScrollView
     scrollEnabled={true}
-     style={{flex:1,backgroundColor:color.backgroundcolor}}>
-      <SafeAreaView style={{flex:1,backgroundColor:color.backgroundcolor}}>
+     style={{flex:1,backgroundColor:theme.colors.background}}>
+      <SafeAreaView style={{flex:1,backgroundColor:theme.colors.background}}>
           <FlashList
           ListEmptyComponent={() => 
             (<Text style={{ color: '#fff', textAlign: 'center', fontFamily:color.textFont,fontSize:20}}>No posts available</Text>)}
@@ -182,14 +194,10 @@ const OtherUserScreen = () => {
                   id={item.post_id}
                   name={item.name}
                   content={item.content}
-                  date={item?.createdAt?.toDate().toLocaleString('en-US',{
-                    year: 'numeric',
-                    month: 'short',
-                    day: '2-digit',
-                    hour: '2-digit',
-                    minute: '2-digit',
-                    hour12: true
-                  })}
+                  date={item?.createdAt?.toDate().toLocaleString('en-US', {
+                  hour: '2-digit',
+                  minute: '2-digit',
+                  hour12: true})}
                   comment_count={item.comment_count} />
                 </View>
               </Suspense>
@@ -201,8 +209,8 @@ const OtherUserScreen = () => {
   ); 
   
   const Projects = () => (
-    <ScrollView style={{flex:1,backgroundColor:color.backgroundcolor}}>
-    <SafeAreaView style={{flex:1,backgroundColor:color.backgroundcolor,padding:50}}>
+    <ScrollView style={{flex:1,backgroundColor:theme.colors.background}}>
+    <SafeAreaView style={{flex:1,backgroundColor:theme.colors.background,padding:50}}>
       {
         projects && projects.length > 0 ? (
           projects.map((project, index) => (
@@ -216,6 +224,25 @@ const OtherUserScreen = () => {
       }
       
     </SafeAreaView>
+    </ScrollView>
+  );
+
+  const SkillsScreen = () => (
+    <ScrollView scrollEnabled style={{flex:1,backgroundColor:theme.colors.background}}>
+    <View style={{flex:1,backgroundColor:theme.colors.background,padding:50}}>
+      {
+        projects && projects.length > 0 ? (
+          projects.map((project, index) => (
+        
+          <TouchableOpacity key={index} onPress={()=>navigation.navigate('ProjectScreen')}>
+             <View style={{ backgroundColor: '#252525', borderRadius: 25, padding: 30,marginBottom:10 }}>
+            <Text style={{ textAlign: 'center', color: '#fff' }}>{project?.project_name}</Text>
+          </View>
+          </TouchableOpacity>
+        ))) : <View style={{flex:1,justifyContent:'center',alignItems:'center'}}><Text variant='bodySmall' style={{ color: '#fff', textAlign: 'center',fontSize:16}}>No skills available</Text></View>
+      }
+      
+    </View>
     </ScrollView>
   );
 
@@ -261,13 +288,7 @@ const OtherUserScreen = () => {
   if(isloading) return null
   
     return (
-        <View style={styles.screen}>
-          <ChatRoomHeader 
-            onPress={()=>navigation.navigate('Main')} 
-            backgroundColor={color.button} 
-            icon='keyboard-backspace' 
-            onPress2={() => navigation.navigate('Message')}
-            />
+        <SafeAreaView style={[styles.screen,{backgroundColor:theme.colors.background,paddingTop:Platform.OS === 'ios' ? top: 0}]}>
             <ScrollView
             scrollEnabled={true}
             showsVerticalScrollIndicator={false}
@@ -275,100 +296,106 @@ const OtherUserScreen = () => {
             contentContainerStyle={{flexGrow:1}}
             refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh}/>}
             >
-            <View style={styles.profileContainer}>
-              <View style={{flexDirection:'row', justifyContent:'space-between',paddingLeft:20}}>
-              <Image
-                  style={{height:hp(10), aspectRatio:1, borderRadius:100,}}
-                  source={{uri:users?.profileUrl}}
-                  placeholder={{blurhash}}
-                  cachePolicy='none'
-                  />
-                  </View>
-                  <View style={{marginLeft:10,padding:10}}>  {
-                        other_user_id ? (<Text variant='titleSmall'
-                           style={styles.username}>@{users?.username}</Text>) 
-                        : (<Text variant='titleSmall' style={styles.username}>@{users?.username}</Text>)
-                      }</View>
-                  </View>
-                        {/* <View style={{alignItems:'flex-end',flexDirection:'column',marginBottom:5,paddingRight:20}}>
-                  <Text style={styles.title}>{users.jobtitle}</Text>
-                  <Text style={styles.location}><EvilIcons name='location' size={20}/> {users.location}</Text>
-                  </View> */}
-                  <View>
-                    <View style={{flexDirection:'column',alignItems:'stretch'}}>
-                      <View style={{flexDirection:'row', justifyContent:'space-around'}}>
-                        {follow_items.map((item,index)=>{
-                          return <FollowComponent key={index} count={item.count} content={item.content}/>
-                        })}
-                      </View>
-                    </View>
-                  </View>
-                  <View style={styles.aboutContainer}>
-                    <View style={{flexDirection:'row', justifyContent:'space-around'}}>
-                      <TouchableOpacity onPressIn={handlePress}>
-                      <SmallButton name={users?.follow_state ? 'Connecting...' : 'Connect'} isTrue={users?.follow_state}/>
-                      </TouchableOpacity>
-                      <TouchableOpacity>
-                        <SmallButton name='Mentor'/>
-                      </TouchableOpacity>
-                         {other_user_id && (
-                  <TouchableOpacity onPress={() => navigation.navigate('Chat',{userid:userId,name:users?.username} as never)}>
-                    <SmallButton name='Message'/>
-                  </TouchableOpacity>)}
-                    </View>
-                    </View>
+            <TouchableOpacity onPress={() => navigation.navigate('Welcome',{screen:'Dash'})} style={{padding:10}}>
+            <Icon
+            source='arrow-left-circle'
+            size={25}
+            />
+          </TouchableOpacity>
+          <View style={{flexDirection:'row',paddingLeft:20,marginTop:10,justifyContent:'space-between',padding:5}}>
+          <Image
+              style={{height:hp(7), aspectRatio:1, borderRadius:100,}}
+              source={users?.profileUrl}
+              placeholder={{blurhash}}
+              cachePolicy='none'/>
+            {other_user_id &&  <Button 
+            onPress={() => navigation.navigate('SecondStack',{screen:'Chat'})}
+            mode='outlined' style={{
+            backgroundColor:'transparent', 
+            borderRadius:100,
+            borderWidth:1,
+            borderColor:theme.colors.tertiary}}>Message</Button>}
+              </View>
+              <View style={{marginTop:5,flexDirection:'column',paddingRight:20}}>
+              <View style={{paddingLeft:20}}>
+               <Text>{
+                    other_user_id ? (<Text
+                    variant='bodySmall'
+                      style={{
+                        color:theme.colors.onPrimary
+                      }}>@{users?.username}</Text>) 
+                    : (<Text
+                    variant='bodySmall'
+                      style={{
+                        color:theme.colors.onPrimary
+                      }}>@{users?.username}</Text>)
+                  }</Text>
+                  {users?.jobtitle &&   <Text
+                  variant='bodySmall'
+                  style={{
+                    color:theme.colors.onPrimary
+                  }}>{users?.jobtitle}</Text>}
+                  {users?.location &&    <Text
+                  variant='bodySmall'
+                  style={{
+                    color:theme.colors.onPrimary
+                  }}><EvilIcons name='location' size={15} color={theme.colors.onTertiary}/>{users?.location}</Text>}
+                    {follow_items.map((item,index)=>{
+                      return <FollowComponent key={index} count={item.count} content={item.content}/>
+                    })}
+                </View>
+              </View>
                     <View style={{flex: 1}}>
                   <Tab.Navigator
                 screenOptions={{
                   swipeEnabled:true,
                   tabBarIndicatorStyle:{
-                    backgroundColor:'#00BF63'
+                    backgroundColor:theme.colors.primary
                   },
                   tabBarStyle:{
-                    backgroundColor:color.backgroundcolor,
+                    backgroundColor:theme.colors.background,
                   },
-                  tabBarShowLabel:false
                 }}
-                >
-                  <Tab.Screen
-                    name='Post'
-                    component={Post}
-                    options={{
-                      tabBarIcon:() => (
-                        <MaterialCommunityIcons name='post' color='#00bf63' size={20}
-                        />),
-                    }}
-                    />
-                    <Tab.Screen
-                    name='Projects'
-                    component={Projects}
-                    options={{
-                      tabBarIcon:() => (
-                        <MaterialIcons name='work' color='#00bf63' size={20}
-                        />),
-                    }}
-                    />
+                ><Tab.Screen
+                name='Posts'
+                component={Post}
+                options={{
+                  tabBarLabelStyle:{
+                    fontSize:20,
+                    color:'#000'
+                  }
+                }}
+                />
+                <Tab.Screen
+                name='Projects'
+                component={Projects}
+                options={{
+                  tabBarLabelStyle:{
+                    fontSize:20,
+                    color:theme.colors.onPrimary
+                  }
+                }}
+                />
+              <Tab.Screen
+                name='Skills'
+                component={SkillsScreen}
+                options={{
+                  tabBarLabelStyle:{
+                    fontSize:20,
+                    color:theme.colors.onPrimary
+                  }
+                }}
+                />
                   </Tab.Navigator>
                 </View> 
             </ScrollView> 
-        </View>
+        </SafeAreaView>
        
       )
     }
     
 const styles = StyleSheet.create({
-      aboutContainer:{
-        padding:5,
-      },
-      aboutText:{
-        fontSize:15,
-        fontWeight:'bold'
-      },
-      profileContainer:{
-        marginTop:10,
-      },
       screen:{
-        backgroundColor:color.backgroundcolor,
         flex:1
       },
       text:{
@@ -379,20 +406,7 @@ const styles = StyleSheet.create({
       },
       username:{
         letterSpacing:1,
-        color:color.grey
       },
-      location:{
-        fontSize:15,
-        color:color.textcolor,
-        fontFamily:color.textFont
-      },
-      title:{
-        fontSize:15,
-        color:color.textcolor,
-        fontFamily:color.textFont
-      },
-    
-    
     })
 
 export default OtherUserScreen

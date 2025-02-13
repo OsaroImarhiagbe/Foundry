@@ -16,8 +16,6 @@ import FollowComponent from '../components/FollowComponent';
 import firestore,{FirebaseFirestoreTypes} from '@react-native-firebase/firestore';
 import { blurhash } from '../../utils/index';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useTheme,Text,Icon,Button } from 'react-native-paper';
 import EvilIcons from 'react-native-vector-icons/EvilIcons';
@@ -333,13 +331,6 @@ const AccountScreen = () => {
 
 
 const styles = StyleSheet.create({
-  aboutContainer:{
-    marginTop:10,
-  },
-  aboutText:{
-    fontSize:15,
-    fontWeight:'bold'
-  },
   screen:{
     flex:1
   },
