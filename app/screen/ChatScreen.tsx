@@ -16,7 +16,7 @@ import { addID } from '../features/Message/messageidSlice';
 import firestore,{FirebaseFirestoreTypes} from '@react-native-firebase/firestore'
 import MessageItem from '../components/MessageItem';
 import { FlashList } from '@shopify/flash-list';
-import { TextInput } from 'react-native-paper';
+import { TextInput,useTheme } from 'react-native-paper';
 
 
 type ChatScreenRouteProp = RouteProp<{ Chat: { item: any,userid:string,name:string } }, 'Chat'>;
@@ -32,6 +32,7 @@ const ChatScreen = () => {
   const dispatch = useDispatch()
   const inputRef = useRef<React.ComponentProps<typeof TextInput>>(null);
   const flashListRef = useRef<FlashList<any> | null>(null);
+  const theme = useTheme()
 
   
   const recipentNamec = userid ? name  : item?.userId ? item.name : 'Unknown Recipient';
@@ -111,6 +112,7 @@ const ChatScreen = () => {
       await messageRef.add({
         senderId:user?.userId,
         recipentId:id,
+        id:messageRef.doc().id,
         text:messageText,
         senderName: user?.username,
         recipentName:recipentNamec,
@@ -142,14 +144,14 @@ const ChatScreen = () => {
         <FlashList
          ref={flashListRef} 
         data={messages}
-        keyExtractor={item => item?.id.toString()}
+        keyExtractor={item => item?.id?.toString() || Math.random().toString()}
         estimatedItemSize={360}
         renderItem={({item}) => (
           <MessageItem  date={item.createdAt.toDate().toLocaleString('en-US', {
             hour: '2-digit',
             minute: '2-digit',
             hour12: true
-          })} id={item.userId} message_text={item.text} current_User={user}/>
+          })} id={item.recipentId} message_text={item.text} current_User={user}/>
         )}
         />
       </View>
@@ -165,7 +167,7 @@ const ChatScreen = () => {
           dense={true}
           mode='outlined'
           outlineStyle={{borderRadius:100}}
-          textColor='#000'
+          textColor={theme.colors.tertiary}
           placeholderTextColor='#000'
           style={[styles.textinput,{fontSize:16,backgroundColor:'transparent'}]}
           onChangeText={setMessageText}

@@ -1,9 +1,10 @@
 import React from 'react';
 import { View, StyleSheet} from 'react-native';
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
-import color from '../../config/color';
-import {Text} from 'react-native-paper'
-
+import {Text,useTheme} from 'react-native-paper'
+import { Image } from 'expo-image';
+import { blurhash } from 'utils';
+import { useAuth } from 'app/authContext';
 interface Messageitem{
     message_text?:any,
     current_User?:any,
@@ -12,34 +13,45 @@ interface Messageitem{
 }
 
 const MessageItem:React.FC<Messageitem> = ({ message_text, current_User,date,id}) => {
+    const theme = useTheme()
+    const {user} = useAuth()
     
-    if (current_User?.userId !== id) {
+    if (current_User?.userId != id) {
         return (
             
             <View style={styles.container}>
-                <View style={{width:wp(70)}}>
-                    <View style={[styles.textContainer,{backgroundColor:'#6A1B9A'}]}>
+                <View style={{width:wp('40%')}}>
+                    <View style={[styles.textContainer,{backgroundColor:'rgb(70, 160, 250)'}]}>
                     <Text
                     variant='bodySmall'
-                     style={{fontSize:hp(1.5),color:'#fff',textAlign:'auto'}}>{message_text}</Text>
+                     style={{color:theme.colors.tertiary,textAlign:'auto'}}>{message_text}</Text>
                     </View>
                     <Text
                      variant='bodySmall'
-                    style={styles.time}>{date}</Text>
+                    style={[styles.time,{color:theme.colors.tertiary}]}>{date}</Text>
                 </View>
             </View>
         );
     } else {
         return (
-            <View style={[styles.leftcontainer, , {width:wp(70)}]}>
-                <View style={[styles.lefttextcontainer, { backgroundColor: '#3C3C3C'}]}>
-                        <Text
-                        variant='bodySmall'
-                        style={{ fontSize: hp(2),textAlign:'auto'}}>{message_text}</Text>
-                    </View>
-                    <Text
+            <View style={[styles.leftcontainer]}>
+             <View style={{flexDirection:'column',marginBottom:5}}>
+             <Image
+                 placeholder={{blurhash}}
+                 source={{uri:user?.profileUrl}}
+                 style={{height:hp(3.3), aspectRatio:1, borderRadius:100}}
+                />
+                <Text
+                variant='bodySmall'
+                style={[styles.lefttime,{color:theme.colors.tertiary}]}>{date}</Text>
+                </View> 
+                <View style={{width:wp('40%')}}>
+                <View style={[styles.lefttextcontainer, { backgroundColor:'rgb(196, 196, 196)'}]}>  
+                <Text
                     variant='bodySmall'
-                    style={styles.lefttime}>{date}</Text>
+                    style={{textAlign:'auto'}}>{message_text}</Text>   
+                </View>
+                </View> 
             </View>
            
         );
@@ -50,48 +62,36 @@ const styles = StyleSheet.create({
     container: {
         flexDirection: 'row',
         justifyContent: 'flex-end',
-        marginBottom: 10,
         marginRight: 1,
         paddingRight:5,
-        marginTop:5
     },
     textContainer: {
-        padding:10,
-        borderRadius: 30,
-        flex:1,
+        padding:5,
+        borderRadius: 10,
         alignSelf:'flex-end',
+        marginBottom:5,
+        marginTop:5
     },
     leftcontainer: {
-        marginLeft: 1,
-        marginBottom: 10
+        marginLeft:1,
+        flexDirection:'row'
     },
     lefttextcontainer: {
         padding:5,
-        flex:1,
         alignSelf:'flex-start',
         borderRadius:10,
-        shadowColor: '#000',
-        shadowOffset: {
-          width: 0,
-          height: 7,
-        },
-        shadowOpacity: 1,
-        shadowRadius: 4.65,
     },
     time:{
         fontSize:8,
-        fontFamily:'Helvetica-light',
         alignSelf:'flex-end',
         marginTop:5,
         paddingLeft:5,
-        color:'#fff'
 
     },
     lefttime:{
         fontSize:8,
-        fontFamily:'Helvetica-light',
         marginTop:5,
-        paddingLeft:5
+        paddingLeft:5,
     }
 });
 

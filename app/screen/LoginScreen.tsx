@@ -93,7 +93,7 @@ const LoginScreen = () => {
   
    
           <CustomKeyboardView inChat={true}>
-            <SafeAreaView style={{flex:1,backgroundColor:theme.colors.background,marginVertical:40}}>
+            <SafeAreaView style={{flex:1,backgroundColor:theme.colors.background,marginVertical:50}}>
             <View style={{
                 alignItems:
                 'center',

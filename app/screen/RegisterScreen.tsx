@@ -115,7 +115,7 @@ const RegisterScreen = () => {
                                      backgroundColor='transparent'
                                     borderColor='#8a8a8a'
                                     values={values.username}
-                                     color='#fff'
+                                     color={theme.colors.tertiary}
                                     onChangeText={handleChange('username')}
                                     onBlur={() => setFieldTouched('username')}
                                     iconcolor={color.button}
@@ -126,7 +126,7 @@ const RegisterScreen = () => {
                                     style={styles.errormessage}>{errors.username}</HelperText>)}
                                 <AppTextInput
                                     icon='email'
-                                     color='#fff'
+                                     color={theme.colors.tertiary}
                                     placeholder='Email'
                                     backgroundColor='transparent'
                                     borderColor='#8a8a8a'
@@ -140,7 +140,7 @@ const RegisterScreen = () => {
                                     icon='lock'
                                     secureTextEntry
                                     placeholder='Password'
-                                     color='#fff'
+                                    color={theme.colors.tertiary}
                                     backgroundColor='transparent'
                                     borderColor='#8a8a8a'
                                     values={values.password}
@@ -156,7 +156,7 @@ const RegisterScreen = () => {
                                     placeholder='Confirm Password'
                                     backgroundColor='transparent'
                                     borderColor='#8a8a8a'
-                                    color='#fff'
+                                    color={theme.colors.tertiary}
                                     values={values.confirmPassword}
                                     onChangeText={handleChange('confirmPassword')}
                                     onBlur={() => setFieldTouched('confirmPassword')}

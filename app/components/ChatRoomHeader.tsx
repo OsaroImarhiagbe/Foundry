@@ -44,11 +44,11 @@ const ChatRoomHeader:React.FC<HeaderProp> = ({title,onPress,icon,onPress2,backgr
         </TouchableOpacity>
         <View style={{alignItems:'center',justifyContent:'center'}}>
         <Text
-        variant='titleMedium'
+        variant='titleLarge'
         style={{
-          color:'#000',
+          color:theme.colors.tertiary,
           textAlign:'center',
-          paddingLeft:50
+          paddingLeft:80
         }}>{title}</Text>
         </View>
          <TouchableOpacity
