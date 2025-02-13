@@ -41,8 +41,8 @@ export default function App() {
       onSecondary: 'rgb(255, 255, 255)',
       secondaryContainer: 'rgb(255, 215, 246)',
       onSecondaryContainer: 'rgb(56, 0, 57)',
-      tertiary: 'rgb(7, 8, 8)',
-      onTertiary: 'rgb(116, 122, 128)',
+      tertiary: 'rgb(0, 0, 0)',
+      onTertiary: 'rgb(128, 128, 128)',
       tertiaryContainer: 'rgb(255, 215, 246)',
       onTertiaryContainer: 'rgb(44, 18, 42)',
       error: 'rgb(186, 26, 26)',
@@ -75,10 +75,6 @@ export default function App() {
       backdrop: 'rgba(47, 48, 56, 0.4)',
       backgroundContainer: 'rgb(190, 233, 255)',
       onBackgroundContaine: 'rgb(0, 31, 42)',
-      text: 'rgb(0, 0, 0)',
-      onText: 'rgb(255, 255, 255)',
-      textContainer: 'rgb(203, 230, 255)',
-      onTextContainer: 'rgb(0, 30, 48)'
         },
   }
 
@@ -87,6 +83,7 @@ export default function App() {
     ...DarkTheme,
     colors: {
       ...DarkTheme.colors,
+      text:'#fff',
       primary: 'rgb(0, 130, 242)',
       onPrimary: 'rgb(247, 247, 247)',
       primaryContainer: 'rgb(38, 65, 145)',
@@ -95,8 +92,8 @@ export default function App() {
       onSecondary: 'rgb(69, 90, 100)',
       secondaryContainer: 'rgb(114, 40, 111)',
       onSecondaryContainer: 'rgb(255, 215, 246)',
-      tertiary: 'rgb(128, 128, 128)',
-      onTertiary: 'rgb(116, 122, 128)',
+      tertiary: 'rgb(250, 250, 250)',
+      onTertiary: 'rgb(128, 128, 128)',
       tertiaryContainer: 'rgb(91, 61, 87)',
       onTertiaryContainer: 'rgb(255, 215, 246)',
       error: 'rgb(255, 180, 171)',
@@ -129,7 +126,6 @@ export default function App() {
       backdrop: 'rgba(47, 48, 56, 0.4)',
       backgroundContainer: 'rgb(0, 77, 100)',
       onBackgroundContainer: 'rgb(190, 233, 255)',
-      text: 'rgb(247, 247, 247)',
       onText: 'rgb(0, 52, 79)',
       textContainer: 'rgb(0, 75, 113)',
       onTextContainer: 'rgb(203, 230, 255)'

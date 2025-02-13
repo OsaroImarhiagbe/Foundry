@@ -87,16 +87,15 @@ const ChatScreen = () => {
       const roomId = userid ? getRoomID(user?.userId, userid) : item?.userId ? getRoomID(user?.userId, item?.userId) : undefined
       const id = userid ? userid : item?.userId
       await firestore().collection('chat-rooms').doc(roomId).set({
-        roomId,
-        createdAt: firestore.Timestamp.fromDate(new Date())
+        roomId:roomId,
+        createdAt: firestore.Timestamp.fromDate(new Date()),
+        recipientId:[id],
+        recipentName:recipentNamec,
+        senderName:user?.username,
+        senderId:user?.userId,
       })
-      await firestore().collection('sent-message-id').doc(id).set({
-        userId:id,
-        name:recipentNamec,
-        senderName:user?.username
-      })
-    } catch (error:any) {
-      console.error("Error creating room:", error.message);
+    } catch (error:unknown) {
+      console.error("Error creating room:", error);
     }
   };
 
@@ -124,8 +123,8 @@ const ChatScreen = () => {
         flashListRef.current.scrollToEnd({ animated: true });
       }
       setMessageText('');
-    }catch(error:any){
-      console.error(`Error sending message:${error.message}`)
+    }catch(error:unknown){
+      console.error(`Error sending message:${error}`)
     }
   }
 

@@ -28,8 +28,8 @@ interface NotificationPayload {
   }
   
   interface MessageData {
-    senderId: string;
-    text: string;
+    recipentId?:string,
+    senderId?:string,
   }
   
   const CONFIG = {
@@ -115,7 +115,7 @@ interface NotificationPayload {
         }
   
         const messageData = snapshot.data() as MessageData;
-        const roomId = event.data.id;
+        const roomId = snapshot.ref.parent.parent?.id;
   
         const roomDoc = await admin.firestore()
           .collection(CONFIG.NOTIFICATION.COLLECTION.ROOMS)
@@ -128,13 +128,13 @@ interface NotificationPayload {
         }
   
         const roomData = roomDoc.data();
-        const participantsToNotify = roomData.participants.filter(
-          (participantId: string) => participantId !== messageData.senderId
+        const participantsToNotify = roomData.recipientId.filter(
+          (Id: string) => Id !== messageData.senderId
         );
-        const notificationPromises = participantsToNotify.map((participantId: string) =>
-          sendNotification(participantId, {
+        const notificationPromises = participantsToNotify.map((Id: string) =>
+          sendNotification(Id, {
             title: 'New Message',
-            body: `You have a new message in ${roomData.name}`,
+            body: `You have a new message from ${roomData.senderName}`,
             data: {
               roomId,
               messageId: snapshot.id,
@@ -144,7 +144,6 @@ interface NotificationPayload {
         );
   
         await Promise.all(notificationPromises);
-        
         return { success: true };
       } catch (error) {
         logger.error('Error processing new message:', error);
