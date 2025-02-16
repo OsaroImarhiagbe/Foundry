@@ -25,7 +25,7 @@ import { Picker } from '@react-native-picker/picker';
 import { useTranslation } from 'react-i18next';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-  
+import crashlytics from '@react-native-firebase/crashlytics'
 
 type NavigationProp = {
     Profile:{user:any},
@@ -157,6 +157,7 @@ const EditScreen = () => {
       ]
 
     useEffect(() => {
+        crashlytics().log('Edit Screen: Grabbing user')
         const unsub = firestore()
         .collection('users')
         .doc(user?.userId)
@@ -171,12 +172,14 @@ const EditScreen = () => {
             setEdit(null)
             }
         }, (error) => {
+            crashlytics().recordError(error)
             console.error('Error fetching document:',error.message)
         });
         return () => unsub()
     },[user])
 
     const pickImage = async () => {
+        crashlytics().log('Edit Screen: Pick Image')
         try{
             let results = await ImagePicker.launchImageLibraryAsync({
                 mediaTypes: ['images'],
@@ -194,11 +197,10 @@ const EditScreen = () => {
                     profileUrl:url
                 })
                 dispatch(addImage({profileimg:url}))
-            }else{
-                console.error('user cancelled the image picker.')
             }
-        }catch(err:any){
-            console.error('Error picking image and uploading to s3:',err.message)
+        }catch(error:any){
+            crashlytics().recordError(error)
+            console.error('Error picking image and uploading to Cloud Storage:',error.message)
         }
         }
       

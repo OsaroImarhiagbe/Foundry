@@ -9,7 +9,7 @@ import { useAuth } from '../authContext';
 import { Image } from 'expo-image';
 import { blurhash } from '../../utils';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-
+import crashlytics from '@react-native-firebase/crashlytics'
 interface Project{
     id?:string,
     skills?:{skill:string}[],
@@ -29,6 +29,8 @@ const ProjectScreen = () => {
 
 
     useEffect(() => {
+        crashlytics().log('Project Screen: Grabbing Projects')
+        try{
         const unsub = firestore()
         .collection('users')
         .doc(user?.userId)
@@ -42,6 +44,9 @@ const ProjectScreen = () => {
             setProjects(data)
         })
         return () => unsub()
+        }catch(error: unknown | any){
+            crashlytics().recordError(error)
+        }
     },[user])
 
     return (

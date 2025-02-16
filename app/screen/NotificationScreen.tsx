@@ -2,7 +2,6 @@ import React,{useState,useEffect,lazy,Suspense,useCallback} from 'react'
 import {
   View, 
   StyleSheet,
-  FlatList,
   ScrollView,
   ActivityIndicator,
   RefreshControl,
@@ -12,7 +11,7 @@ import { useAuth } from '../authContext';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import color from '../../config/color';
 import { useTheme,Text } from 'react-native-paper';
-
+import crashlytics, { crash } from '@react-native-firebase/crashlytics'
 interface Notification{
   id?:string,
   title?:string,
@@ -28,6 +27,7 @@ const NotificationScreen = () => {
 
 
   const getNotifications = useCallback(() => {
+    crashlytics().log('Notification Screen: get Notifications')
     try{
       if(user){
         const unsub = firestore()
@@ -48,17 +48,20 @@ const NotificationScreen = () => {
       })
       return () => unsub()
       }
-    }catch(err){
-      console.error('Error grabbing notifications',err)
+    }catch(error:unknown | any){
+      crashlytics().recordError(error)
+      console.error('Error grabbing notifications',error.message)
     }
   },[user?.userId])
 
   const onRefresh = useCallback(() => {
+    crashlytics().log('Notification Screen: On Refresh')
     setRefreshing(true);
     try{
       getNotifications()
-    }catch(err){
-      console.error('Error getting notifications',err)
+    }catch(error:unknown | any){
+      crashlytics().recordError(error)
+      console.error('Error getting notifications',error.message)
     }finally{
       setRefreshing(false)
     }

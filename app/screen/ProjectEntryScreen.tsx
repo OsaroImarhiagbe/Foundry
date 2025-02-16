@@ -12,11 +12,10 @@ import { Button } from 'react-native-paper';
 import {useAuth} from '../authContext';
 import { blurhash } from '../../utils';
 import firestore, { FirebaseFirestoreTypes } from '@react-native-firebase/firestore'
-import axios from 'axios';
 import * as ImagePicker from 'expo-image-picker';
 import { Image } from 'expo-image';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-
+import crashlytics, { crash } from '@react-native-firebase/crashlytics'
 const ProjectEntryScreen = () => {
     const [focus,setFocus] = useState('')
     const [text,setText] = useState('')
@@ -26,33 +25,9 @@ const ProjectEntryScreen = () => {
     const [project_id,setProject_id] = useState('')
     const {user} = useAuth()
 
-
-    // const uploadtoS3 = async (image) => {
-    //     try{
-    //       const formData = new FormData()
-    //       formData.append('file',{
-    //         uri: image,
-    //         type: "image/jpeg",
-    //         name: "photo.jpg"
-    //     })
-    //     formData.append('project_id', project_id)
-    //       const uploadResponse = await axios.post(DJANGO_PROJECT_URL,formData,{
-    //         headers:{
-    //           'Content-Type':'multipart/form-data'
-    //         }
-    //       })
-    //       if(uploadResponse.status === 201){
-    //         console.error('file uploaded to s3')
-    //         return uploadResponse.data.file
-    //       }else{
-    //         console.error('Failed to upload to s3')
-    //       }
-    //     }catch(err){
-    //       console.error('Error uploading to s3:',err)
-    //     }
-    //   }
-    
-      const pickImage = async () => {
+    const pickImage = async () => {
+      crashlytics().log('ProjectEntryScreen: Picking Image')
+      try{
         let results = await ImagePicker.launchImageLibraryAsync({
           mediaTypes: ['images', 'videos'],
           allowsEditing:true,
@@ -61,19 +36,20 @@ const ProjectEntryScreen = () => {
         console.error('Image results:',results)
         if(!results.canceled){
           setImage(results.assets[0].uri)
-        }else{
-          console.error('user cancelled the image picker.')
         }
+      }catch(error: unknown | any){
+        crashlytics().recordError(error)
+        console.error('user cancelled the image picker.')
+      }
       }
 
     const handleSubmit = async () => {
+      crashlytics().log('ProjectEntryScreen: Handle Submit')
         const docRef = firestore().collection('users').doc(user?.userId).collection('projects')
         const projectDoc = await docRef.where('project_name', '==', projectname).get();
         let imageUrl = null;
-        // if(image){
-        //     imageUrl = await uploadtoS3(image)
-        // }
-        if(projectDoc){
+        try{
+          if(projectDoc){
           const projectref = projectDoc.docs[0]
           const projectId = projectref.id
             await firestore()
@@ -108,6 +84,9 @@ const ProjectEntryScreen = () => {
         setText('')
         setProjectName('')
         setSkills('')
+        }catch(error: unknown | any){
+          crashlytics().recordError(error)
+        }
     }
   return (
     <TouchableWithoutFeedback onPress={()=> Keyboard.dismiss()}>

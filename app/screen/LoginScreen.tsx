@@ -23,12 +23,10 @@ import {GoogleSigninButton,
 statusCodes,
 } from '@react-native-google-signin/google-signin';
 import { TouchableWithoutFeedback } from 'react-native-gesture-handler'
-import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
-import LottieView from 'lottie-react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Image } from 'expo-image';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-
+import crashlytics from '@react-native-firebase/crashlytics'
 
 
 
@@ -44,6 +42,7 @@ const LoginScreen = () => {
     
     
     const LoginPress = async (values:any,{resetForm}:any) => {
+        crashlytics().log('Login Screen: Login Press')
         setLoading(true);
         try{
             const response = await login(values.email, values.password)
@@ -53,12 +52,12 @@ const LoginScreen = () => {
                     resetForm({values: ''})
                     navigation.navigate('Drawer' as never);
                 }, 2000); 
-            }else{
-                setLoading(false)
             }
-        }catch(error){
+        }catch(error:any){
+            crashlytics().recordError(error)
+            console.error(`Unauthorized username and password ${error.message}`)
+        }finally{
             setLoading(false)
-            console.error(`Unauthorized username and password ${error}`)
         }
     }
     const RegisterPress = () => {

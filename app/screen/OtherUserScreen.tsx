@@ -14,8 +14,6 @@ import {useState, useEffect,useCallback} from 'react';
 import { Image } from 'expo-image';
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import { useRoute } from '@react-navigation/native';
-import AntDesign from 'react-native-vector-icons/AntDesign';
-import ChatRoomHeader from '../components/ChatRoomHeader';
 import SmallButton from '../components/SmallButton';
 import FollowComponent from '../components/FollowComponent';
 import firestore, { FirebaseFirestoreTypes } from '@react-native-firebase/firestore'
@@ -23,15 +21,13 @@ import { blurhash } from '../../utils/index';
 import { useSelector } from 'react-redux';
 import { useAuth } from '../authContext';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { FlashList } from '@shopify/flash-list';
 import { Divider,Text,useTheme,Button,Icon } from 'react-native-paper';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import EvilIcons from 'react-native-vector-icons/EvilIcons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { NavigatorScreenParams } from '@react-navigation/native';
-
+import crashlytics from '@react-native-firebase/crashlytics'
 const PostComponent = lazy(() => import('../components/PostComponent'))
 
 
@@ -109,55 +105,9 @@ const OtherUserScreen = () => {
 
 
     const onRefresh = useCallback(async () => {
+    crashlytics().log('Other User Screen: useCallback')
     setRefreshing(true);
-    // await fetchUser();
-    setRefreshing(false);
-    }, [other_user_id]);
-
-
-
-    useEffect(() => {
-      if(projects.length === 0) return;
-      try{
-        const unsub = firestore()
-        .collection('projects')
-        .where('id','==',users?.userId)
-        .onSnapshot(snapShot => {
-          let data:Project[] = []
-          snapShot.forEach(doc => {
-            data.push({...doc.data(),id:doc.id})
-          })
-          setProjects(data)
-        })
-        return () => unsub()
-      }catch(err){
-        console.error('error grabbing user projects:',err)
-      }
-    },[users])
-
-
-    useEffect(() => {
-      if (!users || !users.username) return;  
-      try{
-        const unsub = firestore()
-        .collection('posts')
-        .where('name','==',users.username)
-        .orderBy('createdAt','desc')
-        .onSnapshot(documentSnapshot => {
-          let data:Post[] = []
-          documentSnapshot.forEach(doc => {
-            data.push({...doc.data(),id:doc.id})
-          })
-          setPosts(data)
-        })
-        return () => unsub()
-      }catch(err:any){
-        console.error('error grabbing user post:',err.message)
-      }
-    },[users])
-
-
-    useEffect(() => {
+    try{
       if(!other_user_id) return 
       const unsub = firestore()
         .collection('users')
@@ -175,6 +125,94 @@ const OtherUserScreen = () => {
           }
         );
         return () => unsub()
+    
+    }catch(error:unknown | any){
+      crashlytics().recordError(error.message)
+    }finally{
+      setRefreshing(false);
+    }
+    }, [other_user_id]);
+
+
+
+    useEffect(() => {
+      crashlytics().log('Other User Screen: Grabbing Projects')
+      setLoading(true)
+      if(projects.length === 0) return;
+      try{
+        const unsub = firestore()
+        .collection('projects')
+        .where('id','==',users?.userId)
+        .onSnapshot(snapShot => {
+          let data:Project[] = []
+          snapShot.forEach(doc => {
+            data.push({...doc.data(),id:doc.id})
+          })
+          setProjects(data)
+        })
+        return () => unsub()
+      }catch(error:unknown | any){
+        crashlytics().recordError(error)
+        console.error('error grabbing user projects:',error.message)
+      }finally{
+        setLoading(false)
+      }
+    },[users])
+
+
+    useEffect(() => {
+      crashlytics().log('Other User Screen: Grabbing Posts')
+      setLoading(true)
+      if (!users || !users.username) return;  
+      try{
+        const unsub = firestore()
+        .collection('posts')
+        .where('name','==',users.username)
+        .orderBy('createdAt','desc')
+        .onSnapshot(documentSnapshot => {
+          let data:Post[] = []
+          documentSnapshot.forEach(doc => {
+            data.push({...doc.data(),id:doc.id})
+          })
+          setPosts(data)
+        })
+        return () => unsub()
+      }catch(error:unknown | any){
+        crashlytics().recordError(error)
+        console.error('error grabbing user post:',error.message)
+      }finally{
+        setLoading(false)
+      }
+    },[users])
+
+
+    useEffect(() => {
+      crashlytics().log('Other User Screen: Grabbing User')
+      if(!other_user_id) return
+      setLoading(true) 
+      try{
+      const unsub = firestore()
+      .collection('users')
+      .doc(other_user_id)
+      .onSnapshot(
+        (documentSnapshot) => {
+          if (documentSnapshot.exists) {
+            setUsers(documentSnapshot.data());
+          } else {
+            console.error('No such document exists!');
+          }
+        },
+        (error) => {
+          crashlytics().recordError(error)
+          console.error(`Error fetching document: ${error}`);
+        }
+      );
+      return () => unsub()
+      }catch(error: unknown | any){
+        crashlytics().recordError(error)
+      }finally{
+        setLoading(false)
+      }
     
   },[other_user_id])
 

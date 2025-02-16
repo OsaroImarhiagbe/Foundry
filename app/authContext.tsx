@@ -3,7 +3,7 @@ import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {GoogleSignin,statusCodes,} from '@react-native-google-signin/google-signin';
-
+import crashlytics from '@react-native-firebase/crashlytics'
 export const AuthContext = createContext<any>(null);
 
 interface User {
@@ -49,14 +49,16 @@ export const AuthContextProvider = ({children}:AuthContextProviderProps) => {
     },[])
 
     const login = async (email:string,pasword:string) => {
+        crashlytics().log('Auth Context: Login')
         setLoading(true)
         try{
             const response = await auth().signInWithEmailAndPassword(email,pasword)
-            setLoading(false)
             return {success:true}
-        }catch(error){
-            setLoading(false)
+        }catch(error: unknown | any){
+            crashlytics().recordError(error)
             console.error(`Error logging in:${error}`)
+        }finally{
+            setLoading(false)
         }
     }
 
@@ -90,15 +92,18 @@ export const AuthContextProvider = ({children}:AuthContextProviderProps) => {
     // }
 
     const logout = async () => {
+        crashlytics().log('Auth Context: Logout')
         try{
             await auth().signOut();
             await AsyncStorage.removeItem('authUser')
             return {success:true,}
-        }catch(error:any){
+        }catch(error:unknown | any){
+            crashlytics().recordError(error)
             return {success:false, message: error.message}
         }
     }
     const register = async (username:string,email:string,password:string) => {
+        crashlytics().log('Auth Context: Register')
         try{
             const response = await auth().createUserWithEmailAndPassword(email,password)
             await firestore().collection('users').doc(response?.user?.uid).set({
@@ -106,7 +111,8 @@ export const AuthContextProvider = ({children}:AuthContextProviderProps) => {
                 userId: response?.user?.uid
             })
             return {success:true, data: response?.user}
-        }catch(error:any){
+        }catch(error:unknown | any){
+            crashlytics().recordError(error)
             console.error(`${error}`)
             return {success:false, msg: error.message}
         }   

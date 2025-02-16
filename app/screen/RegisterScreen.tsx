@@ -18,7 +18,7 @@ import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-nativ
 import { TouchableWithoutFeedback } from 'react-native-gesture-handler';
 import { Button,useTheme } from 'react-native-paper';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-
+import crashlytics from '@react-native-firebase/crashlytics'
 
 
 
@@ -35,7 +35,9 @@ const RegisterScreen = () => {
     const {width,height} = useWindowDimensions()
     const { register } = useAuth();
     const theme = useTheme()
+
     const handleRegister = async (values:any, {resetForm}:any )=> {
+        crashlytics().log('Register Screen: Handle Register')
         setLoading(true);
         try{
             let response = await register(values.username, values.email, values.password)
@@ -44,9 +46,11 @@ const RegisterScreen = () => {
                 setLoading(false)
             }
             resetForm({values:initialValues})
-        }catch(error){
-            setLoading(false)
+        }catch(error: unknown | any){
+            crashlytics().recordError(error)
             console.error('error with register',error)
+        }finally{
+            setLoading(false)
         }
     }    
 
