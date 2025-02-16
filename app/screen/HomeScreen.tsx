@@ -136,7 +136,7 @@ const HomeScreen = () => {
         return () => unsub()
       }  catch (error:any) {
         crashlytics().recordError(error)
-      console.error(`Error post can not be found: ${error}`);
+        console.error(`Error post can not be found: ${error}`);
     }finally{
       setRefreshing(false);
     }

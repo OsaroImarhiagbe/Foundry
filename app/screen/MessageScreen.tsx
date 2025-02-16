@@ -45,43 +45,64 @@ const MessageScreen = () => {
 
   const onRefresh = useCallback(() => {
     setRefreshing(true);
-    grabUser(); 
+    try{
+        crashlytics().log('Grabbing Users Message')
+        if (!users) {
+          setUsers([]);
+          return;
+        }
+        const unsub = firestore()
+        .collection('chat-rooms')
+        .where('senderName','!=',user.username)
+        .onSnapshot((documentSnapshot) =>{
+          let data:User[] = []
+          documentSnapshot.forEach(doc => {
+            data.push({...doc.data()})
+          })
+          setUsers(data)
+        },(err)=>{
+          crashlytics().recordError(err)
+          console.error(`Failed to grab users: ${err.message}`)
+        })
+        return unsub
+    }catch(error:any){
+      crashlytics().recordError(error)
+    }finally{
     setRefreshing(false); 
+
+    }
   }, [users]);
 
   useEffect(() => {
-    let unsub:any;
-    const fetchUser =  () => {
-      unsub = grabUser()
-    }
-
-    fetchUser()
-    return () => {if(unsub) unsub()}
-  },[users])
-
-  const grabUser = () => {
-    crashlytics().log('Grabbing Users Message')
-    if (!users) {
-      setUsers([]);
-      return;
-    }
-    const unsub = firestore()
-    .collection('chat-rooms')
-    .where('senderName','!=',user.username)
-    .onSnapshot((documentSnapshot) =>{
-      let data:User[] = []
-      documentSnapshot.forEach(doc => {
-        data.push({...doc.data()})
+    const grabMessageSent = () => {
+      crashlytics().log('Grabbing Users Message')
+      if (!users) {
+        setUsers([]);
+        return;
+      }
+      const unsub = firestore()
+      .collection('chat-rooms')
+      .where('senderName','!=',user.username)
+      .where('recipientName','!=',user.username)
+      .onSnapshot((querySnapshot) =>{
+        let data:User[] = []
+        querySnapshot.forEach(doc => {
+          data.push({...doc.data()})
+        })
+        setUsers(data)
+        setLastVisible(querySnapshot.docs[querySnapshot.docs.length - 1])
+        setHasMore(querySnapshot.docs.length > 0)
+      },(err)=>{
+        crashlytics().recordError(err)
+        console.error(`Failed to grab users: ${err.message}`)
       })
-      setUsers(data)
-    },(err)=>{
-      crashlytics().recordError(err)
-      console.error(`Failed to grab users: ${err.message}`)
-    })
-    return unsub
-  }
+      return unsub
+    }
+
+    grabMessageSent()
+  },[users])
   
-  const fetchMorePost = async () => {
+  const fetchMoreMessage = async () => {
     crashlytics().log('Fetch more Message')
     if (loadingMore || !hasMore) return;
     if (!user?.userId) return;
@@ -93,7 +114,8 @@ const MessageScreen = () => {
     try {
       const snapshot = await firestore()
         .collection('chat-rooms')
-        .orderBy('createdAt', 'desc')
+        .where('senderName','!=',user.username)
+        .where('recipientName','!=',user.username)
         .startAfter(lastVisible)
         .limit(2)
         .get();
@@ -122,7 +144,7 @@ const MessageScreen = () => {
       onRefresh={onRefresh}
       data={users}
       refreshing={refreshing}
-      onEndReached={fetchMorePost}
+      onEndReached={fetchMoreMessage}
       onEndReachedThreshold={0.1}
       ListFooterComponent={() => (<ActivityIndicator size='small' color='#fff' animating={loadingMore}/>)}
       ListEmptyComponent={() => ( <View style={{justifyContent:'center',alignItems:'center',flex:1,marginTop:20}}>

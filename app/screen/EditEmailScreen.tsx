@@ -6,7 +6,7 @@ import { useNavigation } from '@react-navigation/native';
 import { Button } from 'react-native-paper';
 import firestore from '@react-native-firebase/firestore'
 import { useAuth } from '../authContext';
-
+import crashlytics from '@react-native-firebase/crashlytics'
 const EditEmailScreen = () => {
     const navigation = useNavigation()
     const [email,setEmail] = useState('')
@@ -16,6 +16,7 @@ const EditEmailScreen = () => {
 
 
     const handleSubmit = async () =>{
+        crashlytics().log('Edit Email Screen: Handle Submit')
         setLoading(true)
         try{
            await firestore()
@@ -24,7 +25,8 @@ const EditEmailScreen = () => {
            .update({
                     email:email,
             })
-        }catch(e){
+        }catch(e:any){
+            crashlytics().recordError(e)
             console.error(`Error sending updates:${e}`)
         }
         finally{

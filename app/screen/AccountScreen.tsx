@@ -20,7 +20,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useTheme,Text,Icon,Button } from 'react-native-paper';
 import EvilIcons from 'react-native-vector-icons/EvilIcons';
 import SmallButton from 'app/components/SmallButton';
-
+import crashlytics from '@react-native-firebase/crashlytics'
 
 const PostComponent = lazy(() => import('../components/PostComponent'))
 
@@ -95,6 +95,7 @@ const AccountScreen = () => {
 
 
   useEffect(() => {
+    crashlytics().log('Account Screen: Grabbing Users Projects')
     if(projects.length === 0) return;
     try{
       const projectRef = firestore().collection('projects').where('id','==',user?.userId)
@@ -107,12 +108,14 @@ const AccountScreen = () => {
       })
       return () => unsub()
     }catch(err:any){
+      crashlytics().recordError(err)
       console.error('error grabbing user post:',err.message)
     }
     
   },[user])
 
   useEffect(() => {
+    crashlytics().log('Account Screen: Grabbing Users Post')
     try{
       const docRef = firestore().collection('posts').where('name','==',user?.username).orderBy('createdAt','desc')
       const unsub = docRef.onSnapshot((querySnapshot) => {
@@ -124,12 +127,14 @@ const AccountScreen = () => {
       })
       return () => unsub()
     }catch(err:any){
+      crashlytics().recordError(err)
       console.error('error grabbing user post:',err.message)
     }
     
   },[user])
 
   useEffect(() => {
+    crashlytics().log('Account Screen: Grabbing User ')
     setLoading(true)
       const userDoc = firestore().collection('users').doc(user.userId)
       const unsub = userDoc.onSnapshot(
@@ -141,6 +146,7 @@ const AccountScreen = () => {
         }
       },
         (error:any)=>{
+          crashlytics().recordError(error)
           console.error(`No such document ${error.message}`)
           setLoading(false)
         }

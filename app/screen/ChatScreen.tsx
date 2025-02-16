@@ -17,7 +17,7 @@ import firestore,{FirebaseFirestoreTypes} from '@react-native-firebase/firestore
 import MessageItem from '../components/MessageItem';
 import { FlashList } from '@shopify/flash-list';
 import { TextInput,useTheme } from 'react-native-paper';
-
+import crashlytics, { crash } from '@react-native-firebase/crashlytics'
 
 type ChatScreenRouteProp = RouteProp<{ Chat: { item: any,userid:string,name:string } }, 'Chat'>;
 
@@ -37,6 +37,7 @@ const ChatScreen = () => {
   
   const recipentNamec = userid ? name  : item?.userId ? item.name : 'Unknown Recipient';
   useEffect(() => {
+    crashlytics().log('Chat Screen: Grabbing messages')
     const loadMessages = (roomId:string) => {
       const docRef = firestore().collection('chat-rooms').doc(roomId);
       const messageRef = docRef.collection('messages').orderBy('createdAt', 'asc')
@@ -58,29 +59,31 @@ const ChatScreen = () => {
   
   }, [userid, item?.userId]);
   
-  useEffect(() => {
-    const getToken = async () => {
-      try{
-      const id = route?.params?.userid ? route?.params?.userid : item?.userId
-      const docRef = firestore().collection('users').doc(id)
-      const snapShot = await docRef.get()
-        if(snapShot.exists){
-          const data = snapShot.data()
-          if(data) setExpoPushToken(data.expoToken)
-        }else{
-          console.error('No such document')
-        }
-      }catch(err:any){
-        console.error('Error with grabbing token:',err)
+  // useEffect(() => {
+  //   crashlytics().log('Chat Screen: Grabbing Token')
+  //   const getToken = async () => {
+  //     try{
+  //     const id = route?.params?.userid ? route?.params?.userid : item?.userId
+  //     const docRef = firestore().collection('users').doc(id)
+  //     const snapShot = await docRef.get()
+  //       if(snapShot.exists){
+  //         const data = snapShot.data()
+  //         if(data) setExpoPushToken(data.expoToken)
+  //       }else{
+  //         console.error('No such document')
+  //       }
+  //     }catch(err:any){
+  //       console.error('Error with grabbing token:',err)
 
-      }
-    }
+  //     }
+  //   }
 
-    getToken()
+  //   getToken()
     
-  },[route?.params?.userid, item?.userId])
+  // },[route?.params?.userid, item?.userId])
 
   const createRoom = async () => {
+    crashlytics().log('Chat Screen: Creating Chat Room')
     try{
       
       const roomId = userid ? getRoomID(user?.userId, userid) : item?.userId ? getRoomID(user?.userId, item?.userId) : undefined
@@ -93,12 +96,14 @@ const ChatScreen = () => {
         senderName:user?.username,
         senderId:user?.userId,
       })
-    } catch (error:unknown) {
-      console.error("Error creating room:", error);
+    } catch (error:any) {
+      crashlytics().recordError(error)
+      console.error("Error creating room:", error.message);
     }
   };
 
   const handleSend = async () => {
+    crashlytics().log('Chat Screen: Sening Messages ')
     const id = userid ? userid : item?.userId
     if(!messageText.trim()) return;
     try{
@@ -122,7 +127,8 @@ const ChatScreen = () => {
       if (flashListRef.current) {
         flashListRef.current.scrollToEnd({ animated: true });
       }
-    }catch(error:unknown){
+    }catch(error:any){
+      crashlytics().recordError(error)
       console.error(`Error sending message:${error}`)
     }
   }
