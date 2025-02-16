@@ -33,7 +33,7 @@ interface NotificationPayload {
   }
 
   interface UserData{
-    userId?:string | any
+    userId:string
   }
 
   // interface CommentsData{

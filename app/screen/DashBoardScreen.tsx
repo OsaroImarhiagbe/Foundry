@@ -29,6 +29,9 @@ import {Text,ActivityIndicator,Divider } from 'react-native-paper';
 import { FirebaseFirestoreTypes } from '@react-native-firebase/firestore';
 import { MotiView } from 'moti';
 import { Skeleton } from 'moti/skeleton';
+import crashlytics from '@react-native-firebase/crashlytics'
+
+
 
 type NavigationProp = {
   openDrawer(): undefined;

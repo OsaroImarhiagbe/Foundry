@@ -18,6 +18,7 @@ import { useNavigation } from '@react-navigation/native';
 import { FlashList } from '@shopify/flash-list';
 import { ActivityIndicator,Text,useTheme } from 'react-native-paper';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import crashlytics from '@react-native-firebase/crashlytics'
 const ChatList = lazy(() => import('../../List/ChatList'))
 
 
@@ -59,6 +60,7 @@ const MessageScreen = () => {
   },[users])
 
   const grabUser = () => {
+    crashlytics().log('Grabbing Users Message')
     if (!users) {
       setUsers([]);
       return;
@@ -73,12 +75,14 @@ const MessageScreen = () => {
       })
       setUsers(data)
     },(err)=>{
+      crashlytics().recordError(err)
       console.error(`Failed to grab users: ${err.message}`)
     })
     return unsub
   }
   
   const fetchMorePost = async () => {
+    crashlytics().log('Fetch more Message')
     if (loadingMore || !hasMore) return;
     if (!user?.userId) return;
     if (users.length <= 2) {
@@ -88,7 +92,7 @@ const MessageScreen = () => {
     setLoadingMore(true);
     try {
       const snapshot = await firestore()
-        .collection('sent-message-id')
+        .collection('chat-rooms')
         .orderBy('createdAt', 'desc')
         .startAfter(lastVisible)
         .limit(2)
@@ -100,8 +104,9 @@ const MessageScreen = () => {
       setUsers(prev => [...prev, ...newMessgae]);
       setLastVisible(snapshot.docs[snapshot.docs.length - 1]);
       setHasMore(snapshot.docs.length > 0);
-    } catch (e) {
-      console.error(`Error fetching more posts: ${e}`);
+    } catch (error:unknown | any) {
+      crashlytics().recordError(error)
+      console.error(`Error fetching more posts: ${error}`);
     } finally {
       setLoadingMore(false);
     }
@@ -123,7 +128,9 @@ const MessageScreen = () => {
       ListEmptyComponent={() => ( <View style={{justifyContent:'center',alignItems:'center',flex:1,marginTop:20}}>
         <Text
         variant='titleLarge'
-        style={styles.text}>Send a new message!</Text>
+        style={{
+          color:theme.colors.tertiary
+        }}>Send a new message!</Text>
         </View>)}
       renderItem={({item}) => (
         <Suspense fallback={<ActivityIndicator size='small' color='#fff'/>}>
@@ -142,10 +149,5 @@ const styles = StyleSheet.create({
       paddingTop: Platform.OS === 'ios' ? StatusBar.currentHeight : 0,
       flex:1,
     },
-    text:{
-      color:'#fff',
-      fontSize:20,
-      fontFamily:'Helvetica-light'
-      },
 })
 export default MessageScreen

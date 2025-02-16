@@ -24,7 +24,7 @@ import {ActivityIndicator,Text,Divider,useTheme} from 'react-native-paper'
 import { MotiView } from 'moti';
 import { Skeleton } from 'moti/skeleton';
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
-
+import crashlytics from '@react-native-firebase/crashlytics'
 
 const PostComponent = lazy(() => import('../components/PostComponent'))
 
@@ -88,6 +88,7 @@ const HomeScreen = () => {
     setMount(true)
     dispatch(addId({currentuserID:user?.userId}))
     const timer = setTimeout(() => {
+      crashlytics().log('Grabbing post')
         try {
           const subscriber = firestore().collection('posts').orderBy('createdAt', 'desc').limit(10)
             .onSnapshot(querySnapShot =>{
@@ -104,8 +105,9 @@ const HomeScreen = () => {
             setHasMore(querySnapShot.docs.length > 0);
           });
           return () => subscriber()
-        }  catch (e) {
-        console.error(`Error post can not be found: ${e}`);
+        }  catch (error:any) {
+          crashlytics().recordError(error)
+        console.error(`Error post can not be found: ${error}`);
       }finally{
         setMount(false)
       } 
@@ -119,6 +121,7 @@ const HomeScreen = () => {
 
   const onRefresh = useCallback(() => {
     setRefreshing(true);
+    crashlytics().log('Post Refresh')
       try {
         const unsub = firestore().collection('posts').orderBy('createdAt', 'desc').limit(10)
           .onSnapshot(querySnapShot =>{
@@ -131,8 +134,9 @@ const HomeScreen = () => {
           setHasMore(querySnapShot.docs.length > 0);
         });
         return () => unsub()
-      }  catch (e) {
-      console.error(`Error post can not be found: ${e}`);
+      }  catch (error:any) {
+        crashlytics().recordError(error)
+      console.error(`Error post can not be found: ${error}`);
     }finally{
       setRefreshing(false);
     }
@@ -143,6 +147,7 @@ const HomeScreen = () => {
   
 
 const fetchMorePost = async () => {
+  crashlytics().log('Fetch More Post')
   if (loadingMore || !hasMore) return;
   if (!user?.userId) return;
   if (post.length <= 2) {
@@ -164,8 +169,9 @@ const fetchMorePost = async () => {
     setPost(prevPosts => [...prevPosts, ...newPosts]);
     setLastVisible(snapshot.docs[snapshot.docs.length - 1]);
     setHasMore(snapshot.docs.length > 0);
-  } catch (e) {
-    console.error(`Error fetching more posts: ${e}`);
+  } catch (error:any) {
+    crashlytics().recordError(error)
+    console.error(`Error fetching more posts: ${error}`);
   } finally {
     setLoadingMore(false);
   }
