@@ -54,12 +54,15 @@ const MessageScreen = () => {
         const unsub = firestore()
         .collection('chat-rooms')
         .where('senderName','!=',user.username)
-        .onSnapshot((documentSnapshot) =>{
+        .where('recipientName','!=',user.username)
+        .onSnapshot((querySnapshot) =>{
           let data:User[] = []
-          documentSnapshot.forEach(doc => {
+          querySnapshot.forEach(doc => {
             data.push({...doc.data()})
           })
           setUsers(data)
+          setLastVisible(querySnapshot.docs[querySnapshot.docs.length - 1])
+          setHasMore(querySnapshot.docs.length > 0)
         },(err)=>{
           crashlytics().recordError(err)
           console.error(`Failed to grab users: ${err.message}`)
@@ -69,7 +72,6 @@ const MessageScreen = () => {
       crashlytics().recordError(error)
     }finally{
     setRefreshing(false); 
-
     }
   }, [users]);
 
@@ -98,7 +100,6 @@ const MessageScreen = () => {
       })
       return unsub
     }
-
     grabMessageSent()
   },[users])
   

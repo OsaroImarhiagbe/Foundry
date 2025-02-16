@@ -8,7 +8,6 @@ import { getRoomID } from '../../utils';
 import { useAuth } from '../authContext';
 import { useRoute,RouteProp } from '@react-navigation/native';
 import CustomKeyboardView from '../components/CustomKeyboardView';
-import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import ChatRoomHeader from '../components/ChatRoomHeader';
 import { useNavigation } from '@react-navigation/native';
 import { useDispatch } from 'react-redux';
@@ -23,19 +22,25 @@ type ChatScreenRouteProp = RouteProp<{ Chat: { item: any,userid:string,name:stri
 
 const ChatScreen = () => {
   const [messages, setMessages] = useState<FirebaseFirestoreTypes.DocumentData[]>([]);
-  const [expoPushToken,setExpoPushToken] = useState('')
   const route = useRoute<ChatScreenRouteProp>();
   const {item,userid,name} = route?.params;
   const { user } = useAuth();
   const [messageText, setMessageText] = useState('');
   const navigation = useNavigation();
   const dispatch = useDispatch()
-  const inputRef = useRef<React.ComponentProps<typeof TextInput>>(null);
   const flashListRef = useRef<FlashList<any> | null>(null);
   const theme = useTheme()
+  const inputRef = useRef<any>(null)
 
   
   const recipentNamec = userid ? name  : item?.userId ? item.name : 'Unknown Recipient';
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      inputRef.current?.focus();
+    }, 100);
+
+    return () => clearTimeout(timeout);
+  }, []);
   useEffect(() => {
     crashlytics().log('Chat Screen: Grabbing messages')
     const loadMessages = (roomId:string) => {
@@ -58,29 +63,6 @@ const ChatScreen = () => {
     }
   
   }, [userid, item?.userId]);
-  
-  // useEffect(() => {
-  //   crashlytics().log('Chat Screen: Grabbing Token')
-  //   const getToken = async () => {
-  //     try{
-  //     const id = route?.params?.userid ? route?.params?.userid : item?.userId
-  //     const docRef = firestore().collection('users').doc(id)
-  //     const snapShot = await docRef.get()
-  //       if(snapShot.exists){
-  //         const data = snapShot.data()
-  //         if(data) setExpoPushToken(data.expoToken)
-  //       }else{
-  //         console.error('No such document')
-  //       }
-  //     }catch(err:any){
-  //       console.error('Error with grabbing token:',err)
-
-  //     }
-  //   }
-
-  //   getToken()
-    
-  // },[route?.params?.userid, item?.userId])
 
   const createRoom = async () => {
     crashlytics().log('Chat Screen: Creating Chat Room')
@@ -124,6 +106,7 @@ const ChatScreen = () => {
         createdAt: firestore.Timestamp.fromDate(new Date())
       })
       setMessageText('');
+      inputRef.current?.focus();
       if (flashListRef.current) {
         flashListRef.current.scrollToEnd({ animated: true });
       }
@@ -165,6 +148,7 @@ const ChatScreen = () => {
       <View style={styles.inputContainer}>
         <View style={styles.messageInput}>
            <TextInput
+           ref={inputRef}
           left={<TextInput.Icon 
             icon='camera'
             size={25} 
@@ -172,6 +156,8 @@ const ChatScreen = () => {
             rippleColor='rgba(30, 136, 229, 0.3)'/>}
           dense={true}
           mode='outlined'
+          multiline={true}
+          value={messageText}
           outlineStyle={{borderRadius:100}}
           textColor={theme.colors.tertiary}
           placeholderTextColor='#000'
@@ -182,7 +168,9 @@ const ChatScreen = () => {
             icon='send'
             size={25}
             style={[styles.sendButton,{alignSelf:'center',paddingBottom:5}]} 
-            onPress={handleSend} 
+            onPress={(e) => {
+              e.preventDefault()
+              handleSend()}} 
             rippleColor='rgba(30, 136, 229, 0.3)'/>
           }
           /> 
@@ -209,7 +197,8 @@ const styles = StyleSheet.create({
   },
   messageInput: {
     flexDirection:'row',
-    padding:20,
+    padding:10,
+    bottom:0
   },
   textinput:{
     flexDirection:'row',

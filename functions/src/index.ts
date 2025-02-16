@@ -127,7 +127,7 @@ interface NotificationPayload {
       const userId = userData.userId
         sendNotification(userId, {
           title: 'Foundry',
-          body: `Welcome to Foundry`,
+          body: `Welcome to Foundry!`,
           data: {
             messageId: snapshot.id,
             type: 'new_message'

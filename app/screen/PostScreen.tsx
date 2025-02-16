@@ -24,13 +24,14 @@ import storage from '@react-native-firebase/storage'
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useTheme,Icon,Text,Button,Divider } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-
+import crashlytics from '@react-native-firebase/crashlytics'
 import {
   Menu,
   MenuOptions,
   MenuTrigger,
 } from 'react-native-popup-menu';
 import { MenuItems } from '../components/CustomMenu'
+import { crash } from '@react-native-firebase/crashlytics';
 type NavigationProp = {
   Dash:undefined
 }
@@ -86,7 +87,6 @@ const PostScreen = () => {
       })
       setTimeout(() => {
         navigation.navigate('Dash');
-        Alert.alert('Success!!', 'Post has been sent!!');
       }, 1000);
       dispatch(addPost({ id: newDoc.id, content: text }));
       setText('');
@@ -117,16 +117,20 @@ const PostScreen = () => {
     }
   };
   const pickImage = async () => {
-    let results = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ['images', 'videos'],
-      allowsEditing:true,
-      quality:1
-    })
-    if(!results.canceled){
-      setImage(results.assets[0].uri)
-      setFileName(results.assets[0].uri.split('/').pop())
-    }else{
-      console.error('user cancelled the image picker.')
+    crashlytics().log('Post Screen: Picking Images')
+    try{
+      let results = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ['images', 'videos'],
+        allowsEditing:true,
+        quality:1
+      })
+      if(!results.canceled){
+        setImage(results.assets[0].uri)
+        setFileName(results.assets[0].uri.split('/').pop())
+      }
+    }catch(error:any){
+      crashlytics().recordError(error)
+      console.error(error)
     }
   }
   return (
