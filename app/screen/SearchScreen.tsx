@@ -23,7 +23,7 @@ import { Image } from 'expo-image';
 import { blurhash } from 'utils';
 import { useAuth } from 'app/authContext';
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
-
+import crashlytics from '@react-native-firebase/crashlytics'
 
 
 interface Results{
@@ -68,6 +68,7 @@ const SearchScreen = () => {
 }, [debouncedsearch]);
 
   const handleSearch = async () => {
+    crashlytics().log('Search Screen: Handle Search')
     setLoading(true)
     if(searchQuery.trim() === '') return;
     try{
@@ -86,7 +87,8 @@ const SearchScreen = () => {
       })
       setResults(user);
       setSearchQuery('')
-    }catch(error){
+    }catch(error:unknown | any){
+      crashlytics().recordError(error)
       console.error(`Cant find user: ${error}`)
     }finally{
       setLoading(false)

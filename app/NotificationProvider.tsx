@@ -5,7 +5,7 @@ import { useNavigation } from '@react-navigation/native';
 import messaging, { FirebaseMessagingTypes } from '@react-native-firebase/messaging';
 import firestore from '@react-native-firebase/firestore';
 import { useAuth } from './authContext';
-
+import crashlytics from '@react-native-firebase/crashlytics'
 
 const NotificationContext = createContext<any>(null);
 
@@ -29,6 +29,7 @@ export const NotificationProvider = ({ children }:NotificationProp) => {
   const navigation = useNavigation();
 
   const showNotification = useCallback(async (title:string, message:string,data:any) => {
+    crashlytics().log('Notifcation Provider: Show Notification')
     try{
         await notifee.displayNotification({
             title: title,
@@ -50,23 +51,25 @@ export const NotificationProvider = ({ children }:NotificationProp) => {
           setVisible(false)
         }, 5000);
         return () => clearTimeout(timer)
-    }catch(error:any){
+    }catch(error:unknown | any){
+        crashlytics().recordError(error)
         console.error('Error with notification permission:',error.message)
     }
   }, [notification]);
    
     useEffect(() => {
+      crashlytics().log('Notifcation Provider: Getting token')
       if (!user?.userId) return;
       const fetchToken = async () => {
         try{
-            //await messaging().registerDeviceForRemoteMessages();
             await notifee.requestPermission();
             const token = await messaging().getToken();
             if (!token) throw new Error('Failed to get FCM token');      
             await firestore().collection('users').doc(user.userId).set({
                 token:token 
             },{merge:true})
-        }catch(error){
+        }catch(error: unknown | any){
+          crashlytics().recordError(error)
           console.error('Error grabbing token:',error)
         }
       }
