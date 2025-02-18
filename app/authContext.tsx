@@ -7,11 +7,11 @@ import crashlytics from '@react-native-firebase/crashlytics'
 export const AuthContext = createContext<any>(null);
 
 interface User {
-    name:string,
-    username:string,
-    email:string,
-    uid:string,
-    profileUrl:string
+    name?:string,
+    username?:string,
+    email?:string,
+    userId?:string,
+    profileUrl?:string
     
 }
 
@@ -26,11 +26,20 @@ export const AuthContextProvider = ({children}:AuthContextProviderProps) => {
     const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false)
     useEffect(() => {
         const unsub = auth().onAuthStateChanged(async (user) => {
+            crashlytics().log('Auth COntext: Auth State Change')
                     if(user){
                         setIsAuthenticated(true)
                         const docSnap = await firestore().collection('users').doc(user.uid).get();
                         if (docSnap.exists) {
                             const firestoreData = docSnap.data();
+                            await Promise.all(
+                                [
+                                crashlytics().setUserId(user.uid),
+                                crashlytics().setAttributes({
+                                    user_id: user.uid,
+                                    username: firestoreData?.username,
+                                })
+                            ])
                             setUser({
                                 uid: user.uid,
                                 email: user.email,
@@ -41,6 +50,12 @@ export const AuthContextProvider = ({children}:AuthContextProviderProps) => {
                         }
                         await AsyncStorage.setItem('authUser',user?.uid)
                     }else{
+                        await Promise.all([
+                            crashlytics().setUserId(''),
+                            crashlytics().setAttributes({
+                                user_id:'null'
+                            })
+                        ])
                         setIsAuthenticated(false)
                         setUser({})
                     }
@@ -53,6 +68,14 @@ export const AuthContextProvider = ({children}:AuthContextProviderProps) => {
         setLoading(true)
         try{
             const response = await auth().signInWithEmailAndPassword(email,pasword)
+            await Promise.all(
+                [
+                crashlytics().setUserId(response.user.uid),
+                crashlytics().setAttributes({
+                    user_id:response.user.uid,
+                    //username:response.user?.displayName
+                })
+            ])
             return {success:true}
         }catch(error: unknown | any){
             crashlytics().recordError(error)
@@ -108,8 +131,15 @@ export const AuthContextProvider = ({children}:AuthContextProviderProps) => {
             const response = await auth().createUserWithEmailAndPassword(email,password)
             await firestore().collection('users').doc(response?.user?.uid).set({
                 username,
-                userId: response?.user?.uid
+                user_id: response?.user?.uid
             })
+            await Promise.all(
+                [
+                crashlytics().setUserId(response.user.uid),
+                crashlytics().setAttributes({
+                    user_id:response.user.uid,
+                })
+            ])
             return {success:true, data: response?.user}
         }catch(error:unknown | any){
             crashlytics().recordError(error)
@@ -125,13 +155,6 @@ export const AuthContextProvider = ({children}:AuthContextProviderProps) => {
     //         console.error(e)
     //     }
     // }
-    // const updateUserData = async (userId:string) => {
-    //     const docSnap = await firestore().collection('users').doc(userId).get()
-    //     if(docSnap.exists()){
-    //        setUser((prevUser) => ({...prevUser.uid,username:docSnap.data().username, userId:docSnap.data().userId}))
-    //     }
-    // }s
-
     return (
         <AuthContext.Provider value={{user,isAuthenticated,login,register,logout}} >
             {children}

@@ -88,47 +88,93 @@ const AccountScreen = () => {
   const follow_items = [{count:users?.projects,content:' projects'},{count:users?.connection,content:' connection'},{count:posts.length,content:' posts'}]
 
   const onRefresh = useCallback(async () => {
+    crashlytics().log('Account Screen: On Refresh')
     setRefreshing(true);
-    // await fetchUser();
-    setRefreshing(false);
+    const userDoc = firestore().collection('users').doc(user.userId)
+    try{
+      const unsub = userDoc.onSnapshot(
+        async (documentSnapshot) =>{
+        if(documentSnapshot.exists){
+          setUsers(documentSnapshot.data())
+          await Promise.all(
+            [
+            crashlytics().setUserId(user.userId),
+            crashlytics().setAttributes({
+              id:user.userId
+            })
+          ])
+        }else{
+          console.error('No such document')
+        }
+      },
+        (error:unknown | any)=>{
+          crashlytics().recordError(error)
+          console.error(`No such document ${error.message}`)
+          setLoading(false)
+        }
+      );
+      return () => unsub()
+      }catch(error:unknown | any){
+        crashlytics().recordError(error)
+      }finally{
+        setRefreshing(false);
+      }
   }, [user]);
 
 
   useEffect(() => {
     crashlytics().log('Account Screen: Grabbing Users Projects')
     if(projects.length === 0) return;
+    setLoading(true)
     try{
       const projectRef = firestore().collection('projects').where('id','==',user?.userId)
-      const unsub = projectRef.onSnapshot((documentSnapshot) => {
+      const unsub = projectRef.onSnapshot(async (documentSnapshot) => {
         let data:Project[] = []
         documentSnapshot.forEach(doc => {
           data.push({...doc.data(),id:doc.id})
         })
         setProjects(data)
+        await Promise.all([
+          crashlytics().setUserId(user.userId),
+          crashlytics().setAttributes({
+            user_id:user.userId
+          })
+        ])
       })
       return () => unsub()
     }catch(err:any){
       crashlytics().recordError(err)
       console.error('error grabbing user post:',err.message)
+    }finally{
+      setLoading(false)
     }
     
   },[user])
 
   useEffect(() => {
     crashlytics().log('Account Screen: Grabbing Users Post')
+    setLoading(true)
     try{
       const docRef = firestore().collection('posts').where('name','==',user?.username).orderBy('createdAt','desc')
-      const unsub = docRef.onSnapshot((querySnapshot) => {
+      const unsub = docRef.onSnapshot(async (querySnapshot) => {
         let data:Post[] = []
         querySnapshot.forEach(documentSnapshot => {
           data.push({...documentSnapshot.data(),id:documentSnapshot.id})
         })
+        await Promise.all([
+          crashlytics().setUserId(user.userId),
+          crashlytics().setAttributes({
+            user_id:user.userId
+           })
+        ])
         setPosts(data)
       })
       return () => unsub()
     }catch(err:any){
       crashlytics().recordError(err)
       console.error('error grabbing user post:',err.message)
+    }finally{
+      setLoading(false)
     }
     
   },[user])
@@ -137,21 +183,34 @@ const AccountScreen = () => {
     crashlytics().log('Account Screen: Grabbing User ')
     setLoading(true)
       const userDoc = firestore().collection('users').doc(user.userId)
-      const unsub = userDoc.onSnapshot(
-        (documentSnapshot) =>{
-        if(documentSnapshot.exists){
-          setUsers(documentSnapshot.data())
-        }else{
-          console.error('No such document')
-        }
-      },
-        (error:any)=>{
-          crashlytics().recordError(error)
-          console.error(`No such document ${error.message}`)
-          setLoading(false)
-        }
-      );
-      return () => unsub()
+      try{
+        const unsub = userDoc.onSnapshot(
+          async (documentSnapshot) =>{
+          if(documentSnapshot.exists){
+            setUsers(documentSnapshot.data())
+            await Promise.all(
+              [
+              crashlytics().setUserId(user.userId),
+              crashlytics().setAttributes({
+                id:user.userId
+              })
+            ])
+          }else{
+            console.error('No such document')
+          }
+        },
+          (error:unknown | any)=>{
+            crashlytics().recordError(error)
+            console.error(`No such document ${error.message}`)
+            setLoading(false)
+          }
+        );
+        return () => unsub()
+      }catch(error: unknown | any){
+        crashlytics().recordError(error)
+      }finally{
+        setLoading(false)
+      }
   },[])
 
 
