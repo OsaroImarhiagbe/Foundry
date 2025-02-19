@@ -8,7 +8,7 @@ import {
     } from 'react-native'
 import AppTextInput from '../components/AppTextInput'
 import color from '../../config/color'
-import { useState} from 'react'
+import { useState,useEffect} from 'react'
 import * as Yup from 'yup';
 import { Formik} from 'formik';
 import { useAuth } from '../authContext'
@@ -40,20 +40,20 @@ const LoginScreen = () => {
     const theme = useTheme()
     const {top} = useSafeAreaInsets()
     
-    
+    useEffect(() => {
+        return () => setLoading(false)
+    }, []);
+
     const LoginPress = async (values:any,{resetForm}:any) => {
         crashlytics().log('Login Screen: Login Press')
         setLoading(true);
         try{
             const response = await login(values.email, values.password)
             if(response){
-                setTimeout(() => {
-                    setLoading(false);
-                    resetForm({values: ''})
-                    navigation.navigate('Drawer' as never);
-                }, 2000); 
+                resetForm({values: ''})
+                navigation.navigate('Drawer' as never); 
             }
-        }catch(error:any){
+        }catch(error:unknown | any){
             crashlytics().recordError(error)
             console.error(`Unauthorized username and password ${error.message}`)
         }finally{

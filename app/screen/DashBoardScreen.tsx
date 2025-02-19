@@ -76,6 +76,7 @@ const DashBoardScreen = () => {
         setLoading(false)
       },3000)
     },[])
+    
   const FeedScreen = () => (
     <ScrollView
     scrollEnabled

@@ -10,7 +10,7 @@
 import {onCall, HttpsError, CallableRequest} from "firebase-functions/v2/https";
 import logger from "firebase-functions/logger";
 import * as admin from "firebase-admin";
-import {onDocumentCreated} from "firebase-functions/firestore";
+import {onDocumentCreated} from "firebase-functions/v2/firestore";
 admin.initializeApp();
 // Create and deploy your first functions
 // https://firebase.google.com/docs/functions/get-started

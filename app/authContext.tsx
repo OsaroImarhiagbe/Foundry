@@ -50,12 +50,6 @@ export const AuthContextProvider = ({children}:AuthContextProviderProps) => {
                         }
                         await AsyncStorage.setItem('authUser',user?.uid)
                     }else{
-                        await Promise.all([
-                            crashlytics().setUserId(''),
-                            crashlytics().setAttributes({
-                                user_id:'null'
-                            })
-                        ])
                         setIsAuthenticated(false)
                         setUser({})
                     }
