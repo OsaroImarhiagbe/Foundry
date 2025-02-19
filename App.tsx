@@ -16,7 +16,6 @@ import { NotificationProvider } from './app/NotificationProvider';
 import 'react-native-reanimated'
 import 'react-native-gesture-handler'
 
-
 export default function App() {
   const [isloading,setLoading] = useState(true)
   const [isAuthenticated, setIsAuthenticated] = useState(undefined)
@@ -136,11 +135,7 @@ export default function App() {
   
   const theme = colorScheme === 'dark' ? darkTheme : lightTheme;
   console.log('App:',colorScheme)
-  
-
-
-
-  
+    
   return (
     
 

@@ -32,18 +32,18 @@ interface MessageData {
 interface UserData{
     userId:string
   }
-const CONFIG = {
-  NOTIFICATION: {
-    DEFAULT_TITLE: "Foundry Notification",
-    COLLECTION: {
-      USERS: "users",
-      ROOMS: "chat-rooms",
-      MESSAGES: "messages",
-      POSTS: "posts",
-      COMMENTS: "comments",
-    },
-  },
-} as const;
+// const CONFIG = {
+//   NOTIFICATION: {
+//     DEFAULT_TITLE: "Foundry Notification",
+//     COLLECTION: {
+//       USERS: "users",
+//       ROOMS: "chat-rooms",
+//       MESSAGES: "messages",
+//       POSTS: "posts",
+//       COMMENTS: "comments",
+//     },
+//   },
+// } as const;
 /**
  * Retrieves a user's device token from Firestore
  * @param {string} userId - The unique identifier of the user
@@ -52,7 +52,7 @@ const CONFIG = {
 async function getUserDeviceToken(userId: string): Promise<string | null> {
   try {
     const userDoc = await admin.firestore()
-      .collection(CONFIG.NOTIFICATION.COLLECTION.USERS)
+      .collection("users")
       .doc(userId)
       .get();
     if (!userDoc.exists) {
@@ -84,7 +84,7 @@ async function sendNotification(userId: string,
     }
     const payload = {
       notification: {
-        title: notification.title || CONFIG.NOTIFICATION.DEFAULT_TITLE,
+        title: notification.title || "Foundry Notification",
         body: notification.body,
       },
       data: notification.data,
@@ -96,16 +96,15 @@ async function sendNotification(userId: string,
     logger.error("Error sending notification:", error);
     throw new Error("Failed to send notification");
   }
-  exports.checkAuthUser = onCall((request:CallableRequest<unknown>) => {
-    if (!request.auth) {
-      throw new HttpsError(
-        "unauthenticated", "This endpoint requires authentication");
-    }
-    return {authenticated: true, uid: request.auth.uid};
-  });
 }
-exports.newUser = onDocumentCreated(
-  `${CONFIG.NOTIFICATION.COLLECTION.USERS}/{userId}`,
+exports.checkAuthUser = onCall((request:CallableRequest<unknown>) => {
+  if (!request.auth) {
+    throw new HttpsError(
+      "unauthenticated", "This endpoint requires authentication");
+  }
+  return {authenticated: true, uid: request.auth.uid};
+});
+exports.newUser = onDocumentCreated("users/{userId}",
   async (event:{data:unknown | any}) => {
     try {
       const snapshot = event.data;
@@ -129,9 +128,7 @@ exports.newUser = onDocumentCreated(
       throw new Error("Failed to process new message notification");
     }
   });
-exports.newMessage = onDocumentCreated(
-  `${CONFIG.NOTIFICATION.COLLECTION.ROOMS}
-  /{roomId}/${CONFIG.NOTIFICATION.COLLECTION.MESSAGES}`,
+exports.newMessage = onDocumentCreated("chat-rooms/{roomId}/messages",
   async (event: { data:unknown | any}) => {
     try {
       const snapshot = event.data;
@@ -142,7 +139,7 @@ exports.newMessage = onDocumentCreated(
       const messageData = snapshot.data() as MessageData;
       const roomId = snapshot.ref.parent.parent?.id;
       const roomDoc = await admin.firestore()
-        .collection(CONFIG.NOTIFICATION.COLLECTION.ROOMS)
+        .collection("chat-rooms")
         .doc(roomId)
         .get();
       if (!roomDoc.exists) {
