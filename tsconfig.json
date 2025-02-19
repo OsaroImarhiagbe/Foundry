@@ -4,6 +4,7 @@
     "module": "ES2020",
     "allowImportingTsExtensions":true,
     "baseUrl": "./",
+    "skipLibCheck": true
   },
   "extends": "expo/tsconfig.base"
 }
