@@ -1,5 +1,5 @@
 import { createStackNavigator } from '@react-navigation/stack';
-import { lazy,Suspense, useEffect,useState } from 'react';
+import {Suspense, useEffect,useState,lazy } from 'react';
 import { ActivityIndicator } from 'react-native';
 import {useAuth} from '../authContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -57,24 +57,36 @@ const OnboardingScreenWrapper = () =>{
 }
 const AuthNavigation = () => {
   const [showOnboarding,setShowOnboarding] = useState<boolean>(false)
-  const {isAuthenticated} = useAuth()
+  const [loading,setLoading] = useState<boolean>(false)
+  const {user,isAuthenticated} = useAuth()
 
   useEffect(()=>{
-    const  checkifOnboard = async () => {
-      const onboardkey = await AsyncStorage.getItem('onboarded')
-      if(onboardkey=='1'){
-        setShowOnboarding(true)
-      }else{
-        setShowOnboarding(false)
+      const  checkifOnboard = async () => {
+        try{
+          const onboardkey = await AsyncStorage.getItem('onboarded')
+          if(onboardkey =='1'){
+            setShowOnboarding(true)
+          }
+        }catch(error: unknown | any){
+          console.error('Error getting onboarding token',error)
+          setShowOnboarding(false)
       }
     }
     checkifOnboard()
-  },[showOnboarding])
+  },[])
+
+ 
+
     const Stack = createStackNavigator()
+
+    if (loading || showOnboarding === null) {
+      return <ActivityIndicator size="large" color="#000" style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }} />;
+    }
+
       return (
-        <Stack.Navigator initialRouteName={isAuthenticated && showOnboarding ? 'Drawer':'Login'}>
+        <Stack.Navigator initialRouteName={isAuthenticated ? 'Drawer':'Login'}>
           {
-            isAuthenticated && showOnboarding ? 
+          isAuthenticated  ? (
             <Stack.Screen
             name='Drawer'
             component={DrawerNavigationWrapper}
@@ -82,7 +94,7 @@ const AuthNavigation = () => {
               headerShown:false,
               gestureEnabled:false,
               animation:'fade_from_bottom'
-            }}/> :  <Stack.Screen
+            }}/> ): (<Stack.Screen
             name="Login"
             component={LoginScreenWrapper}
             options={{
@@ -91,7 +103,7 @@ const AuthNavigation = () => {
               animation:'fade_from_bottom'
               
             }}
-          /> 
+          /> )
           }
           <Stack.Screen
           name="Register"

@@ -117,7 +117,7 @@ const HomeScreen = () => {
     return () => {
       clearTimeout(timer);
     };
-  }, [memoPost]); 
+  }, []); 
 
 
   const onRefresh = useCallback(() => {
@@ -194,15 +194,11 @@ const fetchMorePost = async () => {
       delay:300
     }}
     style={[styles.container, styles.padded]}
-    animate={{ backgroundColor: dark_or_light ? '#000000' : '#ffffff' }}
+    animate={{ backgroundColor: dark_or_light ? '#ffffff' : '#000000' }}
   >
-    <Skeleton colorMode={dark_or_light ? 'dark' :'light'} radius="round" height={hp(4.3)}/>
-    <Spacer />
-    <Skeleton colorMode={dark_or_light ? 'dark' :'light'} width={250} />
-    <Spacer height={8} />
-    <Skeleton colorMode={dark_or_light ? 'dark' :'light'} width={'100%'} />
-    <Spacer height={8} />
-    <Skeleton colorMode={dark_or_light ? 'dark' :'light'} width={'100%'} />
+    <Skeleton colorMode={dark_or_light ? 'light':'dark'} radius="round" height={hp(4.3)}/>
+    <Spacer height={8}/>
+    <Skeleton height={'100%'} colorMode={dark_or_light ? 'light':'dark'} width={'100%'} radius='square'/>
   </MotiView>
    ))
    : <FlashList
@@ -213,6 +209,9 @@ const fetchMorePost = async () => {
     onScroll={Animated.event(
       [{ nativeEvent: { contentOffset: { y: scrollY } } }],
       { useNativeDriver: false }
+    )}
+    ListEmptyComponent={(item) => (
+      <View style={{flex:1,alignItems:'center',justifyContent:'center',paddingTop:5}}><Text variant='bodySmall' style={{color:theme.colors.tertiary,fontSize:16}}>No Post</Text></View>
     )}
     onEndReached={fetchMorePost}
     onEndReachedThreshold={0.1}
@@ -255,7 +254,7 @@ const styles = StyleSheet.create({
       flex:1,
   },
   padded: {
-    padding: 16,
+    padding: 10,
   },
   container:{
     flex:1

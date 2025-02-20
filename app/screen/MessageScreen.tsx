@@ -9,19 +9,28 @@ import {
   StyleSheet,
   Platform,
   StatusBar,
+  TouchableOpacity
   } from 'react-native'
 import color from '../../config/color';
-import {FirebaseFirestoreTypes,where,onSnapshot,query,orderBy,limit,startAfter, getDocs } from '@react-native-firebase/firestore';
+import {
+  FirebaseFirestoreTypes,
+  where,
+  onSnapshot,
+  query,
+  orderBy,
+  limit,
+  startAfter, 
+  getDocs } from '@react-native-firebase/firestore';
 import { useAuth } from '../authContext';
 import ChatRoomHeader from '../components/ChatRoomHeader';
 import { useNavigation } from '@react-navigation/native';
 import { FlashList } from '@shopify/flash-list';
-import { ActivityIndicator,Text,useTheme } from 'react-native-paper';
+import { ActivityIndicator,Text,useTheme,Icon } from 'react-native-paper';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import crashlytics from '@react-native-firebase/crashlytics'
 import { ChatRoomsRef} from 'FIrebaseConfig';
-
-
+import SearchComponent from 'app/components/SearchComponent';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const ChatList = lazy(() => import('../../List/ChatList'))
 
@@ -39,6 +48,7 @@ const MessageScreen = () => {
 
 
   const [users, setUsers] = useState<User[]>([]);
+  const {top} = useSafeAreaInsets()
   const navigation = useNavigation<Navigation>();
   const { user} = useAuth();
   const [refreshing, setRefreshing] = useState(false);
@@ -55,7 +65,7 @@ const MessageScreen = () => {
           setUsers([]);
           return;
         }
-        const docRef = query(ChatRoomsRef, where('senderName','!=',user.username),where('recipientName','!=',user.username))
+        const docRef = query(ChatRoomsRef, where('senderName','!=',user.username),where('recipientName','==',user.username))
         const unsub = onSnapshot(docRef,(querySnapshot) =>{
           let data:User[] = []
           querySnapshot.forEach(doc => {
@@ -83,7 +93,7 @@ const MessageScreen = () => {
         setUsers([]);
         return;
       }
-      const docRef = query(ChatRoomsRef, where('senderName','!=',user.username),where('recipientName','!=',user.username))
+      const docRef = query(ChatRoomsRef, where('senderName','!=',user.username),where('recipientName','==',user.username))
       const unsub = onSnapshot(docRef,(querySnapshot) =>{
         let data:User[] = []
         querySnapshot.forEach(doc => {
@@ -139,7 +149,14 @@ const MessageScreen = () => {
 
   return (
     <View style={[styles.screen,{backgroundColor:theme.colors.background}]}>
-      <ChatRoomHeader title='Message' onPress={() => navigation.navigate('Dash')} icon='keyboard-backspace' backgroundColor={color.button} iconColor='#00bf63'/>
+      <View style={{flexDirection:'row',alignItems:'center',justifyContent:'space-between',marginTop:top,padding:10}}>
+        <TouchableOpacity onPress={() => navigation.navigate('Dash')}>
+        <Icon source='arrow-left-bold-circle' size={25}/>
+        </TouchableOpacity>
+        <SearchComponent title='Search Message...'/>
+      <Icon source='dots-horizontal' size={25}/>
+      <Icon source='message' size={25}/>
+      </View>
       <View style={{marginTop:5,flex:1}}>
       <FlashList
       estimatedItemSize={460}
@@ -170,7 +187,6 @@ const MessageScreen = () => {
 
 const styles = StyleSheet.create({
     screen:{
-      paddingTop: Platform.OS === 'ios' ? StatusBar.currentHeight : 0,
       flex:1,
     },
 })

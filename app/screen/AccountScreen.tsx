@@ -20,7 +20,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useTheme,Text,Icon,Button } from 'react-native-paper';
 import EvilIcons from 'react-native-vector-icons/EvilIcons';
 import SmallButton from 'app/components/SmallButton';
-import crashlytics from '@react-native-firebase/crashlytics'
+//import crashlytics from '@react-native-firebase/crashlytics'
 import { db } from 'FIrebaseConfig';
 const PostComponent = lazy(() => import('../components/PostComponent'))
 
@@ -88,7 +88,7 @@ const AccountScreen = () => {
   const follow_items = [{count:users?.projects,content:' projects'},{count:users?.connection,content:' connection'},{count:posts.length,content:' posts'}]
 
   const onRefresh = useCallback(async () => {
-    crashlytics().log('Account Screen: On Refresh')
+    //crashlytics().log('Account Screen: On Refresh')
     setRefreshing(true);
     const userCollection = collection(db,'users')
     const userDoc = doc(userCollection,user.userId)
@@ -97,26 +97,26 @@ const AccountScreen = () => {
         async (documentSnapshot) =>{
         if(documentSnapshot.exists){
           setUsers(documentSnapshot.data())
-          await Promise.all(
-            [
-            crashlytics().setUserId(user.userId),
-            crashlytics().setAttributes({
-              id:user.userId
-            })
-          ])
+          // await Promise.all(
+          //   [
+          //   crashlytics().setUserId(user.userId),
+          //   crashlytics().setAttributes({
+          //     id:user.userId
+          //   })
+          // ])
         }else{
           console.error('No such document')
         }
       },
         (error:unknown | any)=>{
-          crashlytics().recordError(error)
+          //crashlytics().recordError(error)
           console.error(`No such document ${error.message}`)
           setLoading(false)
         }
       );
       return () => unsub()
       }catch(error:unknown | any){
-        crashlytics().recordError(error)
+        //crashlytics().recordError(error)
       }finally{
         setRefreshing(false);
       }
@@ -124,7 +124,7 @@ const AccountScreen = () => {
 
 
   useEffect(() => {
-    crashlytics().log('Account Screen: Grabbing Users Projects')
+    //crashlytics().log('Account Screen: Grabbing Users Projects')
     if(projects.length === 0) return;
     setLoading(true)
     try{
@@ -136,16 +136,16 @@ const AccountScreen = () => {
           data.push({...doc.data(),id:doc.id})
         })
         setProjects(data)
-        await Promise.all([
-          crashlytics().setUserId(user.userId),
-          crashlytics().setAttributes({
-            user_id:user.userId
-          })
-        ])
+        // await Promise.all([
+        //   crashlytics().setUserId(user.userId),
+        //   crashlytics().setAttributes({
+        //     user_id:user.userId
+        //   })
+        // ])
       })
       return () => unsub()
     }catch(err:any){
-      crashlytics().recordError(err)
+      //crashlytics().recordError(err)
       console.error('error grabbing user post:',err.message)
     }finally{
       setLoading(false)
@@ -154,7 +154,7 @@ const AccountScreen = () => {
   },[user])
 
   useEffect(() => {
-    crashlytics().log('Account Screen: Grabbing Users Post')
+    //crashlytics().log('Account Screen: Grabbing Users Post')
     setLoading(true)
     try{
       const docRef = collection(db,'posts')
@@ -164,17 +164,17 @@ const AccountScreen = () => {
         querySnapshot.forEach(documentSnapshot => {
           data.push({...documentSnapshot.data(),id:documentSnapshot.id})
         })
-        await Promise.all([
-          crashlytics().setUserId(user.userId),
-          crashlytics().setAttributes({
-            user_id:user.userId
-           })
-        ])
+        // await Promise.all([
+        //   crashlytics().setUserId(user.userId),
+        //   crashlytics().setAttributes({
+        //     user_id:user.userId
+        //    })
+        // ])
         setPosts(data)
       })
       return () => unsub()
     }catch(err:any){
-      crashlytics().recordError(err)
+      //crashlytics().recordError(err)
       console.error('error grabbing user post:',err.message)
     }finally{
       setLoading(false)
@@ -183,7 +183,7 @@ const AccountScreen = () => {
   },[user])
 
   useEffect(() => {
-    crashlytics().log('Account Screen: Grabbing User ')
+    //crashlytics().log('Account Screen: Grabbing User ')
     setLoading(true)
       const userRef = collection(db,'users')
       const userDoc = doc(userRef,user.userId)
@@ -192,26 +192,26 @@ const AccountScreen = () => {
           async (documentSnapshot) =>{
           if(documentSnapshot.exists){
             setUsers(documentSnapshot.data())
-            await Promise.all(
-              [
-              crashlytics().setUserId(user.userId),
-              crashlytics().setAttributes({
-                id:user.userId
-              })
-            ])
+            // await Promise.all(
+            //   [
+            //   crashlytics().setUserId(user.userId),
+            //   crashlytics().setAttributes({
+            //     id:user.userId
+            //   })
+            // ])
           }else{
             console.error('No such document')
           }
         },
           (error:unknown | any)=>{
-            crashlytics().recordError(error)
+            //crashlytics().recordError(error)
             console.error(`No such document ${error.message}`)
             setLoading(false)
           }
         );
         return () => unsub()
       }catch(error: unknown | any){
-        crashlytics().recordError(error)
+        //crashlytics().recordError(error)
       }finally{
         setLoading(false)
       }

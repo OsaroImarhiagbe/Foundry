@@ -15,6 +15,8 @@ const SplashScreen = () => {
     const timer = setTimeout(() => {
       setLoading(false)
     },3000)
+
+    return () => clearTimeout(timer)
   },[])
   return (
     <SafeAreaView style={[styles.container,{backgroundColor:theme.colors.background}]}>

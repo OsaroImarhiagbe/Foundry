@@ -16,7 +16,15 @@ import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-nativ
 import { useRoute } from '@react-navigation/native';
 import SmallButton from '../components/SmallButton';
 import FollowComponent from '../components/FollowComponent';
-import {collection, FirebaseFirestoreTypes, runTransaction} from '@react-native-firebase/firestore'
+import {
+  collection, 
+  doc, 
+  FirebaseFirestoreTypes, 
+  onSnapshot, 
+  orderBy, 
+  query, 
+  runTransaction,
+  where} from '@react-native-firebase/firestore'
 import { blurhash } from '../../utils/index';
 import { useSelector } from 'react-redux';
 import { useAuth } from '../authContext';
@@ -28,7 +36,7 @@ import EvilIcons from 'react-native-vector-icons/EvilIcons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { NavigatorScreenParams } from '@react-navigation/native';
 import crashlytics from '@react-native-firebase/crashlytics'
-import { db } from 'FIrebaseConfig'
+import { UsersRef,ProjectRef, PostRef,db} from 'FIrebaseConfig'
 const PostComponent = lazy(() => import('../components/PostComponent'))
 
 
@@ -109,10 +117,9 @@ const OtherUserScreen = () => {
     crashlytics().log('Other User Screen: useCallback')
     setRefreshing(true);
     try{
-      if(!other_user_id) return 
-      const unsub = collection(db,'users')
-        .doc(other_user_id)
-        .onSnapshot(
+      if(!other_user_id) return
+      const docRef = doc(UsersRef,other_user_id) 
+      const unsub = onSnapshot(docRef,
           (documentSnapshot) => {
             if (documentSnapshot.exists) {
               setUsers(documentSnapshot.data());
@@ -140,9 +147,8 @@ const OtherUserScreen = () => {
       setLoading(true)
       if(projects.length === 0) return;
       try{
-        const unsub = collection(db,'projects')
-        .where('id','==',users?.userId)
-        .onSnapshot(snapShot => {
+        const docRef = query(ProjectRef,where('id','==',users?.userId))
+        const unsub = onSnapshot(docRef,(snapShot) => {
           let data:Project[] = []
           snapShot.forEach(doc => {
             data.push({...doc.data(),id:doc.id})
@@ -164,10 +170,8 @@ const OtherUserScreen = () => {
       setLoading(true)
       if (!users || !users.username) return;  
       try{
-        const unsub = collection(db,'posts')
-        .where('name','==',users.username)
-        .orderBy('createdAt','desc')
-        .onSnapshot(documentSnapshot => {
+        const docRef = query(PostRef, where('name','==',users.username),orderBy('createdAt','desc'))
+        const unsub = onSnapshot(docRef,(documentSnapshot) => {
           let data:Post[] = []
           documentSnapshot.forEach(doc => {
             data.push({...doc.data(),id:doc.id})
@@ -189,9 +193,8 @@ const OtherUserScreen = () => {
       if(!other_user_id) return
       setLoading(true) 
       try{
-      const unsub = collection(db,'users')
-      .doc(other_user_id)
-      .onSnapshot(
+        const docRef = doc(UsersRef,other_user_id)
+        const unsub = onSnapshot(docRef,
         (documentSnapshot) => {
           if (documentSnapshot.exists) {
             setUsers(documentSnapshot.data());
@@ -288,7 +291,7 @@ const OtherUserScreen = () => {
 
   const handlePress = async () =>{
     try{
-      const docRef = collection(db,'users').doc(other_user_id)
+      const docRef = doc(UsersRef,other_user_id)
       await runTransaction(db, async(transaction)=>{
         const doc = await transaction.get(docRef)
         if(!doc.exists) throw new Error("Doc doesn't exists!")

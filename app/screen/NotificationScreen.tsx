@@ -11,13 +11,16 @@ import {
   ActivityIndicator,
   RefreshControl,
   SafeAreaView} from 'react-native'
-import {collection} from '@react-native-firebase/firestore'
+import {
+  collection,
+  onSnapshot,
+  query} from '@react-native-firebase/firestore'
 import { useAuth } from '../authContext';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import color from '../../config/color';
 import { useTheme,Text } from 'react-native-paper';
-import { db } from 'FIrebaseConfig';
-import crashlytics, { crash } from '@react-native-firebase/crashlytics'
+import { db,UsersRef,NotificationsRef} from 'FIrebaseConfig';
+//import crashlytics, { crash } from '@react-native-firebase/crashlytics'
 
 
 interface Notification{
@@ -35,13 +38,11 @@ const NotificationScreen = () => {
 
 
   const getNotifications = useCallback(() => {
-    crashlytics().log('Notification Screen: get Notifications')
+    //crashlytics().log('Notification Screen: get Notifications')
     try{
       if(user){
-        const unsub = collection(db,'users')
-      .doc(user?.uid)
-      .collection('notifications')
-      .onSnapshot((querySnapshot)=>{
+        const docRef = query(UsersRef,user?.userId,NotificationsRef)
+        const unsub = onSnapshot(docRef,(querySnapshot)=>{
         let messageOnly:Notification[] = []
         let all:Notification[] = []
         querySnapshot.forEach((documentSnapshot)=>{
@@ -56,18 +57,18 @@ const NotificationScreen = () => {
       return () => unsub()
       }
     }catch(error:unknown | any){
-      crashlytics().recordError(error)
+      //crashlytics().recordError(error)
       console.error('Error grabbing notifications',error.message)
     }
   },[user?.userId])
 
   const onRefresh = useCallback(() => {
-    crashlytics().log('Notification Screen: On Refresh')
+    //crashlytics().log('Notification Screen: On Refresh')
     setRefreshing(true);
     try{
       getNotifications()
     }catch(error:unknown | any){
-      crashlytics().recordError(error)
+      //crashlytics().recordError(error)
       console.error('Error getting notifications',error.message)
     }finally{
       setRefreshing(false)

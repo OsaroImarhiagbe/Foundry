@@ -8,3 +8,6 @@ export const db = getFirestore(app);
 export const messaging = getMessaging(app);
 export const PostRef = collection(db,'posts')
 export const ChatRoomsRef = collection(db,'chat-rooms')
+export const UsersRef = collection(db,'users')
+export const NotificationsRef = collection(db,'notifications')
+export const ProjectRef = collection(db,'projects')

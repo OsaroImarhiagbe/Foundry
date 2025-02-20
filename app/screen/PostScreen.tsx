@@ -18,21 +18,22 @@ import { addPost } from '../features/PostandComments/socialSlice';
 import { useNavigation } from '@react-navigation/native';
 import * as ImagePicker from 'expo-image-picker';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-import {collection,Timestamp}from '@react-native-firebase/firestore'
+import {
+  addDoc,
+  Timestamp}from '@react-native-firebase/firestore'
 import color from '../../config/color';
 import storage from '@react-native-firebase/storage'
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useTheme,Icon,Text,Button,Divider } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import crashlytics from '@react-native-firebase/crashlytics'
+//import crashlytics from '@react-native-firebase/crashlytics'
 import {
   Menu,
   MenuOptions,
   MenuTrigger,
 } from 'react-native-popup-menu';
 import { MenuItems } from '../components/CustomMenu'
-import { crash } from '@react-native-firebase/crashlytics';
-import { db } from 'FIrebaseConfig';
+import { PostRef } from 'FIrebaseConfig';
 type NavigationProp = {
   Dash:undefined
 }
@@ -66,7 +67,7 @@ const PostScreen = () => {
     if(text.trim() === '') return
     setLoading(true);
     try {
-      const newDoc = await collection(db,'posts').add({
+      const newDoc = await addDoc(PostRef,{
         auth_id:user.uid,
         auth_profile:user.profileUrl,
         name:user?.username,
@@ -118,7 +119,7 @@ const PostScreen = () => {
     }
   };
   const pickImage = async () => {
-    crashlytics().log('Post Screen: Picking Images')
+    //crashlytics().log('Post Screen: Picking Images')
     try{
       let results = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ['images', 'videos'],
@@ -130,7 +131,7 @@ const PostScreen = () => {
         setFileName(results.assets[0].uri.split('/').pop())
       }
     }catch(error:any){
-      crashlytics().recordError(error)
+      //crashlytics().recordError(error)
       console.error(error)
     }
   }
@@ -241,10 +242,13 @@ const PostScreen = () => {
         <View style={{flexDirection:'row',justifyContent:'space-between'}}>
           <View style={{flexDirection:'row',alignItems:'center',padding:10}}>
           <Button
-           mode='contained'
+          buttonColor={theme.colors.primary}
+          textColor={theme.colors.tertiary}
+          mode='contained'
           >Write With AI</Button>
           <View style={{paddingLeft:5}}>
           <Text
+          style={{color:theme.colors.tertiary}}
           variant='bodySmall'
           > 0/20</Text>
           </View>

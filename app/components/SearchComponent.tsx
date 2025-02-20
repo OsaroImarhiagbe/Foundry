@@ -9,18 +9,19 @@ interface SearchProp{
   color?:string,
   onPress?:() => void,
   setSearchQuery?:(query:string) => void,
-  searchQuery?:string | any
+  searchQuery?:string | any,
+  title?:string,
 }
 
-const SearchComponent:React.FC<SearchProp> = ({backgroundColor,color,onPress, setSearchQuery,searchQuery}) => {
+const SearchComponent:React.FC<SearchProp> = ({backgroundColor,color,onPress, setSearchQuery,searchQuery,title}) => {
   const theme = useTheme()
   return (
    <Searchbar
     onIconPress={onPress}
-    placeholder="Search"
+    placeholder={title}
     style={{
     justifyContent:'space-between',
-    width:wp('70%'),
+    width:wp('65%'),
     backgroundColor:theme.colors.onTertiary
     }}
     onChangeText={setSearchQuery}
@@ -28,19 +29,4 @@ const SearchComponent:React.FC<SearchProp> = ({backgroundColor,color,onPress, se
     />
   )
 }
-
-const styles = StyleSheet.create({
-
-    iconContainer:{
-        padding:10
-    },
-    textinput: {
-        color: color.white,
-        fontSize: 15,
-        padding:10,
-        width:'80%' 
-    },
-
-
-})
 export default SearchComponent
