@@ -11,7 +11,7 @@ import ChatRoomHeader from '../components/ChatRoomHeader';
 import color from '../../config/color';
 import { useNavigation } from '@react-navigation/native';
 import { useAuth } from '../authContext';
-import firestore from '@react-native-firebase/firestore'
+import {collection,doc,onSnapshot,updateDoc} from '@react-native-firebase/firestore'
 import { Image } from 'expo-image';
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import { blurhash } from '../../utils/index';
@@ -26,6 +26,7 @@ import { useTranslation } from 'react-i18next';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import crashlytics from '@react-native-firebase/crashlytics'
+import { db } from 'FIrebaseConfig';
 
 type NavigationProp = {
     Profile:{user:any},
@@ -158,10 +159,8 @@ const EditScreen = () => {
 
     useEffect(() => {
         crashlytics().log('Edit Screen: Grabbing user')
-        const unsub = firestore()
-        .collection('users')
-        .doc(user?.userId)
-        .onSnapshot((documentSnapshot) => {
+        const docRef = doc(db,'users',user?.userId)
+        const unsub = onSnapshot(docRef,(documentSnapshot) => {
         if(documentSnapshot.exists){
             const data:Edit ={
                 ...documentSnapshot.data(),
@@ -192,8 +191,8 @@ const EditScreen = () => {
                 const ref = storage().ref(`/users/profile/${user.userId}/${filename}`)
                 await ref.putFile(uri)
                 const url = await ref.getDownloadURL()
-                const docRef = firestore().collection('users').doc(user.userId)
-                await docRef.update({
+                const docRef = doc(db,'users',user.userId)
+                await updateDoc(docRef,{
                     profileUrl:url
                 })
                 dispatch(addImage({profileimg:url}))

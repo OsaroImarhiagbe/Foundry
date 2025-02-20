@@ -26,7 +26,7 @@ import { TouchableWithoutFeedback } from 'react-native-gesture-handler'
 import { useNavigation } from '@react-navigation/native';
 import { Image } from 'expo-image';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import crashlytics from '@react-native-firebase/crashlytics'
+//import crashlytics from '@react-native-firebase/crashlytics'
 
 
 
@@ -45,7 +45,7 @@ const LoginScreen = () => {
     }, []);
 
     const LoginPress = async (values:any,{resetForm}:any) => {
-        crashlytics().log('Login Screen: Login Press')
+        //crashlytics().log('Login Screen: Login Press')
         setLoading(true);
         try{
             const response = await login(values.email, values.password)
@@ -54,7 +54,7 @@ const LoginScreen = () => {
                 navigation.navigate('Drawer' as never); 
             }
         }catch(error:unknown | any){
-            crashlytics().recordError(error)
+            //crashlytics().recordError(error)
             console.error(`Unauthorized username and password ${error.message}`)
         }finally{
             setLoading(false)

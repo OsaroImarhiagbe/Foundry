@@ -1,6 +1,5 @@
 import React,{ createContext, useEffect, useState, useContext,ReactNode} from 'react'
 import {
-    collection,
     doc,
     getDoc,
     setDoc}from '@react-native-firebase/firestore';

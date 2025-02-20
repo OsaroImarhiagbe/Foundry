@@ -12,7 +12,7 @@ import ChatRoomHeader from '../components/ChatRoomHeader';
 import { useNavigation } from '@react-navigation/native';
 import { useDispatch } from 'react-redux';
 import { addID } from '../features/Message/messageidSlice';
-import {collection,FirebaseFirestoreTypes,Timestamp} from '@react-native-firebase/firestore'
+import {collection,FirebaseFirestoreTypes,Timestamp,onSnapshot,doc,orderBy,query,setDoc,addDoc} from '@react-native-firebase/firestore'
 import MessageItem from '../components/MessageItem';
 import { FlashList } from '@shopify/flash-list';
 import { TextInput,useTheme } from 'react-native-paper';
@@ -45,9 +45,10 @@ const ChatScreen = () => {
   useEffect(() => {
     crashlytics().log('Chat Screen: Grabbing messages')
     const loadMessages = (roomId:string) => {
-      const docRef = collection(db,'chat-rooms').doc(roomId);
-      const messageRef = docRef.collection('messages').orderBy('createdAt', 'asc')
-      let unsub = messageRef.onSnapshot((documentSnapshot) => {
+      const docRef = doc(db,"chat-rooms",roomId);
+      const messageRef = collection(docRef,'messages')
+      const q = query(messageRef ,orderBy('createdAt', 'asc'))
+      let unsub = onSnapshot(q,(documentSnapshot) => {
         let allMessages = documentSnapshot.docs.map((doc) => doc.data());
         setMessages(allMessages);
       });
@@ -69,9 +70,9 @@ const ChatScreen = () => {
     crashlytics().log('Chat Screen: Creating Chat Room')
     try{
       
-      const roomId = userid ? getRoomID(user?.userId, userid) : item?.userId ? getRoomID(user?.userId, item?.userId) : undefined
+      const roomId = userid ? getRoomID(user?.userId, userid) : item?.userId ? getRoomID(user?.userId, item?.userId) : ''
       const id = userid ? userid : item?.userId
-      await collection(db,'chat-rooms').doc(roomId).set({
+      await setDoc(doc(db,'chat-rooms',roomId), {
         roomId:roomId,
         createdAt: Timestamp.fromDate(new Date()),
         recipientId:[id],
@@ -94,10 +95,10 @@ const ChatScreen = () => {
       ? getRoomID(user?.userId, userid)
       : item?.userId
       ? getRoomID(user?.userId, item.userId)
-      : undefined;
-      const docRef = collection(db,'chat-rooms').doc(roomId);
-      const messageRef = docRef.collection('messages')
-      await messageRef.add({
+      : '';
+      const docRef = doc(db,'chat-rooms',roomId);
+      const messageRef = collection(docRef,'messages')
+      await addDoc(messageRef, {
         senderId:user?.userId,
         recipentId:id,
         id:messageRef.doc().id,

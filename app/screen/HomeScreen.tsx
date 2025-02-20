@@ -16,7 +16,7 @@ import {
 import color from '../../config/color';
 import { useNavigation} from '@react-navigation/native';
 import { useAuth } from 'app/authContext';
-import { collection,FirebaseFirestoreTypes } from '@react-native-firebase/firestore';
+import { collection,FirebaseFirestoreTypes,onSnapshot,doc,orderBy,query, limit,getDocs, startAfter } from '@react-native-firebase/firestore';
 import { useDispatch} from 'react-redux';
 import { addId } from '../features/user/userSlice.ts';
 import { FlashList } from "@shopify/flash-list";
@@ -25,7 +25,7 @@ import { MotiView } from 'moti';
 import { Skeleton } from 'moti/skeleton';
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 //import crashlytics from '@react-native-firebase/crashlytics'
-import { db } from 'FIrebaseConfig.ts';
+import { PostRef} from 'FIrebaseConfig.ts';
 
 const PostComponent = lazy(() => import('../components/PostComponent'))
 
@@ -91,8 +91,8 @@ const HomeScreen = () => {
     const timer = setTimeout(() => {
       //crashlytics().log('Grabbing post')
         try {
-          const subscriber = collection(db,'posts').orderBy('createdAt', 'desc').limit(10)
-            .onSnapshot(querySnapShot =>{
+          const docRef = query(PostRef,orderBy('createdAt', 'desc'),limit(10))
+          const subscriber = onSnapshot(docRef,querySnapShot =>{
               if (!querySnapShot || querySnapShot.empty) {
                 setPost([]);
                 return;
@@ -117,15 +117,15 @@ const HomeScreen = () => {
     return () => {
       clearTimeout(timer);
     };
-  }, []); 
+  }, [memoPost]); 
 
 
   const onRefresh = useCallback(() => {
     setRefreshing(true);
     //crashlytics().log('Post Refresh')
       try {
-        const unsub = collection(db,'posts').orderBy('createdAt', 'desc').limit(10)
-          .onSnapshot(querySnapShot =>{
+        const docRef = query(PostRef,orderBy('createdAt', 'desc'),limit(10))
+        const unsub = onSnapshot(docRef,querySnapShot =>{
             let data:Post[] = [];
             querySnapShot.forEach(documentSnapShot => {
               data.push({ ...documentSnapShot.data(),id:documentSnapShot.id });
@@ -157,11 +157,16 @@ const fetchMorePost = async () => {
   }
   setLoadingMore(true);
   try {
-    const snapshot = await collection(db,'posts')
-      .orderBy('createdAt', 'desc')
-      .startAfter(lastVisible)
-      .limit(2)
-      .get();
+    const docRef = lastVisible ? query(
+      PostRef,
+      orderBy('createAt','desc'),
+      startAfter(lastVisible), 
+      limit(2)) : 
+      query(
+        PostRef,
+        orderBy('createdAt', 'desc'),
+        limit(2))
+    const snapshot = await getDocs(docRef)
     const newPosts = snapshot.docs.map(doc => ({
       id: doc.id,
       ...doc.data(),

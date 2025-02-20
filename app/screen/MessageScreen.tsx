@@ -11,7 +11,7 @@ import {
   StatusBar,
   } from 'react-native'
 import color from '../../config/color';
-import { collection,FirebaseFirestoreTypes } from '@react-native-firebase/firestore';
+import {FirebaseFirestoreTypes,where,onSnapshot,query,orderBy,limit,startAfter, getDocs } from '@react-native-firebase/firestore';
 import { useAuth } from '../authContext';
 import ChatRoomHeader from '../components/ChatRoomHeader';
 import { useNavigation } from '@react-navigation/native';
@@ -19,7 +19,7 @@ import { FlashList } from '@shopify/flash-list';
 import { ActivityIndicator,Text,useTheme } from 'react-native-paper';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import crashlytics from '@react-native-firebase/crashlytics'
-import { db } from 'FIrebaseConfig';
+import { ChatRoomsRef} from 'FIrebaseConfig';
 
 
 
@@ -55,10 +55,8 @@ const MessageScreen = () => {
           setUsers([]);
           return;
         }
-        const unsub = collection(db,'chat-rooms')
-        .where('senderName','!=',user.username)
-        .where('recipientName','!=',user.username)
-        .onSnapshot((querySnapshot) =>{
+        const docRef = query(ChatRoomsRef, where('senderName','!=',user.username),where('recipientName','!=',user.username))
+        const unsub = onSnapshot(docRef,(querySnapshot) =>{
           let data:User[] = []
           querySnapshot.forEach(doc => {
             data.push({...doc.data()})
@@ -85,10 +83,8 @@ const MessageScreen = () => {
         setUsers([]);
         return;
       }
-      const unsub = collection(db,'chat-rooms')
-      .where('senderName','!=',user.username)
-      .where('recipientName','!=',user.username)
-      .onSnapshot((querySnapshot) =>{
+      const docRef = query(ChatRoomsRef, where('senderName','!=',user.username),where('recipientName','!=',user.username))
+      const unsub = onSnapshot(docRef,(querySnapshot) =>{
         let data:User[] = []
         querySnapshot.forEach(doc => {
           data.push({...doc.data()})
@@ -115,12 +111,16 @@ const MessageScreen = () => {
     }
     setLoadingMore(true);
     try {
-      const snapshot = await collection(db,'chat-rooms')
-        .where('senderName','!=',user.username)
-        .where('recipientName','!=',user.username)
-        .startAfter(lastVisible)
-        .limit(2)
-        .get();
+      const docRef = lastVisible ? query(
+        ChatRoomsRef,
+        orderBy('createAt','desc'),
+        startAfter(lastVisible), 
+        limit(2)) : 
+        query(
+          ChatRoomsRef,
+          orderBy('createdAt', 'desc'),
+          limit(2))
+      const snapshot = await getDocs(docRef)
       const newMessgae = snapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data(),

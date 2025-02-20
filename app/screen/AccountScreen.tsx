@@ -13,7 +13,7 @@ import { useAuth } from '../authContext';
 import { Image } from 'expo-image';
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import FollowComponent from '../components/FollowComponent';
-import { collection, query, where,FirebaseFirestoreTypes,doc, orderBy } from '@react-native-firebase/firestore';
+import { collection, query, where,FirebaseFirestoreTypes,doc, orderBy, onSnapshot} from '@react-native-firebase/firestore';
 import { blurhash } from '../../utils/index';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -93,7 +93,7 @@ const AccountScreen = () => {
     const userCollection = collection(db,'users')
     const userDoc = doc(userCollection,user.userId)
     try{
-      const unsub = userDoc.onSnapshot(
+      const unsub = onSnapshot( userDoc,
         async (documentSnapshot) =>{
         if(documentSnapshot.exists){
           setUsers(documentSnapshot.data())
@@ -130,7 +130,7 @@ const AccountScreen = () => {
     try{
       const projectCollection = collection(db,'projects')
       const projectRef = query(projectCollection, where('id','==',user?.userId))
-      const unsub = projectRef.onSnapshot(async (documentSnapshot) => {
+      const unsub = onSnapshot(projectRef,async (documentSnapshot) => {
         let data:Project[] = []
         documentSnapshot.forEach(doc => {
           data.push({...doc.data(),id:doc.id})
@@ -159,7 +159,7 @@ const AccountScreen = () => {
     try{
       const docRef = collection(db,'posts')
       const postRef = query(docRef,where('name','==',user?.username) ,orderBy('createdAt','desc'))
-      const unsub = postRef.onSnapshot(async (querySnapshot) => {
+      const unsub = onSnapshot(postRef,async (querySnapshot) => {
         let data:Post[] = []
         querySnapshot.forEach(documentSnapshot => {
           data.push({...documentSnapshot.data(),id:documentSnapshot.id})
@@ -188,7 +188,7 @@ const AccountScreen = () => {
       const userRef = collection(db,'users')
       const userDoc = doc(userRef,user.userId)
       try{
-        const unsub = userDoc.onSnapshot(
+        const unsub = onSnapshot(userDoc,
           async (documentSnapshot) =>{
           if(documentSnapshot.exists){
             setUsers(documentSnapshot.data())
