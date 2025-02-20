@@ -12,12 +12,12 @@ import ChatRoomHeader from '../components/ChatRoomHeader';
 import { useNavigation } from '@react-navigation/native';
 import { useDispatch } from 'react-redux';
 import { addID } from '../features/Message/messageidSlice';
-import firestore,{FirebaseFirestoreTypes} from '@react-native-firebase/firestore'
+import {collection,FirebaseFirestoreTypes,Timestamp} from '@react-native-firebase/firestore'
 import MessageItem from '../components/MessageItem';
 import { FlashList } from '@shopify/flash-list';
 import { TextInput,useTheme } from 'react-native-paper';
 import crashlytics, { crash } from '@react-native-firebase/crashlytics'
-
+import { db } from 'FIrebaseConfig';
 type ChatScreenRouteProp = RouteProp<{ Chat: { item: any,userid:string,name:string } }, 'Chat'>;
 
 const ChatScreen = () => {
@@ -32,6 +32,7 @@ const ChatScreen = () => {
   const theme = useTheme()
   const inputRef = useRef<any>(null)
 
+
   
   const recipentNamec = userid ? name  : item?.userId ? item.name : 'Unknown Recipient';
   useEffect(() => {
@@ -44,7 +45,7 @@ const ChatScreen = () => {
   useEffect(() => {
     crashlytics().log('Chat Screen: Grabbing messages')
     const loadMessages = (roomId:string) => {
-      const docRef = firestore().collection('chat-rooms').doc(roomId);
+      const docRef = collection(db,'chat-rooms').doc(roomId);
       const messageRef = docRef.collection('messages').orderBy('createdAt', 'asc')
       let unsub = messageRef.onSnapshot((documentSnapshot) => {
         let allMessages = documentSnapshot.docs.map((doc) => doc.data());
@@ -70,9 +71,9 @@ const ChatScreen = () => {
       
       const roomId = userid ? getRoomID(user?.userId, userid) : item?.userId ? getRoomID(user?.userId, item?.userId) : undefined
       const id = userid ? userid : item?.userId
-      await firestore().collection('chat-rooms').doc(roomId).set({
+      await collection(db,'chat-rooms').doc(roomId).set({
         roomId:roomId,
-        createdAt: firestore.Timestamp.fromDate(new Date()),
+        createdAt: Timestamp.fromDate(new Date()),
         recipientId:[id],
         recipentName:recipentNamec,
         senderName:user?.username,
@@ -94,7 +95,7 @@ const ChatScreen = () => {
       : item?.userId
       ? getRoomID(user?.userId, item.userId)
       : undefined;
-      const docRef = firestore().collection('chat-rooms').doc(roomId);
+      const docRef = collection(db,'chat-rooms').doc(roomId);
       const messageRef = docRef.collection('messages')
       await messageRef.add({
         senderId:user?.userId,
@@ -103,7 +104,7 @@ const ChatScreen = () => {
         text:messageText,
         senderName: user?.username,
         recipentName:recipentNamec,
-        createdAt: firestore.Timestamp.fromDate(new Date())
+        createdAt: Timestamp.fromDate(new Date())
       })
       setMessageText('');
       inputRef.current?.focus();

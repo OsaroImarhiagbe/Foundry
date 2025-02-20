@@ -16,7 +16,7 @@ import {
 import color from '../../config/color';
 import { useNavigation} from '@react-navigation/native';
 import { useAuth } from 'app/authContext';
-import firestore, { FirebaseFirestoreTypes } from '@react-native-firebase/firestore'
+import { collection,FirebaseFirestoreTypes } from '@react-native-firebase/firestore';
 import { useDispatch} from 'react-redux';
 import { addId } from '../features/user/userSlice.ts';
 import { FlashList } from "@shopify/flash-list";
@@ -25,6 +25,7 @@ import { MotiView } from 'moti';
 import { Skeleton } from 'moti/skeleton';
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import crashlytics from '@react-native-firebase/crashlytics'
+import { db } from 'FIrebaseConfig.ts';
 
 const PostComponent = lazy(() => import('../components/PostComponent'))
 
@@ -90,7 +91,7 @@ const HomeScreen = () => {
     const timer = setTimeout(() => {
       crashlytics().log('Grabbing post')
         try {
-          const subscriber = firestore().collection('posts').orderBy('createdAt', 'desc').limit(10)
+          const subscriber = collection(db,'posts').orderBy('createdAt', 'desc').limit(10)
             .onSnapshot(querySnapShot =>{
               if (!querySnapShot || querySnapShot.empty) {
                 setPost([]);
@@ -123,7 +124,7 @@ const HomeScreen = () => {
     setRefreshing(true);
     crashlytics().log('Post Refresh')
       try {
-        const unsub = firestore().collection('posts').orderBy('createdAt', 'desc').limit(10)
+        const unsub = collection(db,'posts').orderBy('createdAt', 'desc').limit(10)
           .onSnapshot(querySnapShot =>{
             let data:Post[] = [];
             querySnapShot.forEach(documentSnapShot => {
@@ -156,8 +157,7 @@ const fetchMorePost = async () => {
   }
   setLoadingMore(true);
   try {
-    const snapshot = await firestore()
-      .collection('posts')
+    const snapshot = await collection(db,'posts')
       .orderBy('createdAt', 'desc')
       .startAfter(lastVisible)
       .limit(2)

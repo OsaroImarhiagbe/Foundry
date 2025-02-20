@@ -12,6 +12,8 @@ import logger from "firebase-functions/logger";
 import * as admin from "firebase-admin";
 import {onDocumentCreated} from "firebase-functions/v2/firestore";
 admin.initializeApp();
+const db = admin.firestore()
+const message = admin.messaging()
 // Create and deploy your first functions
 // https://firebase.google.com/docs/functions/get-started
 
@@ -19,31 +21,6 @@ admin.initializeApp();
 //   logger.info("Hello logs!", {structuredData: true});
 //   response.send("Hello from Firebase!");
 // });
-
-interface NotificationPayload {
-    title: string;
-    body: string;
-    data?: Record<string, string>;
-  }
-interface MessageData {
-    recipentId?:string
-    senderId?:string
-  }
-interface UserData{
-    userId:string
-  }
-// const CONFIG = {
-//   NOTIFICATION: {
-//     DEFAULT_TITLE: "Foundry Notification",
-//     COLLECTION: {
-//       USERS: "users",
-//       ROOMS: "chat-rooms",
-//       MESSAGES: "messages",
-//       POSTS: "posts",
-//       COMMENTS: "comments",
-//     },
-//   },
-// } as const;
 /**
  * Retrieves a user's device token from Firestore
  * @param {string} userId - The unique identifier of the user
@@ -76,7 +53,7 @@ async function getUserDeviceToken(userId: string): Promise<string | null> {
  * @param {NotificationPayload} notification
  * @return {Promise<void>}*/
 async function sendNotification(userId: string,
-  notification: NotificationPayload):Promise<void> {
+  notification:unknown | any): Promise<void>{
   try {
     const token = await getUserDeviceToken(userId);
     if (!token) {
@@ -90,7 +67,7 @@ async function sendNotification(userId: string,
       data: notification.data,
       token,
     };
-    await admin.messaging().send(payload);
+    await message.send(payload);
     logger.info(`Notification sent successfully to user: ${userId}`);
   } catch (error) {
     logger.error("Error sending notification:", error);
@@ -105,14 +82,14 @@ exports.checkAuthUser = onCall((request:CallableRequest<unknown>) => {
   return {authenticated: true, uid: request.auth.uid};
 });
 exports.newUser = onDocumentCreated("users/{userId}",
-  async (event:{data:unknown | any}) => {
+  async (event) => {
     try {
-      const snapshot = event.data;
+      const snapshot = event.data
       if (!snapshot) {
         logger.warn("No data associated with the event");
         return {success: false, error: "No data found"};
       }
-      const userData = snapshot.data() as UserData;
+      const userData = snapshot.data();
       const userId = userData.userId;
       sendNotification(userId, {
         title: "Foundry",
@@ -128,20 +105,17 @@ exports.newUser = onDocumentCreated("users/{userId}",
       throw new Error("Failed to process new message notification");
     }
   });
-exports.newMessage = onDocumentCreated("chat-rooms/{roomId}/messages",
-  async (event: { data:unknown | any}) => {
+exports.newMessage = onDocumentCreated("chat-rooms/{roomId}/messages/{messageId}",
+  async (event) => {
     try {
       const snapshot = event.data;
       if (!snapshot) {
         logger.warn("No data associated with the event");
         return {success: false, error: "No data found"};
       }
-      const messageData = snapshot.data() as MessageData;
-      const roomId = snapshot.ref.parent.parent?.id;
-      const roomDoc = await admin.firestore()
-        .collection("chat-rooms")
-        .doc(roomId)
-        .get();
+      const messageData = snapshot.data();
+      const roomId = messageData.roomId
+      const roomDoc = await db.collection("chat-rooms").doc(roomId).get();
       if (!roomDoc.exists) {
         logger.warn(`Room ${roomId} not found`);
         return {success: false, error: "Room not found"};

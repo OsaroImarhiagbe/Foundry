@@ -11,7 +11,7 @@ import {
   StatusBar,
   } from 'react-native'
 import color from '../../config/color';
-import firestore,{FirebaseFirestoreTypes} from '@react-native-firebase/firestore'
+import { collection,FirebaseFirestoreTypes } from '@react-native-firebase/firestore';
 import { useAuth } from '../authContext';
 import ChatRoomHeader from '../components/ChatRoomHeader';
 import { useNavigation } from '@react-navigation/native';
@@ -19,6 +19,10 @@ import { FlashList } from '@shopify/flash-list';
 import { ActivityIndicator,Text,useTheme } from 'react-native-paper';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import crashlytics from '@react-native-firebase/crashlytics'
+import { db } from 'FIrebaseConfig';
+
+
+
 const ChatList = lazy(() => import('../../List/ChatList'))
 
 
@@ -51,8 +55,7 @@ const MessageScreen = () => {
           setUsers([]);
           return;
         }
-        const unsub = firestore()
-        .collection('chat-rooms')
+        const unsub = collection(db,'chat-rooms')
         .where('senderName','!=',user.username)
         .where('recipientName','!=',user.username)
         .onSnapshot((querySnapshot) =>{
@@ -82,8 +85,7 @@ const MessageScreen = () => {
         setUsers([]);
         return;
       }
-      const unsub = firestore()
-      .collection('chat-rooms')
+      const unsub = collection(db,'chat-rooms')
       .where('senderName','!=',user.username)
       .where('recipientName','!=',user.username)
       .onSnapshot((querySnapshot) =>{
@@ -113,8 +115,7 @@ const MessageScreen = () => {
     }
     setLoadingMore(true);
     try {
-      const snapshot = await firestore()
-        .collection('chat-rooms')
+      const snapshot = await collection(db,'chat-rooms')
         .where('senderName','!=',user.username)
         .where('recipientName','!=',user.username)
         .startAfter(lastVisible)

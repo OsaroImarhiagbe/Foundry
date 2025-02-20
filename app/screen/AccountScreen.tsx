@@ -13,7 +13,7 @@ import { useAuth } from '../authContext';
 import { Image } from 'expo-image';
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import FollowComponent from '../components/FollowComponent';
-import firestore,{FirebaseFirestoreTypes} from '@react-native-firebase/firestore';
+import { collection, query, where, getDocs, getFirestore,FirebaseFirestoreTypes,doc, orderBy } from '@react-native-firebase/firestore';
 import { blurhash } from '../../utils/index';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -21,7 +21,7 @@ import { useTheme,Text,Icon,Button } from 'react-native-paper';
 import EvilIcons from 'react-native-vector-icons/EvilIcons';
 import SmallButton from 'app/components/SmallButton';
 import crashlytics from '@react-native-firebase/crashlytics'
-
+import { db } from 'FIrebaseConfig';
 const PostComponent = lazy(() => import('../components/PostComponent'))
 
 
@@ -90,7 +90,8 @@ const AccountScreen = () => {
   const onRefresh = useCallback(async () => {
     crashlytics().log('Account Screen: On Refresh')
     setRefreshing(true);
-    const userDoc = firestore().collection('users').doc(user.userId)
+    const userCollection = collection(db,'users')
+    const userDoc = doc(userCollection,user.userId)
     try{
       const unsub = userDoc.onSnapshot(
         async (documentSnapshot) =>{
@@ -127,7 +128,8 @@ const AccountScreen = () => {
     if(projects.length === 0) return;
     setLoading(true)
     try{
-      const projectRef = firestore().collection('projects').where('id','==',user?.userId)
+      const projectCollection = collection(db,'projects')
+      const projectRef = query(projectCollection, where('id','==',user?.userId))
       const unsub = projectRef.onSnapshot(async (documentSnapshot) => {
         let data:Project[] = []
         documentSnapshot.forEach(doc => {
@@ -155,8 +157,9 @@ const AccountScreen = () => {
     crashlytics().log('Account Screen: Grabbing Users Post')
     setLoading(true)
     try{
-      const docRef = firestore().collection('posts').where('name','==',user?.username).orderBy('createdAt','desc')
-      const unsub = docRef.onSnapshot(async (querySnapshot) => {
+      const docRef = collection(db,'posts')
+      const postRef = query(docRef,where('name','==',user?.username) ,orderBy('createdAt','desc'))
+      const unsub = postRef.onSnapshot(async (querySnapshot) => {
         let data:Post[] = []
         querySnapshot.forEach(documentSnapshot => {
           data.push({...documentSnapshot.data(),id:documentSnapshot.id})
@@ -182,7 +185,8 @@ const AccountScreen = () => {
   useEffect(() => {
     crashlytics().log('Account Screen: Grabbing User ')
     setLoading(true)
-      const userDoc = firestore().collection('users').doc(user.userId)
+      const userRef = collection(db,'users')
+      const userDoc = doc(userRef,user.userId)
       try{
         const unsub = userDoc.onSnapshot(
           async (documentSnapshot) =>{

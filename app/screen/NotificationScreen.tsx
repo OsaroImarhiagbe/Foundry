@@ -1,4 +1,9 @@
-import React,{useState,useEffect,lazy,Suspense,useCallback} from 'react'
+import React,{
+  useState,
+  useEffect,
+  lazy,
+  Suspense,
+  useCallback} from 'react'
 import {
   View, 
   StyleSheet,
@@ -6,12 +11,15 @@ import {
   ActivityIndicator,
   RefreshControl,
   SafeAreaView} from 'react-native'
-import firestore from '@react-native-firebase/firestore'
+import {collection} from '@react-native-firebase/firestore'
 import { useAuth } from '../authContext';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import color from '../../config/color';
 import { useTheme,Text } from 'react-native-paper';
+import { db } from 'FIrebaseConfig';
 import crashlytics, { crash } from '@react-native-firebase/crashlytics'
+
+
 interface Notification{
   id?:string,
   title?:string,
@@ -30,8 +38,7 @@ const NotificationScreen = () => {
     crashlytics().log('Notification Screen: get Notifications')
     try{
       if(user){
-        const unsub = firestore()
-      .collection('users')
+        const unsub = collection(db,'users')
       .doc(user?.uid)
       .collection('notifications')
       .onSnapshot((querySnapshot)=>{
