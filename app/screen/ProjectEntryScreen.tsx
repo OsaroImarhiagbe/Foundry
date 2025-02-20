@@ -11,11 +11,15 @@ import color from '../../config/color'
 import { Button } from 'react-native-paper';
 import {useAuth} from '../authContext';
 import { blurhash } from '../../utils';
-import firestore, { FirebaseFirestoreTypes } from '@react-native-firebase/firestore'
+import { 
+  collection,
+  FirebaseFirestoreTypes,
+  Timestamp} from '@react-native-firebase/firestore'
 import * as ImagePicker from 'expo-image-picker';
 import { Image } from 'expo-image';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import crashlytics, { crash } from '@react-native-firebase/crashlytics'
+import { db } from 'FIrebaseConfig';
 const ProjectEntryScreen = () => {
     const [focus,setFocus] = useState('')
     const [text,setText] = useState('')
@@ -45,15 +49,14 @@ const ProjectEntryScreen = () => {
 
     const handleSubmit = async () => {
       crashlytics().log('ProjectEntryScreen: Handle Submit')
-        const docRef = firestore().collection('users').doc(user?.userId).collection('projects')
+        const docRef = collection(db,'users').doc(user?.userId).collection('projects')
         const projectDoc = await docRef.where('project_name', '==', projectname).get();
         let imageUrl = null;
         try{
           if(projectDoc){
           const projectref = projectDoc.docs[0]
           const projectId = projectref.id
-            await firestore()
-            .collection('users')
+            await collection(db,'users')
             .doc(user?.userId)
             .collection('projects')
             .doc(projectId)
@@ -64,12 +67,11 @@ const ProjectEntryScreen = () => {
                 skills: [{
                     skill: skills
                 }],
-                createdAt: firestore.Timestamp.fromDate(new Date())
+                createdAt: Timestamp.fromDate(new Date())
             })
             setProject_id(projectId)
         }else{
-           const newDoc = await firestore()
-            .collection('users')
+           const newDoc = await collection(db,'users')
             .doc(user?.userId)
             .collection('projects')
             .add({
@@ -77,7 +79,7 @@ const ProjectEntryScreen = () => {
                 image:imageUrl,
                 content: text,
                 skills: [{ skill: skills }],
-                createdAt: firestore.Timestamp.fromDate(new Date())
+                createdAt: Timestamp.fromDate(new Date())
             })
             setProject_id(newDoc.id)
         }

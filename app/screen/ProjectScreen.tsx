@@ -4,12 +4,13 @@ import color from '../../config/color';
 import Entypo from 'react-native-vector-icons/Entypo';
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 import { useNavigation } from '@react-navigation/native';
-import firestore from '@react-native-firebase/firestore'
+import {collection} from '@react-native-firebase/firestore'
 import { useAuth } from '../authContext';
 import { Image } from 'expo-image';
 import { blurhash } from '../../utils';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import crashlytics from '@react-native-firebase/crashlytics'
+import { db } from 'FIrebaseConfig';
 interface Project{
     id?:string,
     skills?:{skill:string}[],
@@ -31,8 +32,7 @@ const ProjectScreen = () => {
     useEffect(() => {
         crashlytics().log('Project Screen: Grabbing Projects')
         try{
-        const unsub = firestore()
-        .collection('users')
+        const unsub = collection(db,'users')
         .doc(user?.userId)
         .collection('projects')
         .where('project_name', '==', 'projectname')

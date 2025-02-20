@@ -1,9 +1,13 @@
 import React,{ createContext, useEffect, useState, useContext,ReactNode} from 'react'
-import auth from '@react-native-firebase/auth';
-import firestore from '@react-native-firebase/firestore';
+import {
+    collection,
+    doc,
+    getDoc,
+    setDoc}from '@react-native-firebase/firestore';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {GoogleSignin,statusCodes,} from '@react-native-google-signin/google-signin';
-import crashlytics from '@react-native-firebase/crashlytics'
+//import crashlytics from '@react-native-firebase/crashlytics'
+import { db,auth } from 'FIrebaseConfig';
 export const AuthContext = createContext<any>(null);
 
 interface User {
@@ -25,21 +29,22 @@ export const AuthContextProvider = ({children}:AuthContextProviderProps) => {
     const [loading,setLoading] = useState<boolean>(false)
     const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false)
     useEffect(() => {
-        const unsub = auth().onAuthStateChanged(async (user) => {
-            crashlytics().log('Auth COntext: Auth State Change')
+        const unsub = auth.onAuthStateChanged(async (user) => {
+            //crashlytics().log('Auth COntext: Auth State Change')
                     if(user){
                         setIsAuthenticated(true)
-                        const docSnap = await firestore().collection('users').doc(user.uid).get();
-                        if (docSnap.exists) {
-                            const firestoreData = docSnap.data();
-                            await Promise.all(
-                                [
-                                crashlytics().setUserId(user.uid),
-                                crashlytics().setAttributes({
-                                    user_id: user.uid,
-                                    username: firestoreData?.username,
-                                })
-                            ])
+                        const docRef = doc(db,'users',user.uid);
+                        const currentUserRef = await getDoc(docRef)
+                        if (currentUserRef.exists) {
+                            const firestoreData = currentUserRef.data();
+                            // await Promise.all(
+                            //     [
+                            //     crashlytics().setUserId(user.uid),
+                            //     crashlytics().setAttributes({
+                            //         user_id: user.uid,
+                            //         username: firestoreData?.username,
+                            //     })
+                            // ])
                             setUser({
                                 uid: user.uid,
                                 email: user.email,
@@ -58,21 +63,21 @@ export const AuthContextProvider = ({children}:AuthContextProviderProps) => {
     },[])
 
     const login = async (email:string,pasword:string) => {
-        crashlytics().log('Auth Context: Login')
+        //crashlytics().log('Auth Context: Login')
         setLoading(true)
         try{
-            const response = await auth().signInWithEmailAndPassword(email,pasword)
-            await Promise.all(
-                [
-                crashlytics().setUserId(response.user.uid),
-                crashlytics().setAttributes({
-                    user_id:response.user.uid,
-                    //username:response.user?.displayName
-                })
-            ])
+            const response = await auth.signInWithEmailAndPassword(email,pasword)
+            // await Promise.all(
+            //     [
+            //     //crashlytics().setUserId(response.user.uid),
+            //     // crashlytics().setAttributes({
+            //     //     user_id:response.user.uid,
+            //     //     //username:response.user?.displayName
+            //     // })
+            // ])
             return {success:true}
         }catch(error: unknown | any){
-            crashlytics().recordError(error)
+            //crashlytics().recordError(error)
             console.error(`Error logging in:${error}`)
         }finally{
             setLoading(false)
@@ -109,34 +114,34 @@ export const AuthContextProvider = ({children}:AuthContextProviderProps) => {
     // }
 
     const logout = async () => {
-        crashlytics().log('Auth Context: Logout')
+        //crashlytics().log('Auth Context: Logout')
         try{
-            await auth().signOut();
+            await auth.signOut();
             await AsyncStorage.removeItem('authUser')
             return {success:true,}
         }catch(error:unknown | any){
-            crashlytics().recordError(error)
+            //crashlytics().recordError(error)
             return {success:false, message: error.message}
         }
     }
     const register = async (username:string,email:string,password:string) => {
-        crashlytics().log('Auth Context: Register')
+        //crashlytics().log('Auth Context: Register')
         try{
-            const response = await auth().createUserWithEmailAndPassword(email,password)
-            await firestore().collection('users').doc(response?.user?.uid).set({
+            const response = await auth.createUserWithEmailAndPassword(email,password)
+            await  setDoc(doc(db,'users',response?.user?.uid),{
                 username,
                 user_id: response?.user?.uid
             })
-            await Promise.all(
-                [
-                crashlytics().setUserId(response.user.uid),
-                crashlytics().setAttributes({
-                    user_id:response.user.uid,
-                })
-            ])
+            // await Promise.all(
+            //     [
+            //     crashlytics().setUserId(response.user.uid),
+            //     crashlytics().setAttributes({
+            //         user_id:response.user.uid,
+            //     })
+            // ])
             return {success:true, data: response?.user}
         }catch(error:unknown | any){
-            crashlytics().recordError(error)
+            //crashlytics().recordError(error)
             console.error(`${error}`)
             return {success:false, msg: error.message}
         }   

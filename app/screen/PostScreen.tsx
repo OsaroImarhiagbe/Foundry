@@ -18,7 +18,7 @@ import { addPost } from '../features/PostandComments/socialSlice';
 import { useNavigation } from '@react-navigation/native';
 import * as ImagePicker from 'expo-image-picker';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-import firestore from '@react-native-firebase/firestore'
+import {collection,Timestamp}from '@react-native-firebase/firestore'
 import color from '../../config/color';
 import storage from '@react-native-firebase/storage'
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -32,6 +32,7 @@ import {
 } from 'react-native-popup-menu';
 import { MenuItems } from '../components/CustomMenu'
 import { crash } from '@react-native-firebase/crashlytics';
+import { db } from 'FIrebaseConfig';
 type NavigationProp = {
   Dash:undefined
 }
@@ -65,7 +66,7 @@ const PostScreen = () => {
     if(text.trim() === '') return
     setLoading(true);
     try {
-      const newDoc = await firestore().collection('posts').add({
+      const newDoc = await collection(db,'posts').add({
         auth_id:user.uid,
         auth_profile:user.profileUrl,
         name:user?.username,
@@ -73,7 +74,7 @@ const PostScreen = () => {
         like_count: null,
         comment_count: null,
         liked_by: null,
-        createdAt: firestore.Timestamp.fromDate(new Date())
+        createdAt: Timestamp.fromDate(new Date())
       })
       let imageUrl = null;
       if(image){

@@ -13,7 +13,7 @@ import { useAuth } from '../authContext';
 import { Image } from 'expo-image';
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import FollowComponent from '../components/FollowComponent';
-import { collection, query, where, getDocs, getFirestore,FirebaseFirestoreTypes,doc, orderBy } from '@react-native-firebase/firestore';
+import { collection, query, where,FirebaseFirestoreTypes,doc, orderBy } from '@react-native-firebase/firestore';
 import { blurhash } from '../../utils/index';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';

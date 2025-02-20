@@ -2,10 +2,11 @@ import React, { createContext, useContext, useState, useCallback,useEffect,React
 import NotificationBanner from './components/NotificationBanner';
 import notifee, { EventType } from '@notifee/react-native'
 import { useNavigation } from '@react-navigation/native';
-import messaging, { FirebaseMessagingTypes } from '@react-native-firebase/messaging';
-import firestore from '@react-native-firebase/firestore';
+import { FirebaseMessagingTypes } from '@react-native-firebase/messaging';
 import { useAuth } from './authContext';
-import crashlytics from '@react-native-firebase/crashlytics'
+import { db, messaging } from 'FIrebaseConfig';
+import { doc, setDoc } from '@react-native-firebase/firestore';
+//import crashlytics from '@react-native-firebase/crashlytics'
 
 const NotificationContext = createContext<any>(null);
 
@@ -29,7 +30,7 @@ export const NotificationProvider = ({ children }:NotificationProp) => {
   const navigation = useNavigation();
 
   const showNotification = useCallback(async (title:string, message:string,data:any) => {
-    crashlytics().log('Notifcation Provider: Show Notification')
+    //crashlytics().log('Notifcation Provider: Show Notification')
     try{
         await notifee.displayNotification({
             title: title,
@@ -52,24 +53,24 @@ export const NotificationProvider = ({ children }:NotificationProp) => {
         }, 5000);
         return () => clearTimeout(timer)
     }catch(error:unknown | any){
-        crashlytics().recordError(error)
+        //crashlytics().recordError(error)
         console.error('Error with notification permission:',error.message)
     }
   }, [notification]);
    
     useEffect(() => {
-      crashlytics().log('Notifcation Provider: Getting token')
+      //crashlytics().log('Notifcation Provider: Getting token')
       if (!user?.userId) return;
       const fetchToken = async () => {
         try{
             await notifee.requestPermission();
-            const token = await messaging().getToken();
+            const token = await messaging.getToken();
             if (!token) throw new Error('Failed to get FCM token');      
-            await firestore().collection('users').doc(user.userId).set({
+            await setDoc(doc(db,"users",user.userId),{
                 token:token 
             },{merge:true})
         }catch(error: unknown | any){
-          crashlytics().recordError(error)
+          //crashlytics().recordError(error)
           console.error('Error grabbing token:',error)
         }
       }
@@ -103,7 +104,7 @@ export const NotificationProvider = ({ children }:NotificationProp) => {
       },[handleNotificationClick])
 
     useEffect(() => {
-      messaging().onNotificationOpenedApp((remoteMessage:FirebaseMessagingTypes.RemoteMessage) => {
+      messaging.onNotificationOpenedApp((remoteMessage:FirebaseMessagingTypes.RemoteMessage) => {
         console.log(
           "Notification caused app to open from background state:",
           remoteMessage?.data?.screen,
@@ -115,7 +116,7 @@ export const NotificationProvider = ({ children }:NotificationProp) => {
       });
 
     
-        messaging().getInitialNotification().then((remoteMessage) => {
+        messaging.getInitialNotification().then((remoteMessage) => {
             if (remoteMessage) {
                 console.log(
                 "Notification caused app to open from quit state:",
@@ -126,7 +127,7 @@ export const NotificationProvider = ({ children }:NotificationProp) => {
                 }
       }
     });
-    const unsubscribe = messaging().setBackgroundMessageHandler(handlePushNotification)
+    const unsubscribe = messaging.setBackgroundMessageHandler(handlePushNotification)
        return unsubscribe
 
     },[handleNotificationClick])
@@ -140,7 +141,7 @@ export const NotificationProvider = ({ children }:NotificationProp) => {
     },[showNotification])
 
     useEffect(() => {
-      messaging().onMessage(handlePushNotification)
+      messaging.onMessage(handlePushNotification)
     },[])
 
   return (
