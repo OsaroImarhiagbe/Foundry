@@ -17,9 +17,10 @@ import { collection, query, where,FirebaseFirestoreTypes,doc, orderBy, onSnapsho
 import { blurhash } from '../../utils/index';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { useTheme,Text,Icon,Button } from 'react-native-paper';
+import { useTheme,Text,Icon,Button, Divider } from 'react-native-paper';
 import EvilIcons from 'react-native-vector-icons/EvilIcons';
 import SmallButton from 'app/components/SmallButton';
+import { FlashList } from '@shopify/flash-list';
 //import crashlytics from '@react-native-firebase/crashlytics'
 import { db } from 'FIrebaseConfig';
 const PostComponent = lazy(() => import('../components/PostComponent'))
@@ -229,24 +230,39 @@ const AccountScreen = () => {
       <View style={{flex:1,backgroundColor:theme.colors.background}}>
         {
         posts && posts.length > 0 ? (
-            posts.map((post) => (
-              <Suspense key={post.id} fallback={<ActivityIndicator size="small" color="#000" />}>
-                <View>
-                  <PostComponent
-                  auth_profile={post.auth_profile}
-                  count={post.like_count}
-                  url={post.imageUrl} 
-                  id={post.id} 
-                  name={post.name} 
-                  content={post.content} 
-                  date={post?.createdAt?.toDate().toLocaleString('en-US', {
-                  hour: '2-digit',
-                  minute: '2-digit',
-                  hour12: true})}
-                  comment_count={post.comment_count} />
-                </View>
-              </Suspense>
-            ))) : <View style={{flex:1,justifyContent:'center',alignItems:'center',paddingTop:50}}>
+          <FlashList
+              contentContainerStyle={{padding:0}}
+              data={posts}
+              estimatedItemSize={460}
+              onRefresh={onRefresh}
+              ListEmptyComponent={(item) => (
+                <View style={{flex:1,alignItems:'center',justifyContent:'center',paddingTop:5}}><Text variant='bodySmall' style={{color:theme.colors.tertiary,fontSize:16}}>No Post</Text></View>
+              )}
+              onEndReachedThreshold={0.1}
+              refreshing={refreshing}
+              ItemSeparatorComponent={()=> (
+                <Divider/>
+              )}
+              ListFooterComponent={() => (
+                 <ActivityIndicator color='#fff' size='small' animating={isloading}/>
+              )}
+              renderItem={({item}) => <Suspense fallback={<ActivityIndicator size='small' color='#000'/>}>
+                <PostComponent
+                auth_profile={item.auth_profile}
+                count={item.like_count}
+                url={item.imageUrl}
+                id={item.post_id}
+                name={item.name}
+                content={item.content}
+                date={item?.createdAt?.toDate().toLocaleString('en-US', {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    hour12: true})}
+                comment_count={item.comment_count}/>
+                </Suspense>}
+              keyExtractor={(item)=> item?.post_id?.toString() || Math.random().toString()}
+              />
+            ) : <View style={{flex:1,justifyContent:'center',alignItems:'center',paddingTop:50}}>
               <Text variant='bodySmall' style={{ color: '#fff', textAlign: 'center'}}>No posts available</Text></View>}
     </View>
     </ScrollView>
@@ -308,7 +324,7 @@ const AccountScreen = () => {
           </TouchableOpacity>
           <View style={{flexDirection:'row',paddingLeft:20,marginTop:10,justifyContent:'space-between',padding:5}}>
           <Image
-              style={{height:hp(7), aspectRatio:1, borderRadius:100,}}
+              style={{height:hp(7), aspectRatio:1, borderRadius:100,borderWidth:1}}
               source={users?.profileUrl}
               placeholder={{blurhash}}
               cachePolicy='none'/>

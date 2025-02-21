@@ -18,6 +18,7 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import { 
   addDoc, 
   collection, 
+  deleteDoc, 
   doc, 
   FirebaseFirestoreTypes, 
   onSnapshot, 
@@ -219,7 +220,7 @@ const PostComponent: React.FC<PostComponentProps> = ({
     const handleDelete = async () => {
       try {
         const messagesRef = doc(PostRef,id)
-        await messagesRef.delete()
+        await deleteDoc(messagesRef)
         Alert.alert('Post Deleted!')
       } catch (error) {
         console.error('Error deleting document: ', error);
@@ -228,7 +229,7 @@ const PostComponent: React.FC<PostComponentProps> = ({
     }
   return (
     
-    <SafeAreaView>
+    <View style={{flex:1}}>
       <Card
       elevation={0}
       style={{backgroundColor:'transparent'}}
@@ -346,7 +347,7 @@ const PostComponent: React.FC<PostComponentProps> = ({
     </Menu> 
       </View>
     </View>
-    <View>
+    <View style={{flex:1}}>
     <Modal
     animationType="fade"
     transparent={true}
@@ -374,9 +375,10 @@ const PostComponent: React.FC<PostComponentProps> = ({
              <ScrollView
              style={{flex:1,flexGrow:1}}
              >
+             <View style={{flex:1}}>
             <FlashList
             data={comments}
-            estimatedItemSize={460}
+            estimatedItemSize={500}
             keyExtractor={(item) => item?.id?.toString() || Math.random().toString()}
             renderItem={({item}) => (
               <CommentComponent
@@ -393,7 +395,8 @@ const PostComponent: React.FC<PostComponentProps> = ({
                     onReplyPress={(id,name) => {
                       setReplyingTo(id);
                       setReplyingToUsername(name);
-                    }}/>)}/></ScrollView>
+                    }}/>)}/>
+              </View></ScrollView>
            <View style={{ bottom: 0, padding: 20 }}>
                 <TextInput
                 mode='outlined'
@@ -412,7 +415,7 @@ const PostComponent: React.FC<PostComponentProps> = ({
   </View>
       </Card.Content>
       </Card>
-  </SafeAreaView>
+  </View>
   )
 }
 

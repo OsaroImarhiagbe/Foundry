@@ -246,8 +246,8 @@ const PostScreen = () => {
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         keyboardVerticalOffset={0}
         >
-        <View style={{flexDirection:'row',justifyContent:'space-between'}}>
-          <View style={{flexDirection:'row',alignItems:'center',padding:10}}>
+        <View style={{flexDirection:'row',justifyContent:'space-between',padding:10}}>
+          <View style={{flexDirection:'row',alignItems:'center'}}>
           <Button
           buttonColor={theme.colors.primary}
           textColor={theme.colors.tertiary}

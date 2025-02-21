@@ -347,7 +347,7 @@ const OtherUserScreen = () => {
           </TouchableOpacity>
           <View style={{flexDirection:'row',paddingLeft:20,marginTop:10,justifyContent:'space-between',paddingRight:20}}>
           <Image
-              style={{height:hp(7), aspectRatio:1, borderRadius:100,}}
+              style={{height:hp(7), aspectRatio:1, borderRadius:100,borderWidth:1}}
               source={users?.profileUrl}
               placeholder={{blurhash}}
               cachePolicy='none'/>

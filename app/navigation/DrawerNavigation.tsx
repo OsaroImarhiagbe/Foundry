@@ -71,7 +71,7 @@ const DrawerNavigation = () => {
               }}
               
               icon={ () => (<Icon
-                source="home"
+                source="logout"
                 color={theme.colors.tertiary}
                 size={20}/>)}
               onPress={handleLogout}
