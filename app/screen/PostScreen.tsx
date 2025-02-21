@@ -262,7 +262,7 @@ const PostScreen = () => {
           </View>
           <View style={{flexDirection:'row',alignItems:'center',padding:10}}>
           <TouchableWithoutFeedback style={styles.uploadImageButton} onPress={pickImage}>
-          <MaterialIcons name='camera-alt' size={25} color='#fff' />
+          <MaterialIcons name='camera-alt' size={25} color={theme.colors.tertiary}/>
         </TouchableWithoutFeedback>
         <Icon source='plus' size={30}/>
           </View>

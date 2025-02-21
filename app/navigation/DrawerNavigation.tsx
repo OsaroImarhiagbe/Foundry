@@ -101,7 +101,7 @@ const DrawerNavigation = () => {
         headerShown:false,
       }}/>
        <Drawer.Screen
-      name='Resource'
+      name='News'
       component={TestScreen}
       options={{
         drawerIcon:({focused,color,size}) => (
