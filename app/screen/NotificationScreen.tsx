@@ -13,13 +13,14 @@ import {
   SafeAreaView} from 'react-native'
 import {
   collection,
-  onSnapshot,
-  query} from '@react-native-firebase/firestore'
+  doc,
+  onSnapshot,} from '@react-native-firebase/firestore'
 import { useAuth } from '../authContext';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import color from '../../config/color';
 import { useTheme,Text } from 'react-native-paper';
 import { db,UsersRef,NotificationsRef} from 'FIrebaseConfig';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 //import crashlytics, { crash } from '@react-native-firebase/crashlytics'
 
 
@@ -33,6 +34,7 @@ const NotificationScreen = () => {
   const [messageNotifications,setMessageNotifications] = useState<Notification[]>([])
   const [notification,setNotification] = useState<Notification[]>([])
   const [refreshing, setRefreshing] = useState<boolean>(false);
+  const {top} = useSafeAreaInsets()
   const Tab = createMaterialTopTabNavigator()
   const theme = useTheme()
 
@@ -41,7 +43,7 @@ const NotificationScreen = () => {
     //crashlytics().log('Notification Screen: get Notifications')
     try{
       if(user){
-        const docRef = query(UsersRef,user?.userId,NotificationsRef)
+        const docRef = collection(db,'users',user?.userId,'notifications')
         const unsub = onSnapshot(docRef,(querySnapshot)=>{
         let messageOnly:Notification[] = []
         let all:Notification[] = []
@@ -54,11 +56,12 @@ const NotificationScreen = () => {
         setMessageNotifications([...messageOnly])
         setNotification([...all])
       })
-      return () => unsub()
+      return unsub
       }
     }catch(error:unknown | any){
       //crashlytics().recordError(error)
-      console.error('Error grabbing notifications',error.message)
+      console.error('Error grabbing notifications:',error.message)
+      return ()  => {}
     }
   },[user?.userId])
 
@@ -77,24 +80,13 @@ const NotificationScreen = () => {
 
 
 
-
   useEffect(() => {
-    if(!messageNotifications || !notification){
-      setMessageNotifications([])
-      setNotification([])
-      return
-    }
-    let unsub = () => {}
-    const getNotif = () => {
-     getNotifications()
-    }
-
-    getNotif()
+    const unsubscribe = getNotifications()
     return () => {
-      if(unsub) unsub()
+      unsubscribe
     }
-    
-  },[user?.userId,getNotifications])
+  }, [getNotifications])
+
 
 
   const MessagesNotifications = () => (
@@ -172,7 +164,7 @@ const NotificationScreen = () => {
   );
   return (
    <View style={[styles.screen,{backgroundColor:theme.colors.background}]}>
-    <View style={styles.headingContainer}>
+    <View style={[styles.headingContainer,{marginTop:top}]}>
     <Text
     variant='titleLarge'
     style={{
@@ -186,7 +178,7 @@ const NotificationScreen = () => {
   screenOptions={{
     swipeEnabled:true,
     tabBarIndicatorStyle:{
-      backgroundColor:theme.colors.tertiary
+      backgroundColor:theme.colors.primary
     },
     tabBarStyle:{
       backgroundColor:theme.colors.background
@@ -236,7 +228,6 @@ const styles = StyleSheet.create({
       flex:1,
     },
     headingContainer:{
-      paddingTop:90,
       padding:10,
     },
     notificationTitle:{

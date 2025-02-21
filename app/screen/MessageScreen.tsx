@@ -27,7 +27,7 @@ import { useNavigation } from '@react-navigation/native';
 import { FlashList } from '@shopify/flash-list';
 import { ActivityIndicator,Text,useTheme,Icon } from 'react-native-paper';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import crashlytics from '@react-native-firebase/crashlytics'
+//import crashlytics from '@react-native-firebase/crashlytics'
 import { ChatRoomsRef} from 'FIrebaseConfig';
 import SearchComponent from 'app/components/SearchComponent';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -60,7 +60,7 @@ const MessageScreen = () => {
   const onRefresh = useCallback(() => {
     setRefreshing(true);
     try{
-        crashlytics().log('Grabbing Users Message')
+        //crashlytics().log('Grabbing Users Message')
         if (!users) {
           setUsers([]);
           return;
@@ -75,12 +75,12 @@ const MessageScreen = () => {
           setLastVisible(querySnapshot.docs[querySnapshot.docs.length - 1])
           setHasMore(querySnapshot.docs.length > 0)
         },(err)=>{
-          crashlytics().recordError(err)
+          //crashlytics().recordError(err)
           console.error(`Failed to grab users: ${err.message}`)
         })
         return unsub
     }catch(error:any){
-      crashlytics().recordError(error)
+      //crashlytics().recordError(error)
     }finally{
     setRefreshing(false); 
     }
@@ -88,7 +88,7 @@ const MessageScreen = () => {
 
   useEffect(() => {
     const grabMessageSent = () => {
-      crashlytics().log('Grabbing Users Message')
+      //crashlytics().log('Grabbing Users Message')
       if (!users) {
         setUsers([]);
         return;
@@ -103,7 +103,7 @@ const MessageScreen = () => {
         setLastVisible(querySnapshot.docs[querySnapshot.docs.length - 1])
         setHasMore(querySnapshot.docs.length > 0)
       },(err)=>{
-        crashlytics().recordError(err)
+        //crashlytics().recordError(err)
         console.error(`Failed to grab users: ${err.message}`)
       })
       return unsub
@@ -112,7 +112,7 @@ const MessageScreen = () => {
   },[users])
   
   const fetchMoreMessage = async () => {
-    crashlytics().log('Fetch more Message')
+    //crashlytics().log('Fetch more Message')
     if (loadingMore || !hasMore) return;
     if (!user?.userId) return;
     if (users.length <= 2) {
@@ -139,7 +139,7 @@ const MessageScreen = () => {
       setLastVisible(snapshot.docs[snapshot.docs.length - 1]);
       setHasMore(snapshot.docs.length > 0);
     } catch (error:unknown | any) {
-      crashlytics().recordError(error)
+      //crashlytics().recordError(error)
       console.error(`Error fetching more posts: ${error}`);
     } finally {
       setLoadingMore(false);
@@ -152,7 +152,7 @@ const MessageScreen = () => {
       <View style={{flexDirection:'row',alignItems:'center',justifyContent:'space-between',marginTop:top,padding:10}}>
         <TouchableOpacity onPress={() => navigation.navigate('Dash')}>
         <Icon source='arrow-left-bold-circle' size={25}/>
-        </TouchableOpacity>
+        </TouchableOpacity>3
         <SearchComponent title='Search Message...'/>
       <Icon source='dots-horizontal' size={25}/>
       <Icon source='message' size={25}/>

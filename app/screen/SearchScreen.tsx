@@ -14,7 +14,7 @@ import color from '../../config/color';
 import { useNavigation } from '@react-navigation/native';
 import { useDispatch,useSelector } from 'react-redux';
 import { addsearchID } from '../features/search/searchSlice';
-import {collection}from '@react-native-firebase/firestore';
+import {collection, getDocs, query, where}from '@react-native-firebase/firestore';
 import useDebounce from '../hooks/useDebounce';
 import SearchFilter from '../components/SearchFilter';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -22,7 +22,7 @@ import { useTheme } from 'react-native-paper';
 import { Image } from 'expo-image';
 import { blurhash } from 'utils';
 import { useAuth } from 'app/authContext';
-import { db } from 'FIrebaseConfig';
+import { db, UsersRef } from 'FIrebaseConfig';
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import crashlytics from '@react-native-firebase/crashlytics'
 
@@ -73,13 +73,11 @@ const SearchScreen = () => {
     setLoading(true)
     if(searchQuery.trim() === '') return;
     try{
-      let queryRef = collection(db,'users')
-      .where('username', '>=', searchQuery)
-      .where('username', '<=', searchQuery + '\uf8ff')
+      let queryRef = query(UsersRef, where('username', '>=', searchQuery),where('username', '<=', searchQuery + '\uf8ff'))
       if(skills_array.length > 0){
-        queryRef = queryRef.where('skills','array-contains-any',skills_array)
+        queryRef = query(queryRef,where('skills','array-contains-any',skills_array))
       }
-      const querySnapShot = await queryRef.get()
+      const querySnapShot = await getDocs(queryRef)
       let user:Results[]= []
       querySnapShot.docs.forEach(documentSnapShot => {
         user.push({...documentSnapShot.data(),id:documentSnapShot.id})
@@ -104,6 +102,7 @@ const SearchScreen = () => {
           placeholder={{blurhash}}
           />
           <SearchComponent
+          title='Search...'
           setSearchQuery={setSearchQuery} 
           backgroundColor={color.grey}
           color='#00bf63'

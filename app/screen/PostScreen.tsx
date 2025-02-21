@@ -20,9 +20,11 @@ import * as ImagePicker from 'expo-image-picker';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import {
   addDoc,
-  Timestamp}from '@react-native-firebase/firestore'
+  collection,
+  Timestamp,
+  updateDoc}from '@react-native-firebase/firestore'
 import color from '../../config/color';
-import storage from '@react-native-firebase/storage'
+import {getDownloadURL, getStorage,putFile,ref} from '@react-native-firebase/storage'
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useTheme,Icon,Text,Button,Divider } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -33,7 +35,8 @@ import {
   MenuTrigger,
 } from 'react-native-popup-menu';
 import { MenuItems } from '../components/CustomMenu'
-import { PostRef } from 'FIrebaseConfig';
+import { db, PostRef } from 'FIrebaseConfig';
+import { storage } from 'FIrebaseConfig';
 type NavigationProp = {
   Dash:undefined
 }
@@ -54,12 +57,14 @@ const PostScreen = () => {
   const textInputRef = useRef<TextInput>(null);
   const [category, setCategory] = useState<string>('')
 
+  
+
  
   const dispatch = useDispatch();
   useEffect(() => {
     const timeout = setTimeout(() => {
       textInputRef.current?.focus();
-    }, 100);
+    }, 1000);
 
     return () => clearTimeout(timeout);
   }, []);
@@ -68,33 +73,34 @@ const PostScreen = () => {
     setLoading(true);
     try {
       const newDoc = await addDoc(PostRef,{
-        auth_id:user.uid,
-        auth_profile:user.profileUrl,
+        auth_id:user?.userId,
         name:user?.username,
-        content: text,
+        content:text,
         like_count: null,
         comment_count: null,
         liked_by: null,
+        category:category,
         createdAt: Timestamp.fromDate(new Date())
       })
       let imageUrl = null;
-      if(image){
-        const ref = storage().ref(`/posts/images/${newDoc.id}/${filename}`)
-        await ref.putFile(image)
-        imageUrl = await ref.getDownloadURL()
+      if(image && filename){
+        const imageRef = ref(storage,`/posts/images/${newDoc.id}/${filename}`)
+        await putFile(imageRef,image)
+        imageUrl = await getDownloadURL(imageRef)
       }
-      await newDoc.update({
+      await updateDoc(newDoc,{
         imageUrl:imageUrl,
         post_id: newDoc.id
       })
       setTimeout(() => {
-        navigation.navigate('Dash');
+        navigation.goBack();
       }, 1000);
       dispatch(addPost({ id: newDoc.id, content: text }));
       setText('');
       setImage(null);
-    } catch (error:any) {
-      console.error("Error creating room:", error.message);
+      setCategory('');
+    } catch (error:unknown | any) {
+      console.error("Error creating room:", error);
     }finally{
       setLoading(false);
     }
@@ -190,6 +196,7 @@ const PostScreen = () => {
       <MenuItems 
         text='Collaboration and Community'
         action={()=>setCategory('Collaboration and Community')}/>
+      <Divider/>
       <MenuItems 
         text='Startup and Busniess'
         action={()=>setCategory('Statup and Busniess')}/>
@@ -219,7 +226,7 @@ const PostScreen = () => {
         >{category}</Text>
         <TextInput
           ref={textInputRef}
-          style={styles.textArea}
+          style={[styles.textArea,{color:theme.colors.tertiary}]}
           value={text}
           onChangeText={(text) => setText(text)}
           numberOfLines={10}
@@ -286,7 +293,6 @@ const styles = StyleSheet.create({
   },
   text: {
     textAlign: 'center',
-    color: '#ffffff',
     fontSize: 12,
   },
   textContainer: {

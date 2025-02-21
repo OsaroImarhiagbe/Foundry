@@ -50,14 +50,6 @@ const OtherUserScreenWrapper = () => {
   )
 
 }
-const SecondStackNavigationWrapper = () => {
-  return (
-    <Suspense fallback={<ActivityIndicator size='small' color='#000'/>}>
-    <SecondStackNavigation/>
-  </Suspense>
-  )
-}
-
 const EditInputScreenWrapper = () =>{
   return (
       <Suspense fallback={<ActivityIndicator size='small' color='#000'/>}>

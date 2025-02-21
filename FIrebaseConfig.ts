@@ -2,9 +2,11 @@ import {getApp} from "@react-native-firebase/app";
 import { getFirestore ,collection} from "@react-native-firebase/firestore";
 import { getMessaging } from "@react-native-firebase/messaging";
 import {getAuth}from '@react-native-firebase/auth';
+import {getStorage} from '@react-native-firebase/storage'
 const app = getApp();
 export const auth = getAuth(app)
 export const db = getFirestore(app);
+export const storage = getStorage(app)
 export const messaging = getMessaging(app);
 export const PostRef = collection(db,'posts')
 export const ChatRoomsRef = collection(db,'chat-rooms')

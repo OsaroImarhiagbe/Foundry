@@ -32,31 +32,31 @@ const PostComponent = lazy(() => import('../components/PostComponent'))
 
 const Spacer = ({ height = 16 }) => <View style={{ height }} />;
 
-interface Post{
-  id: string;
+type Post = {
+
+  id?: string;
   auth_profile?: string;
   like_count?: number;
   imageUrl?: string;
   post_id?: string;
   name?: string;
   content?: string;
+  category?:string;
   createdAt?: FirebaseFirestoreTypes.Timestamp
   comment_count?: number;
   mount?:boolean
 };
 
-const Post = () => (
-  <ScrollView scrollEnabled style={{flex:1,backgroundColor:color.backgroundcolor}}>
-    <View style={{flex:1,backgroundColor:color.backgroundcolor}}>
-      <Text>hi</Text>
-  </View>
-  </ScrollView>
+// const Post = () => (
+//   <ScrollView scrollEnabled style={{flex:1,backgroundColor:color.backgroundcolor}}>
+//     <View style={{flex:1,backgroundColor:color.backgroundcolor}}>
+//       <Text>hi</Text>
+//   </View>
+//   </ScrollView>
   
-); 
+// ); 
 
 const HomeScreen = () => {
-
-  const navigation = useNavigation();
   const theme = useTheme()
   const dispatch = useDispatch()
   const [refreshing, setRefreshing] = useState<boolean>(false);
@@ -66,13 +66,16 @@ const HomeScreen = () => {
   const [lastVisible, setLastVisible] = useState<FirebaseFirestoreTypes.QueryDocumentSnapshot<FirebaseFirestoreTypes.DocumentData> | null>(null);
   const [loadingMore, setLoadingMore] = useState<boolean>(false);
   const [hasMore, setHasMore] = useState<boolean>(true);
+  const [category,setCategory] = useState('')
   const [mount, setMount] = useState<boolean>(false)
   const scrollY = useState(new Animated.Value(0))[0];
   const dark_or_light = useColorScheme()
 
 
-  const memoPost = useMemo(() => {return post},[post])
-
+  const memoPost = useMemo(() => {
+    return post?.filter((name) => name?.category?.includes('Creativity and Innovation'));
+  }, [post]);
+  
   // const headerOpacity = scrollY.interpolate({
   //   inputRange: [0, 250],
   //   outputRange: [1, 0],

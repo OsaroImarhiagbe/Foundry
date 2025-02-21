@@ -13,16 +13,15 @@ interface SearchProp{
   title?:string,
 }
 
-const SearchComponent:React.FC<SearchProp> = ({backgroundColor,color,onPress, setSearchQuery,searchQuery,title}) => {
+const SearchComponent:React.FC<SearchProp> = ({color,onPress, setSearchQuery,searchQuery,title}) => {
   const theme = useTheme()
   return (
    <Searchbar
     onIconPress={onPress}
     placeholder={title}
     style={{
-    justifyContent:'space-between',
-    width:wp('65%'),
-    backgroundColor:theme.colors.onTertiary
+      width:wp('65%'),
+      backgroundColor:theme.colors.onTertiary
     }}
     onChangeText={setSearchQuery}
     value={searchQuery}

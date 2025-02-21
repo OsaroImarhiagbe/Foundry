@@ -11,16 +11,16 @@ import {View} from 'react-native'
 import color from '../../config/color'
 import { useDispatch} from 'react-redux';
 import { addSkills } from '../features/Skill/skillSlice';
+import { useTheme } from 'react-native-paper';
 
 
 
 const SearchFilter = () => {
     const [searchSkills,setSearchSkills] = useState<string[]>([])
     const dispatch = useDispatch()
+    const theme = useTheme()
 
     useEffect(()=>{
-        console.log('skill',searchSkills)
-
     },[searchSkills])
     const Divider = () => {
         return (
@@ -41,7 +41,7 @@ const SearchFilter = () => {
     <Menu>
           <MenuTrigger>
           <View>
-          <MaterialCommunityIcons name='filter-variant' size={20} color='#fff'/>
+          <MaterialCommunityIcons name='filter-variant' size={25} color={theme.colors.tertiary}/>
           </View>
       </MenuTrigger>
           <MenuOptions

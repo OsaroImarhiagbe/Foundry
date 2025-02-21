@@ -15,7 +15,16 @@ import { Image } from 'expo-image';
 import EvilIcons from 'react-native-vector-icons/EvilIcons'
 import { useAuth } from '../authContext';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import firestore, { FirebaseFirestoreTypes } from '@react-native-firebase/firestore';
+import { 
+  addDoc, 
+  collection, 
+  doc, 
+  FirebaseFirestoreTypes, 
+  onSnapshot, 
+  orderBy, 
+  query, 
+  runTransaction, 
+  Timestamp } from '@react-native-firebase/firestore';
 import { useSelector} from 'react-redux';
 import CommentComponent from './CommentComponent';
 import ReplyComponent from './ReplyComponent';
@@ -36,6 +45,7 @@ import {
   MenuTrigger,
 } from 'react-native-popup-menu';
 import { MenuItems } from '../components/CustomMenu'
+import { db, PostRef } from 'FIrebaseConfig';
 interface PostComponentProps {
   auth_profile?: string;
   count?: number;
@@ -96,8 +106,10 @@ const PostComponent: React.FC<PostComponentProps> = ({
  
 
     useEffect(() => {
-      const docRef = firestore().collection('posts').doc(id)
-       const subscriber =  docRef.collection('comments').orderBy('createdAt','desc').onSnapshot((querySnapShot) => {
+      const docRef = doc(PostRef,id)
+      const commentRef = collection(docRef,'comments')
+      const q = query(commentRef, orderBy('createdAt','desc'))
+       const subscriber = onSnapshot(q, (querySnapShot) => {
               if (!querySnapShot || querySnapShot.empty) {
                 setComment([]);
                 return;
@@ -117,9 +129,9 @@ const PostComponent: React.FC<PostComponentProps> = ({
     const handleLike = async () => {
 
       setLoading(true)
-      const docRef = firestore().collection('posts').doc(id);
+      const docRef = doc(PostRef,id);
       try{
-        await firestore().runTransaction(async (transaction)=>{
+        await runTransaction(db,async (transaction)=>{
           const doc = await transaction.get(docRef)
           if (!doc.exists) throw new Error ('Document doesnt exists');
 
@@ -153,17 +165,13 @@ const PostComponent: React.FC<PostComponentProps> = ({
         if(!text) return;
         setLoading(true)
           try{
-            const docRef = firestore()
-            .collection('posts')
-            .doc(id)
-            .collection('comments')
-            .doc(replyingTo)
-            .collection('replys')
-            const newDoc = await docRef.add({
+            const docRef = doc(PostRef,id)
+            const commetRef = collection(docRef,'comments',replyingTo,'replys')
+            const newDoc = await addDoc(commetRef,{
               id:user.userId,
               name: user?.username,
               content:text,
-              createdAt: firestore.Timestamp.fromDate(new Date()),
+              createdAt: Timestamp.fromDate(new Date()),
               parentId:replyingTo
             })
             await newDoc.update({
@@ -179,19 +187,20 @@ const PostComponent: React.FC<PostComponentProps> = ({
         }else{
           if(text.trim() === " ") return;
           try{
-            const docRef = firestore().collection('posts').doc(id).collection('comments')
-            const newDoc = await docRef.add({
+            const docRef = doc(PostRef,id)
+            const commetRef = collection(docRef,'comments')
+            const newDoc = await addDoc(commetRef,{
               parentId:null,
               content:text,
               auth_profile:auth_profile,
               name:user?.username,
-              createdAt: firestore.Timestamp.fromDate(new Date())
+              createdAt: Timestamp.fromDate(new Date())
             })
             await newDoc.update({
               id:newDoc.id
             })
-            const postDocRef = firestore().collection('posts').doc(id)
-            await firestore().runTransaction(async (transaction)=>{
+            const postDocRef = doc(PostRef,id)
+            await runTransaction(db,async (transaction)=>{
               const doc = await transaction.get(postDocRef)
               if (!doc.exists) throw new Error('Doc does not exists!!')
               const commentCount = doc?.data()?.comment_count || 0
@@ -209,7 +218,7 @@ const PostComponent: React.FC<PostComponentProps> = ({
 
     const handleDelete = async () => {
       try {
-        const messagesRef = firestore().collection('posts').doc(id)
+        const messagesRef = doc(PostRef,id)
         await messagesRef.delete()
         Alert.alert('Post Deleted!')
       } catch (error) {

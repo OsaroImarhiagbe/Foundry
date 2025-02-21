@@ -1,20 +1,15 @@
 import React,
 {
-  useEffect,
   useState,
   lazy,
   Suspense
 }from 'react'
 import {
     View,
-    ScrollView,
     StyleSheet,
-    TouchableOpacity,
-    useWindowDimensions,
-    useColorScheme} from 'react-native'
+    TouchableOpacity} from 'react-native'
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
+import {heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import {Image} from 'expo-image'
 import { useAuth } from '../authContext';
 import { blurhash } from '../../utils';
@@ -24,9 +19,8 @@ import { TouchableWithoutFeedback } from 'react-native-gesture-handler';
 import { FAB } from 'react-native-paper';
 import Entypo from 'react-native-vector-icons/Entypo';
 import {ActivityIndicator} from 'react-native-paper';
-import { FirebaseFirestoreTypes } from '@react-native-firebase/firestore';
-import crashlytics from '@react-native-firebase/crashlytics'
-
+import HomeScreen from '../screen/HomeScreen';
+import FeedScreen from '../screen/FeedScreen';
 
 
 type NavigationProp = {
@@ -37,28 +31,28 @@ type NavigationProp = {
   Post:undefined
 }
 const Tab = createMaterialTopTabNavigator();
-const FeedScreen = lazy(() => import('../screen/FeedScreen'))
-const HomeScreen = lazy(() => import('../screen/HomeScreen'))
+//const FeedScreen = lazy(() => import('../screen/FeedScreen'))
+//const HomeScreen = lazy(() => import('../screen/HomeScreen'))
 
-const FeedScreenWrapper = () => {
+// const FeedScreenWrapper = () => {
   
-  return (
-    <Suspense fallback={<ActivityIndicator size='small' color='#fff'/>}>
-    <FeedScreen/>
-  </Suspense>
+//   return (
+//     <Suspense fallback={<ActivityIndicator size='small' color='#fff'/>}>
+//     <FeedScreen/>
+//   </Suspense>
 
-  )
-}
+//   )
+// }
 
-const HomeScreenWrapper = () => {
+// const HomeScreenWrapper = () => {
   
-  return (
-    <Suspense fallback={<ActivityIndicator size='small' color='#fff'/>}>
-    <HomeScreen/>
-  </Suspense>
+//   return (
+//     <Suspense fallback={<ActivityIndicator size='small' color='#fff'/>}>
+//     <HomeScreen/>
+//   </Suspense>
 
-  )
-}
+//   )
+// }
 
 
 
@@ -67,16 +61,10 @@ const DashBoardScreen = () => {
     const navigation = useNavigation<NavigationProp>()
     const [loading,setLoading] = useState<boolean>(false)
     const theme = useTheme()
-  
-    
-    
-    const handlePress = () => {
-    navigation.openDrawer();
-  } 
   return (
     <View style={{flex:1,paddingTop:hp(5),backgroundColor:theme.colors.background}}> 
         <View style={{alignItems:'center',paddingTop:20,flexDirection:'row',justifyContent:'space-between',padding:10,backgroundColor:'transparent'}}>
-        <TouchableWithoutFeedback onPress={handlePress}>
+        <TouchableWithoutFeedback onPress={() => navigation.openDrawer()}>
         <Image
         style={{height:hp(4.3), aspectRatio:1, borderRadius:100}}
         source={user?.profileUrl}
@@ -112,11 +100,11 @@ const DashBoardScreen = () => {
     >
         <Tab.Screen
         name='For You'
-        component={FeedScreenWrapper}
+        component={FeedScreen}
         />
         <Tab.Screen
         name='Community'
-        component={HomeScreenWrapper}
+        component={HomeScreen}
         />
         </Tab.Navigator>
         <FAB
