@@ -10,7 +10,7 @@ import { db,auth,functions } from 'FIrebaseConfig';
 import {httpsCallable} from '@react-native-firebase/functions'
 export const AuthContext = createContext<any>(null);
 
-interface User {
+type User = {
     name?:string,
     username?:string,
     email?:string,
@@ -19,7 +19,7 @@ interface User {
     
 }
 
-interface AuthContextProviderProps {
+interface AuthContextProviderProps  {
     children: ReactNode;
   }
   

@@ -4,14 +4,18 @@ import notifee, { EventType } from '@notifee/react-native'
 import { useNavigation } from '@react-navigation/native';
 import { FirebaseMessagingTypes } from '@react-native-firebase/messaging';
 import { useAuth } from './authContext';
-import { db, messaging } from 'FIrebaseConfig';
+import {messaging,UsersRef } from 'FIrebaseConfig';
 import { doc, setDoc } from '@react-native-firebase/firestore';
 //import crashlytics from '@react-native-firebase/crashlytics'
 
 const NotificationContext = createContext<any>(null);
 
 export const useNotification = () => {
-  return useContext(NotificationContext);
+  const context = useContext(NotificationContext);
+  if(!context){
+    throw new Error('must use Notification context')
+  }
+  return context
 };
 
 interface NotificationProp {
@@ -56,19 +60,20 @@ export const NotificationProvider = ({ children }:NotificationProp) => {
         //crashlytics().recordError(error)
         console.error('Error with notification permission:',error.message)
     }
-  }, [notification]);
+  }, []);
    
     useEffect(() => {
       //crashlytics().log('Notifcation Provider: Getting token')
       if (!user?.userId) return;
       const fetchToken = async () => {
         try{
-            await notifee.requestPermission();
-            const token = await messaging.getToken();
-            if (!token) throw new Error('Failed to get FCM token');      
-            await setDoc(doc(db,"users",user.userId),{
-                token:token 
-            },{merge:true})
+          await messaging.registerDeviceForRemoteMessages()
+          await notifee.requestPermission();
+          const token = await messaging.getToken();
+          if (!token) throw new Error('Failed to get FCM token');      
+          await setDoc(doc(UsersRef,user.userId),{
+            token:token
+          },{merge:true})
         }catch(error: unknown | any){
           //crashlytics().recordError(error)
           console.error('Error grabbing token:',error)
@@ -78,23 +83,37 @@ export const NotificationProvider = ({ children }:NotificationProp) => {
       }, [user?.userId]);
 
 
-    const handleNotificationClick = async (response:any) => {
-        const screen = response?.notification?.request?.content?.data?.screen;
+    const handleNotificationClick = useCallback((notification:unknown | any) => {
+        const screen = notification?.data?.screen;
         if (screen && typeof screen == 'string') {
-          navigation.navigate(`${screen}` as never );
+          navigation.navigate(`${screen}` as never);
         }
-    };
+    },[navigation]);
 
-      useEffect(() => {
-        const Foreunsubscribe = notifee.onForegroundEvent(async ({type,detail}) => {
+    const handlePushNotification = useCallback(async (remoteMessage:FirebaseMessagingTypes.RemoteMessage): Promise<void> => {
+      const notification = remoteMessage.notification
+      const data = remoteMessage?.data
+      if(notification?.title && notification?.body){
+        await showNotification(notification?.title,notification?.body,data)
+      }
+    },[showNotification])
+
+
+    useEffect(() => {
+      const unsub = messaging.onMessage(handlePushNotification)
+      return unsub
+    },[handlePushNotification])
+    
+    useEffect(() => {
+      const Foreunsubscribe = notifee.onForegroundEvent(({type,detail}) => {
             if(type === EventType.PRESS){
-                await handleNotificationClick(detail.notification)
+              handleNotificationClick(detail.notification)
             }
         });
 
         notifee.onBackgroundEvent(async ({type,detail})=>{
             if(type === EventType.PRESS){
-                await handleNotificationClick(detail.notification)
+              handleNotificationClick(detail.notification)
             }
         });
 
@@ -104,7 +123,7 @@ export const NotificationProvider = ({ children }:NotificationProp) => {
       },[handleNotificationClick])
 
     useEffect(() => {
-      messaging.onNotificationOpenedApp((remoteMessage:FirebaseMessagingTypes.RemoteMessage) => {
+      const backgroundOpenApp = messaging.onNotificationOpenedApp((remoteMessage:FirebaseMessagingTypes.RemoteMessage) => {
         console.log(
           "Notification caused app to open from background state:",
           remoteMessage?.data?.screen,
@@ -114,9 +133,7 @@ export const NotificationProvider = ({ children }:NotificationProp) => {
           navigation.navigate(`${remoteMessage?.data?.screen}` as never );
         }
       });
-
-    
-        messaging.getInitialNotification().then((remoteMessage) => {
+      messaging.getInitialNotification().then((remoteMessage) => {
             if (remoteMessage) {
                 console.log(
                 "Notification caused app to open from quit state:",
@@ -127,22 +144,11 @@ export const NotificationProvider = ({ children }:NotificationProp) => {
                 }
       }
     });
-    const unsubscribe = messaging.setBackgroundMessageHandler(handlePushNotification)
-       return unsubscribe
+    messaging.setBackgroundMessageHandler(handlePushNotification)
+    return () => backgroundOpenApp()
 
-    },[handleNotificationClick])
-    
-    const handlePushNotification = useCallback(async (remoteMessage:FirebaseMessagingTypes.RemoteMessage): Promise<void> => {
-      const notification = remoteMessage.notification
-      const data = remoteMessage?.data
-      if(notification?.title && notification?.body){
-        showNotification(notification?.title,notification?.body,data)
-      }
-    },[showNotification])
+    },[navigation,handleNotificationClick])
 
-    useEffect(() => {
-      messaging.onMessage(handlePushNotification)
-    },[])
 
   return (
     <NotificationContext.Provider value={{ showNotification }}>
