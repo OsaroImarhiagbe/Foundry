@@ -6,14 +6,13 @@
  *
  * See a full list of supported triggers at https://firebase.google.com/docs/functions
  */
-
-import {onCall, HttpsError, CallableRequest} from "firebase-functions/v2/https";
-import logger from "firebase-functions/logger";
-import * as admin from "firebase-admin";
-import {onDocumentCreated} from "firebase-functions/v2/firestore";
-admin.initializeApp();
-const db = admin.firestore()
-const message = admin.messaging()
+const {logger} = require("firebase-functions/v2");
+const {onCall,HttpsError} = require("firebase-functions/v2/https");
+const {onDocumentCreated} = require("firebase-functions/v2/firestore");
+const {initializeApp} = require("firebase-admin/app");
+const {getFirestore,FieldValue} = require("firebase-admin/firestore");
+const {getMessaging} = require("firebase-admin/messaging")
+initializeApp();
 // Create and deploy your first functions
 // https://firebase.google.com/docs/functions/get-started
 
@@ -28,7 +27,7 @@ const message = admin.messaging()
  */
 async function getUserDeviceToken(userId: string): Promise<string | null> {
   try {
-    const userDoc = await admin.firestore()
+    const userDoc = await getFirestore()
       .collection("users")
       .doc(userId)
       .get();
@@ -67,22 +66,75 @@ async function sendNotification(userId: string,
       data: notification.data,
       token,
     };
-    await message.send(payload);
+    await getMessaging().send(payload);
     logger.info(`Notification sent successfully to user: ${userId}`);
   } catch (error) {
     logger.error("Error sending notification:", error);
     throw new Error("Failed to send notification");
   }
 }
-exports.checkAuthUser = onCall((request:CallableRequest<unknown>) => {
+exports.addMessage = onCall(async (request:unknown | any) => {
   if (!request.auth) {
     throw new HttpsError(
       "unauthenticated", "This endpoint requires authentication");
   }
-  return {authenticated: true, uid: request.auth.uid};
+  const newMessage = request.data.text 
+  const roomId = request.data.roomId
+  const senderName = request.data.senderName
+  const recipientName = request.data.recipientName
+  const senderId = request.data.senderId
+  const recipientId = request.recipientId
+  await getFirestore()
+  .collection("chat-rooms")
+  .doc(roomId)
+  .collection("messages")
+  .add({
+    senderId:senderId,
+    recipentId:recipientId,
+    roomId:roomId,
+    senderName:senderName,
+    recipientName:recipientName,
+    text:newMessage,
+    createdAt:FieldValue.serverTimestamp(new Date())
+  })
+  return {success:true, msg:'Message sent!'}
 });
-exports.newUser = onDocumentCreated("users/{userId}",
-  async (event) => {
+exports.newChatRooomMessage = onDocumentCreated("/chat-rooms/{roomId}/messages/{messageId}",
+  async (event: unknown | any) => {
+    try {
+      const snapshot = event.data;
+      if (!snapshot) {
+        logger.warn("No data associated with the event");
+        return {success: false, error: "No data found"};
+      }
+      const messageData = snapshot.data();
+      const roomId = event.params.roomId
+      const roomDoc = await getFirestore().collection("chat-rooms").doc(roomId).get();
+      if (!roomDoc.exists) {
+        logger.warn(`Room ${roomId} not found`);
+        return {success: false, error: "Room not found"};
+      }
+      const roomData = roomDoc.data();
+      const participantId = roomData?.recipientId.find((Id: string) => Id !== messageData.senderId);
+      if(participantId){
+        await sendNotification(participantId, {
+          title: "New Message",
+          body: `You have a new message from ${roomData?.senderName}`,
+          data: {
+            roomId,
+            messageId: snapshot.id,
+            type: "new_message",
+          },
+        });
+      }
+      return {success: true};
+    } catch (error) {
+      logger.error("Error processing new message:", error);
+      throw new Error("Failed to process new message notification");
+    }
+  });
+exports.newUser = onDocumentCreated("/users/{userId}",
+  async (event:unknown | any) => {
     try {
       const snapshot = event.data
       if (!snapshot) {
@@ -105,42 +157,7 @@ exports.newUser = onDocumentCreated("users/{userId}",
       throw new Error("Failed to process new message notification");
     }
   });
-exports.newMessage = onDocumentCreated("chat-rooms/{roomId}/messages/{messageId}",
-  async (event) => {
-    try {
-      const snapshot = event.data;
-      if (!snapshot) {
-        logger.warn("No data associated with the event");
-        return {success: false, error: "No data found"};
-      }
-      const messageData = snapshot.data();
-      const roomId = messageData.roomId
-      const roomDoc = await db.collection("chat-rooms").doc(roomId).get();
-      if (!roomDoc.exists) {
-        logger.warn(`Room ${roomId} not found`);
-        return {success: false, error: "Room not found"};
-      }
-      const roomData = roomDoc.data();
-      const participantsToNotify = roomData?.recipientId.filter(
-        (Id: string) => Id !== messageData.senderId);
-      const notificationPromises = participantsToNotify.map(
-        (Id: string) => sendNotification(Id, {
-          title: "New Message",
-          body: `You have a new message from ${roomData?.senderName}`,
-          data: {
-            roomId,
-            messageId: snapshot.id,
-            type: "new_message",
-          },
-        }));
-      await Promise.all(notificationPromises);
-      return {success: true};
-    } catch (error) {
-      logger.error("Error processing new message:", error);
-      throw new Error("Failed to process new message notification");
-    }
-  });
-exports.sendTestNotification = onCall((request:CallableRequest<unknown>) => {
+exports.sendTestNotification = onCall((request: unknown | any) => {
   if (!request.auth) {
     throw new HttpsError("unauthenticated", "Authentication required");
   }

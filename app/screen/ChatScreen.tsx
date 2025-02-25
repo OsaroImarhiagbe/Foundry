@@ -17,7 +17,8 @@ import MessageItem from '../components/MessageItem';
 import { FlashList } from '@shopify/flash-list';
 import { TextInput,useTheme } from 'react-native-paper';
 import crashlytics, { crash } from '@react-native-firebase/crashlytics'
-import { db } from 'FIrebaseConfig';
+import { db,functions } from 'FIrebaseConfig';
+import {httpsCallable} from '@react-native-firebase/functions'
 type ChatScreenRouteProp = RouteProp<{ Chat: { item: any,userid:string,name:string } }, 'Chat'>;
 
 const ChatScreen = () => {
@@ -31,14 +32,12 @@ const ChatScreen = () => {
   const flashListRef = useRef<FlashList<any> | null>(null);
   const theme = useTheme()
   const inputRef = useRef<any>(null)
-
-
   
   const recipentNamec = userid ? name  : item?.userId ? item.name : 'Unknown Recipient';
   useEffect(() => {
     const timeout = setTimeout(() => {
       inputRef.current?.focus();
-    }, 100);
+    }, 1000);
 
     return () => clearTimeout(timeout);
   }, []);
@@ -69,7 +68,6 @@ const ChatScreen = () => {
   const createRoom = async () => {
     crashlytics().log('Chat Screen: Creating Chat Room')
     try{
-      
       const roomId = userid ? getRoomID(user?.userId, userid) : item?.userId ? getRoomID(user?.userId, item?.userId) : ''
       const id = userid ? userid : item?.userId
       await setDoc(doc(db,'chat-rooms',roomId), {
@@ -88,25 +86,38 @@ const ChatScreen = () => {
 
   const handleSend = async () => {
     crashlytics().log('Chat Screen: Sening Messages ')
-    const id = userid ? userid : item?.userId
-    if(!messageText.trim()) return;
+    if(messageText.trim() === '') return;
     try{
+      const addMessage = httpsCallable(functions,'addMessage')
+      const id = userid ? userid : item?.userId
       const roomId = userid
       ? getRoomID(user?.userId, userid)
       : item?.userId
       ? getRoomID(user?.userId, item.userId)
       : '';
-      const docRef = doc(db,'chat-rooms',roomId);
-      const messageRef = collection(docRef,'messages')
-      await addDoc(messageRef, {
+      await addMessage({
         senderId:user?.userId,
-        recipentId:id,
-        id:messageRef.doc().id,
-        text:messageText,
+        recipentId:[id],
+        roomId:roomId,
         senderName: user?.username,
         recipentName:recipentNamec,
-        createdAt: Timestamp.fromDate(new Date())
+        text:messageText,
+      }).then((results) => {
+        console.log(results)
+      }).catch((error) => {
+        console.log(error)
       })
+      //const docRef = doc(db,'chat-rooms',roomId);
+      //const messageRef = collection(docRef,'messages')
+      // await addDoc(messageRef, {
+      //   senderId:user?.userId,
+      //   recipentId:id,
+      //   id:messageRef.doc().id,
+      //   text:messageText,
+      //   senderName: user?.username,
+      //   recipentName:recipentNamec,
+      //   createdAt: Timestamp.fromDate(new Date())
+      // })
       setMessageText('');
       inputRef.current?.focus();
       if (flashListRef.current) {
