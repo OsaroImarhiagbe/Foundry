@@ -6,7 +6,8 @@ import {
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {GoogleSignin,statusCodes,} from '@react-native-google-signin/google-signin';
 //import crashlytics from '@react-native-firebase/crashlytics'
-import { db,auth } from 'FIrebaseConfig';
+import { db,auth,functions } from 'FIrebaseConfig';
+import {httpsCallable} from '@react-native-firebase/functions'
 export const AuthContext = createContext<any>(null);
 
 interface User {
@@ -127,10 +128,19 @@ export const AuthContextProvider = ({children}:AuthContextProviderProps) => {
         //crashlytics().log('Auth Context: Register')
         try{
             const response = await auth.createUserWithEmailAndPassword(email,password)
-            await  setDoc(doc(db,'users',response?.user?.uid),{
-                username,
-                user_id: response?.user?.uid
+            const newUser = httpsCallable(functions,'newUser')
+            await newUser({
+                username:username,
+                userId:response?.user?.uid
+            }).then(result => {
+                console.log(result)
+            }).catch(error => {
+                console.error(error)
             })
+            // await  setDoc(doc(db,'users',response?.user?.uid),{
+            //     username,
+            //     user_id: response?.user?.uid
+            // })
             // await Promise.all(
             //     [
             //     crashlytics().setUserId(response.user.uid),

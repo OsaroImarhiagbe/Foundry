@@ -6,12 +6,12 @@
  *
  * See a full list of supported triggers at https://firebase.google.com/docs/functions
  */
-const {logger} = require("firebase-functions/v2");
-const {onCall,HttpsError} = require("firebase-functions/v2/https");
-const {onDocumentCreated} = require("firebase-functions/v2/firestore");
-const {initializeApp} = require("firebase-admin/app");
-const {getFirestore,FieldValue} = require("firebase-admin/firestore");
-const {getMessaging} = require("firebase-admin/messaging")
+import { logger } from "firebase-functions/v2";
+import { onCall, HttpsError } from "firebase-functions/v2/https";
+import { onDocumentCreated } from "firebase-functions/v2/firestore";
+import { initializeApp } from "firebase-admin/app";
+import { getFirestore, FieldValue } from "firebase-admin/firestore";
+import { getMessaging } from "firebase-admin/messaging";
 initializeApp();
 // Create and deploy your first functions
 // https://firebase.google.com/docs/functions/get-started
@@ -95,7 +95,7 @@ exports.addMessage = onCall(async (request:unknown | any) => {
     senderName:senderName,
     recipientName:recipientName,
     text:newMessage,
-    createdAt:FieldValue.serverTimestamp(new Date())
+    createdAt:FieldValue.serverTimestamp()
   })
   return {success:true, msg:'Message sent!'}
 });
@@ -133,7 +133,20 @@ exports.newChatRooomMessage = onDocumentCreated("/chat-rooms/{roomId}/messages/{
       throw new Error("Failed to process new message notification");
     }
   });
-exports.newUser = onDocumentCreated("/users/{userId}",
+
+exports.newUser = onCall(async (request: unknown | any) => {
+  if(!request.auth){
+    throw new HttpsError("unauthenticated", "This endpoint requires authentication")
+  }
+  const userId = request.data.userId
+  const username = request.data.username
+  await getFirestore().collection('users').doc(userId).set({
+    username:username,
+    userId:userId
+  })
+  return {success:true,msg:'New User!!'}
+})
+exports.newUserDoc = onDocumentCreated("/users/{userId}",
   async (event:unknown | any) => {
     try {
       const snapshot = event.data
@@ -141,9 +154,8 @@ exports.newUser = onDocumentCreated("/users/{userId}",
         logger.warn("No data associated with the event");
         return {success: false, error: "No data found"};
       }
-      const userData = snapshot.data();
-      const userId = userData.userId;
-      sendNotification(userId, {
+      const userId = event.params.userId
+      await sendNotification(userId, {
         title: "Foundry",
         body: "Welcome to Foundry!",
         data: {
