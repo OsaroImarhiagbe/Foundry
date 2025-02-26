@@ -16,7 +16,7 @@ import {collection,FirebaseFirestoreTypes,Timestamp,onSnapshot,doc,orderBy,query
 import MessageItem from '../components/MessageItem';
 import { FlashList } from '@shopify/flash-list';
 import { TextInput,useTheme } from 'react-native-paper';
-import crashlytics, { crash } from '@react-native-firebase/crashlytics'
+//import crashlytics, { crash } from '@react-native-firebase/crashlytics'
 import { db,functions } from 'FIrebaseConfig';
 import {httpsCallable} from '@react-native-firebase/functions'
 type ChatScreenRouteProp = RouteProp<{ Chat: { item: any,userid:string,name:string } }, 'Chat'>;
@@ -33,7 +33,7 @@ const ChatScreen = () => {
   const theme = useTheme()
   const inputRef = useRef<any>(null)
   
-  const recipentNamec = userid ? name  : item?.userId ? item.name : 'Unknown Recipient';
+  const recipientNamec = userid ? name  : item?.userId ? item.name : 'Unknown Recipient';
   useEffect(() => {
     const timeout = setTimeout(() => {
       inputRef.current?.focus();
@@ -42,7 +42,7 @@ const ChatScreen = () => {
     return () => clearTimeout(timeout);
   }, []);
   useEffect(() => {
-    crashlytics().log('Chat Screen: Grabbing messages')
+    //crashlytics().log('Chat Screen: Grabbing messages')
     const loadMessages = (roomId:string) => {
       const docRef = doc(db,"chat-rooms",roomId);
       const messageRef = collection(docRef,'messages')
@@ -66,7 +66,7 @@ const ChatScreen = () => {
   }, [userid, item?.userId]);
 
   const createRoom = async () => {
-    crashlytics().log('Chat Screen: Creating Chat Room')
+    //crashlytics().log('Chat Screen: Creating Chat Room')
     try{
       const roomId = userid ? getRoomID(user?.userId, userid) : item?.userId ? getRoomID(user?.userId, item?.userId) : ''
       const id = userid ? userid : item?.userId
@@ -74,18 +74,18 @@ const ChatScreen = () => {
         roomId:roomId,
         createdAt: Timestamp.fromDate(new Date()),
         recipientId:[id],
-        recipentName:recipentNamec,
+        recipentName:recipientNamec,
         senderName:user?.username,
         senderId:user?.userId,
       })
     } catch (error:any) {
-      crashlytics().recordError(error)
+      //crashlytics().recordError(error)
       console.error("Error creating room:", error.message);
     }
   };
 
   const handleSend = async () => {
-    crashlytics().log('Chat Screen: Sening Messages ')
+    //crashlytics().log('Chat Screen: Sening Messages ')
     if(messageText.trim() === '') return;
     try{
       const addMessage = httpsCallable(functions,'addMessage')
@@ -95,17 +95,17 @@ const ChatScreen = () => {
       : item?.userId
       ? getRoomID(user?.userId, item.userId)
       : '';
-      await addMessage({
-        senderId:user?.userId,
-        recipentId:[id],
-        roomId:roomId,
+      addMessage({
+        senderId: user?.userId,
+        recipientId: [id],
+        roomId: roomId,
         senderName: user?.username,
-        recipentName:recipentNamec,
-        text:messageText,
+        recipientName: recipientNamec,
+        text: messageText,
       }).then((results) => {
         console.log(results)
       }).catch((error) => {
-        console.log(error)
+        console.log('Chat Screen Error: ',error.message)
       })
       //const docRef = doc(db,'chat-rooms',roomId);
       //const messageRef = collection(docRef,'messages')
@@ -124,8 +124,8 @@ const ChatScreen = () => {
         flashListRef.current.scrollToEnd({ animated: true });
       }
     }catch(error:any){
-      crashlytics().recordError(error)
-      console.error(`Error sending message:${error}`)
+      //crashlytics().recordError(error)
+      console.error(`Error sending message:${error.message}`)
     }
   }
 
@@ -135,7 +135,7 @@ const ChatScreen = () => {
     >
       <View style={{flex:1}}>
       <ChatRoomHeader 
-      title={recipentNamec}
+      title={recipientNamec}
       backgroundColor='transparent'
       icon='keyboard-backspace'
       iconColor='#00bf63'

@@ -6,12 +6,12 @@
  *
  * See a full list of supported triggers at https://firebase.google.com/docs/functions
  */
-import { logger } from "firebase-functions/v2";
-import { onCall, HttpsError } from "firebase-functions/v2/https";
-import { onDocumentCreated } from "firebase-functions/v2/firestore";
-import { initializeApp } from "firebase-admin/app";
-import { getFirestore, FieldValue } from "firebase-admin/firestore";
-import { getMessaging } from "firebase-admin/messaging";
+import {logger} from "firebase-functions/v2";
+import {onCall, HttpsError} from "firebase-functions/v2/https";
+import {onDocumentCreated} from "firebase-functions/v2/firestore";
+import {initializeApp} from "firebase-admin/app";
+import {getFirestore, FieldValue} from "firebase-admin/firestore";
+import {getMessaging} from "firebase-admin/messaging";
 initializeApp();
 // Create and deploy your first functions
 // https://firebase.google.com/docs/functions/get-started
@@ -52,7 +52,7 @@ async function getUserDeviceToken(userId: string): Promise<string | null> {
  * @param {NotificationPayload} notification
  * @return {Promise<void>}*/
 async function sendNotification(userId: string,
-  notification:unknown | any): Promise<void>{
+  notification:unknown | any):Promise<void> {
   try {
     const token = await getUserDeviceToken(userId);
     if (!token) {
@@ -78,28 +78,29 @@ exports.addMessage = onCall(async (request:unknown | any) => {
     throw new HttpsError(
       "unauthenticated", "This endpoint requires authentication");
   }
-  const newMessage = request.data.text 
-  const roomId = request.data.roomId
-  const senderName = request.data.senderName
-  const recipientName = request.data.recipientName
-  const senderId = request.data.senderId
-  const recipientId = request.recipientId
+  const newMessage = request.data.text;
+  const roomId = request.data.roomId;
+  const senderName = request.data.senderName;
+  const recipientName = request.data.recipientName;
+  const senderId = request.data.senderId;
+  const recipientId = request.data.recipientId;
   await getFirestore()
-  .collection("chat-rooms")
-  .doc(roomId)
-  .collection("messages")
-  .add({
-    senderId:senderId,
-    recipentId:recipientId,
-    roomId:roomId,
-    senderName:senderName,
-    recipientName:recipientName,
-    text:newMessage,
-    createdAt:FieldValue.serverTimestamp()
-  })
-  return {success:true, msg:'Message sent!'}
+    .collection("chat-rooms")
+    .doc(roomId)
+    .collection("messages")
+    .add({
+      senderId: senderId,
+      recipientId: recipientId,
+      roomId: roomId,
+      senderName: senderName,
+      recipientName: recipientName,
+      text: newMessage,
+      createdAt: FieldValue.serverTimestamp(),
+    });
+  return {success: true, msg: "Message sent!"};
 });
-exports.newChatRooomMessage = onDocumentCreated("/chat-rooms/{roomId}/messages/{messageId}",
+exports.newChatRooomMessage = onDocumentCreated(
+  "/chat-rooms/{roomId}/messages/{messageId}",
   async (event: unknown | any) => {
     try {
       const snapshot = event.data;
@@ -108,15 +109,17 @@ exports.newChatRooomMessage = onDocumentCreated("/chat-rooms/{roomId}/messages/{
         return {success: false, error: "No data found"};
       }
       const messageData = snapshot.data();
-      const roomId = event.params.roomId
-      const roomDoc = await getFirestore().collection("chat-rooms").doc(roomId).get();
+      const roomId = event.params.roomId;
+      const roomDoc = await getFirestore().collection("chat-rooms")
+        .doc(roomId).get();
       if (!roomDoc.exists) {
         logger.warn(`Room ${roomId} not found`);
         return {success: false, error: "Room not found"};
       }
       const roomData = roomDoc.data();
-      const participantId = roomData?.recipientId.find((Id: string) => Id !== messageData.senderId);
-      if(participantId){
+      const participantId = roomData?.recipientId.find(
+        (Id: string) => Id !== messageData.senderId);
+      if (participantId) {
         await sendNotification(participantId, {
           title: "New Message",
           body: `You have a new message from ${roomData?.senderName}`,
@@ -135,26 +138,27 @@ exports.newChatRooomMessage = onDocumentCreated("/chat-rooms/{roomId}/messages/{
   });
 
 exports.newUser = onCall(async (request: unknown | any) => {
-  if(!request.auth){
-    throw new HttpsError("unauthenticated", "This endpoint requires authentication")
+  if (!request.auth) {
+    throw new HttpsError(
+      "unauthenticated", "This endpoint requires authentication");
   }
-  const userId = request.data.userId
-  const username = request.data.username
-  await getFirestore().collection('users').doc(userId).set({
-    username:username,
-    userId:userId
-  })
-  return {success:true,msg:'New User!!'}
-})
+  const userId = request.data.userId;
+  const username = request.data.username;
+  await getFirestore().collection("users").doc(userId).set({
+    username: username,
+    userId: userId,
+  });
+  return {success: true, msg: "New User!!"};
+});
 exports.newUserDoc = onDocumentCreated("/users/{userId}",
   async (event:unknown | any) => {
     try {
-      const snapshot = event.data
+      const snapshot = event.data;
       if (!snapshot) {
         logger.warn("No data associated with the event");
         return {success: false, error: "No data found"};
       }
-      const userId = event.params.userId
+      const userId = event.params.userId;
       await sendNotification(userId, {
         title: "Foundry",
         body: "Welcome to Foundry!",

@@ -152,7 +152,6 @@ export const NotificationProvider = ({ children }:NotificationProp) => {
 
   return (
     <NotificationContext.Provider value={{ showNotification }}>
-      {children}
       {notification && (
         <NotificationBanner
         visiable={visible}
@@ -160,6 +159,7 @@ export const NotificationProvider = ({ children }:NotificationProp) => {
         message={notification.message}
         />
       )}
+      {children}
     </NotificationContext.Provider>
   );
 };
