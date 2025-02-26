@@ -5,6 +5,7 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   SafeAreaView,
+  ImageBackground,
   RefreshControl} from 'react-native'
 import {lazy,Suspense} from 'react'
 import { useNavigation } from '@react-navigation/native';
@@ -322,9 +323,22 @@ const AccountScreen = () => {
             size={25}
             />
           </TouchableOpacity>
-          <View style={{flexDirection:'row',paddingLeft:20,marginTop:10,justifyContent:'space-between',padding:5}}>
+          <ImageBackground
+           resizeMode="cover"
+           imageStyle={{height:150}}
+           style={{
+            height:100,
+            justifyContent:'flex-end',
+          }}
+           source={require('../assets/images/header.png')}
+          ></ImageBackground>
+          <View style={{
+            flexDirection:'row',
+            paddingLeft:10,
+            justifyContent:'space-between',
+            padding:5,}}>
           <Image
-              style={{height:hp(7), aspectRatio:1, borderRadius:100,borderWidth:1}}
+              style={{height:hp(8), aspectRatio:1, borderRadius:100,borderWidth:2,borderColor:theme.colors.background}}
               source={users?.profileUrl}
               placeholder={{blurhash}}
               cachePolicy='none'/>
@@ -336,7 +350,7 @@ const AccountScreen = () => {
             borderWidth:1,
             borderColor:theme.colors.tertiary}}>Edit Profile</Button>}
               </View>
-              <View style={{marginTop:5,flexDirection:'column',paddingRight:20}}>
+              <View style={{marginTop:5,flexDirection:'row',paddingRight:20}}>
               <View style={{paddingLeft:20}}>
                <Text>{
                     isCurrentUser ? (<Text
@@ -427,6 +441,13 @@ const styles = StyleSheet.create({
   },
   username:{
     letterSpacing:1,
+  },
+  gradient: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 0,
+    height: '70%', // Adjust this to control fade height
   },
 })
 export default AccountScreen
