@@ -6,6 +6,7 @@ import {
   ActivityIndicator,
   RefreshControl,
   Platform,
+  ImageBackground,
   SafeAreaView} from 'react-native'
 import {lazy,Suspense} from 'react'
 import color from '../../config/color';
@@ -345,6 +346,19 @@ const OtherUserScreen = () => {
             size={25}
             />
           </TouchableOpacity>
+          <ImageBackground
+              resizeMode="cover"
+              imageStyle={{height:150,justifyContent:'flex-end'}}
+              style={{
+              height:100,
+              justifyContent:'flex-end',
+            }}
+            source={require('../assets/images/header.png')}
+                >
+            <TouchableOpacity style={{alignItems:'flex-end',bottom:40,padding:5}} onPress={() => console.log('button pressed')}>
+            <Icon size={30} source='pencil' color={theme.colors.tertiary}/>
+            </TouchableOpacity>
+          </ImageBackground>
           <View style={{flexDirection:'row',paddingLeft:20,marginTop:10,justifyContent:'space-between',paddingRight:20}}>
           <Image
               style={{height:hp(7), aspectRatio:1, borderRadius:100,borderWidth:1}}

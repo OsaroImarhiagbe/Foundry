@@ -35,8 +35,13 @@ import {
   MenuTrigger,
 } from 'react-native-popup-menu';
 import { MenuItems } from '../components/CustomMenu'
-import { db, PostRef } from 'FIrebaseConfig';
+import { PostRef, functions } from 'FIrebaseConfig';
 import { storage } from 'FIrebaseConfig';
+import { httpsCallable } from '@react-native-firebase/functions'
+
+
+
+
 type NavigationProp = {
   Dash:undefined
 }
@@ -60,7 +65,7 @@ const PostScreen = () => {
   
 
  
-  const dispatch = useDispatch();
+  //const dispatch = useDispatch();
   useEffect(() => {
     const timeout = setTimeout(() => {
       textInputRef.current?.focus();
@@ -68,11 +73,20 @@ const PostScreen = () => {
 
     return () => clearTimeout(timeout);
   }, []);
+
+
   const handlePost = async () => {
     if(text.trim() === '') return
     setLoading(true);
     try {
-      const newDoc = await addDoc(PostRef,{
+      const addPost = httpsCallable(functions,'addPost')
+      let imageUrl = null;
+      if(image && filename){
+        const imageRef = ref(storage,`/posts/images/${user.userId}/${filename}`)
+        await putFile(imageRef,image)
+        imageUrl = await getDownloadURL(imageRef)
+      }
+      addPost({
         auth_id:user?.userId,
         name:user?.username,
         content:text,
@@ -80,22 +94,15 @@ const PostScreen = () => {
         comment_count: null,
         liked_by: null,
         category:category,
-        createdAt: Timestamp.fromDate(new Date())
-      })
-      let imageUrl = null;
-      if(image && filename){
-        const imageRef = ref(storage,`/posts/images/${newDoc.id}/${filename}`)
-        await putFile(imageRef,image)
-        imageUrl = await getDownloadURL(imageRef)
-      }
-      await updateDoc(newDoc,{
         imageUrl:imageUrl,
-        post_id: newDoc.id
+        filename:filename,
+        createdAt: Timestamp.fromDate(new Date())
+      }).then((results)=> {
+        console.log(results)
+      }).catch((error) => {
+        console.log(error)
       })
-      setTimeout(() => {
-        navigation.goBack();
-      }, 1000);
-      dispatch(addPost({ id: newDoc.id, content: text }));
+      navigation.goBack();
       setText('');
       setImage(null);
       setCategory('');

@@ -276,7 +276,6 @@ const AccountScreen = () => {
       {
         projects && projects.length > 0 ? (
           projects.map((project, index) => (
-        
           <TouchableOpacity key={index} onPress={()=>navigation.navigate('ProjectScreen')}>
              <View style={{ backgroundColor: '#252525', borderRadius: 25, padding: 30,marginBottom:10 }}>
             <Text style={{ textAlign: 'center', color: '#fff' }}>{project?.project_name}</Text>
@@ -311,119 +310,117 @@ const AccountScreen = () => {
   
     <SafeAreaView style={[styles.screen,{backgroundColor:theme.colors.background}]}>
       <ScrollView
-        scrollEnabled={true}
-        showsVerticalScrollIndicator={false}
-        style={styles.screen}
-        contentContainerStyle={{flexGrow:1}}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh}/>}
-        >
-          <TouchableOpacity onPress={() => navigation.navigate('Welcome',{screen:'Dash'})} style={{padding:10}}>
-            <Icon
-            source='arrow-left-circle'
-            size={25}
-            />
-          </TouchableOpacity>
-          <ImageBackground
-           resizeMode="cover"
-           imageStyle={{height:150}}
-           style={{
-            height:100,
-            justifyContent:'flex-end',
+    scrollEnabled={true}
+    showsVerticalScrollIndicator={false}
+    style={styles.screen}
+    contentContainerStyle={{flexGrow:1}}
+    refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh}/>}
+    >
+      <TouchableOpacity onPress={() => navigation.navigate('Welcome',{screen:'Dash'})} style={{padding:10}}>
+        <Icon
+        source='arrow-left-circle'
+        size={25}
+        />
+      </TouchableOpacity>
+      <ImageBackground
+        resizeMode="cover"
+        imageStyle={{height:150,justifyContent:'flex-end'}}
+        style={{
+        height:100,
+        justifyContent:'flex-end',
+      }}
+      source={require('../assets/images/header.png')}
+      >
+        <TouchableOpacity style={{alignItems:'flex-end',bottom:40,padding:5}} onPress={() => console.log('button pressed')}>
+        <Icon size={30} source='pencil' color={theme.colors.tertiary}/>
+        </TouchableOpacity>
+      </ImageBackground>
+      <View style={{
+        flexDirection:'row',
+        paddingLeft:10,
+        justifyContent:'space-between',
+        padding:5,}}>
+      <Image
+          style={{height:hp(8), aspectRatio:1, borderRadius:100,borderWidth:2,borderColor:theme.colors.background}}
+          source={users?.profileUrl}
+          placeholder={{blurhash}}
+          cachePolicy='none'/>
+        {isCurrentUser &&  <Button 
+        onPress={() => navigation.navigate('Edit')}
+        mode='outlined' style={{
+        backgroundColor:'transparent', 
+        borderRadius:100,
+        borderWidth:1,
+        borderColor:theme.colors.tertiary}}>Edit Profile</Button>}
+          </View>
+          <View style={{marginTop:5}}>
+          <View style={{paddingLeft:10,flexDirection:'row'}}>
+          <Text
+          variant='bodySmall'
+          style={{
+            color:theme.colors.onTertiary
+            }}>@{users?.username}</Text>
+              {users?.jobtitle &&   <Text
+              variant='bodySmall'
+              style={{
+                color:theme.colors.onPrimary
+              }}>{users?.jobtitle}</Text>}
+              {users?.location &&    <Text
+              variant='bodySmall'
+              style={{
+                color:theme.colors.onPrimary
+              }}><EvilIcons name='location' size={15} color={theme.colors.onTertiary}/>{users?.location}</Text>}
+                {follow_items.map((item,index)=>{
+                  
+                  return <FollowComponent key={index} count={item.count} content={item.content}/>
+                })}
+            </View>
+          </View>
+      <View style={{flex: 1}}>
+        <Tab.Navigator
+      screenOptions={{
+        swipeEnabled:true,
+        tabBarIndicatorStyle:{
+          backgroundColor:theme.colors.onPrimary
+        },
+        tabBarStyle:{
+          backgroundColor:theme.colors.background
+        },
+      }}
+      >
+        <Tab.Screen
+          name='Posts'
+          component={Post}
+          options={{
+            tabBarLabelStyle:{
+              fontSize:20,
+              color:theme.colors.tertiary
+            }
           }}
-           source={require('../assets/images/header.png')}
-          ></ImageBackground>
-          <View style={{
-            flexDirection:'row',
-            paddingLeft:10,
-            justifyContent:'space-between',
-            padding:5,}}>
-          <Image
-              style={{height:hp(8), aspectRatio:1, borderRadius:100,borderWidth:2,borderColor:theme.colors.background}}
-              source={users?.profileUrl}
-              placeholder={{blurhash}}
-              cachePolicy='none'/>
-            {isCurrentUser &&  <Button 
-            onPress={() => navigation.navigate('Edit')}
-            mode='outlined' style={{
-            backgroundColor:'transparent', 
-            borderRadius:100,
-            borderWidth:1,
-            borderColor:theme.colors.tertiary}}>Edit Profile</Button>}
-              </View>
-              <View style={{marginTop:5,flexDirection:'row',paddingRight:20}}>
-              <View style={{paddingLeft:20}}>
-               <Text>{
-                    isCurrentUser ? (<Text
-                    variant='bodySmall'
-                      style={{
-                        color:theme.colors.onTertiary
-                      }}>@{users?.username}</Text>) 
-                    : (<Text
-                    variant='bodySmall'
-                      style={{
-                        color:theme.colors.onTertiary
-                      }}>@{users?.username}</Text>)
-                  }</Text>
-                  {users?.jobtitle &&   <Text
-                  variant='bodySmall'
-                  style={{
-                    color:theme.colors.onPrimary
-                  }}>{users?.jobtitle}</Text>}
-                  {users?.location &&    <Text
-                  variant='bodySmall'
-                  style={{
-                    color:theme.colors.onPrimary
-                  }}><EvilIcons name='location' size={15} color={theme.colors.onTertiary}/>{users?.location}</Text>}
-                    {follow_items.map((item,index)=>{
-                      return <FollowComponent key={index} count={item.count} content={item.content}/>
-                    })}
-                </View>
-              </View>
-                <View style={{flex: 1}}>
-                  <Tab.Navigator
-                screenOptions={{
-                  swipeEnabled:true,
-                  tabBarIndicatorStyle:{
-                    backgroundColor:theme.colors.onPrimary
-                  },
-                  tabBarStyle:{
-                    backgroundColor:theme.colors.background
-                  },
-                }}
-                >
-                  <Tab.Screen
-                    name='Posts'
-                    component={Post}
-                    options={{
-                      tabBarLabelStyle:{
-                        fontSize:20,
-                        color:theme.colors.tertiary
-                      }
-                    }}
-                    />
-                    <Tab.Screen
-                    name='Projects'
-                    component={Projects}
-                    options={{
-                      tabBarLabelStyle:{
-                        fontSize:20,
-                        color:theme.colors.tertiary
-                      }
-                    }}
-                    />
-                  <Tab.Screen
-                    name='Skills'
-                    component={SkillsScreen}
-                    options={{
-                      tabBarLabelStyle:{
-                        fontSize:20,
-                        color:theme.colors.tertiary
-                      }
-                    }}
-                    />
-                  </Tab.Navigator>
-                </View>
-                </ScrollView> 
+          />
+          <Tab.Screen
+          name='Projects'
+          component={Projects}
+          options={{
+            tabBarLabelStyle:{
+              fontSize:20,
+              color:theme.colors.tertiary
+          }
+        }}
+        />
+      <Tab.Screen
+        name='Skills'
+        component={SkillsScreen}
+        options={{
+          tabBarLabelStyle:{
+            fontSize:20,
+            color:theme.colors.tertiary
+          }
+        }}
+        />
+      </Tab.Navigator>
+    </View>
+    </ScrollView> 
     </SafeAreaView>
   )
 }

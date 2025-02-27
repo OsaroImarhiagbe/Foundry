@@ -10,7 +10,7 @@ import {logger} from "firebase-functions/v2";
 import {onCall, HttpsError} from "firebase-functions/v2/https";
 import {onDocumentCreated} from "firebase-functions/v2/firestore";
 import {initializeApp} from "firebase-admin/app";
-import {getFirestore, FieldValue} from "firebase-admin/firestore";
+import {getFirestore, FieldValue,} from "firebase-admin/firestore";
 import {getMessaging} from "firebase-admin/messaging";
 initializeApp();
 // Create and deploy your first functions
@@ -78,26 +78,29 @@ exports.addMessage = onCall(async (request:unknown | any) => {
     throw new HttpsError(
       "unauthenticated", "This endpoint requires authentication");
   }
-  const newMessage = request.data.text;
-  const roomId = request.data.roomId;
-  const senderName = request.data.senderName;
-  const recipientName = request.data.recipientName;
-  const senderId = request.data.senderId;
-  const recipientId = request.data.recipientId;
-  await getFirestore()
-    .collection("chat-rooms")
-    .doc(roomId)
-    .collection("messages")
-    .add({
-      senderId: senderId,
-      recipientId: recipientId,
-      roomId: roomId,
-      senderName: senderName,
-      recipientName: recipientName,
-      text: newMessage,
-      createdAt: FieldValue.serverTimestamp(),
-    });
-  return {success: true, msg: "Message sent!"};
+  try{
+    const newMessage = request.data.text;
+    const roomId = request.data.roomId;
+    const senderName = request.data.senderName;
+    const recipientName = request.data.recipientName;
+    const senderId = request.data.senderId;
+    const recipientId = request.data.recipientId;
+    await getFirestore()
+      .collection("chat-rooms")
+      .doc(roomId)
+      .collection("messages")
+      .add({
+        senderId: senderId,
+        recipientId: recipientId,
+        roomId: roomId,
+        senderName: senderName,
+        recipientName: recipientName,
+        text: newMessage,
+        createdAt: FieldValue.serverTimestamp(),
+      });
+  }catch(error){
+    logger.error('Error Processing Message:',error)
+  }
 });
 exports.newChatRooomMessage = onDocumentCreated(
   "/chat-rooms/{roomId}/messages/{messageId}",
@@ -136,7 +139,44 @@ exports.newChatRooomMessage = onDocumentCreated(
       throw new Error("Failed to process new message notification");
     }
   });
-
+exports.addPost = onCall(async (request:unknown | any) => {
+  if(!request.auth){
+    throw new HttpsError(
+      "unauthenticated", "This endpoint requires authentication");
+  }
+  try{
+    const auth_id = request.data.auth_id;
+    const name = request.data.name;
+    const content = request.data.content;
+    const like_count = request.data.like_count;
+    const comment_count = request.data.comment_count;
+    const liked_by = request.data.liked_by;
+    const category = request.data.category;
+    const image = request.data.imageUrl
+    const createdAt = FieldValue.serverTimestamp()
+    const newDoc = await getFirestore().collection('posts').add({
+      auth_id: auth_id,
+      name: name,
+      content: content,
+      like_count: like_count,
+      comment_count: comment_count,
+      liked_by: liked_by,
+      category: category,
+      createdAt: createdAt
+    })
+    await getFirestore().collection('posts')
+    .doc(newDoc.id)
+    .update({
+      imageUrl:image,
+      post_id: newDoc.id
+    })
+    await sendNotification(auth_id, {
+      title: "Post has sent!"
+    });
+  }catch(error){
+    logger.error('Error Proccessing Post:',error)
+  }
+})
 exports.newUser = onCall(async (request: unknown | any) => {
   if (!request.auth) {
     throw new HttpsError(

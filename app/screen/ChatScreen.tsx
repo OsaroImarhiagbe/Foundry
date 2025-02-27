@@ -1,4 +1,6 @@
-
+import {
+  useCallback
+} from 'react'
 import {
   View,
   StyleSheet,
@@ -12,13 +14,22 @@ import ChatRoomHeader from '../components/ChatRoomHeader';
 import { useNavigation } from '@react-navigation/native';
 import { useDispatch } from 'react-redux';
 import { addID } from '../features/Message/messageidSlice';
-import {collection,FirebaseFirestoreTypes,Timestamp,onSnapshot,doc,orderBy,query,setDoc,addDoc} from '@react-native-firebase/firestore'
+import {
+  collection,
+  FirebaseFirestoreTypes,
+  Timestamp,
+  onSnapshot,
+  doc,
+  orderBy,
+  query,
+  setDoc
+} from '@react-native-firebase/firestore'
 import MessageItem from '../components/MessageItem';
 import { FlashList } from '@shopify/flash-list';
 import { TextInput,useTheme } from 'react-native-paper';
 //import crashlytics, { crash } from '@react-native-firebase/crashlytics'
 import { db,functions } from 'FIrebaseConfig';
-import {httpsCallable} from '@react-native-firebase/functions'
+import { httpsCallable } from '@react-native-firebase/functions'
 type ChatScreenRouteProp = RouteProp<{ Chat: { item: any,userid:string,name:string } }, 'Chat'>;
 
 const ChatScreen = () => {
@@ -32,6 +43,8 @@ const ChatScreen = () => {
   const flashListRef = useRef<FlashList<any> | null>(null);
   const theme = useTheme()
   const inputRef = useRef<any>(null)
+  const roomId = userid ? getRoomID(user?.userId, userid) : item?.userId ? getRoomID(user?.userId, item.userId) : null;
+  const id = userid ? userid : item?.userId
   
   const recipientNamec = userid ? name  : item?.userId ? item.name : 'Unknown Recipient';
   useEffect(() => {
@@ -53,11 +66,8 @@ const ChatScreen = () => {
       });
       return unsub;
     };
-  
-    const roomId = userid ? getRoomID(user?.userId, userid) : item?.userId ? getRoomID(user?.userId, item.userId) : null;
-  
-    if (roomId) {
-      createRoom();
+    if (roomId && id) {
+      createRoom(roomId,id);
       dispatch(addID(userid));
       const unsubscribe = loadMessages(roomId);
       return () => unsubscribe();
@@ -65,11 +75,9 @@ const ChatScreen = () => {
   
   }, [userid, item?.userId]);
 
-  const createRoom = async () => {
+  const createRoom = useCallback(async (roomId:string,id:string) => {
     //crashlytics().log('Chat Screen: Creating Chat Room')
     try{
-      const roomId = userid ? getRoomID(user?.userId, userid) : item?.userId ? getRoomID(user?.userId, item?.userId) : ''
-      const id = userid ? userid : item?.userId
       await setDoc(doc(db,'chat-rooms',roomId), {
         roomId:roomId,
         createdAt: Timestamp.fromDate(new Date()),
@@ -82,7 +90,7 @@ const ChatScreen = () => {
       //crashlytics().recordError(error)
       console.error("Error creating room:", error.message);
     }
-  };
+  },[roomId,id]);
 
   const handleSend = async () => {
     //crashlytics().log('Chat Screen: Sening Messages ')
