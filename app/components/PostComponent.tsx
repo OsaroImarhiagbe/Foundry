@@ -1,18 +1,15 @@
-import React,{useState,useEffect,lazy, Suspense} from 'react'
+import React,{useState,useEffect} from 'react'
 import {View,StyleSheet,
 TouchableOpacity,
 TouchableHighlight,
-SafeAreaView,
 KeyboardAvoidingView,
 Platform,
 Modal,
 Alert,
-useWindowDimensions,
 } from 'react-native'
 import { blurhash } from '../../utils/index'
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import { Image } from 'expo-image';
-import EvilIcons from 'react-native-vector-icons/EvilIcons'
 import { useAuth } from '../authContext';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { 
@@ -26,20 +23,13 @@ import {
   query, 
   runTransaction, 
   Timestamp } from '@react-native-firebase/firestore';
-import { useSelector} from 'react-redux';
 import CommentComponent from './CommentComponent';
-import ReplyComponent from './ReplyComponent';
 import color from '../../config/color';
-import { useDispatch } from 'react-redux';
-import { addComment } from '../features/PostandComments/socialSlice';
 import Feather from 'react-native-vector-icons/Feather';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Card,Text,Divider,Icon} from 'react-native-paper';
 import { FlashList } from "@shopify/flash-list";
 import { ScrollView } from 'react-native-gesture-handler';
 import { useTheme,TextInput } from 'react-native-paper';
-import { useNavigation } from '@react-navigation/native';
-import {removeID} from '../features/Message/messageidSlice';
 import {
   Menu,
   MenuOptions,
@@ -47,6 +37,7 @@ import {
 } from 'react-native-popup-menu';
 import { MenuItems } from '../components/CustomMenu'
 import { db, PostRef } from 'FIrebaseConfig';
+
 interface PostComponentProps {
   auth_profile?: string;
   count?: number;
@@ -97,8 +88,6 @@ const PostComponent: React.FC<PostComponentProps> = ({
     const [modalVisible, setModalVisible] = useState<boolean>(false);
     const [comments, setComment] = useState<Comment[]>([])
     const [text,setText] = useState('')
-    const {height, width} = useWindowDimensions();
-    const dispatch = useDispatch();
     const theme = useTheme()
     const {user} = useAuth();
     const [replyingTo, setReplyingTo] = useState<string | null>(null);

@@ -4,12 +4,14 @@ import { getMessaging } from "@react-native-firebase/messaging";
 import {getAuth}from '@react-native-firebase/auth';
 import {getStorage} from '@react-native-firebase/storage'
 import {getFunctions} from '@react-native-firebase/functions'
+import {getCrashlytics} from '@react-native-firebase/crashlytics'
 const app = getApp();
 export const auth = getAuth(app)
 export const db = getFirestore(app);
 export const storage = getStorage(app)
 export const functions = getFunctions(app)
 export const messaging = getMessaging(app);
+export const crashlytics = getCrashlytics()
 export const PostRef = collection(db,'posts')
 export const ChatRoomsRef = collection(db,'chat-rooms')
 export const UsersRef = collection(db,'users')

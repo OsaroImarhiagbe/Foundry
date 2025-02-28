@@ -217,7 +217,9 @@ const FeedScreen = () => {
                 { useNativeDriver: false }
               )}
               ListEmptyComponent={(item) => (
-                <View style={{flex:1,alignItems:'center',justifyContent:'center',paddingTop:5}}><Text variant='bodySmall' style={{color:theme.colors.tertiary,fontSize:16}}>No Post</Text></View>
+                <View style={{flex:1,alignItems:'center',justifyContent:'center',paddingTop:5}}>
+                  <ActivityIndicator color={theme.colors.background ? '#000' :'#fff'} size='large' animating={mount}/>
+                </View>
               )}
               onEndReached={fetchMorePost}
               onEndReachedThreshold={0.1}

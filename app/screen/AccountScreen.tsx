@@ -3,7 +3,6 @@ import {
   StyleSheet, 
   ScrollView, 
   TouchableOpacity,
-  ActivityIndicator,
   SafeAreaView,
   ImageBackground,
   RefreshControl} from 'react-native'
@@ -18,12 +17,16 @@ import { collection, query, where,FirebaseFirestoreTypes,doc, orderBy, onSnapsho
 import { blurhash } from '../../utils/index';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { useTheme,Text,Icon,Button, Divider } from 'react-native-paper';
+import { 
+  useTheme,
+  Text,Icon,
+  Button,
+  Divider,
+  ActivityIndicator} from 'react-native-paper';
 import EvilIcons from 'react-native-vector-icons/EvilIcons';
 import SmallButton from 'app/components/SmallButton';
 import { FlashList } from '@shopify/flash-list';
-//import crashlytics from '@react-native-firebase/crashlytics'
-import { db } from 'FIrebaseConfig';
+import { db,crashlytics} from 'FIrebaseConfig';
 const PostComponent = lazy(() => import('../components/PostComponent'))
 
 
@@ -90,7 +93,7 @@ const AccountScreen = () => {
   const follow_items = [{count:users?.projects,content:' projects'},{count:users?.connection,content:' connection'},{count:posts.length,content:' posts'}]
 
   const onRefresh = useCallback(async () => {
-    //crashlytics().log('Account Screen: On Refresh')
+    crashlytics.log('Account Screen: On Refresh')
     setRefreshing(true);
     const userCollection = collection(db,'users')
     const userDoc = doc(userCollection,user.userId)
@@ -99,34 +102,43 @@ const AccountScreen = () => {
         async (documentSnapshot) =>{
         if(documentSnapshot.exists){
           setUsers(documentSnapshot.data())
-          // await Promise.all(
-          //   [
-          //   crashlytics().setUserId(user.userId),
-          //   crashlytics().setAttributes({
-          //     id:user.userId
-          //   })
-          // ])
+          await Promise.all(
+            [
+            crashlytics.setUserId(user.userId),
+            crashlytics.setAttributes({
+              id:user.userId
+            })
+          ])
         }else{
           console.error('No such document')
         }
       },
         (error:unknown | any)=>{
-          //crashlytics().recordError(error)
+          crashlytics.recordError(error)
           console.error(`No such document ${error.message}`)
           setLoading(false)
         }
       );
       return () => unsub()
       }catch(error:unknown | any){
-        //crashlytics().recordError(error)
+        crashlytics.recordError(error)
       }finally{
         setRefreshing(false);
       }
   }, [user]);
 
+  useEffect(() => {
+    setLoading(true)
+    const timer = setTimeout(() => {
+      setLoading(false)
+    },1000)
+
+    return  () => clearTimeout(timer)
+  },[])
+
 
   useEffect(() => {
-    //crashlytics().log('Account Screen: Grabbing Users Projects')
+    crashlytics.log('Account Screen: Grabbing Users Projects')
     if(projects.length === 0) return;
     setLoading(true)
     try{
@@ -138,16 +150,16 @@ const AccountScreen = () => {
           data.push({...doc.data(),id:doc.id})
         })
         setProjects(data)
-        // await Promise.all([
-        //   crashlytics().setUserId(user.userId),
-        //   crashlytics().setAttributes({
-        //     user_id:user.userId
-        //   })
-        // ])
+        await Promise.all([
+          crashlytics.setUserId(user.userId),
+          crashlytics.setAttributes({
+            user_id:user.userId
+          })
+        ])
       })
       return () => unsub()
     }catch(err:any){
-      //crashlytics().recordError(err)
+      crashlytics.recordError(err)
       console.error('error grabbing user post:',err.message)
     }finally{
       setLoading(false)
@@ -156,7 +168,7 @@ const AccountScreen = () => {
   },[user])
 
   useEffect(() => {
-    //crashlytics().log('Account Screen: Grabbing Users Post')
+    crashlytics.log('Account Screen: Grabbing Users Post')
     setLoading(true)
     try{
       const docRef = collection(db,'posts')
@@ -166,17 +178,17 @@ const AccountScreen = () => {
         querySnapshot.forEach(documentSnapshot => {
           data.push({...documentSnapshot.data(),id:documentSnapshot.id})
         })
-        // await Promise.all([
-        //   crashlytics().setUserId(user.userId),
-        //   crashlytics().setAttributes({
-        //     user_id:user.userId
-        //    })
-        // ])
+        await Promise.all([
+          crashlytics.setUserId(user.userId),
+          crashlytics.setAttributes({
+            user_id:user.userId
+           })
+        ])
         setPosts(data)
       })
       return () => unsub()
     }catch(err:any){
-      //crashlytics().recordError(err)
+      crashlytics.recordError(err)
       console.error('error grabbing user post:',err.message)
     }finally{
       setLoading(false)
@@ -185,7 +197,7 @@ const AccountScreen = () => {
   },[user])
 
   useEffect(() => {
-    //crashlytics().log('Account Screen: Grabbing User ')
+    crashlytics.log('Account Screen: Grabbing User ')
     setLoading(true)
       const userRef = collection(db,'users')
       const userDoc = doc(userRef,user.userId)
@@ -194,26 +206,26 @@ const AccountScreen = () => {
           async (documentSnapshot) =>{
           if(documentSnapshot.exists){
             setUsers(documentSnapshot.data())
-            // await Promise.all(
-            //   [
-            //   crashlytics().setUserId(user.userId),
-            //   crashlytics().setAttributes({
-            //     id:user.userId
-            //   })
-            // ])
+            await Promise.all(
+              [
+              crashlytics.setUserId(user.userId),
+              crashlytics.setAttributes({
+                id:user.userId
+              })
+            ])
           }else{
             console.error('No such document')
           }
         },
           (error:unknown | any)=>{
-            //crashlytics().recordError(error)
+            crashlytics.recordError(error)
             console.error(`No such document ${error.message}`)
             setLoading(false)
           }
         );
         return () => unsub()
       }catch(error: unknown | any){
-        //crashlytics().recordError(error)
+        crashlytics.recordError(error)
       }finally{
         setLoading(false)
       }
@@ -225,85 +237,112 @@ const AccountScreen = () => {
 
 
   const Post = () => (
-    <ScrollView
-    scrollEnabled
+    <View
      style={{flex:1,backgroundColor:theme.colors.background}}>
-      <View style={{flex:1,backgroundColor:theme.colors.background}}>
-        {
-        posts && posts.length > 0 ? (
-          <FlashList
-              contentContainerStyle={{padding:0}}
-              data={posts}
-              estimatedItemSize={460}
-              onRefresh={onRefresh}
-              ListEmptyComponent={(item) => (
-                <View style={{flex:1,alignItems:'center',justifyContent:'center',paddingTop:5}}><Text variant='bodySmall' style={{color:theme.colors.tertiary,fontSize:16}}>No Post</Text></View>
-              )}
-              onEndReachedThreshold={0.1}
-              refreshing={refreshing}
-              ItemSeparatorComponent={()=> (
-                <Divider/>
-              )}
-              ListFooterComponent={() => (
-                 <ActivityIndicator color='#fff' size='small' animating={isloading}/>
-              )}
-              renderItem={({item}) => <Suspense fallback={<ActivityIndicator size='small' color='#000'/>}>
-                <PostComponent
-                auth_profile={item.auth_profile}
-                count={item.like_count}
-                url={item.imageUrl}
-                id={item.post_id}
-                name={item.name}
-                content={item.content}
-                date={item?.createdAt?.toDate().toLocaleString('en-US', {
-                    hour: '2-digit',
-                    minute: '2-digit',
-                    hour12: true})}
-                comment_count={item.comment_count}/>
-                </Suspense>}
-              keyExtractor={(item)=> item?.post_id?.toString() || Math.random().toString()}
+      <SafeAreaView style={{flex:1,backgroundColor:theme.colors.background}}>
+        <FlashList
+          contentContainerStyle={{padding:0}}
+          data={posts}
+          estimatedItemSize={460}
+          onRefresh={onRefresh}
+          ListEmptyComponent={(item) => (
+            <View style={{flex:1,alignItems:'center',justifyContent:'center',paddingTop:5}}>
+              <ActivityIndicator color={theme.colors.background ? '#000' :'#fff'} size='large' animating={isloading}/>
+            </View>
+          )}
+          onEndReachedThreshold={0.1}
+          refreshing={refreshing}
+          ItemSeparatorComponent={()=> (
+            <Divider/>
+          )}
+          ListFooterComponent={() => (
+              <ActivityIndicator color='#fff' size='small' animating={isloading}/>
+          )}
+          renderItem={({item}) => <Suspense fallback={<ActivityIndicator size='small' color='#000'/>}>
+            <PostComponent
+            auth_profile={item.auth_profile}
+            count={item.like_count}
+            url={item.imageUrl}
+            id={item.post_id}
+            name={item.name}
+            content={item.content}
+            date={item?.createdAt?.toDate().toLocaleString('en-US', {
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: true})}
+            comment_count={item.comment_count}/>
+            </Suspense>}
+          keyExtractor={(item)=> item?.post_id?.toString() || Math.random().toString()}
               />
-            ) : <View style={{flex:1,justifyContent:'center',alignItems:'center',paddingTop:50}}>
-              <Text variant='bodySmall' style={{ color: '#fff', textAlign: 'center'}}>No posts available</Text></View>}
+    </SafeAreaView>
     </View>
-    </ScrollView>
     
   ); 
   
   const Projects = () => (
-    <ScrollView scrollEnabled style={{flex:1,backgroundColor:theme.colors.background}}>
-    <View style={{flex:1,backgroundColor:theme.colors.background,padding:50}}>
-      {
-        projects && projects.length > 0 ? (
-          projects.map((project, index) => (
-          <TouchableOpacity key={index} onPress={()=>navigation.navigate('ProjectScreen')}>
+    <View style={{flex:1,backgroundColor:theme.colors.background}}>
+    <SafeAreaView style={{flex:1,backgroundColor:theme.colors.background,padding:50}}>
+          <FlashList
+          contentContainerStyle={{padding:0}}
+          estimatedItemSize={460}
+          data={projects}
+          onRefresh={onRefresh}
+          keyExtractor={(item)=> item?.id?.toString() || Math.random().toString()}
+          ListEmptyComponent={(item) => (
+            <View style={{flex:1,alignItems:'center',justifyContent:'center',paddingTop:5}}>
+              <ActivityIndicator color={theme.colors.background ? '#000' :'#fff'} size='large' animating={isloading}/>
+            </View>
+          )}
+          onEndReachedThreshold={0.1}
+          refreshing={refreshing}
+          ItemSeparatorComponent={()=> (
+            <Divider/>
+          )}
+          ListFooterComponent={() => (
+            <ActivityIndicator color='#fff' size='small' animating={isloading}/>
+         )}
+          renderItem={({item}) => (
+            <TouchableOpacity onPress={()=>navigation.navigate('ProjectScreen')}>
              <View style={{ backgroundColor: '#252525', borderRadius: 25, padding: 30,marginBottom:10 }}>
-            <Text style={{ textAlign: 'center', color: '#fff' }}>{project?.project_name}</Text>
+            <Text style={{ textAlign: 'center', color: '#fff' }}>{item?.project_name}</Text>
           </View>
-          </TouchableOpacity>
-        ))) : <View style={{flex:1,justifyContent:'center',alignItems:'center'}}><Text variant='bodySmall' style={{ color: '#fff', textAlign: 'center',fontSize:16}}>No projects available</Text></View>
-      }
-      
+          </TouchableOpacity>)}
+          />
+    </SafeAreaView>
     </View>
-    </ScrollView>
   );
   const SkillsScreen = () => (
-    <ScrollView scrollEnabled style={{flex:1,backgroundColor:theme.colors.background}}>
-    <View style={{flex:1,backgroundColor:theme.colors.background,padding:50}}>
-      {
-        projects && projects.length > 0 ? (
-          projects.map((project, index) => (
-        
-          <TouchableOpacity key={index} onPress={()=>navigation.navigate('ProjectScreen')}>
-             <View style={{ backgroundColor: '#252525', borderRadius: 25, padding: 30,marginBottom:10 }}>
-            <Text style={{ textAlign: 'center', color: '#fff' }}>{project?.project_name}</Text>
+    <View style={{flex:1,backgroundColor:theme.colors.background}}>
+    <SafeAreaView style={{flex:1,backgroundColor:theme.colors.background,padding:50}}>
+      <FlashList
+      data={projects}
+      contentContainerStyle={{padding:0}}
+      estimatedItemSize={460}
+      onRefresh={onRefresh}
+      keyExtractor={(item)=> item?.id?.toString() || Math.random().toString()}
+      ListEmptyComponent={(item) => (
+        <View style={{flex:1,alignItems:'center',justifyContent:'center',paddingTop:5}}>
+          <ActivityIndicator color={theme.colors.background ? '#000' :'#fff'} size='large' animating={isloading}/>
+        </View>
+      )}
+      onEndReachedThreshold={0.1}
+      refreshing={refreshing}
+      ItemSeparatorComponent={()=> (
+        <Divider/>
+      )}
+      ListFooterComponent={() => (
+        <ActivityIndicator color='#fff' size='small' animating={isloading}/>
+     )}
+      renderItem={({item}) => (
+      <TouchableOpacity onPress={()=>navigation.navigate('ProjectScreen')}>
+        <View style={{ backgroundColor: '#252525', borderRadius: 25, padding: 30,marginBottom:10 }}>
+          <Text style={{ textAlign: 'center', color: '#fff' }}>{item?.project_name}</Text>
           </View>
           </TouchableOpacity>
-        ))) : <View style={{flex:1,justifyContent:'center',alignItems:'center'}}><Text variant='bodySmall' style={{ color: '#fff', textAlign: 'center',fontSize:16}}>No skills available</Text></View>
-      }
-      
+          )}
+          />
+    </SafeAreaView>
     </View>
-    </ScrollView>
   );
 
   return (

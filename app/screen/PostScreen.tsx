@@ -14,15 +14,11 @@ import { blurhash } from '../../utils/index';
 import { useAuth } from '../authContext';
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
 import { useDispatch,useSelector } from 'react-redux';
-import { addPost } from '../features/PostandComments/socialSlice';
 import { useNavigation } from '@react-navigation/native';
 import * as ImagePicker from 'expo-image-picker';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import {
-  addDoc,
-  collection,
-  Timestamp,
-  updateDoc}from '@react-native-firebase/firestore'
+  Timestamp}from '@react-native-firebase/firestore'
 import color from '../../config/color';
 import {getDownloadURL, getStorage,putFile,ref} from '@react-native-firebase/storage'
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -35,7 +31,7 @@ import {
   MenuTrigger,
 } from 'react-native-popup-menu';
 import { MenuItems } from '../components/CustomMenu'
-import { PostRef, functions } from 'FIrebaseConfig';
+import {functions } from 'FIrebaseConfig';
 import { storage } from 'FIrebaseConfig';
 import { httpsCallable } from '@react-native-firebase/functions'
 
@@ -64,8 +60,7 @@ const PostScreen = () => {
 
   
 
- 
-  //const dispatch = useDispatch();
+
   useEffect(() => {
     const timeout = setTimeout(() => {
       textInputRef.current?.focus();
@@ -102,10 +97,10 @@ const PostScreen = () => {
       }).catch((error) => {
         console.log(error)
       })
-      navigation.goBack();
       setText('');
       setImage(null);
       setCategory('');
+      navigation.goBack();
     } catch (error:unknown | any) {
       console.error("Error creating room:", error);
     }finally{
@@ -190,7 +185,6 @@ const PostScreen = () => {
                 position:'relative'
             }
         }}
-      
       >
         <MenuItems 
         text='Anyone'

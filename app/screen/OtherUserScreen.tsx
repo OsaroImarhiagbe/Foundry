@@ -218,17 +218,19 @@ const OtherUserScreen = () => {
   },[other_user_id])
 
   const Post = () => (
-    <ScrollView
-    scrollEnabled={true}
+    <View
      style={{flex:1,backgroundColor:theme.colors.background}}>
       <SafeAreaView style={{flex:1,backgroundColor:theme.colors.background}}>
-          <FlashList
-          ListEmptyComponent={() => 
-            (<Text style={{ color: '#fff', textAlign: 'center', fontFamily:color.textFont,fontSize:20}}>No posts available</Text>)}
+        <FlashList
+          ListEmptyComponent={(item) => (
+          <View style={{flex:1,alignItems:'center',justifyContent:'center',paddingTop:5}}>
+            <ActivityIndicator color={theme.colors.background ? '#000' :'#fff'} size='large' animating={isloading}/>
+             </View>
+             )}
           data={posts}
           ItemSeparatorComponent={() => <Divider/>}
           keyExtractor={item => item?.post_id?.toString() || Math.random().toString()}
-          estimatedItemSize={402}
+          estimatedItemSize={460}
           renderItem={({item}) => (
             <Suspense key={item.post_id} fallback={<ActivityIndicator size="small" color="#000" />}>
                 <View style={{padding: 10 }}>
@@ -248,46 +250,74 @@ const OtherUserScreen = () => {
           )}
           />
     </SafeAreaView>
-    </ScrollView>
+    </View>
     
   ); 
   
   const Projects = () => (
-    <ScrollView style={{flex:1,backgroundColor:theme.colors.background}}>
+    <View style={{flex:1,backgroundColor:theme.colors.background}}>
     <SafeAreaView style={{flex:1,backgroundColor:theme.colors.background,padding:50}}>
-      {
-        projects && projects.length > 0 ? (
-          projects.map((project, index) => (
-        
-          <TouchableOpacity key={index} onPress={()=>navigation.navigate('ProjectScreen')}>
-             <View style={{ backgroundColor: '#252525', borderRadius: 25, padding: 30,marginBottom:10 }}>
-            <Text style={{ textAlign: 'center', color: '#fff' }}>{project?.project_name }</Text>
-          </View>
-          </TouchableOpacity>
-        ))) : <Text style={{ color: '#fff', textAlign: 'center', fontFamily:color.textFont,fontSize:20}}>No projects available</Text>
-      }
-      
+      <FlashList
+      data={projects}
+      estimatedItemSize={460}
+      contentContainerStyle={{padding:0}}
+      onRefresh={onRefresh}
+      ListEmptyComponent={(item) => (
+        <View style={{flex:1,alignItems:'center',justifyContent:'center',paddingTop:5}}>
+          <ActivityIndicator color={theme.colors.background ? '#000' :'#fff'} size='large' animating={isloading}/>
+        </View>
+      )}
+      onEndReachedThreshold={0.1}
+      refreshing={refreshing}
+      ItemSeparatorComponent={()=> (
+        <Divider/>
+      )}
+      ListFooterComponent={() => (
+          <ActivityIndicator color='#fff' size='small' animating={isloading}/>
+      )}
+      renderItem={({item}) => (
+        <TouchableOpacity onPress={()=>navigation.navigate('ProjectScreen')}>
+        <View style={{ backgroundColor: '#252525', borderRadius: 25, padding: 30,marginBottom:10 }}>
+       <Text style={{ textAlign: 'center', color: '#fff' }}>{item?.project_name }</Text>
+     </View>
+     </TouchableOpacity>
+      )}
+      />
     </SafeAreaView>
-    </ScrollView>
+    </View>
   );
 
   const SkillsScreen = () => (
-    <ScrollView scrollEnabled style={{flex:1,backgroundColor:theme.colors.background}}>
-    <View style={{flex:1,backgroundColor:theme.colors.background,padding:50}}>
-      {
-        projects && projects.length > 0 ? (
-          projects.map((project, index) => (
-        
-          <TouchableOpacity key={index} onPress={()=>navigation.navigate('ProjectScreen')}>
-             <View style={{ backgroundColor: '#252525', borderRadius: 25, padding: 30,marginBottom:10 }}>
-            <Text style={{ textAlign: 'center', color: '#fff' }}>{project?.project_name}</Text>
-          </View>
-          </TouchableOpacity>
-        ))) : <View style={{flex:1,justifyContent:'center',alignItems:'center'}}><Text variant='bodySmall' style={{ color: '#fff', textAlign: 'center',fontSize:16}}>No skills available</Text></View>
-      }
-      
+    <View style={{flex:1,backgroundColor:theme.colors.background}}>
+    <SafeAreaView style={{flex:1,backgroundColor:theme.colors.background,padding:50}}>
+      <FlashList
+      data={projects}
+      estimatedItemSize={460}
+      contentContainerStyle={{padding:0}}
+      onRefresh={onRefresh}
+      ListEmptyComponent={(item) => (
+        <View style={{flex:1,alignItems:'center',justifyContent:'center',paddingTop:5}}>
+          <ActivityIndicator color={theme.colors.background ? '#000' :'#fff'} size='large' animating={isloading}/>
+        </View>
+      )}
+      onEndReachedThreshold={0.1}
+      refreshing={refreshing}
+      ItemSeparatorComponent={()=> (
+        <Divider/>
+      )}
+      ListFooterComponent={() => (
+          <ActivityIndicator color='#fff' size='small' animating={isloading}/>
+      )}
+      renderItem={({item}) => (
+        <TouchableOpacity onPress={()=>navigation.navigate('ProjectScreen')}>
+        <View style={{ backgroundColor: '#252525', borderRadius: 25, padding: 30,marginBottom:10 }}>
+       <Text style={{ textAlign: 'center', color: '#fff' }}>{item?.project_name}</Text>
+     </View>
+     </TouchableOpacity>
+      )}
+      />
+    </SafeAreaView>
     </View>
-    </ScrollView>
   );
 
   const handlePress = async () =>{
