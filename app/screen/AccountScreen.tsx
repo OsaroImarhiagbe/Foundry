@@ -47,7 +47,7 @@ const AccountScreen = () => {
   const [refreshing, setRefreshing] = useState(false);
   const theme = useTheme()
 
-
+{/** NEED TO TACKLE EDIT SCREEN, COULD REDUCE APP SIZE BY MOVING SOME SCREENS */}
   type NavigationProp = {
     ProjectScreen:undefined,
     Welcome:{
@@ -311,6 +311,7 @@ const AccountScreen = () => {
     </SafeAreaView>
     </View>
   );
+  {/** Need to Change this Function to display skills instead for bother Account and Other User Screen */}
   const SkillsScreen = () => (
     <View style={{flex:1,backgroundColor:theme.colors.background}}>
     <SafeAreaView style={{flex:1,backgroundColor:theme.colors.background,padding:50}}>

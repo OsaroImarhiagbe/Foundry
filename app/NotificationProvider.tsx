@@ -10,6 +10,7 @@ import { doc, setDoc } from '@react-native-firebase/firestore';
 
 const NotificationContext = createContext<any>(null);
 
+{/** NEED TO STYLE IN-APP NOTIFCATION BANNER */}
 export const useNotification = () => {
   const context = useContext(NotificationContext);
   if(!context){

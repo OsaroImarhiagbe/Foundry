@@ -33,6 +33,7 @@
     "plugins": [
       "@react-native-firebase/app",
       "@react-native-firebase/auth",
+      "@react-native-firebase/perf",
       "@react-native-firebase/messaging",
       "@react-native-firebase/crashlytics",
       "@react-native-google-signin/google-signin",
