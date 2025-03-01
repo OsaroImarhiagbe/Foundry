@@ -2,11 +2,9 @@ import { NavigationContainer} from '@react-navigation/native';
 import { MenuProvider } from 'react-native-popup-menu';
 import { AuthContextProvider } from './app/authContext';
 import { StatusBar } from 'expo-status-bar';
-import {useEffect,useState,useRef} from 'react'
-import SplashScreen from './app/screen/SplashScreen';
+import {useEffect,useState,lazy} from 'react'
 import {store,persistor} from './app/store'
 import { Provider } from 'react-redux';
-import AuthNavigation from './app/navigation/AuthNavigation';
 import { PersistGate } from 'redux-persist/integration/react';
 import { I18nextProvider } from 'react-i18next';
 import i18n from './app/Language/i18n';
@@ -16,9 +14,11 @@ import { NotificationProvider } from './app/NotificationProvider';
 import 'react-native-reanimated'
 import 'react-native-gesture-handler'
 
+const SplashScreen = lazy(() => import('./app/screen/SplashScreen'))
+const AuthNavigation = lazy(() => import('./app/navigation/AuthNavigation'))
+
 export default function App() {
-  const [isloading,setLoading] = useState(true)
-  const [isAuthenticated, setIsAuthenticated] = useState(undefined)
+  const [isloading,setLoading] = useState(false)
   useEffect(() => {
     setLoading(true)
     const timer = setTimeout(() => {
