@@ -5,6 +5,8 @@ import {
   TouchableOpacity,
   SafeAreaView,
   ImageBackground,
+  useWindowDimensions,
+  Platform,
   RefreshControl} from 'react-native'
 import {lazy,Suspense} from 'react'
 import { useNavigation } from '@react-navigation/native';
@@ -27,9 +29,11 @@ import EvilIcons from 'react-native-vector-icons/EvilIcons';
 import SmallButton from 'app/components/SmallButton';
 import { FlashList } from '@shopify/flash-list';
 import { db,crashlytics} from 'FIrebaseConfig';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 const PostComponent = lazy(() => import('../components/PostComponent'))
 
 
+{/** NEED TO LOOK AT USE EFFECT THAT IS GRAB POST AND PROJECTS AND SKILLS NEED TO IMPLEMENT IT */}
 
 const Tab = createMaterialTopTabNavigator();
 
@@ -40,12 +44,14 @@ const AccountScreen = () => {
   const [users, setUsers] = useState<User | undefined>(undefined)
   const [isloading,setLoading] = useState<boolean>(false)
   const [projects,setProjects] = useState<Project[]>([])
-    const [posts,setPosts] = useState<Post[]>([])
+  const [posts,setPosts] = useState<Post[]>([])
   const { user } = useAuth();
   const navigation = useNavigation<Navigation>();
   const isCurrentUser = user
   const [refreshing, setRefreshing] = useState(false);
   const theme = useTheme()
+  const {top} = useSafeAreaInsets()
+  const {width,height} = useWindowDimensions()
 
 {/** NEED TO TACKLE EDIT SCREEN, COULD REDUCE APP SIZE BY MOVING SOME SCREENS */}
   type NavigationProp = {
@@ -90,7 +96,7 @@ const AccountScreen = () => {
     project_name?:string
   }
   
-  const follow_items = [{count:users?.projects,content:' projects'},{count:users?.connection,content:' connection'},{count:posts.length,content:' posts'}]
+  const follow_items = [{count:users?.projects,content:' projects'},{count:users?.connection,content:' connection  '},{count:posts.length,content:' posts'}]
 
   const onRefresh = useCallback(async () => {
     crashlytics.log('Account Screen: On Refresh')
@@ -348,32 +354,35 @@ const AccountScreen = () => {
 
   return (
   
-    <SafeAreaView style={[styles.screen,{backgroundColor:theme.colors.background}]}>
-      <ScrollView
+    <View style={[styles.screen,{backgroundColor:theme.colors.background,paddingTop:Platform.OS === 'ios' ? top: 0}]}>
+  <ScrollView
     scrollEnabled={true}
     showsVerticalScrollIndicator={false}
     style={styles.screen}
     contentContainerStyle={{flexGrow:1}}
     refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh}/>}
     >
-      <TouchableOpacity onPress={() => navigation.navigate('Welcome',{screen:'Dash'})} style={{padding:10}}>
-        <Icon
-        source='arrow-left-circle'
-        size={25}
-        />
-      </TouchableOpacity>
       <ImageBackground
-        resizeMode="cover"
+        resizeMode='cover'
         imageStyle={{height:150,justifyContent:'flex-end'}}
         style={{
         height:100,
+        bottom:0,
         justifyContent:'flex-end',
       }}
       source={require('../assets/images/header.png')}
       >
-        <TouchableOpacity style={{alignItems:'flex-end',bottom:40,padding:5}} onPress={() => console.log('button pressed')}>
-        <Icon size={30} source='pencil' color={theme.colors.tertiary}/>
+       <View style={{flexDirection:'row',justifyContent:'space-between',alignItems:'center',bottom:40}}>
+       <TouchableOpacity onPress={() => navigation.navigate('Welcome',{screen:'Dash'})} style={{padding:10}}>
+        <Icon
+        source='arrow-left-circle'
+        size={hp(3)}
+        />
+      </TouchableOpacity>
+        <TouchableOpacity style={{alignItems:'flex-end',padding:5}} onPress={() => console.log('button pressed')}>
+        <Icon size={hp(3)} source='pencil' color={theme.colors.tertiary}/>
         </TouchableOpacity>
+        </View> 
       </ImageBackground>
       <View style={{
         flexDirection:'row',
@@ -386,7 +395,7 @@ const AccountScreen = () => {
           placeholder={{blurhash}}
           cachePolicy='none'/>
         {isCurrentUser &&  <Button 
-        onPress={() => navigation.navigate('Edit')}
+        onPress={() => navigation.navigate('Welcome',{screen:'Edit'})}
         mode='outlined' style={{
         backgroundColor:'transparent', 
         borderRadius:100,
@@ -394,7 +403,7 @@ const AccountScreen = () => {
         borderColor:theme.colors.tertiary}}>Edit Profile</Button>}
           </View>
           <View style={{marginTop:5}}>
-          <View style={{paddingLeft:10,flexDirection:'row'}}>
+          <View style={{paddingLeft:10,flexDirection:'column'}}>
           <Text
           variant='bodySmall'
           style={{
@@ -403,17 +412,18 @@ const AccountScreen = () => {
               {users?.jobtitle &&   <Text
               variant='bodySmall'
               style={{
-                color:theme.colors.onPrimary
+                color:theme.colors.onTertiary
               }}>{users?.jobtitle}</Text>}
               {users?.location &&    <Text
               variant='bodySmall'
               style={{
-                color:theme.colors.onPrimary
+                color:theme.colors.onTertiary
               }}><EvilIcons name='location' size={15} color={theme.colors.onTertiary}/>{users?.location}</Text>}
-                {follow_items.map((item,index)=>{
-                  
+              <View style={{flexDirection:'row',marginTop:10}}>
+              {follow_items.map((item,index)=>{
                   return <FollowComponent key={index} count={item.count} content={item.content}/>
                 })}
+              </View>
             </View>
           </View>
       <View style={{flex: 1}}>
@@ -461,7 +471,7 @@ const AccountScreen = () => {
       </Tab.Navigator>
     </View>
     </ScrollView> 
-    </SafeAreaView>
+    </View>
   )
 }
 

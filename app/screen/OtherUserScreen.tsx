@@ -41,7 +41,7 @@ import { UsersRef,ProjectRef, PostRef,db} from 'FIrebaseConfig'
 const PostComponent = lazy(() => import('../components/PostComponent'))
 
 
-
+{/** NEED TO LOOK AT USE EFFECT THAT IS GRAB POST AND PROJECTS AND SKILLS NEED TO IMPLEMENT IT */}
 
 const Tab = createMaterialTopTabNavigator();
 
@@ -111,7 +111,7 @@ const OtherUserScreen = () => {
     const theme = useTheme()
     const {top} = useSafeAreaInsets()
 
-    const follow_items = [{count:users?.projects,content:'projects'},{count:users?.connection,content:'connection'},{count:posts.length,content:'posts'}]
+    const follow_items = [{count:users?.projects,content:'projects'},{count:users?.connection,content:'  connection   '},{count:posts.length,content:' posts'}]
 
 
     const onRefresh = useCallback(async () => {
@@ -370,28 +370,38 @@ const OtherUserScreen = () => {
             contentContainerStyle={{flexGrow:1}}
             refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh}/>}
             >
-            <TouchableOpacity onPress={() => navigation.navigate('Welcome',{screen:'Dash'})} style={{padding:10}}>
-            <Icon
-            source='arrow-left-circle'
-            size={25}
-            />
-          </TouchableOpacity>
-          <ImageBackground
-              resizeMode="cover"
-              imageStyle={{height:150,justifyContent:'flex-end'}}
-              style={{
-              height:100,
-              justifyContent:'flex-end',
-            }}
-            source={require('../assets/images/header.png')}
-                >
-            <TouchableOpacity style={{alignItems:'flex-end',bottom:40,padding:5}} onPress={() => console.log('button pressed')}>
-            <Icon size={30} source='pencil' color={theme.colors.tertiary}/>
-            </TouchableOpacity>
-          </ImageBackground>
-          <View style={{flexDirection:'row',paddingLeft:20,marginTop:10,justifyContent:'space-between',paddingRight:20}}>
+       <ImageBackground
+        resizeMode="cover"
+        imageStyle={{height:150,justifyContent:'flex-end'}}
+        style={{
+        height:100,
+        bottom:0,
+        justifyContent:'flex-end',
+      }}
+      source={require('../assets/images/header.png')}
+      >
+       <View style={{flexDirection:'row',justifyContent:'space-between',alignItems:'center',bottom:40}}>
+       <TouchableOpacity onPress={() => navigation.navigate('Welcome',{screen:'Dash'})} style={{padding:10}}>
+        <Icon
+        source='arrow-left-circle'
+        size={hp(3)}
+        />
+      </TouchableOpacity>
+      {
+        !other_user_id && 
+         <TouchableOpacity style={{alignItems:'flex-end',padding:5}} onPress={() => console.log('button pressed')}>
+         <Icon size={hp(3)} source='pencil' color={theme.colors.tertiary}/>
+         </TouchableOpacity>
+      }
+        </View> 
+      </ImageBackground>
+          <View style={{
+             flexDirection:'row',
+             paddingLeft:10,
+             justifyContent:'space-between',
+             padding:5,}}>
           <Image
-              style={{height:hp(7), aspectRatio:1, borderRadius:100,borderWidth:1}}
+              style={{height:hp(7), aspectRatio:1, borderRadius:100,borderWidth:1,borderColor:theme.colors.background}}
               source={users?.profileUrl}
               placeholder={{blurhash}}
               cachePolicy='none'/>
@@ -409,37 +419,47 @@ const OtherUserScreen = () => {
             borderWidth:1,
             borderColor:theme.colors.tertiary}}>Message</Button>}
               </View>
-              <View style={{marginTop:5,flexDirection:'column',paddingRight:20}}>
-              <View style={{paddingLeft:20}}>
+              <View style={{marginTop:5}}>
+              <View style={{paddingLeft:20,flexDirection:'column',paddingRight:20}}>
                <Text>{
                     other_user_id ? (<Text
                     variant='bodySmall'
                       style={{
-                        color:theme.colors.onPrimary
+                        color:theme.colors.onTertiary
                       }}>@{users?.username}</Text>) 
                     : (<Text
                     variant='bodySmall'
                       style={{
-                        color:theme.colors.onPrimary
+                        color:theme.colors.onTertiary
                       }}>@{users?.username}</Text>)
                   }</Text>
                   {users?.jobtitle &&   <Text
                   variant='bodySmall'
                   style={{
-                    color:theme.colors.onPrimary
+                    color:theme.colors.onTertiary
                   }}>{users?.jobtitle}</Text>}
                   {users?.location &&    <Text
                   variant='bodySmall'
                   style={{
-                    color:theme.colors.onPrimary
+                    color:theme.colors.onTertiary
                   }}><EvilIcons name='location' size={15} color={theme.colors.onTertiary}/>{users?.location}</Text>}
+                   <View style={{flexDirection:'row',marginTop:10,justifyContent:'space-around',alignItems:'center'}}>
                     {follow_items.map((item,index)=>{
                       return <FollowComponent key={index} count={item.count} content={item.content}/>
-                    })}
-                </View>
-              </View>
-                    <View style={{flex: 1}}>
-                  <Tab.Navigator
+                      })}
+                      <View style={{marginLeft:50}}>
+                      <Button
+                      onPress={handlePress}
+                        mode='outlined' style={{
+                        backgroundColor:'transparent', 
+                        borderRadius:100,
+                        borderWidth:1,
+                        borderColor:theme.colors.tertiary}}>Connection</Button></View>
+                        </View>
+                        </View>
+                        </View>
+              <View style={{flex: 1}}>
+              <Tab.Navigator
                 screenOptions={{
                   swipeEnabled:true,
                   tabBarIndicatorStyle:{

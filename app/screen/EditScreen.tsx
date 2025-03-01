@@ -1,11 +1,11 @@
 import {
     View,
-    Text,
     StyleSheet, 
     TouchableOpacity,
     ScrollView,
     Switch,
-    Modal} from 'react-native'
+    Modal,
+    Platform} from 'react-native'
 import { useState,useEffect } from 'react';
 import ChatRoomHeader from '../components/ChatRoomHeader';
 import color from '../../config/color';
@@ -27,6 +27,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import crashlytics from '@react-native-firebase/crashlytics'
 import { db } from 'FIrebaseConfig';
+import { useTheme, Text,Icon } from 'react-native-paper';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 type NavigationProp = {
     Profile:{user:any},
@@ -56,7 +58,8 @@ const EditScreen = () => {
     const [modalVisible, setModalVisible] = useState<boolean>(false);
     const profileImage = useSelector((state:any) => state.user.profileimg)
     const {user} = useAuth()
-
+    const theme = useTheme()
+    const {top} = useSafeAreaInsets()
 
     const [form, setForm] = useState({
         darkMode:true,
@@ -212,17 +215,15 @@ const EditScreen = () => {
   
 
   return (
-    <View style={styles.screen}>
-        <ChatRoomHeader
-        iconColor='#00bf63' 
-        onPress={()=>navigation.navigate('Profile',{user})} 
-        backgroundColor={color.button}
-        title='Edit Profile'
-        icon='keyboard-backspace' 
-        onPress2={() => navigation.navigate('Message')}
+    <View style={[styles.screen,{backgroundColor:theme.colors.background,paddingTop:Platform.OS === 'ios' ? top : 0}]}>
+    <TouchableOpacity onPress={() => navigation.goBack()} style={{padding:10}}>
+        <Icon
+        source='arrow-left-circle'
+        size={hp(3)}
         />
+      </TouchableOpacity>
         <ScrollView
-        contentContainerStyle={{paddingBottom:30}}
+        contentContainerStyle={{paddingBottom:10}}
         zoomScale={1.0}
         showsVerticalScrollIndicator
         alwaysBounceVertical
@@ -230,22 +231,24 @@ const EditScreen = () => {
         <View style={{padding:40}}>
         <View style={{flexDirection:'row'}}>
         <Image
-            style={{height:hp(5), aspectRatio:1, borderRadius:100}}
+            style={{height:hp(8), aspectRatio:1, borderRadius:100}}
             source={edit?.profileUrl || user.profileUrl}
             placeholder={{blurhash}}
             transition={500}
             cachePolicy='none'/>
         <View style={{marginLeft:40,marginTop:10}}>
-        <Text style={{color:'#fff',fontSize:20}}>{edit?.name}</Text>
+        <Text style={{color:theme.colors.tertiary,fontSize:20}}>{edit?.name}</Text>
         <TouchableOpacity style={{marginTop:5}} onPress={pickImage}>
-        <Text style={{color:'#fff',fontSize:12}}>Edit picture</Text>
+        <Text style={{color:theme.colors.tertiary,fontSize:12}}>Edit picture</Text>
         </TouchableOpacity>
         </View>
         </View>
         <View style={{marginTop:40}}>
             {sections.map(({header,items,id})=>( 
                 <View>
-                     <Text key={id} style={{color:'#fff',fontSize:20}}>
+                     <Text
+                     variant='bodyLarge'
+                     key={id} style={{color:theme.colors.tertiary,fontSize:20}}>
                   {header}
                         </Text>
                 {items.map(({id,icon,nav,name,type,screen})=>(
@@ -257,9 +260,9 @@ const EditScreen = () => {
                               </View>
                               </View>
                       <View style={{ paddingLeft: 10, flex: 1}}>
-                      <Text style={{ fontSize: 18,color:'#fff'}}>@{name}</Text>
+                      <Text variant='bodySmall' style={{ fontSize: 16,color:theme.colors.tertiary}}>@{name}</Text>
                       <View style={{ marginTop: 3 }}>
-                      <Text style={{ fontSize: 12,color:'#fff'}}>{type}</Text>
+                      <Text variant='bodySmall' style={{ fontSize: 12,color:theme.colors.tertiary}}>{type}</Text>
                       </View>
                       </View>
                       <View style={{ backgroundColor: '#3b3b3b', borderRadius: 5, width: 30, padding: 5 }}>
@@ -275,7 +278,9 @@ const EditScreen = () => {
             <View style={{marginTop:20}}>
             {Sections.map(({header, items,id}) => (
                 <View key={id}>
-                    <Text style={{color:'#fff',fontSize:20,marginBottom:10}}>{header}</Text>
+                    <Text
+                    variant='bodyLarge'
+                    style={{color:theme.colors.tertiary,fontSize:20,marginBottom:10}}>{header}</Text>
 
                     {items.map(({id, icon,tag, label, type,screen}) => (
                         <TouchableOpacity
@@ -287,7 +292,7 @@ const EditScreen = () => {
                                 <Feather name={icon} size={15} color='#fff'/>
                                 </View>
                             </View>
-                            <Text style={{ fontSize: 18,color:'#fff',paddingLeft:10 }}>{label}</Text>
+                            <Text variant='bodySmall' style={{ fontSize: 16,color:theme.colors.tertiary,paddingLeft:10 }}>{label}</Text>
                             <View style={{flex:1}}/>
                             {type === 'toggle' && 
                             <Switch value={true}
@@ -338,7 +343,6 @@ const styles = StyleSheet.create({
 
     screen:{
         flex:1,
-        backgroundColor:color.backgroundcolor
     },
     row:{
         flexDirection:'row',
