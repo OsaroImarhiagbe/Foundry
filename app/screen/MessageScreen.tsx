@@ -7,11 +7,8 @@ import React, {
 import {
   View,
   StyleSheet,
-  Platform,
-  StatusBar,
   TouchableOpacity
   } from 'react-native'
-import color from '../../config/color';
 import {
   FirebaseFirestoreTypes,
   where,
@@ -22,13 +19,12 @@ import {
   startAfter, 
   getDocs } from '@react-native-firebase/firestore';
 import { useAuth } from '../authContext';
-import ChatRoomHeader from '../components/ChatRoomHeader';
 import { useNavigation } from '@react-navigation/native';
 import { FlashList } from '@shopify/flash-list';
 import { ActivityIndicator,Text,useTheme,Icon } from 'react-native-paper';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-//import crashlytics from '@react-native-firebase/crashlytics'
-import { ChatRoomsRef} from 'FIrebaseConfig';
+import {log,recordError,setAttributes} from '@react-native-firebase/crashlytics'
+import { ChatRoomsRef,crashlytics} from 'FIrebaseConfig';
 import SearchComponent from 'app/components/SearchComponent';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -60,7 +56,7 @@ const MessageScreen = () => {
   const onRefresh = useCallback(() => {
     setRefreshing(true);
     try{
-        //crashlytics().log('Grabbing Users Message')
+        log(crashlytics,'Grabbing Users Message')
         if (!users) {
           setUsers([]);
           return;
@@ -75,20 +71,20 @@ const MessageScreen = () => {
           setLastVisible(querySnapshot.docs[querySnapshot.docs.length - 1])
           setHasMore(querySnapshot.docs.length > 0)
         },(err)=>{
-          //crashlytics().recordError(err)
+          recordError(crashlytics,err)
           console.error(`Failed to grab users: ${err.message}`)
         })
         return unsub
     }catch(error:any){
-      //crashlytics().recordError(error)
+      recordError(crashlytics,error)
     }finally{
     setRefreshing(false); 
     }
   }, [users]);
 
   useEffect(() => {
-    const grabMessageSent = () => {
-      //crashlytics().log('Grabbing Users Message')
+    try{
+      log(crashlytics,'Grabbing Users Message')
       if (!users) {
         setUsers([]);
         return;
@@ -103,16 +99,18 @@ const MessageScreen = () => {
         setLastVisible(querySnapshot.docs[querySnapshot.docs.length - 1])
         setHasMore(querySnapshot.docs.length > 0)
       },(err)=>{
-        //crashlytics().recordError(err)
+        recordError(crashlytics,err)
         console.error(`Failed to grab users: ${err.message}`)
       })
       return unsub
+    }catch(error: unknown | any){
+      recordError(crashlytics,error)
+      console.error('Error getting messages',error)
     }
-    grabMessageSent()
-  },[users])
+    },[users])
   
   const fetchMoreMessage = async () => {
-    //crashlytics().log('Fetch more Message')
+    log(crashlytics,'Fetch more Message')
     if (loadingMore || !hasMore) return;
     if (!user?.userId) return;
     if (users.length <= 2) {
@@ -139,7 +137,7 @@ const MessageScreen = () => {
       setLastVisible(snapshot.docs[snapshot.docs.length - 1]);
       setHasMore(snapshot.docs.length > 0);
     } catch (error:unknown | any) {
-      //crashlytics().recordError(error)
+      recordError(crashlytics,error)
       console.error(`Error fetching more posts: ${error}`);
     } finally {
       setLoadingMore(false);

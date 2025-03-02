@@ -14,7 +14,7 @@ import color from '../../config/color';
 import { useNavigation } from '@react-navigation/native';
 import { useDispatch,useSelector } from 'react-redux';
 import { addsearchID } from '../features/search/searchSlice';
-import {collection, getDocs, query, where}from '@react-native-firebase/firestore';
+import { getDocs, query, where}from '@react-native-firebase/firestore';
 import useDebounce from '../hooks/useDebounce';
 import SearchFilter from '../components/SearchFilter';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -22,7 +22,7 @@ import { useTheme } from 'react-native-paper';
 import { Image } from 'expo-image';
 import { blurhash } from 'utils';
 import { useAuth } from 'app/authContext';
-import { db, UsersRef } from 'FIrebaseConfig';
+import { UsersRef } from 'FIrebaseConfig';
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import crashlytics from '@react-native-firebase/crashlytics'
 
