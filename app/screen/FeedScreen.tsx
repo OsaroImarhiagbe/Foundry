@@ -5,34 +5,24 @@ import React,
   lazy,
   Suspense,
   useCallback,
-  useMemo
 }from 'react'
 import {
     View,
-    ScrollView,
     StyleSheet,
-    TouchableOpacity,
     useWindowDimensions,
     useColorScheme,
     Animated} from 'react-native'
-import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
-import {Image} from 'expo-image'
 import { useAuth } from '../authContext';
-import { blurhash } from '../../utils';
 import { useTheme } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
-import { TouchableWithoutFeedback } from 'react-native-gesture-handler';
-import { FAB } from 'react-native-paper';
-import Entypo from 'react-native-vector-icons/Entypo';
 import {ActivityIndicator,Divider,Text} from 'react-native-paper';
 import { FirebaseFirestoreTypes, getDocs, limit, onSnapshot, orderBy, query, startAfter, Timestamp } from '@react-native-firebase/firestore';
-import crashlytics from '@react-native-firebase/crashlytics'
+import {log,recordError,} from '@react-native-firebase/crashlytics'
 import { MotiView } from 'moti';
 import { FlashList } from '@shopify/flash-list';
 import { Skeleton } from 'moti/skeleton';
-import { PostRef } from 'FIrebaseConfig';
+import { crashlytics, PostRef } from 'FIrebaseConfig';
 import { addId } from 'app/features/user/userSlice';
 import { useDispatch } from 'react-redux';
 
@@ -96,7 +86,7 @@ const FeedScreen = () => {
       setMount(true)
       dispatch(addId({currentuserID:user?.userId}))
       const timer = setTimeout(() => {
-        //crashlytics().log('Grabbing post')
+        log(crashlytics,'Grabbing post')
           try {
             const docRef = query(PostRef,orderBy('createdAt', 'desc'),limit(10))
             const subscriber = onSnapshot(docRef,querySnapShot =>{
@@ -113,8 +103,8 @@ const FeedScreen = () => {
               setHasMore(querySnapShot.docs.length > 0);
             });
             return () => subscriber()
-          }  catch (error:any) {
-            //crashlytics().recordError(error)
+          }  catch (error:unknown | any) {
+            recordError(crashlytics,error)
           console.error(`Error post can not be found: ${error}`);
         }finally{
           setMount(false)
@@ -129,7 +119,7 @@ const FeedScreen = () => {
   
     const onRefresh = useCallback(() => {
       setRefreshing(true);
-      //crashlytics().log('Post Refresh')
+      log(crashlytics,'Post Refresh')
         try {
           const docRef = query(PostRef,orderBy('createdAt', 'desc'),limit(10))
           const unsub = onSnapshot(docRef,querySnapShot =>{
@@ -143,52 +133,46 @@ const FeedScreen = () => {
           });
           return () => unsub()
         }  catch (error:any) {
-          //crashlytics().recordError(error)
+          recordError(crashlytics,error)
           console.error(`Error post can not be found: ${error}`);
       }finally{
         setRefreshing(false);
       }
     }, [post]);
-    
-  
-   
-    
-    
-  
-  const fetchMorePost = async () => {
-    //crashlytics().log('Fetch More Post')
-    if (loadingMore || !hasMore) return;
-    if (!user?.userId) return;
-    if (post.length <= 2) {
-      setHasMore(false);
-      return;
-    }
-    setLoadingMore(true);
-    try {
-      const docRef = lastVisible ? query(
-        PostRef,
-        orderBy('createdAt','desc'),
-        startAfter(lastVisible), 
-        limit(2)) : 
-        query(
+    const fetchMorePost = async () => {
+      log(crashlytics,'Fetch More Post')
+      if (loadingMore || !hasMore) return;
+      if (!user?.userId) return;
+      if (post.length <= 2) {
+        setHasMore(false);
+        return;
+      }
+      setLoadingMore(true);
+      try {
+        const docRef = lastVisible ? query(
           PostRef,
-          orderBy('createdAt', 'desc'),
-          limit(2))
-      const snapshot = await getDocs(docRef)
-      const newPosts = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-      setPost(prevPosts => [...prevPosts, ...newPosts]);
-      setLastVisible(snapshot.docs[snapshot.docs.length - 1]);
-      setHasMore(snapshot.docs.length > 0);
-    } catch (error:any) {
-      //crashlytics().recordError(error)
-      console.error(`Error fetching more posts: ${error}`);
-    } finally {
-      setLoadingMore(false);
+          orderBy('createdAt','desc'),
+          startAfter(lastVisible), 
+          limit(2)) : 
+          query(
+            PostRef,
+            orderBy('createdAt', 'desc'),
+            limit(2))
+        const snapshot = await getDocs(docRef)
+        const newPosts = snapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        setPost(prevPosts => [...prevPosts, ...newPosts]);
+        setLastVisible(snapshot.docs[snapshot.docs.length - 1]);
+        setHasMore(snapshot.docs.length > 0);
+      } catch (error:any) {
+        recordError(crashlytics,error)
+        console.error(`Error fetching more posts: ${error}`);
+      } finally {
+        setLoadingMore(false);
+      }
     }
-  }
 
   return (
       <View style={{flex:1,backgroundColor:theme.colors.background}}>

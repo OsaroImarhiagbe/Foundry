@@ -2,7 +2,6 @@ import React,
 {
   useState,
   lazy,
-  Suspense
 }from 'react'
 import {
     View,

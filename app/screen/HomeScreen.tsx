@@ -12,7 +12,7 @@ import {
   useColorScheme
 } from 'react-native'
 import { useAuth } from 'app/authContext';
-import { collection,FirebaseFirestoreTypes,onSnapshot,doc,orderBy,query, limit,getDocs, startAfter } from '@react-native-firebase/firestore';
+import { FirebaseFirestoreTypes,onSnapshot,doc,orderBy,query, limit,getDocs, startAfter } from '@react-native-firebase/firestore';
 import { useDispatch} from 'react-redux';
 import { addId } from '../features/user/userSlice.ts';
 import { FlashList } from "@shopify/flash-list";
@@ -22,7 +22,6 @@ import { Skeleton } from 'moti/skeleton';
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import {log,recordError} from '@react-native-firebase/crashlytics'
 import { PostRef,crashlytics} from 'FIrebaseConfig.ts';
-import { useRoute } from '@react-navigation/native';
 
 const PostComponent = lazy(() => import('../components/PostComponent'))
 

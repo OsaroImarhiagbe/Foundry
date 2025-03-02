@@ -7,11 +7,9 @@ import {
     Modal,
     Platform} from 'react-native'
 import { useState,useEffect } from 'react';
-import ChatRoomHeader from '../components/ChatRoomHeader';
-import color from '../../config/color';
 import { useNavigation } from '@react-navigation/native';
 import { useAuth } from '../authContext';
-import {collection,doc,onSnapshot,updateDoc} from '@react-native-firebase/firestore'
+import { doc,onSnapshot,updateDoc} from '@react-native-firebase/firestore'
 import { Image } from 'expo-image';
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import { blurhash } from '../../utils/index';
@@ -25,8 +23,8 @@ import { Picker } from '@react-native-picker/picker';
 import { useTranslation } from 'react-i18next';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import crashlytics from '@react-native-firebase/crashlytics'
-import { db } from 'FIrebaseConfig';
+import {log,recordError,setAttributes} from '@react-native-firebase/crashlytics'
+import { crashlytics, db } from 'FIrebaseConfig';
 import { useTheme, Text,Icon } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -163,7 +161,7 @@ const EditScreen = () => {
       ]
 
     useEffect(() => {
-        crashlytics().log('Edit Screen: Grabbing user')
+        log(crashlytics,'Edit Screen: Grabbing user')
         const docRef = doc(db,'users',user?.userId)
         const unsub = onSnapshot(docRef,(documentSnapshot) => {
         if(documentSnapshot.exists){
@@ -176,14 +174,14 @@ const EditScreen = () => {
             setEdit(null)
             }
         }, (error) => {
-            crashlytics().recordError(error)
+            recordError(crashlytics,error)
             console.error('Error fetching document:',error.message)
         });
         return () => unsub()
     },[user])
 
     const pickImage = async () => {
-        crashlytics().log('Edit Screen: Pick Image')
+        log(crashlytics,'Edit Screen: Pick Image')
         try{
             let results = await ImagePicker.launchImageLibraryAsync({
                 mediaTypes: ['images'],
@@ -203,7 +201,7 @@ const EditScreen = () => {
                 dispatch(addImage({profileimg:url}))
             }
         }catch(error:any){
-            crashlytics().recordError(error)
+            recordError(crashlytics,error)
             console.error('Error picking image and uploading to Cloud Storage:',error.message)
         }
         }

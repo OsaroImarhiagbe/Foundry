@@ -4,9 +4,9 @@ import notifee, { EventType } from '@notifee/react-native'
 import { useNavigation } from '@react-navigation/native';
 import { FirebaseMessagingTypes } from '@react-native-firebase/messaging';
 import { useAuth } from './authContext';
-import {messaging,UsersRef } from 'FIrebaseConfig';
+import {crashlytics, messaging,UsersRef } from 'FIrebaseConfig';
 import { doc, setDoc } from '@react-native-firebase/firestore';
-//import crashlytics from '@react-native-firebase/crashlytics'
+import {log,recordError} from '@react-native-firebase/crashlytics'
 
 const NotificationContext = createContext<any>(null);
 
@@ -35,7 +35,7 @@ export const NotificationProvider = ({ children }:NotificationProp) => {
   const navigation = useNavigation();
 
   const showNotification = useCallback(async (title:string, message:string,data:any) => {
-    //crashlytics().log('Notifcation Provider: Show Notification')
+    log(crashlytics,'Notifcation Provider: Show Notification')
     try{
         await notifee.displayNotification({
             title: title,
@@ -58,13 +58,13 @@ export const NotificationProvider = ({ children }:NotificationProp) => {
         }, 5000);
         return () => clearTimeout(timer)
     }catch(error:unknown | any){
-        //crashlytics().recordError(error)
+        recordError(crashlytics,error)
         console.error('Error with notification permission:',error.message)
     }
   }, []);
    
     useEffect(() => {
-      //crashlytics().log('Notifcation Provider: Getting token')
+      log(crashlytics,'Notifcation Provider: Getting token')
       if (!user?.userId) return;
       const fetchToken = async () => {
         try{
@@ -76,7 +76,7 @@ export const NotificationProvider = ({ children }:NotificationProp) => {
             token:token
           },{merge:true})
         }catch(error: unknown | any){
-          //crashlytics().recordError(error)
+          recordError(crashlytics,error)
           console.error('Error grabbing token:',error)
         }
       }

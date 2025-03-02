@@ -33,7 +33,7 @@ import { log, recordError, setAttributes, setUserId } from '@react-native-fireba
 const PostComponent = lazy(() => import('../components/PostComponent'))
 
 
-{/** NEED TO LOOK AT USE EFFECT THAT IS GRAB POST AND PROJECTS AND SKILLS NEED TO IMPLEMENT IT */}
+{/** NEED TO LOOK AT USEEFFECT THAT IS GRABBING POST AND PROJECTS AND SKILLS NEED TO IMPLEMENT IT FOR SKILLS AND PROJECTS*/}
 
 const Tab = createMaterialTopTabNavigator();
 

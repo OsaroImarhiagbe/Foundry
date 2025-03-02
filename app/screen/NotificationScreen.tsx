@@ -7,21 +7,18 @@ import React,{
 import {
   View, 
   StyleSheet,
-  ScrollView,
-  ActivityIndicator,
-  RefreshControl,
   SafeAreaView} from 'react-native'
 import {
   collection,
-  doc,
   onSnapshot,} from '@react-native-firebase/firestore'
 import { useAuth } from '../authContext';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import color from '../../config/color';
 import { useTheme,Text } from 'react-native-paper';
-import { db,UsersRef,NotificationsRef} from 'FIrebaseConfig';
+import { db,UsersRef,NotificationsRef, crashlytics} from 'FIrebaseConfig';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-//import crashlytics, { crash } from '@react-native-firebase/crashlytics'
+import { log,recordError } from '@react-native-firebase/crashlytics'
+import { FlashList } from '@shopify/flash-list';
 
 
 interface Notification{
@@ -40,7 +37,7 @@ const NotificationScreen = () => {
 
 
   const getNotifications = useCallback(() => {
-    //crashlytics().log('Notification Screen: get Notifications')
+    log(crashlytics,'Notification Screen: get Notifications')
     try{
       if(user){
         const docRef = collection(db,'users',user?.userId,'notifications')
@@ -59,19 +56,19 @@ const NotificationScreen = () => {
       return unsub
       }
     }catch(error:unknown | any){
-      //crashlytics().recordError(error)
+      recordError(crashlytics,error)
       console.error('Error grabbing notifications:',error.message)
       return ()  => {}
     }
   },[user?.userId])
 
   const onRefresh = useCallback(() => {
-    //crashlytics().log('Notification Screen: On Refresh')
+    log(crashlytics,'Notification Screen: On Refresh')
     setRefreshing(true);
     try{
       getNotifications()
     }catch(error:unknown | any){
-      //crashlytics().recordError(error)
+      recordError(crashlytics,error)
       console.error('Error getting notifications',error.message)
     }finally{
       setRefreshing(false)
@@ -90,76 +87,64 @@ const NotificationScreen = () => {
 
 
   const MessagesNotifications = () => (
-    <ScrollView
-    refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh}/>}
-    scrollEnabled={true}
+    <View
      style={{flex:1,backgroundColor:theme.colors.background}}>
       <SafeAreaView style={{flex:1,backgroundColor:theme.colors.background}}>
-        {
-        messageNotifications &&  messageNotifications.length > 0 ? (
-            messageNotifications.map((message,index) => (
-              <Suspense key={index} fallback={<ActivityIndicator size="large" color="#fff" />}>
-                <View style={{padding: 10}}>
-                  <View style={{backgroundColor:color.grey,padding:20,borderRadius:20}}>
-                  <Text style={styles.notificationTitle}>{message.title}</Text>
-                  <Text style={styles.notificationText}>{message.body}</Text>
-                  </View>
-                </View>
-              </Suspense>
-            ))) : <View style={{paddingTop:20}}>
-              <Text 
-            variant='bodySmall' 
-            style={{ color: '#fff', textAlign: 'center',fontSize:16}}>No Notifications Available</Text></View>}
+        <FlashList
+        data={messageNotifications}
+        ListEmptyComponent={() => <View style={{paddingTop:20}}><Text
+          variant='bodySmall'
+        style={{ color: '#fff', textAlign: 'center',fontSize:16}}>No Notifications Available</Text></View>}
+        renderItem={({item}) =>  
+          <View style={{padding: 10}}>
+            <View style={{backgroundColor:color.grey,padding:20,borderRadius:20}}>
+            <Text style={styles.notificationTitle}>{item.title}</Text>
+            <Text style={styles.notificationText}>{item.body}</Text>
+            </View>
+          </View>}/>
     </SafeAreaView>
-    </ScrollView>
+    </View>
     
   ); 
   
   const Notifcations = () => (
-    <ScrollView
-    refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh}/>}
-    scrollEnabled={true}
+    <View
      style={{flex:1,backgroundColor:theme.colors.background}}>
       <SafeAreaView style={{flex:1,backgroundColor:theme.colors.background}}>
-        {
-        notification && notification.length > 0 ? (
-            notification.map((notifications,index) => (
-              <Suspense key={index} fallback={<ActivityIndicator size="large" color="#fff" />}>
-                <View style={{padding: 10}}>
-                  <View style={{backgroundColor:color.grey,padding:20,borderRadius:20}}>
-                  <Text style={styles.notificationTitle}>{notifications.title}</Text>
-                  <Text style={styles.notificationText}>{notifications.body}</Text>
-                  </View>
-                </View>
-              </Suspense>
-            ))) : <View style={{paddingTop:20}}>
-              <Text
-              variant='bodySmall'
-            style={{ color: '#fff', textAlign: 'center',fontSize:16}}>No Notifications Available</Text></View>}
+      <FlashList
+        data={notification}
+        ListEmptyComponent={() => <View style={{paddingTop:20}}><Text
+          variant='bodySmall'
+        style={{ color: '#fff', textAlign: 'center',fontSize:16}}>No Notifications Available</Text></View>}
+        renderItem={({item}) =>  
+          <View style={{padding: 10}}>
+            <View style={{backgroundColor:color.grey,padding:20,borderRadius:20}}>
+            <Text style={styles.notificationTitle}>{item.title}</Text>
+            <Text style={styles.notificationText}>{item.body}</Text>
+            </View>
+          </View>}/>
     </SafeAreaView>
-    </ScrollView>
+    </View>
     
   );
   const Mentions = () => (
-    <ScrollView
-    refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh}/>}
-    scrollEnabled={true}
+    <View
      style={{flex:1,backgroundColor:theme.colors.background}}>
       <SafeAreaView style={{flex:1,backgroundColor:theme.colors.background}}>
-        {
-        notification && notification.length > 0 ? (
-            notification.map((notifications,index) => (
-              <Suspense key={index} fallback={<ActivityIndicator size="large" color="#fff" />}>
-                <View style={{padding: 10}}>
-                  <View style={{backgroundColor:color.grey,padding:20,borderRadius:20}}>
-                  <Text style={styles.notificationTitle}>{notifications.title}</Text>
-                  <Text style={styles.notificationText}>{notifications.body}</Text>
-                  </View>
-                </View>
-              </Suspense>
-            ))) : <View style={{paddingTop:20}}><Text style={{ color: '#fff', textAlign: 'center', fontFamily:color.textFont,fontSize:20}}>No Notifications Available</Text></View>}
+      <FlashList
+        data={messageNotifications}
+        ListEmptyComponent={() => <View style={{paddingTop:20}}><Text
+          variant='bodySmall'
+        style={{ color: '#fff', textAlign: 'center',fontSize:16}}>No Notifications Available</Text></View>}
+        renderItem={({item}) =>  
+          <View style={{padding: 10}}>
+            <View style={{backgroundColor:color.grey,padding:20,borderRadius:20}}>
+            <Text style={styles.notificationTitle}>{item.title}</Text>
+            <Text style={styles.notificationText}>{item.body}</Text>
+            </View>
+          </View>}/>
     </SafeAreaView>
-    </ScrollView>
+    </View>
     
   );
   return (

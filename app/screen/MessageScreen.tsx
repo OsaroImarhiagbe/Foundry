@@ -23,7 +23,7 @@ import { useNavigation } from '@react-navigation/native';
 import { FlashList } from '@shopify/flash-list';
 import { ActivityIndicator,Text,useTheme,Icon } from 'react-native-paper';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import {log,recordError,setAttributes} from '@react-native-firebase/crashlytics'
+import {log,recordError} from '@react-native-firebase/crashlytics'
 import { ChatRoomsRef,crashlytics} from 'FIrebaseConfig';
 import SearchComponent from 'app/components/SearchComponent';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';

@@ -9,7 +9,6 @@ import {
   ImageBackground,
   SafeAreaView} from 'react-native'
 import {lazy,Suspense} from 'react'
-import color from '../../config/color';
 import { useNavigation } from '@react-navigation/native';
 import {useState, useEffect,useCallback} from 'react';
 import { Image } from 'expo-image';
@@ -18,7 +17,6 @@ import { useRoute } from '@react-navigation/native';
 import SmallButton from '../components/SmallButton';
 import FollowComponent from '../components/FollowComponent';
 import {
-  collection, 
   doc, 
   FirebaseFirestoreTypes, 
   onSnapshot, 
@@ -36,8 +34,8 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import EvilIcons from 'react-native-vector-icons/EvilIcons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { NavigatorScreenParams } from '@react-navigation/native';
-import crashlytics from '@react-native-firebase/crashlytics'
-import { UsersRef,ProjectRef, PostRef,db} from 'FIrebaseConfig'
+import {log,recordError} from '@react-native-firebase/crashlytics'
+import { UsersRef,ProjectRef, PostRef,db, crashlytics} from 'FIrebaseConfig'
 const PostComponent = lazy(() => import('../components/PostComponent'))
 
 
@@ -115,7 +113,7 @@ const OtherUserScreen = () => {
 
 
     const onRefresh = useCallback(async () => {
-    crashlytics().log('Other User Screen: useCallback')
+    log(crashlytics,'Other User Screen: useCallback')
     setRefreshing(true);
     try{
       if(!other_user_id) return
@@ -129,13 +127,14 @@ const OtherUserScreen = () => {
             }
           },
           (error) => {
+            recordError(crashlytics,error)
             console.error(`Error fetching document: ${error}`);
           }
         );
         return () => unsub()
     
     }catch(error:unknown | any){
-      crashlytics().recordError(error.message)
+      recordError(crashlytics,error.message)
     }finally{
       setRefreshing(false);
     }
@@ -144,7 +143,7 @@ const OtherUserScreen = () => {
 
 
     useEffect(() => {
-      crashlytics().log('Other User Screen: Grabbing Projects')
+      log(crashlytics,'Other User Screen: Grabbing Projects')
       setLoading(true)
       if(projects.length === 0) return;
       try{
@@ -158,7 +157,7 @@ const OtherUserScreen = () => {
         })
         return () => unsub()
       }catch(error:unknown | any){
-        crashlytics().recordError(error)
+        recordError(crashlytics,error)
         console.error('error grabbing user projects:',error.message)
       }finally{
         setLoading(false)
@@ -167,7 +166,7 @@ const OtherUserScreen = () => {
 
 
     useEffect(() => {
-      crashlytics().log('Other User Screen: Grabbing Posts')
+      log(crashlytics,'Other User Screen: Grabbing Posts')
       setLoading(true)
       if (!users || !users.username) return;  
       try{
@@ -181,7 +180,7 @@ const OtherUserScreen = () => {
         })
         return () => unsub()
       }catch(error:unknown | any){
-        crashlytics().recordError(error)
+        recordError(crashlytics,error)
         console.error('error grabbing user post:',error.message)
       }finally{
         setLoading(false)
@@ -190,7 +189,7 @@ const OtherUserScreen = () => {
 
 
     useEffect(() => {
-      crashlytics().log('Other User Screen: Grabbing User')
+      log(crashlytics,'Other User Screen: Grabbing User')
       if(!other_user_id) return
       setLoading(true) 
       try{
@@ -204,13 +203,13 @@ const OtherUserScreen = () => {
           }
         },
         (error) => {
-          crashlytics().recordError(error)
+          recordError(crashlytics,error)
           console.error(`Error fetching document: ${error}`);
         }
       );
       return () => unsub()
       }catch(error: unknown | any){
-        crashlytics().recordError(error)
+        recordError(crashlytics,error)
       }finally{
         setLoading(false)
       }
@@ -353,8 +352,9 @@ const OtherUserScreen = () => {
         })
         
       })
-    }catch(err){
-      console.error(err)
+    }catch(error:unknown | any){
+      recordError(crashlytics,error)
+      console.error(error)
 
     }
   }

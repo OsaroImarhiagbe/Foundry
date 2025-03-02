@@ -22,9 +22,9 @@ import { useTheme } from 'react-native-paper';
 import { Image } from 'expo-image';
 import { blurhash } from 'utils';
 import { useAuth } from 'app/authContext';
-import { UsersRef } from 'FIrebaseConfig';
+import { crashlytics, UsersRef } from 'FIrebaseConfig';
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
-import crashlytics from '@react-native-firebase/crashlytics'
+import {log, recordError} from '@react-native-firebase/crashlytics'
 
 
 interface Results{
@@ -69,7 +69,7 @@ const SearchScreen = () => {
 }, [debouncedsearch]);
 
   const handleSearch = async () => {
-    crashlytics().log('Search Screen: Handle Search')
+    log(crashlytics,'Search Screen: Handle Search')
     setLoading(true)
     if(searchQuery.trim() === '') return;
     try{
@@ -86,7 +86,7 @@ const SearchScreen = () => {
       setResults(user);
       setSearchQuery('')
     }catch(error:unknown | any){
-      crashlytics().recordError(error)
+      recordError(crashlytics,error)
       console.error(`Cant find user: ${error}`)
     }finally{
       setLoading(false)
