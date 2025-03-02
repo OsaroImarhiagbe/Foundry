@@ -9,6 +9,9 @@
       "autoIncrement": true,
       "distribution": "internal",
       "environment": "development",
+      "ios": {
+        "simulator": true
+      },
       "env": {
         "ENV_FILE": "development"
       },
