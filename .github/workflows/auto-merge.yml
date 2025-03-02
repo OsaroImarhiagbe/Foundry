@@ -1,0 +1,49 @@
+name: Auto Merge Development to Main
+
+on:
+  pull_request:
+    branches:
+      - main  # Runs when a PR is opened to master
+
+jobs:
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest  # Use Ubuntu for the runner
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 23  # Adjust based on your project
+
+      - name: Install dependencies
+        run: npm install  # Install dependencies
+
+      - name: Run tests
+        run: npm test  # Run your test suite
+
+  merge:
+    name: Merge Development to Master
+    needs: test  # Only runs if tests pass
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Ensure full git history is fetched
+
+      - name: Check for AUTO-MERGE keyword
+        run: |
+          if git log -1 --pretty=%B | grep -q "AUTO-MERGE"; then
+            echo "Merging development into master..."
+            git config --global user.name "github-actions"
+            git config --global user.email "github-actions@github.com"
+            git checkout master
+            git merge --no-ff development -m "Auto-merged development into master"
+            git push origin master
+          else
+            echo "No AUTO-MERGE keyword found. Skipping merge."
