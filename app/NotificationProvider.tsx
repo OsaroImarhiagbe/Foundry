@@ -5,7 +5,7 @@ import { useNavigation } from '@react-navigation/native';
 import { FirebaseMessagingTypes } from '@react-native-firebase/messaging';
 import { useAuth } from './authContext';
 import {crashlytics, messaging,UsersRef } from 'FIrebaseConfig';
-import { doc, setDoc } from '@react-native-firebase/firestore';
+import { doc, setDoc} from '@react-native-firebase/firestore';
 import {log,recordError} from '@react-native-firebase/crashlytics'
 
 const NotificationContext = createContext<any>(null);
@@ -51,11 +51,16 @@ export const NotificationProvider = ({ children }:NotificationProp) => {
             },
         });
         setNotification({ title, message,data });
+        await setDoc(doc(UsersRef,user.userId,'notifications'),{
+          title:title,
+          message:message,
+          data:data
+        })
         setVisible(true)
         const timer = setTimeout(() => {
           setNotification(null);
           setVisible(false)
-        }, 5000);
+        }, 9000);
         return () => clearTimeout(timer)
     }catch(error:unknown | any){
         recordError(crashlytics,error)

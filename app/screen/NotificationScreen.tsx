@@ -46,7 +46,7 @@ const NotificationScreen = () => {
         let all:Notification[] = []
         querySnapshot.forEach((documentSnapshot)=>{
           all.push({...documentSnapshot.data(),id:documentSnapshot.id})
-          if (documentSnapshot.data().notification_data == 'message'){
+          if (documentSnapshot.data().data == 'message'){
             messageOnly.push({...documentSnapshot.data()})
           }
         })

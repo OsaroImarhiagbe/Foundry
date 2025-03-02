@@ -25,6 +25,7 @@ import { Skeleton } from 'moti/skeleton';
 import { crashlytics, PostRef } from 'FIrebaseConfig';
 import { addId } from 'app/features/user/userSlice';
 import { useDispatch } from 'react-redux';
+import perf from '@react-native-firebase/perf';
 
 const PostComponent = lazy(() => import('../components/PostComponent'))
 

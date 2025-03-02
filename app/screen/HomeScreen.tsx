@@ -22,7 +22,7 @@ import { Skeleton } from 'moti/skeleton';
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import {log,recordError} from '@react-native-firebase/crashlytics'
 import { PostRef,crashlytics} from 'FIrebaseConfig.ts';
-
+import perf from '@react-native-firebase/perf';
 const PostComponent = lazy(() => import('../components/PostComponent'))
 
 

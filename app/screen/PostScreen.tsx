@@ -23,14 +23,14 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useTheme,Icon,Text,Button,Divider } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Image } from 'expo-image';
-//import crashlytics from '@react-native-firebase/crashlytics'
+import {log,recordError} from '@react-native-firebase/crashlytics'
 import {
   Menu,
   MenuOptions,
   MenuTrigger,
 } from 'react-native-popup-menu';
 import { MenuItems } from '../components/CustomMenu'
-import {functions } from 'FIrebaseConfig';
+import {crashlytics, functions } from 'FIrebaseConfig';
 import { storage } from 'FIrebaseConfig';
 import { httpsCallable } from '@react-native-firebase/functions'
 import FastImage from 'react-native-fast-image'
@@ -130,7 +130,7 @@ const PostScreen = () => {
     }
   };
   const pickImage = async () => {
-    //crashlytics().log('Post Screen: Picking Images')
+    log( crashlytics,'Post Screen: Picking Images')
     try{
       let results = await launchImageLibrary({
         mediaType: 'mixed',
@@ -143,7 +143,7 @@ const PostScreen = () => {
         setFileName(results?.assets[0]?.uri?.split('/').pop())
       }
     }catch(error:unknown | any){
-      //crashlytics().recordError(error)
+      recordError(crashlytics,error)
       console.error(error)
     }
   }
