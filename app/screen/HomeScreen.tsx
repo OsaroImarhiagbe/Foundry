@@ -2,19 +2,15 @@ import React,{
   useState,
   useEffect,
   lazy,
-  Suspense,
   useMemo,
   useCallback} from 'react'
 import {
   View,
   StyleSheet,
   useWindowDimensions,
-  ScrollView,
   Animated,
   useColorScheme
 } from 'react-native'
-import color from '../../config/color';
-import { useNavigation} from '@react-navigation/native';
 import { useAuth } from 'app/authContext';
 import { collection,FirebaseFirestoreTypes,onSnapshot,doc,orderBy,query, limit,getDocs, startAfter } from '@react-native-firebase/firestore';
 import { useDispatch} from 'react-redux';
@@ -24,8 +20,9 @@ import {ActivityIndicator,Text,Divider,useTheme} from 'react-native-paper'
 import { MotiView } from 'moti';
 import { Skeleton } from 'moti/skeleton';
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
-//import crashlytics from '@react-native-firebase/crashlytics'
-import { PostRef} from 'FIrebaseConfig.ts';
+import {log,recordError} from '@react-native-firebase/crashlytics'
+import { PostRef,crashlytics} from 'FIrebaseConfig.ts';
+import { useRoute } from '@react-navigation/native';
 
 const PostComponent = lazy(() => import('../components/PostComponent'))
 
@@ -47,16 +44,8 @@ type Post = {
   mount?:boolean
 };
 
-// const Post = () => (
-//   <ScrollView scrollEnabled style={{flex:1,backgroundColor:color.backgroundcolor}}>
-//     <View style={{flex:1,backgroundColor:color.backgroundcolor}}>
-//       <Text>hi</Text>
-//   </View>
-//   </ScrollView>
-  
-// ); 
 
-const HomeScreen = () => {
+const HomeScreen= (route:unknown | any) => {
   const theme = useTheme()
   const dispatch = useDispatch()
   const [refreshing, setRefreshing] = useState<boolean>(false);
@@ -66,33 +55,21 @@ const HomeScreen = () => {
   const [lastVisible, setLastVisible] = useState<FirebaseFirestoreTypes.QueryDocumentSnapshot<FirebaseFirestoreTypes.DocumentData> | null>(null);
   const [loadingMore, setLoadingMore] = useState<boolean>(false);
   const [hasMore, setHasMore] = useState<boolean>(true);
-  const [category,setCategory] = useState('')
   const [mount, setMount] = useState<boolean>(false)
   const scrollY = useState(new Animated.Value(0))[0];
   const dark_or_light = useColorScheme()
-
+  const {category} = route?.params
 
   const memoPost = useMemo(() => {
-    return post?.filter((name) => name?.category?.includes('Creativity and Innovation'));
+    return post?.filter((name) => name?.category?.includes(category));
   }, [post]);
   
-  // const headerOpacity = scrollY.interpolate({
-  //   inputRange: [0, 250],
-  //   outputRange: [1, 0],
-  //   extrapolate: 'clamp',
-  // });
-  // const headerBackgroundColor = scrollY.interpolate({
-  //   inputRange: [0, 250],
-  //   outputRange: ['rgba(0, 0, 0, 0)', 'rgba(0, 0,0,0)'], // Adjust the color
-  //   extrapolate: 'clamp',
-  // });
-
   useEffect(() => {
     if (!user?.userId) return;
     setMount(true)
     dispatch(addId({currentuserID:user?.userId}))
     const timer = setTimeout(() => {
-      //crashlytics().log('Grabbing post')
+      log(crashlytics,'Grabbing post')
         try {
           const docRef = query(PostRef,orderBy('createdAt', 'desc'),limit(10))
           const subscriber = onSnapshot(docRef,querySnapShot =>{
@@ -110,7 +87,7 @@ const HomeScreen = () => {
           });
           return () => subscriber()
         }  catch (error:any) {
-          //crashlytics().recordError(error)
+          recordError(crashlytics,error)
         console.error(`Error post can not be found: ${error}`);
       }finally{
         setMount(false)
@@ -125,7 +102,7 @@ const HomeScreen = () => {
 
   const onRefresh = useCallback(() => {
     setRefreshing(true);
-    //crashlytics().log('Post Refresh')
+    log(crashlytics,'Post Refresh')
       try {
         const docRef = query(PostRef,orderBy('createdAt', 'desc'),limit(10))
         const unsub = onSnapshot(docRef,querySnapShot =>{
@@ -139,19 +116,17 @@ const HomeScreen = () => {
         });
         return () => unsub()
       }  catch (error:any) {
-        //crashlytics().recordError(error)
+        recordError(crashlytics,error)
         console.error(`Error post can not be found: ${error}`);
     }finally{
       setRefreshing(false);
     }
   }, [memoPost]);
-  
-
-  
+    
   
 
 const fetchMorePost = async () => {
-  //crashlytics().log('Fetch More Post')
+  log(crashlytics,'Fetch More Post')
   if (loadingMore || !hasMore) return;
   if (!user?.userId) return;
   if (post.length <= 2) {
@@ -178,12 +153,14 @@ const fetchMorePost = async () => {
     setLastVisible(snapshot.docs[snapshot.docs.length - 1]);
     setHasMore(snapshot.docs.length > 0);
   } catch (error:any) {
-    //crashlytics().recordError(error)
+    recordError(crashlytics,error)
     console.error(`Error fetching more posts: ${error}`);
   } finally {
     setLoadingMore(false);
   }
 }
+
+
 
   return (
     <View
@@ -227,7 +204,7 @@ const fetchMorePost = async () => {
     ListFooterComponent={() => (
        <ActivityIndicator color='#fff' size='small' animating={loadingMore}/>
     )}
-    renderItem={({item}) => <Suspense fallback={<ActivityIndicator size='small' color='#000'/>}>
+    renderItem={({item}) => 
       <PostComponent
       auth_profile={item.auth_profile}
       count={item.like_count}
@@ -239,8 +216,7 @@ const fetchMorePost = async () => {
           hour: '2-digit',
           minute: '2-digit',
           hour12: true})}
-      comment_count={item.comment_count}/>
-      </Suspense>}
+      comment_count={item.comment_count}/>}
     keyExtractor={(item)=> item?.post_id?.toString() || Math.random().toString()}
     /> } 
     </View>

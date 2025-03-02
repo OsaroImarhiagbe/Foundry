@@ -37,6 +37,7 @@
       "@react-native-firebase/messaging",
       "@react-native-firebase/crashlytics",
       "@react-native-google-signin/google-signin",
+      "react-native-compressor",
       [
         "expo-notifications",
         {

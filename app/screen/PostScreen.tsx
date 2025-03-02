@@ -9,21 +9,20 @@ import {
   KeyboardAvoidingView,
   TouchableWithoutFeedback,
   TouchableOpacity} from 'react-native';
-import { Image } from 'expo-image';
 import { blurhash } from '../../utils/index';
 import { useAuth } from '../authContext';
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
-import { useDispatch,useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { useNavigation } from '@react-navigation/native';
-import * as ImagePicker from 'expo-image-picker';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import {
   Timestamp}from '@react-native-firebase/firestore'
 import color from '../../config/color';
-import {getDownloadURL, getStorage,putFile,ref} from '@react-native-firebase/storage'
+import {getDownloadURL,putFile,ref} from '@react-native-firebase/storage'
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useTheme,Icon,Text,Button,Divider } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Image } from 'expo-image';
 //import crashlytics from '@react-native-firebase/crashlytics'
 import {
   Menu,
@@ -34,6 +33,10 @@ import { MenuItems } from '../components/CustomMenu'
 import {functions } from 'FIrebaseConfig';
 import { storage } from 'FIrebaseConfig';
 import { httpsCallable } from '@react-native-firebase/functions'
+import FastImage from 'react-native-fast-image'
+import * as ImageCompressor from 'react-native-image-compressor';
+import {launchImageLibrary} from 'react-native-image-picker';
+
 
 
 
@@ -129,16 +132,17 @@ const PostScreen = () => {
   const pickImage = async () => {
     //crashlytics().log('Post Screen: Picking Images')
     try{
-      let results = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ['images', 'videos'],
-        allowsEditing:true,
-        quality:1
+      let results = await launchImageLibrary({
+        mediaType: 'mixed',
+        quality:1,
+        videoQuality:'high'
       })
-      if(!results.canceled){
-        setImage(results.assets[0].uri)
-        setFileName(results.assets[0].uri.split('/').pop())
+      if(!results.didCancel && results.assets?.length){
+        const uri = await ImageCompressor.compress(results.assets[0].uri)
+        setImage(uri)
+        setFileName(results?.assets[0]?.uri?.split('/').pop())
       }
-    }catch(error:any){
+    }catch(error:unknown | any){
       //crashlytics().recordError(error)
       console.error(error)
     }
@@ -237,9 +241,18 @@ const PostScreen = () => {
         />
          {image && 
         <View style={{borderRadius:30}}>
-          <Image
-            source={image}
-            style={styles.uploadedImage}
+          <FastImage
+            source={{
+              uri:image,
+              priority: FastImage.priority.normal,
+            }}
+            style={{
+              width: '100%',
+              borderRadius: 10,
+              alignSelf: 'center',
+              marginTop: 10,
+            }}
+            resizeMode={FastImage.resizeMode.contain}
           />
         </View>}
       </View>
@@ -308,12 +321,6 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     padding: 10,
     marginBottom: 10,
-  },
-  uploadedImage: {
-    width: '100%',
-    borderRadius: 10,
-    alignSelf: 'center',
-    marginTop: 10,
   },
   uploadImageButton: {
     padding: 12,

@@ -30,6 +30,8 @@ import { db } from 'FIrebaseConfig';
 import { useTheme, Text,Icon } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+
+{/** NEED TO SEE IS IT WORTH HAVE MORE SCREENS FOR EDITING OR USING A MODAL FOR EDITING?????? */}
 type NavigationProp = {
     Profile:{user:any},
     Message:undefined
