@@ -65,6 +65,22 @@ const HomeScreen= () => {
   const memoPost = useMemo(() => {
     return post?.filter((name) => name?.category?.includes(category));
   }, [post]);
+
+  useEffect(() =>{
+    async function screenTrace() {
+      // Define & start a screen trace
+      try {
+        const trace = await perf().startScreenTrace('HomeScreen');
+        // Stop the trace
+        await trace.stop();
+      } catch (e) {
+        // rejects if iOS or (Android == 8 || Android == 8.1)
+        // or if hardware acceleration is off
+      }
+    }
+
+    screenTrace()
+  },[]) 
   
   useEffect(() => {
     if (!user?.userId) return;
