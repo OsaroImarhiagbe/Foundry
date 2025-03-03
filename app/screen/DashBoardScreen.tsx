@@ -2,6 +2,7 @@ import React,
 {
   useState,
   lazy,
+  useEffect,
 }from 'react'
 import {
     View,
@@ -23,7 +24,9 @@ import {
   MenuOptions,
   MenuTrigger,
 } from 'react-native-popup-menu';
+import { useDispatch} from 'react-redux';
 import { MenuItems } from '../components/CustomMenu'
+import { addsearchID } from 'app/features/search/searchSlice';
 
 
 type NavigationProp = {
@@ -46,7 +49,9 @@ const DashBoardScreen = () => {
     const navigation = useNavigation<NavigationProp>()
     const theme = useTheme()
     const [category,setCategory] = useState<string>('')
-
+    const dispatch = useDispatch()
+    
+  
 
 
   return (
@@ -97,19 +102,19 @@ const DashBoardScreen = () => {
       >
         <MenuItems 
         text='Anyone'
-        action={()=>setCategory('Anyone')}/>
+        action={()=>dispatch(addsearchID('Anyone'))}/>
         <Divider/>
          <MenuItems 
         text='Creativity and Innovation'
-        action={()=>setCategory('Creativity and Innovation')}/>
+        action={()=>dispatch(addsearchID('Creativity and Innovation'))}/>
       <Divider/>
       <MenuItems 
         text='Collaboration and Community'
-        action={()=>setCategory('Collaboration and Community')}/>
+        action={()=> dispatch(addsearchID('Collaboration and Community'))}/>
       <Divider/>
       <MenuItems 
         text='Startup and Busniess'
-        action={()=>setCategory('Statup and Busniess')}/>
+        action={()=> dispatch(addsearchID('Statup and Busniess'))}/>
       </MenuOptions>
     </Menu>
         </View>
@@ -136,7 +141,6 @@ const DashBoardScreen = () => {
         <Tab.Screen
         name='Community'
         component={HomeScreen}
-        initialParams={{category:category}}
         />
         </Tab.Navigator>
         <FAB

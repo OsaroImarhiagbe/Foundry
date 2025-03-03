@@ -13,7 +13,7 @@ import {
 } from 'react-native'
 import { useAuth } from 'app/authContext';
 import { FirebaseFirestoreTypes,onSnapshot,doc,orderBy,query, limit,getDocs, startAfter } from '@react-native-firebase/firestore';
-import { useDispatch} from 'react-redux';
+import { useDispatch, useSelector} from 'react-redux';
 import { addId } from '../features/user/userSlice.ts';
 import { FlashList } from "@shopify/flash-list";
 import {ActivityIndicator,Text,Divider,useTheme} from 'react-native-paper'
@@ -23,6 +23,7 @@ import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-nativ
 import {log,recordError} from '@react-native-firebase/crashlytics'
 import { PostRef,crashlytics} from 'FIrebaseConfig.ts';
 import perf from '@react-native-firebase/perf';
+import { UseSelector } from 'react-redux';
 const PostComponent = lazy(() => import('../components/PostComponent'))
 
 
@@ -44,7 +45,7 @@ type Post = {
 };
 
 
-const HomeScreen= (route:unknown | any) => {
+const HomeScreen= () => {
   const theme = useTheme()
   const dispatch = useDispatch()
   const [refreshing, setRefreshing] = useState<boolean>(false);
@@ -57,7 +58,10 @@ const HomeScreen= (route:unknown | any) => {
   const [mount, setMount] = useState<boolean>(false)
   const scrollY = useState(new Animated.Value(0))[0];
   const dark_or_light = useColorScheme()
-  const {category} = route?.params
+  const category = useSelector((state:any)=> state.search.searchID)
+
+
+  
 
   const memoPost = useMemo(() => {
     return post?.filter((name) => name?.category?.includes(category));
@@ -136,7 +140,7 @@ const fetchMorePost = async () => {
   try {
     const docRef = lastVisible ? query(
       PostRef,
-      orderBy('createAt','desc'),
+      orderBy('createdAt','desc'),
       startAfter(lastVisible), 
       limit(2)) : 
       query(

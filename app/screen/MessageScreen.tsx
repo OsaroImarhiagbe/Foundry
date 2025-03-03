@@ -121,7 +121,7 @@ const MessageScreen = () => {
     try {
       const docRef = lastVisible ? query(
         ChatRoomsRef,
-        orderBy('createAt','desc'),
+        orderBy('createdAt','desc'),
         startAfter(lastVisible), 
         limit(2)) : 
         query(
