@@ -23,7 +23,6 @@ import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-nativ
 import {log,recordError} from '@react-native-firebase/crashlytics'
 import { PostRef,crashlytics} from 'FIrebaseConfig.ts';
 import perf from '@react-native-firebase/perf';
-import { UseSelector } from 'react-redux';
 const PostComponent = lazy(() => import('../components/PostComponent'))
 
 
