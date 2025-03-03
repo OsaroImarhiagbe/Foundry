@@ -27,6 +27,9 @@ import {
 import { useDispatch} from 'react-redux';
 import { MenuItems } from '../components/CustomMenu'
 import { addsearchID } from 'app/features/search/searchSlice';
+import { FirebasePerformanceTypes, startScreenTrace } from '@react-native-firebase/perf';
+import { crashlytics, perf } from 'FIrebaseConfig';
+import { recordError } from '@react-native-firebase/crashlytics';
 
 
 type NavigationProp = {
@@ -51,6 +54,24 @@ const DashBoardScreen = () => {
     const [category,setCategory] = useState<string>('')
     const dispatch = useDispatch()
     
+    useEffect(() =>{
+      let trace: FirebasePerformanceTypes.ScreenTrace;
+      async function screenTrace() {
+        try {
+          trace = await startScreenTrace(perf,'DashBoardScreen');
+        } catch (error:unknown | any) {
+          recordError(crashlytics,error)
+        }
+      }
+      screenTrace()
+  
+      return () => {
+        if(trace){
+          trace.stop()
+          .catch(error => recordError(crashlytics,error))
+      }
+      }
+    },[])
   
 
 

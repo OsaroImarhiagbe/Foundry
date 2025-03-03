@@ -22,10 +22,11 @@ import {log,recordError,} from '@react-native-firebase/crashlytics'
 import { MotiView } from 'moti';
 import { FlashList } from '@shopify/flash-list';
 import { Skeleton } from 'moti/skeleton';
-import { crashlytics, PostRef } from 'FIrebaseConfig';
+import { crashlytics, perf, PostRef } from 'FIrebaseConfig';
 import { addId } from 'app/features/user/userSlice';
 import { useDispatch } from 'react-redux';
-import perf from '@react-native-firebase/perf';
+import { FirebasePerformanceTypes, startScreenTrace } from '@react-native-firebase/perf';
+ '@react-native-firebase/perf';
 
 const PostComponent = lazy(() => import('../components/PostComponent'))
 
@@ -81,6 +82,25 @@ const FeedScreen = () => {
     //   outputRange: ['rgba(0, 0, 0, 0)', 'rgba(0, 0,0,0)'], // Adjust the color
     //   extrapolate: 'clamp',
     // });
+    useEffect(() =>{
+      setMount(true)
+      let trace: FirebasePerformanceTypes.ScreenTrace;
+      async function screenTrace() {
+        try {
+          trace = await startScreenTrace(perf,'FeedScreen');
+        } catch (error:unknown | any) {
+          recordError(crashlytics,error)
+        }
+      }
+      screenTrace()
+  
+      return () => {
+        if(trace){
+          trace.stop()
+          .catch(error => recordError(crashlytics,error))
+      }
+      }
+    },[])
   
     useEffect(() => {
       if (!user?.userId) return;

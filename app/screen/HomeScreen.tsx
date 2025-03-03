@@ -21,8 +21,8 @@ import { MotiView } from 'moti';
 import { Skeleton } from 'moti/skeleton';
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import {log,recordError} from '@react-native-firebase/crashlytics'
-import { PostRef,crashlytics} from 'FIrebaseConfig.ts';
-import perf from '@react-native-firebase/perf';
+import { PostRef,crashlytics,perf} from 'FIrebaseConfig.ts';
+import { FirebasePerformanceTypes,startScreenTrace} from '@react-native-firebase/perf';
 const PostComponent = lazy(() => import('../components/PostComponent'))
 
 
@@ -67,19 +67,23 @@ const HomeScreen= () => {
   }, [post]);
 
   useEffect(() =>{
+    setMount(true)
+    let trace: FirebasePerformanceTypes.ScreenTrace;
     async function screenTrace() {
-      // Define & start a screen trace
       try {
-        const trace = await perf().startScreenTrace('HomeScreen');
-        // Stop the trace
-        await trace.stop();
-      } catch (e) {
-        // rejects if iOS or (Android == 8 || Android == 8.1)
-        // or if hardware acceleration is off
+        trace = await startScreenTrace(perf,'HomeScreen');
+      } catch (error:unknown | any) {
+        recordError(crashlytics,error)
       }
     }
-
     screenTrace()
+
+    return () => {
+      if(trace){
+        trace.stop()
+        .catch(error => recordError(crashlytics,error))
+    }
+    }
   },[]) 
   
   useEffect(() => {
