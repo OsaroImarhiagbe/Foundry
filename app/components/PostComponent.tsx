@@ -37,7 +37,8 @@ import {
 } from 'react-native-popup-menu';
 import { MenuItems } from '../components/CustomMenu'
 import { db, PostRef } from 'FIrebaseConfig';
-import FastImage from 'react-native-fast-image'
+import FastImage from "@d11/react-native-fast-image";
+
 
 
 interface PostComponentProps {
@@ -263,7 +264,7 @@ const PostComponent: React.FC<PostComponentProps> = ({
     </View>
     {url && 
       <FastImage
-      source={url}
+      source={{uri:url}}
       resizeMode={FastImage.resizeMode.cover}
       style={{
         aspectRatio:1,

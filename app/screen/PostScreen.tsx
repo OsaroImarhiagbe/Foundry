@@ -33,8 +33,8 @@ import { MenuItems } from '../components/CustomMenu'
 import {crashlytics, functions } from 'FIrebaseConfig';
 import { storage } from 'FIrebaseConfig';
 import { httpsCallable } from '@react-native-firebase/functions'
-import FastImage from 'react-native-fast-image'
-import * as ImageCompressor from 'react-native-image-compressor';
+import FastImage from "@d11/react-native-fast-image";
+import {Image as ImageCompressor} from 'react-native-compressor';
 import {launchImageLibrary} from 'react-native-image-picker';
 
 
@@ -137,7 +137,7 @@ const PostScreen = () => {
         quality:1,
         videoQuality:'high'
       })
-      if(!results.didCancel && results.assets?.length){
+      if(!results.didCancel && results.assets?.length && results.assets[0].uri){
         const uri = await ImageCompressor.compress(results.assets[0].uri)
         setImage(uri)
         setFileName(results?.assets[0]?.uri?.split('/').pop())

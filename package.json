@@ -33,6 +33,7 @@
     }
   },
   "dependencies": {
+    "@d11/react-native-fast-image": "^8.9.2",
     "@expo/config-plugins": "~9.0.0",
     "@notifee/react-native": "^9.1.8",
     "@react-native-async-storage/async-storage": "1.23.1",
