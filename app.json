@@ -22,6 +22,7 @@
       "googleServicesFile": "./GoogleService-Info.plist",
       "bundleIdentifier": "com.devguides.app",
       "infoPlist": {
+        "NSPhotoLibraryUsageDescription":"This app uses the camera to let user upload a picture or video",
         "NSSpeechRecognitionUsageDescription": "This app uses speech recognition to convert your speech to text.",
         "NSCameraUsageDescription": "This app uses the camera to let user put a photo in his profile page.",
         "UIBackgroundModes": [

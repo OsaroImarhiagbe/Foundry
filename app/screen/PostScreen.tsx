@@ -33,10 +33,9 @@ import { MenuItems } from '../components/CustomMenu'
 import {crashlytics, functions } from 'FIrebaseConfig';
 import { storage } from 'FIrebaseConfig';
 import { httpsCallable } from '@react-native-firebase/functions'
-import FastImage from "@d11/react-native-fast-image";
+//import FastImage from "@d11/react-native-fast-image";
 import {Image as ImageCompressor} from 'react-native-compressor';
 import {launchImageLibrary} from 'react-native-image-picker';
-
 
 
 
@@ -62,14 +61,14 @@ const PostScreen = () => {
   const [category, setCategory] = useState<string>('')
 
   
-
+{/** TOMORROW GET IMAGE AND VIDEO OPTIMIZE ALSO IN POST AND COMMMENT COMPONENT, THIS WILL TIE INTO WITH PROJECT SCREEN AND MAYBE EDIT SCREEN */}
 
   useEffect(() => {
     const timeout = setTimeout(() => {
       textInputRef.current?.focus();
     }, 1000);
 
-    return () => clearTimeout(timeout);
+    return () => clearTimeout(timeout); 
   }, []);
 
 
@@ -91,7 +90,7 @@ const PostScreen = () => {
         like_count: null,
         comment_count: null,
         liked_by: null,
-        category:category,
+        category:[category],
         imageUrl:imageUrl,
         filename:filename,
         createdAt: Timestamp.fromDate(new Date())
@@ -112,7 +111,7 @@ const PostScreen = () => {
   };
 
   const handleCancel = () => {
-    if (hasUnsavedChanges) {
+    if (hasUnsavedChanges || image) {
       Alert.alert(
         'Discard changes?',
         'You have unsaved changes. Are you sure to discard them and leave the screen?',
@@ -138,9 +137,11 @@ const PostScreen = () => {
         videoQuality:'high'
       })
       if(!results.didCancel && results.assets?.length && results.assets[0].uri){
+        console.log('Results',results)
         const uri = await ImageCompressor.compress(results.assets[0].uri)
+        console.log('results uri',uri)
         setImage(uri)
-        setFileName(results?.assets[0]?.uri?.split('/').pop())
+        setFileName(results?.assets[0]?.fileName)
       }
     }catch(error:unknown | any){
       recordError(crashlytics,error)
@@ -226,9 +227,6 @@ const PostScreen = () => {
         </View>
       </View>
       <View style={styles.textContainer}>
-        <Text
-        variant='bodyLarge'
-        >{category}</Text>
         <TextInput
           ref={textInputRef}
           style={[styles.textArea,{color:theme.colors.tertiary}]}
@@ -240,19 +238,15 @@ const PostScreen = () => {
           placeholderTextColor='grey'
         />
          {image && 
-        <View style={{borderRadius:30}}>
-          <FastImage
-            source={{
-              uri:image,
-              priority: FastImage.priority.normal,
-            }}
+        <View>
+          <Image
+            source={image}
+            contentFit='contain'
             style={{
-              width: '100%',
-              borderRadius: 10,
+              width:'100%',
               alignSelf: 'center',
-              marginTop: 10,
+              height:300,
             }}
-            resizeMode={FastImage.resizeMode.contain}
           />
         </View>}
       </View>
@@ -311,20 +305,18 @@ const styles = StyleSheet.create({
   },
   textContainer: {
     flex:1,
-    paddingHorizontal: 22,
+    paddingHorizontal:20,
     borderRadius: 10,
-    padding: 10,
   },
   textArea: {
     flex: 1,
-    color: '#ffffff',
     borderRadius: 10,
-    padding: 10,
-    marginBottom: 10,
+    padding: 20,
   },
   uploadImageButton: {
     padding: 12,
   },
+ 
 });
 
 export default PostScreen;

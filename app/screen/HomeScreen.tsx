@@ -57,7 +57,7 @@ const HomeScreen= () => {
   const [mount, setMount] = useState<boolean>(false)
   const scrollY = useState(new Animated.Value(0))[0];
   const dark_or_light = useColorScheme()
-  const category = useSelector((state:any)=> state.search.searchID)
+  const category = useSelector((state:string | any)=> state.search.searchID)
 
 
   
