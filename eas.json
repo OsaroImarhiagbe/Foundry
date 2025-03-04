@@ -10,12 +10,20 @@
       "distribution": "internal",
       "environment": "development",
       "ios": {
-        "simulator": true
+        "simulator": "development-simulator"
       },
       "env": {
         "ENV_FILE": "development"
       },
       "channel": "development"
+    },
+    "development-simulator": {
+      "developmentClient": true,
+      "autoIncrement": true,
+      "distribution": "internal",
+      "ios": {
+        "simulator": true
+      }
     },
     "preview": {
       "distribution": "internal",
