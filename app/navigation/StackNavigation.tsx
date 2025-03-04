@@ -7,11 +7,6 @@ const HomeScreen = lazy(() => import('../screen/HomeScreen'))
 const MessageScreen = lazy(() => import('../screen/MessageScreen'))
 const EditScreen = lazy(() => import('../screen/EditScreen'))
 const OtherUserScreen = lazy(() => import('../screen/OtherUserScreen'))
-const EditInputScreen = lazy(() => import('../screen/EditInputScreen'))
-const EditEmailScreen = lazy(() => import('../screen/EditEmailScreen'))
-const EditPhoneScreen = lazy(() => import('../screen/EditPhoneScreen'))
-const EditJobScreen = lazy(() => import('../screen/EditJobScreen'))
-const SecondStackNavigation = lazy(() => import('../navigation/SecondStackNavigation'))
 
 
 const MessageScreenWrapper = () => {
@@ -50,37 +45,6 @@ const OtherUserScreenWrapper = () => {
   )
 
 }
-const EditInputScreenWrapper = () =>{
-  return (
-      <Suspense fallback={<ActivityIndicator size='small' color='#000'/>}>
-      <EditInputScreen/>
-    </Suspense>
-  )
-}
-
-const EditEmailScreenWrapper = () => {
-  return (
-    <Suspense fallback={<ActivityIndicator size='small' color='#000'/>}>
-      <EditEmailScreen/>
-    </Suspense>
-  )
-}
-
-const EditPhoneScreenWrapper = () => {
-  return (
-    <Suspense fallback={<ActivityIndicator size='small' color='#000'/>}>
-    <EditPhoneScreen/>
-  </Suspense>
-  )
-}
-
-const EditJobScreenWrapper = () => {
-  return (
-    <Suspense fallback={<ActivityIndicator size='small' color='#000'/>}>
-    <EditJobScreen/>
-  </Suspense>
-  )
-}
 const StackNavigation = () => {
   const Stack = createNativeStackNavigator();
 
@@ -118,7 +82,8 @@ const StackNavigation = () => {
       component={EditScreenWrapper}
       options={{
         headerShown:false,
-        gestureEnabled:false
+        gestureEnabled:false,
+        presentation:'modal'
       }}
       />
         <Stack.Screen
@@ -127,34 +92,6 @@ const StackNavigation = () => {
       options={{
         headerShown:false,
         gestureEnabled:false
-      }}/>
-      <Stack.Screen
-      name='EditUser'
-      component={EditInputScreenWrapper}
-      options={{
-        headerShown:false,
-        gestureEnabled:false,
-      }}/>
-        <Stack.Screen
-      name='EditEmail'
-      component={EditEmailScreenWrapper}
-      options={{
-        headerShown:false,
-        gestureEnabled:false,
-      }}/>
-         <Stack.Screen
-      name='EditPhone'
-      component={EditPhoneScreenWrapper}
-      options={{
-        headerShown:false,
-        gestureEnabled:false,
-      }}/>
-           <Stack.Screen
-      name='EditJob'
-      component={EditJobScreenWrapper}
-      options={{
-        headerShown:false,
-        gestureEnabled:false,
       }}/>
     </Stack.Navigator>
   );

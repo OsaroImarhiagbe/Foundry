@@ -7,7 +7,8 @@ import {
   ImageBackground,
   useWindowDimensions,
   Platform,
-  RefreshControl} from 'react-native'
+  RefreshControl,
+  TouchableWithoutFeedback} from 'react-native'
 import {lazy,Suspense} from 'react'
 import { useNavigation } from '@react-navigation/native';
 import {useState, useEffect,useCallback} from 'react';
@@ -59,9 +60,13 @@ const AccountScreen = () => {
     Welcome:{
       screen?:string
     },
+    SecondStack:{
+      screen?:string
+    },
     Message:undefined,
     Edit:undefined,
     SkillsScreen:undefined,
+    ProjectEntryScreen:undefined
   }
   
   type Navigation = NativeStackNavigationProp<NavigationProp>;
@@ -294,7 +299,9 @@ const AccountScreen = () => {
           keyExtractor={(item)=> item?.id?.toString() || Math.random().toString()}
           ListEmptyComponent={(item) => (
             <View style={{flex:1,alignItems:'center',justifyContent:'center',paddingTop:5}}>
-              <ActivityIndicator color={theme.colors.background ? '#000' :'#fff'} size='large' animating={isloading}/>
+              <TouchableOpacity onPress={()=> navigation.navigate('SecondStack',{screen:'ProjectEntryScreen',})}>
+              <Text>Enter a Project</Text>
+              </TouchableOpacity>
             </View>
           )}
           onEndReachedThreshold={0.1}
@@ -327,7 +334,9 @@ const AccountScreen = () => {
       keyExtractor={(item)=> item?.id?.toString() || Math.random().toString()}
       ListEmptyComponent={(item) => (
         <View style={{flex:1,alignItems:'center',justifyContent:'center',paddingTop:5}}>
-          <ActivityIndicator color={theme.colors.background ? '#000' :'#fff'} size='large' animating={isloading}/>
+           <TouchableOpacity onPress={()=> navigation.navigate('SecondStack',{screen:'ProjectEntryScreen',})}>
+              <Text>Enter a Skill</Text>
+              </TouchableOpacity>
         </View>
       )}
       onEndReachedThreshold={0.1}

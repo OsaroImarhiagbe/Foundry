@@ -62,16 +62,6 @@ interface Comment{
 
 }
 
-interface Reply{
-  id?:string,
-  auth_profile?:string,
-  like_count?:number,
-  content?:string,
-  name?:string,
-  createdAt?:FirebaseFirestoreTypes.Timestamp
-
-}
-
 const PostComponent: React.FC<PostComponentProps> = ({
   auth_profile,
   count,
@@ -265,7 +255,7 @@ const PostComponent: React.FC<PostComponentProps> = ({
     {url && 
       <FastImage
       source={{uri:url}}
-      resizeMode={FastImage.resizeMode.cover}
+      resizeMode={FastImage.resizeMode.contain}
       style={{
         aspectRatio:1,
         width:wp('100%'),

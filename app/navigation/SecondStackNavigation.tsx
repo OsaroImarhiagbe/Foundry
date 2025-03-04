@@ -118,7 +118,7 @@ const SecondStackNavigation = () => {
     component={ProjectEntryScreenWrapper}
     options={{
         headerShown:false,
-       
+        presentation:'modal'
     }}/>
         <Stack.Screen
     name="SkillsScreen"
