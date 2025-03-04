@@ -91,10 +91,6 @@ const DashBoardScreen = () => {
         placeholder={{blurhash}}
         cachePolicy='none'/>
         </TouchableWithoutFeedback >
-        <Image
-        source={require('../assets/images/icon.png')}
-        style={styles.logo}
-        />
        <TouchableOpacity
          onPress={() => navigation.navigate('Message')}>
         <View style={styles.icon}>
@@ -184,7 +180,8 @@ const styles = StyleSheet.create({
       height: 40, 
     },
     icon:{
-      margin:5
+      margin:5,
+      marginLeft:200
     },
     container:{
       flex:1
