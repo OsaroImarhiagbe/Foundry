@@ -6,6 +6,7 @@ import {getStorage} from '@react-native-firebase/storage'
 import {getFunctions} from '@react-native-firebase/functions'
 import {getCrashlytics} from '@react-native-firebase/crashlytics'
 import { getPerformance} from '@react-native-firebase/perf';
+import {getAnalytics} from '@react-native-firebase/analytics'
 const app = getApp();
 export const auth = getAuth(app)
 export const db = getFirestore(app);
@@ -14,6 +15,7 @@ export const functions = getFunctions(app)
 export const messaging = getMessaging(app);
 export const crashlytics = getCrashlytics()
 export const perf = getPerformance(app)
+export const analytics = getAnalytics(app)
 export const PostRef = collection(db,'posts')
 export const ChatRoomsRef = collection(db,'chat-rooms')
 export const UsersRef = collection(db,'users')

@@ -65,26 +65,7 @@ const HomeScreen= () => {
   const memoPost = useMemo(() => {
     return post?.filter((name) => name?.category?.includes(category));
   }, [post]);
-
-  useEffect(() =>{
-    setMount(true)
-    let trace: FirebasePerformanceTypes.ScreenTrace;
-    async function screenTrace() {
-      try {
-        trace = await startScreenTrace(perf,'HomeScreen');
-      } catch (error:unknown | any) {
-        recordError(crashlytics,error)
-      }
-    }
-    screenTrace()
-
-    return () => {
-      if(trace){
-        trace.stop()
-        .catch(error => recordError(crashlytics,error))
-    }
-    }
-  },[]) 
+ 
   
   useEffect(() => {
     if (!user?.userId) return;

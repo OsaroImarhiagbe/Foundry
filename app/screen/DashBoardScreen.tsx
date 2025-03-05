@@ -1,8 +1,6 @@
 import React,
 {
-  useState,
   lazy,
-  useEffect,
 }from 'react'
 import {
     View,
@@ -27,9 +25,6 @@ import {
 import { useDispatch} from 'react-redux';
 import { MenuItems } from '../components/CustomMenu'
 import { addsearchID } from 'app/features/search/searchSlice';
-import { FirebasePerformanceTypes, startScreenTrace } from '@react-native-firebase/perf';
-import { crashlytics, perf } from 'FIrebaseConfig';
-import { recordError } from '@react-native-firebase/crashlytics';
 import SearchComponent from 'app/components/SearchComponent';
 
 
@@ -52,27 +47,9 @@ const DashBoardScreen = () => {
     const {user} = useAuth()
     const navigation = useNavigation<NavigationProp>()
     const theme = useTheme()
-    const [category,setCategory] = useState<string>('')
     const dispatch = useDispatch()
     
-    useEffect(() =>{
-      let trace: FirebasePerformanceTypes.ScreenTrace;
-      async function screenTrace() {
-        try {
-          trace = await startScreenTrace(perf,'DashBoardScreen');
-        } catch (error:unknown | any) {
-          recordError(crashlytics,error)
-        }
-      }
-      screenTrace()
-  
-      return () => {
-        if(trace){
-          trace.stop()
-          .catch(error => recordError(crashlytics,error))
-      }
-      }
-    },[])
+
   
 
 
