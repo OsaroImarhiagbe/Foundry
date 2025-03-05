@@ -30,6 +30,7 @@ import { addsearchID } from 'app/features/search/searchSlice';
 import { FirebasePerformanceTypes, startScreenTrace } from '@react-native-firebase/perf';
 import { crashlytics, perf } from 'FIrebaseConfig';
 import { recordError } from '@react-native-firebase/crashlytics';
+import SearchComponent from 'app/components/SearchComponent';
 
 
 type NavigationProp = {
@@ -81,9 +82,9 @@ const DashBoardScreen = () => {
           alignItems:'center',
           paddingTop:20,
           flexDirection:'row',
-          justifyContent:'space-between',
           padding:10,
-          backgroundColor:'transparent'}}>
+          justifyContent:'space-between',
+          backgroundColor:theme.colors.background}}>
         <TouchableWithoutFeedback onPress={() => navigation.openDrawer()}>
         <Image
         style={{height:hp(4.3), aspectRatio:1, borderRadius:100}}
@@ -91,9 +92,12 @@ const DashBoardScreen = () => {
         placeholder={{blurhash}}
         cachePolicy='none'/>
         </TouchableWithoutFeedback >
+        <SearchComponent
+        title='Search....'
+        />
        <TouchableOpacity
          onPress={() => navigation.navigate('Message')}>
-        <View style={styles.icon}>
+        <View>
            <Entypo name='new-message' size={20} color={theme.colors.primary}/>
         </View>
         </TouchableOpacity>
@@ -178,10 +182,6 @@ const styles = StyleSheet.create({
     logo: {
       width: 40,
       height: 40, 
-    },
-    icon:{
-      margin:5,
-      marginLeft:200
     },
     container:{
       flex:1

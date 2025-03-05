@@ -1,18 +1,31 @@
 import React,{useState,useEffect} from 'react'
-import {View, Text,StyleSheet,Platform,Keyboard,TouchableWithoutFeedback,TouchableOpacity,SafeAreaView} from 'react-native'
+import {
+    View,
+    StyleSheet,
+    Platform,
+    Keyboard,
+    TouchableWithoutFeedback,
+    TouchableOpacity,
+    SafeAreaView} from 'react-native'
 import color from '../../config/color'
 import Autocomplete from 'react-native-autocomplete-input'
 import { useAuth } from '../authContext'
-import {collection }from '@react-native-firebase/firestore'
+import {collection, doc, getDoc, updateDoc }from '@react-native-firebase/firestore'
 import axios from 'axios'
-import { db } from 'FIrebaseConfig'
+import { db, UsersRef } from 'FIrebaseConfig'
 import {SkillsAPIKEY,SkillsAPIURL} from '@env'
+import { useTheme,Text, Icon } from 'react-native-paper'
+import { useNavigation } from '@react-navigation/native'
+import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 
-const SkillsScreen = () => {
+
+const SkillScreen = () => {
     const [ query, setQuery ] = useState('');
     const [results,setResults] = useState([])
     const [skills,setSkills] = useState<String[]>([])
     const [isloading,setLoading] = useState(false)
+    const theme = useTheme()
+    const navigation = useNavigation()
     const {user} = useAuth()
 
   
@@ -44,12 +57,13 @@ const SkillsScreen = () => {
 
 
     const handleSubmit = async (item:string) => {
-        const userDoc = await collection('users').doc(user?.userId).get()
-        const userskills = userDoc.data()?.skills || []
+        const userDoc = doc(UsersRef,user?.userId)
+        const docRef = await getDoc(userDoc)
+        const userskills = docRef.data()?.skills || []
         try{
             if(!userskills.includes(item)){
                 setSkills((prev) => [...prev,item])
-                await collection('users').doc(user.userId).update({
+                await updateDoc(userDoc,{
                     skills:[
                         ...skills,
                         item
@@ -64,35 +78,44 @@ const SkillsScreen = () => {
 
    
   return (
-          <TouchableWithoutFeedback onPress={()=>Keyboard.dismiss()}>
-    <SafeAreaView style={styles.screen}>
-    <View style={styles.headingContainer}>
-        <Text style={styles.headingText}>Skills</Text>
+    <TouchableWithoutFeedback onPress={()=>Keyboard.dismiss()}>
+    <SafeAreaView style={[styles.screen,{backgroundColor:theme.colors.background}]}>
+        <TouchableOpacity onPress={() => navigation.goBack()}style={{padding:5}}>
+            <Icon
+            size={hp(3)}
+            source='close'
+            />
+        </TouchableOpacity>
+    <View  style={{padding:20}}>
+        <Text variant='bodyLarge'>Skills</Text>
     </View>
-    <View style={styles.inputContainer}>
     <Autocomplete
       data={results}
       placeholder='Enter skills...'
-      placeholderTextColor='#000'
-      containerStyle={{padding:30}}
+      placeholderTextColor={theme.colors.tertiary}
+      containerStyle={{padding:10}}
       value={query}
       onChangeText={(text) => setQuery(text)}
       flatListProps={{
         keyExtractor: (item,index) => index.toString(),
         renderItem: ({ item }) => <TouchableOpacity onPress={() => handleSubmit(item)}>
             <View style={{padding:5}}>
-            <Text style={{fontSize:20,fontFamily:color.textFont}}>{item}</Text>
+            <Text>{item}</Text>
                 </View></TouchableOpacity>
       }}/>
-    </View>
-    <View style={{paddingTop:100}}>
-        <Text style={styles.headingText}>Skills</Text>
-        <View>{skills.map((skill,index) => (
-            <View key={index}>
-                 <Text style={{color:color.textcolor}}>{skill}</Text>
-                </View>
-        ))}</View>
-    </View>
+      <View style={{padding:20}}>
+        <View style={{backgroundColor:theme.colors.onTertiary,borderWidth:0.5,height:hp(30),borderRadius:5}}>
+            <View style={{padding:10,flexDirection:'row',alignItems:'center',justifyContent:'space-between'}}>
+                <Text>Based off your profile</Text>
+                <TouchableOpacity onPress={() => navigation.goBack()}style={{padding:5}}>
+                    <Icon
+                    size={hp(3)}
+                    source='close'
+                    />
+                </TouchableOpacity>
+            </View>
+        </View>
+      </View>
    </SafeAreaView>
     </TouchableWithoutFeedback>
   )
@@ -101,20 +124,7 @@ const SkillsScreen = () => {
 const styles = StyleSheet.create({
     screen:{
         flex:1,
-        backgroundColor:color.backgroundcolor,
-        paddingTop: Platform.OS === 'ios' ? 20 : 0
-    },
-    headingContainer:{
-        padding:40,
-    },
-    headingText:{
-        color:color.textcolor,
-        fontFamily:color.textFont,
-        fontSize:30
-    },
-    inputContainer:{
-        marginBottom:40
     }
 })
 
-export default SkillsScreen
+export default SkillScreen

@@ -6,7 +6,11 @@ import {addDoc, collection, deleteDoc, doc, onSnapshot, orderBy, query, runTrans
 import { useAuth } from '../../app/authContext';
 
 
-jest.mock('@react-native-firebase/firestore',() => ({
+jest.mock('../../app/authContext', () => ({
+  useAuth: jest.fn()
+}));// A function in jest framework used to mock modules jest.mock()
+
+jest.mock('@react-native-firebase/firestore',() => ({ // mocking the react-native-firebase/firestore module
     addDoc: jest.fn(),
     collection: jest.fn(),
     deleteDoc: jest.fn(),
@@ -29,9 +33,6 @@ jest.mock('react-native-responsive-screen', () => ({
 jest.mock('expo-image', () => ({
   Image: 'MockedImage'
 }));
-jest.mock('../../app/authContext', () => ({
-  useAuth: jest.fn()
-}));
 jest.mock('FIrebaseConfig', () => ({
   db: 'mockedDB',
   PostRef: 'mockedPostRef'
@@ -52,6 +53,21 @@ jest.mock('react-native', () => {
 
 describe('PostComponent', () => {
   // Setup common props and mocks before each test
+  const mockPost = {
+    auth_profile: 'https://example.com/profile.jpg',
+    count: 5,
+    url: 'https://example.com/image.jpg',
+    id: 'post123',
+    name: 'testuser',
+    content: 'This is a test post',
+    date: '2025-03-04',
+    comment_count: 3,
+  };
+  beforeEach(() => {
+    (useAuth as jest.Mock).mockReturnValue({
+      user: { userId: 'user123', username: 'testuser' },
+    });
+  });
   beforeEach(() => {
     // Reset all mocks
     jest.clearAllMocks();
@@ -104,7 +120,7 @@ describe('PostComponent', () => {
       comment_count: 5
     };
 
-    const { getByText } = render(<PostComponent {...props} />);
+    const { getByText } = render(<PostComponent {...mockPost} />);
     
     expect(getByText('@Test User')).toBeTruthy();
     expect(getByText('This is a test post')).toBeTruthy();

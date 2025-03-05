@@ -20,9 +20,13 @@ const SearchComponent:React.FC<SearchProp> = ({color,onPress, setSearchQuery,sea
     onIconPress={onPress}
     placeholder={title}
     style={{
-      width:wp('65%'),
+      width:wp('60%'),
+      height:50,
       backgroundColor:theme.colors.onTertiary
     }}
+    inputStyle={{
+      color:theme.colors.tertiary
+      }}
     onChangeText={setSearchQuery}
     value={searchQuery}
     />

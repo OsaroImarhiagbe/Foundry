@@ -103,6 +103,50 @@ const AccountScreen = () => {
   
   const follow_items = [{count:users?.projects,content:' projects'},{count:users?.connection,content:' connection  '},{count:posts.length,content:' posts'}]
 
+//   const handleSubmit = async (item:string) => {
+//     const userDoc = await collection('users').doc(user?.userId).get()
+//     const userskills = userDoc.data()?.skills || []
+//     try{
+//         if(!userskills.includes(item)){
+//             setSkills((prev) => [...prev,item])
+//             await collection('users').doc(user.userId).update({
+//                 skills:[
+//                     ...skills,
+//                     item
+//                     ]
+//             })
+//         }
+//     }catch(err){
+//         console.error('Error with adding skill:',err)
+//     }
+// }
+
+
+
+//   useEffect(() =>{
+//     const fetchSkills = async () => {
+//         setLoading(true)
+//         if(query.trim() == ''){
+//             setResults([])
+//             return
+//         }
+//         try{
+//             const res = await axios.get(`${SkillsAPIURL}skills?q=${query}`,{headers:{
+//                 "apikey": SkillsAPIKEY,
+//                 "redirect":'follow'
+//             }})
+//             setResults(res.data || [])
+//         }catch(err){
+//             console.error(`Error API:${err}`)
+//             setResults([])
+//         }finally{
+//             setLoading(false)
+//         }      
+//     }
+
+//     fetchSkills()
+
+// },[query])
   const onRefresh = useCallback(async () => {
     log(crashlytics,'Account Screen: On Refresh')
     setRefreshing(true);
@@ -333,7 +377,7 @@ const AccountScreen = () => {
       keyExtractor={(item)=> item?.id?.toString() || Math.random().toString()}
       ListEmptyComponent={(item) => (
         <View style={{flex:1,alignItems:'center',justifyContent:'center',paddingTop:5}}>
-           <TouchableOpacity onPress={()=> navigation.navigate('SecondStack',{screen:'ProjectEntryScreen',})}>
+           <TouchableOpacity onPress={()=> navigation.navigate('SecondStack',{screen:'SkillScreen',})}>
               <Text>Enter a Skill</Text>
               </TouchableOpacity>
         </View>

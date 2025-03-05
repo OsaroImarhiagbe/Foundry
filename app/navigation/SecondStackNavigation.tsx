@@ -5,12 +5,12 @@ import { ActivityIndicator } from 'react-native';
 const ReportBugScreen = lazy(() => import('../screen/ReportBugScreen'))
 const ContactUsScreen = lazy(() => import('../screen/ContactUsScreen'))
 const ProjectEntryScreen = lazy(() => import('../screen/ProjectEntryScreen'))
-const SkillsScreen = lazy(() => import('../screen/SkillsScreen'))
 const ChatScreen = lazy(() => import('../screen/ChatScreen'))
 const PostScreen = lazy(() => import('../screen/PostScreen'))
 const ProjectScreen  = lazy(()=>import('../screen/ProjectScreen'))
 const LocationScreen = lazy(()=>import('../screen/LocationScreen'))
-  
+const SkillsScreen = lazy(() => import('../screen/SkillScreen'))
+
 const ReportBugScreenWrapper = () => {
     
     return (
@@ -39,15 +39,7 @@ const ReportBugScreenWrapper = () => {
   
     )
   }
-  const SkillsScreenWrapper = () => {
-    
-    return (
-      <Suspense fallback={<ActivityIndicator size='small' color='#fff'/>}>
-      <SkillsScreen/>
-    </Suspense>
-  
-    )
-  }
+
   
   const ProjectEntryScreenWrapper = () => {
     
@@ -91,6 +83,16 @@ const ReportBugScreenWrapper = () => {
     )
   
   }
+  const SkillsScreenWrapper = () => {
+    
+    return (
+      <Suspense fallback={<ActivityIndicator size='small' color='#fff'/>}>
+      <SkillsScreen/>
+    </Suspense>
+  
+    )
+  }
+
 
 const SecondStackNavigation = () => {
     const Stack = createNativeStackNavigator();
@@ -142,13 +144,6 @@ const SecondStackNavigation = () => {
         headerShown:false,
         presentation:'modal'
     }}/>
-        <Stack.Screen
-    name="SkillsScreen"
-    component={SkillsScreenWrapper}
-    options={{
-        headerShown:false,
-       
-    }}/>
     <Stack.Screen
       name='Chat'
       component={ChatScreenWrapper}
@@ -157,6 +152,14 @@ const SecondStackNavigation = () => {
       gestureEnabled:false
       }}
         />
+  <Stack.Screen
+    name="SkillScreen"
+    component={SkillsScreenWrapper}
+    options={{
+      headerShown:false,
+      animation:'fade_from_bottom'
+    }}/>
+
       </Stack.Navigator>
     );
   }
