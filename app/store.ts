@@ -3,6 +3,7 @@ import socialReducer from './features/PostandComments/socialSlice'
 import userReducer from './features/user/userSlice';
 import searchReducer from './features/search/searchSlice';
 import skillReducer from './features/Skill/skillSlice';
+import projectReducer from './features/projects/projectSlice';
 import { persistStore, persistReducer, FLUSH,
   REHYDRATE,
   PAUSE,
@@ -18,12 +19,13 @@ const rootReducer = combineReducers({
   user:userReducer,
   search:searchReducer,
   message:messageReducer,
-  skill:skillReducer
+  skill:skillReducer,
+  project:projectReducer
 })
 const persistConfig = {
   key: "root",
   storage:AsyncStorage,
-  whitelist:['user','message']
+  whitelist:['user','message','project']
 };
 const persistedReducer = persistReducer(persistConfig, rootReducer);
 export const store = configureStore({

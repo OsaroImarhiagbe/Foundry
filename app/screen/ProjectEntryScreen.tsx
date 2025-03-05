@@ -2,98 +2,115 @@ import React,{useState} from 'react'
 import {
   View,
   StyleSheet,
-  TextInput,
   TouchableWithoutFeedback,
   Keyboard,
   SafeAreaView,
   TouchableOpacity} from 'react-native'
-import color from '../../config/color'
-import { Button } from 'react-native-paper';
+import { Button, Icon } from 'react-native-paper';
 import {useAuth} from '../authContext';
 import { blurhash } from '../../utils';
 import { 
+  addDoc,
   collection,
+  doc,
   FirebaseFirestoreTypes,
-  Timestamp} from '@react-native-firebase/firestore'
-import * as ImagePicker from 'expo-image-picker';
+  getDoc,
+  query,
+  Timestamp,
+  updateDoc,
+  where} from '@react-native-firebase/firestore'
 import { Image } from 'expo-image';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-import crashlytics, { crash } from '@react-native-firebase/crashlytics'
-import { db } from 'FIrebaseConfig';
+import { log,recordError } from '@react-native-firebase/crashlytics'
+import { crashlytics, db, UsersRef } from 'FIrebaseConfig';
+import { useTheme } from 'react-native-paper';
+import { useNavigation } from '@react-navigation/native';
+import AppTextInput from 'app/components/AppTextInput';
+//import FastImage from "@d11/react-native-fast-image";
+import {Image as ImageCompressor} from 'react-native-compressor';
+import {launchImageLibrary} from 'react-native-image-picker';
+import { useDispatch,useSelector } from 'react-redux';
+import { addprojectId } from 'app/features/projects/projectSlice';
+
 const ProjectEntryScreen = () => {
     const [focus,setFocus] = useState('')
     const [text,setText] = useState('')
-    const [skills,setSkills] = useState('')
+    const [tech,setTech] = useState('')
     const [projectname,setProjectName] = useState('')
     const [image,setImage] = useState('')
-    const [project_id,setProject_id] = useState('')
+    const [filename,setFileName] = useState<string | undefined>(undefined)
+    const projectId = useSelector((state:any) => state.project.projectId )
+    const theme = useTheme()
     const {user} = useAuth()
+    const navigation = useNavigation()
+    const dispatch = useDispatch()
 
     const pickImage = async () => {
-      crashlytics().log('ProjectEntryScreen: Picking Image')
+      log(crashlytics,'ProjectEntryScreen: Picking Image')
       try{
-        let results = await ImagePicker.launchImageLibraryAsync({
-          mediaTypes: ['images', 'videos'],
-          allowsEditing:true,
+        let results = await launchImageLibrary({
+          mediaType:'photo',
           quality:1
         })
-        console.error('Image results:',results)
-        if(!results.canceled){
-          setImage(results.assets[0].uri)
+        if(!results.didCancel && results.assets?.length && results.assets[0].uri){
+          const uri = await ImageCompressor.compress(results.assets[0].uri)
+          setImage(uri)
+          setFileName(results?.assets[0]?.fileName)
         }
       }catch(error: unknown | any){
-        crashlytics().recordError(error)
+        recordError(crashlytics,error)
         console.error('user cancelled the image picker.')
       }
       }
 
     const handleSubmit = async () => {
-      crashlytics().log('ProjectEntryScreen: Handle Submit')
-        const docRef = collection(db,'users').doc(user?.userId).collection('projects')
-        const projectDoc = await docRef.where('project_name', '==', projectname).get();
-        let imageUrl = null;
+      log(crashlytics,'ProjectEntryScreen: Handle Submit')
+      const projectDoc = doc(UsersRef,user?.userId,'projects',projectId)
+      const docRef = await getDoc(projectDoc)
+      let imageUrl = null;
         try{
-          if(projectDoc){
-          const projectref = projectDoc.docs[0]
-          const projectId = projectref.id
-            await collection(db,'users')
-            .doc(user?.userId)
-            .collection('projects')
-            .doc(projectId)
-            .update({
+          if(docRef){
+            await updateDoc(projectDoc,{
                 project_name: projectname,
                 image:imageUrl,
                 content: text,
-                skills: [{
-                    skill: skills
-                }],
+                technology: [tech],
                 createdAt: Timestamp.fromDate(new Date())
             })
-            setProject_id(projectId)
+            dispatch(addprojectId(projectId))
         }else{
-           const newDoc = await collection(db,'users')
-            .doc(user?.userId)
-            .collection('projects')
-            .add({
+          const projectRef = collection(UsersRef,user.userId,'projects')
+          const newDoc = await addDoc(projectRef,{
                 project_name: projectname,
                 image:imageUrl,
                 content: text,
-                skills: [{ skill: skills }],
+                technology: [tech],
                 createdAt: Timestamp.fromDate(new Date())
             })
-            setProject_id(newDoc.id)
+          await updateDoc(newDoc,{
+            projectid:newDoc.id
+          })
+          dispatch(addprojectId(newDoc.id))
         }
         setText('')
         setProjectName('')
-        setSkills('')
+        setTech('')
         }catch(error: unknown | any){
-          crashlytics().recordError(error)
+          recordError(crashlytics,error)
         }
     }
   return (
     <TouchableWithoutFeedback onPress={()=> Keyboard.dismiss()}>
-        <SafeAreaView style={styles.screen}>
-        <View style={{padding:10}}>
+        <SafeAreaView style={[styles.screen,{backgroundColor:theme.colors.background}]}>
+        <View style={{padding:5}}>
+          <View style={{flexDirection:'row',justifyContent:'space-between'}}>
+          <TouchableOpacity onPress={() => navigation.goBack()}>
+            <Icon source='arrow-left-circle' size={25}/>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={pickImage}>
+          <MaterialIcons name='camera-alt' size={25} color='#000' />
+        </TouchableOpacity>
+       </View>
         <View style={styles.imagecontainer}>
         <Image
             style={{width:'100%',height:'100%',borderRadius:20}}
@@ -101,43 +118,36 @@ const ProjectEntryScreen = () => {
             placeholder={{blurhash}}
             />
         </View>
-        <View style={{flexDirection:'row',justifyContent:'center',alignItems:'center',padding:10}}>
-          <TouchableOpacity style={styles.uploadImageButton} onPress={pickImage}>
-          <MaterialIcons name='camera-alt' size={15} color='#fff' />
-        </TouchableOpacity>
-       </View>
         </View>
-        <View style={{padding:10}}>
-        <View style={[styles.textcontainer,{borderColor:focus === 'projectname' ? '#00BF63' : '#8a8a8a',marginBottom:10}]}>
-            <TextInput
-            value={projectname}
+        <View style={{padding:5}}>
+        <View>
+            <AppTextInput
+            values={projectname}
             onChangeText={(text) => setProjectName(text)}
             onFocus={()=>setFocus('projectname')}
             placeholder='Project Name...'
-            placeholderTextColor='#fff'/>
+            color={theme.colors.tertiary}/>
         </View>
-        <View style={[styles.textcontainer,{borderColor:focus === 'text' ? '#00BF63' : '#8a8a8a'}]}>
-            <TextInput
-            value={text}
+        <View>
+            <AppTextInput
+            values={text}
             onChangeText={(text) => setText(text)}
             onFocus={()=>setFocus('text')}
             placeholder='Project Overview...'
-            placeholderTextColor='#fff'
-            multiline={true}/>
+            color={theme.colors.tertiary}/>
         </View>
-        <View style={[styles.textcontainer,{borderColor:focus === 'skills' ? '#00BF63' : '#8a8a8a',marginTop:10}]}>
-            <TextInput
-            value={skills}
-            onChangeText={(text) => setSkills(text)}
-            onFocus={()=>setFocus('skills')}
-            placeholder='List skills...'
-            placeholderTextColor='#fff'
-            multiline={true}
-            scrollEnabled={true}/>
+        <View>
+            <AppTextInput
+            values={tech}
+            onChangeText={(text) => setTech(text)}
+            onFocus={()=>setFocus('tech')}
+            placeholder='List Tech...'
+            color={theme.colors.tertiary}
+           />
         </View>
         </View>
-        <View style={{padding:50}}>
-        <Button onPress={handleSubmit}>Submit</Button>
+        <View style={{padding:10,marginVertical:10}}>
+        <Button mode='outlined' onPress={handleSubmit}>Submit</Button>
         </View>
     </SafeAreaView>
     </TouchableWithoutFeedback>
@@ -147,7 +157,6 @@ const ProjectEntryScreen = () => {
 const styles = StyleSheet.create({
     screen:{
         flex:1,
-        backgroundColor:color.backgroundcolor
     },
     imagecontainer:{
         justifyContent:'center',
@@ -157,22 +166,6 @@ const styles = StyleSheet.create({
         borderRadius:20,
         height:250,
     },
-    textcontainer:{
-        padding:20,
-        borderRadius:20,
-        backgroundColor:'#3b3b3b',
-        borderWidth:2,
-        
-    },
-    uploadImageButton: {
-        position: 'absolute',
-        backgroundColor: '#00bf63',
-        padding: 12,
-        alignItems: 'center',
-        borderRadius:50,
-        justifyContent:'center',
-        top:5
-      },
 })
 
 export default ProjectEntryScreen

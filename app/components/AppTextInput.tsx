@@ -19,6 +19,7 @@ interface TextInputProp {
   values?: string | undefined;
   onFocus?: () => void;
   right?: any;
+  multiline?:boolean
 }
 const AppTextInput:React.FC<TextInputProp> = ({
   placeholder,
@@ -33,7 +34,9 @@ const AppTextInput:React.FC<TextInputProp> = ({
   iconcolor,
   values,
   color,
-  onFocus,right}) => {
+  multiline,
+  onFocus,
+  right}) => {
   return (
     
   
@@ -55,6 +58,7 @@ const AppTextInput:React.FC<TextInputProp> = ({
     onBlur={onBlur}
     onFocus={onFocus}
     right={right}
+    multiline={multiline}
     />  
     </View>
       

@@ -54,7 +54,7 @@ const AccountScreen = () => {
   const {top} = useSafeAreaInsets()
   const {width,height} = useWindowDimensions()
 
-{/** NEED TO TACKLE EDIT SCREEN, COULD REDUCE APP SIZE BY MOVING SOME SCREENS */}
+
   type NavigationProp = {
     ProjectScreen:undefined,
     Welcome:{
@@ -152,9 +152,8 @@ const AccountScreen = () => {
     if(projects.length === 0) return;
     setLoading(true)
     try{
-     
-      const projectRef = query(ProjectRef, where('id','==',user?.userId))
-      const unsub = onSnapshot(projectRef,async (documentSnapshot) => {
+      const collectionRef = collection(UsersRef,user.userId,'projects')
+      const unsub = onSnapshot(collectionRef,async (documentSnapshot) => {
         let data:Project[] = []
         documentSnapshot.forEach(doc => {
           data.push({...doc.data(),id:doc.id})

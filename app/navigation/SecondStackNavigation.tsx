@@ -70,6 +70,28 @@ const ReportBugScreenWrapper = () => {
   
   }
 
+  const LocationScreenWrapper = () => {
+  
+    return (
+      <Suspense fallback={<ActivityIndicator size='small' color='#000'/>}>
+      <LocationScreen/>
+    </Suspense>
+  
+    )
+  
+  }
+
+  const ProjectScreenWrapper = () => {
+  
+    return (
+      <Suspense fallback={<ActivityIndicator size='small' color='#000'/>}>
+      <ProjectScreen/>
+    </Suspense>
+  
+    )
+  
+  }
+
 const SecondStackNavigation = () => {
     const Stack = createNativeStackNavigator();
 
@@ -87,14 +109,14 @@ const SecondStackNavigation = () => {
       />
     <Stack.Screen
     name="ProjectScreen"
-    component={ProjectScreen}
+    component={ProjectScreenWrapper}
     options={{
         headerShown:false,
         
     }}/>
         <Stack.Screen
     name="LocationScreen"
-    component={LocationScreen}
+    component={LocationScreenWrapper}
     options={{
         headerShown:false,
         
