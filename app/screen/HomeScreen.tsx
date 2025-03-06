@@ -22,7 +22,6 @@ import { Skeleton } from 'moti/skeleton';
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import {log,recordError} from '@react-native-firebase/crashlytics'
 import { PostRef,crashlytics,perf} from 'FIrebaseConfig.ts';
-import { FirebasePerformanceTypes,startScreenTrace} from '@react-native-firebase/perf';
 const PostComponent = lazy(() => import('../components/PostComponent'))
 
 
@@ -69,6 +68,7 @@ const HomeScreen= () => {
   
   useEffect(() => {
     if (!user?.userId) return;
+    let trace
     setMount(true)
     dispatch(addId({currentuserID:user?.userId}))
     const timer = setTimeout(() => {
@@ -103,9 +103,10 @@ const HomeScreen= () => {
   }, []); 
 
 
-  const onRefresh = useCallback(() => {
+  const onRefresh = useCallback(async () => {
     setRefreshing(true);
     log(crashlytics,'Post Refresh')
+    let trace = await perf.startTrace('Refreshing_community_posts_HomeScreen')
       try {
         const docRef = query(PostRef,orderBy('createdAt', 'desc'),limit(10))
         const unsub = onSnapshot(docRef,querySnapShot =>{
@@ -116,6 +117,7 @@ const HomeScreen= () => {
           setPost(data);
           setLastVisible(querySnapShot.docs[querySnapShot.docs.length - 1]);
           setHasMore(querySnapShot.docs.length > 0);
+          trace.putAttribute('post_count', post.length.toString());
         });
         return () => unsub()
       }  catch (error:any) {
@@ -123,6 +125,7 @@ const HomeScreen= () => {
         console.error(`Error post can not be found: ${error}`);
     }finally{
       setRefreshing(false);
+      trace.stop()
     }
   }, [memoPost]);
     
@@ -130,6 +133,7 @@ const HomeScreen= () => {
 
 const fetchMorePost = async () => {
   log(crashlytics,'Fetch More Post')
+  let trace = await perf.startTrace('fetch_more_community_posts')
   if (loadingMore || !hasMore) return;
   if (!user?.userId) return;
   if (post.length <= 2) {
@@ -155,11 +159,13 @@ const fetchMorePost = async () => {
     setPost(prevPosts => [...prevPosts, ...newPosts]);
     setLastVisible(snapshot.docs[snapshot.docs.length - 1]);
     setHasMore(snapshot.docs.length > 0);
+    trace.putAttribute('post_count', post.length.toString());
   } catch (error:any) {
     recordError(crashlytics,error)
     console.error(`Error fetching more posts: ${error}`);
   } finally {
     setLoadingMore(false);
+    trace.stop()
   }
 }
 

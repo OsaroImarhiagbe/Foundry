@@ -25,13 +25,12 @@ import { Skeleton } from 'moti/skeleton';
 import { crashlytics, perf, PostRef } from 'FIrebaseConfig';
 import { addId } from 'app/features/user/userSlice';
 import { useDispatch } from 'react-redux';
-import { FirebasePerformanceTypes, startScreenTrace } from '@react-native-firebase/perf';
- '@react-native-firebase/perf';
+import { FirebasePerformanceTypes, startScreenTrace, trace } from '@react-native-firebase/perf';
 
 const PostComponent = lazy(() => import('../components/PostComponent'))
 
 const Spacer = ({ height = 16 }) => <View style={{ height }} />;
-const skills = ['Quick Search','hello','hello','hello','hello']
+
 type NavigationProp = {
     openDrawer(): undefined;
     navigate(arg0?: string, arg1?: { screen: string; }): unknown;
@@ -82,25 +81,7 @@ const FeedScreen = () => {
     //   outputRange: ['rgba(0, 0, 0, 0)', 'rgba(0, 0,0,0)'], // Adjust the color
     //   extrapolate: 'clamp',
     // });
-    useEffect(() =>{
-      setMount(true)
-      let trace: FirebasePerformanceTypes.ScreenTrace;
-      async function screenTrace() {
-        try {
-          trace = await startScreenTrace(perf,'FeedScreen');
-        } catch (error:unknown | any) {
-          recordError(crashlytics,error)
-        }
-      }
-      screenTrace()
-  
-      return () => {
-        if(trace){
-          trace.stop()
-          .catch(error => recordError(crashlytics,error))
-      }
-      }
-    },[])
+
   
     useEffect(() => {
       if (!user?.userId) return;
@@ -110,7 +91,7 @@ const FeedScreen = () => {
         log(crashlytics,'Grabbing post')
           try {
             const docRef = query(PostRef,orderBy('createdAt', 'desc'),limit(10))
-            const subscriber = onSnapshot(docRef,querySnapShot =>{
+            const subscriber = onSnapshot(docRef,async (querySnapShot) =>{
                 if (!querySnapShot || querySnapShot.empty) {
                   setPost([]);
                   return;
@@ -138,8 +119,9 @@ const FeedScreen = () => {
     }, []); 
   
   
-    const onRefresh = useCallback(() => {
+    const onRefresh = useCallback(async () => {
       setRefreshing(true);
+      let trace = await perf.startTrace('refreshing_post_feedscreen')
       log(crashlytics,'Post Refresh')
         try {
           const docRef = query(PostRef,orderBy('createdAt', 'desc'),limit(10))
@@ -151,6 +133,7 @@ const FeedScreen = () => {
             setPost(data);
             setLastVisible(querySnapShot.docs[querySnapShot.docs.length - 1]);
             setHasMore(querySnapShot.docs.length > 0);
+            trace.putAttribute('post_count', post.length.toString());
           });
           return () => unsub()
         }  catch (error:any) {
@@ -158,10 +141,13 @@ const FeedScreen = () => {
           console.error(`Error post can not be found: ${error}`);
       }finally{
         setRefreshing(false);
+        trace.stop()
       }
     }, [post]);
+
     const fetchMorePost = async () => {
       log(crashlytics,'Fetch More Post')
+      let trace = await perf.startTrace('fetching_more_post_feedscreen')
       if (loadingMore || !hasMore) return;
       if (!user?.userId) return;
       if (post.length <= 2) {
@@ -187,11 +173,13 @@ const FeedScreen = () => {
         setPost(prevPosts => [...prevPosts, ...newPosts]);
         setLastVisible(snapshot.docs[snapshot.docs.length - 1]);
         setHasMore(snapshot.docs.length > 0);
+        trace.putAttribute('post_count', post.length.toString());
       } catch (error:any) {
         recordError(crashlytics,error)
         console.error(`Error fetching more posts: ${error}`);
       } finally {
         setLoadingMore(false);
+        trace.stop()
       }
     }
 

@@ -30,7 +30,7 @@ import {
   MenuTrigger,
 } from 'react-native-popup-menu';
 import { MenuItems } from '../components/CustomMenu'
-import {crashlytics, functions } from 'FIrebaseConfig';
+import {crashlytics, functions, perf } from 'FIrebaseConfig';
 import { storage } from 'FIrebaseConfig';
 import { httpsCallable } from '@react-native-firebase/functions'
 import FastImage from "@d11/react-native-fast-image";
@@ -74,6 +74,7 @@ const PostScreen = () => {
 
   const handlePost = async () => {
     if(text.trim() === '') return
+    let trace = await perf.startTrace('sending_post_or_image')
     setLoading(true);
     try {
       const addPost = httpsCallable(functions,'addPost')
@@ -107,6 +108,7 @@ const PostScreen = () => {
       console.error("Error creating room:", error);
     }finally{
       setLoading(false);
+      trace.stop()
     }
   };
 

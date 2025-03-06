@@ -27,8 +27,8 @@ import {
 import MessageItem from '../components/MessageItem';
 import { FlashList } from '@shopify/flash-list';
 import { TextInput,useTheme } from 'react-native-paper';
-import { log,recordError,setAttributes} from '@react-native-firebase/crashlytics'
-import { db,functions, crashlytics } from 'FIrebaseConfig';
+import { log,recordError} from '@react-native-firebase/crashlytics'
+import { db,functions, crashlytics, perf } from 'FIrebaseConfig';
 import { httpsCallable } from '@react-native-firebase/functions'
 
 
@@ -99,6 +99,7 @@ const ChatScreen = () => {
 
   const handleSend = async () => {
     log(crashlytics,'Chat Screen: Sening Messages ')
+    let trace = await perf.startTrace('send_chat_message')
     if(messageText.trim() === '') return;
     try{
       const addMessage = httpsCallable(functions,'addMessage')
@@ -129,6 +130,8 @@ const ChatScreen = () => {
     }catch(error:unknown | any){
       recordError(crashlytics,error)
       console.error(`Error sending message:${error.message}`)
+    }finally{
+      trace.stop()
     }
   }
 
