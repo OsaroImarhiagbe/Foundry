@@ -1,9 +1,5 @@
 name: Create development builds
 
-on:
-  push:
-    branches: ['development']
-
 jobs:
   ios_device_development_build:
     name: Build iOS device
