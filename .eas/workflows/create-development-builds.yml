@@ -1,8 +1,10 @@
 name: Create development builds
 
 on:
-  push:
-    branches: ['development']
+  pull_request_labeld:
+    branches: ['UAT']
+    labels:
+      - Test
 
 jobs:
   ios_device_development_build:
