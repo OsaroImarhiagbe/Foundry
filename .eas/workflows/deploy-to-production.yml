@@ -1,8 +1,10 @@
 name: Deploy to production
 
 on:
-  push:
+  pull_request_labeled:
     branches: ['main']
+    labels:
+      - production
 
 jobs:
   fingerprint:
