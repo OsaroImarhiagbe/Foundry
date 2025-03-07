@@ -2,38 +2,32 @@ import {
     View,
     StyleSheet, 
     TouchableOpacity,
-    Modal,
-    Platform,
+    ImageSourcePropType,
     ImageBackground} from 'react-native'
-import { useState,useEffect } from 'react';
+import { useState,} from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { useAuth } from '../authContext';
-import { doc,onSnapshot,updateDoc} from '@react-native-firebase/firestore'
+import { doc,updateDoc} from '@react-native-firebase/firestore'
 import { Image } from 'expo-image';
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import { blurhash } from '../../utils/index';
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-import Feather from 'react-native-vector-icons/Feather';
-import * as ImagePicker from 'expo-image-picker';
 import {getDownloadURL, putFile, ref} from '@react-native-firebase/storage';
-import { useSelector,useDispatch } from 'react-redux';
-import { addImage } from '../features/user/userSlice';
-import { Picker } from '@react-native-picker/picker';
-import { useTranslation } from 'react-i18next';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useDispatch } from 'react-redux';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import {log,recordError,setAttributes} from '@react-native-firebase/crashlytics'
-import { crashlytics, db, UsersRef } from 'FIrebaseConfig';
-import { useTheme, Text,Icon, TextInput, Button } from 'react-native-paper';
+import {log,recordError,} from '@react-native-firebase/crashlytics'
+import { crashlytics,UsersRef } from 'FIrebaseConfig';
+import { useTheme, Text,Icon,} from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import AppTextInput from 'app/components/AppTextInput';
 import { storage } from 'FIrebaseConfig';
 import {Image as ImageCompressor} from 'react-native-compressor';
 import {launchImageLibrary} from 'react-native-image-picker';
+import { TouchableWithoutFeedback } from 'react-native-gesture-handler';
+import { addHeaderImage, addImage } from 'app/features/user/userSlice';
 
 
-{/** NEED TO SEE IS IT WORTH HAVE MORE SCREENS FOR EDITING OR USING A MODAL FOR EDITING?????? */}
-{/** NEED TO FIX NAVIGATION FOR GOING BACK TO ACCOUNT SCREEN */}
+
+
 type NavigationProp = {
     Profile:{user:any},
     Message:undefined
@@ -58,7 +52,8 @@ const EditScreen = () => {
     const navigation = useNavigation<Navigation>();
     const [edit,setEdit] = useState<Edit>()
     const [filename,setFileName] = useState<string | undefined>(undefined)
-    const [image,setImage] = useState<string | null>(null)
+    const [image,setImage] = useState<string | undefined>(undefined)
+    const [headerimage,setHeaderImage] = useState<ImageSourcePropType | undefined>(undefined)
     const dispatch = useDispatch()
     const {user} = useAuth()
     const theme = useTheme()
@@ -74,7 +69,7 @@ const EditScreen = () => {
     const items = [{
               id:1,
               icon:'person',
-              name:edit?.name,
+
               type:'Username',
               screen:'EditUser',
               color:'#fff',
@@ -83,7 +78,6 @@ const EditScreen = () => {
           {
               id:2,
               icon:'email',
-              name:edit?.email,
               type:'Email',
               screen:'EditEmail',
               color:'#fff',
@@ -92,7 +86,6 @@ const EditScreen = () => {
           {
               id:3,
               icon:'phone',
-              name:edit?.phone,
               type:'Phone',
               screen:'EditPhone',
               color:'#fff',
@@ -101,7 +94,6 @@ const EditScreen = () => {
           {
               id:4,
               icon:'work',
-              name:edit?.jobTitle,
               type:'Job title',
               screen:'EditJob',
               color:'#fff',
@@ -110,7 +102,6 @@ const EditScreen = () => {
           {
             id:5,
             icon:'work',
-            name:edit?.jobTitle,
             type:'Location',
             screen:'EditJob',
             color:'#fff',
@@ -142,8 +133,27 @@ const EditScreen = () => {
         }
     }
 
+    const pickHeaderImage = async () => {
+        log(crashlytics,'Edit Screen: Pick Image')
+        try{
+            let results = await launchImageLibrary({
+                mediaType:'photo',
+                quality:1
+              })
+            if(!results.didCancel && results.assets?.length && results.assets[0].uri){
+                const uri = await ImageCompressor.compress(results.assets[0].uri)
+                setHeaderImage({uri})
+                dispatch(addHeaderImage(uri))
+                setFileName(results?.assets[0]?.fileName)
+            }
+        }catch(error:any){
+            recordError(crashlytics,error)
+            console.error('Error picking image and uploading to Cloud Storage:',error.message)
+        }
+        }
+    
 
-    const pickImage = async () => {
+    const pickProfileImage = async () => {
         log(crashlytics,'Edit Screen: Pick Image')
         try{
             let results = await launchImageLibrary({
@@ -153,6 +163,7 @@ const EditScreen = () => {
             if(!results.didCancel && results.assets?.length && results.assets[0].uri){
                 const uri = await ImageCompressor.compress(results.assets[0].uri)
                 setImage(uri)
+                dispatch(addImage(uri))
                 setFileName(results?.assets[0]?.fileName)
             }
         }catch(error:any){
@@ -182,17 +193,19 @@ const EditScreen = () => {
             <Text variant='bodyLarge'>Save</Text>
             </TouchableOpacity>
             </View>
+            <TouchableWithoutFeedback onPress={pickHeaderImage}>
             <ImageBackground
-                resizeMode='cover'
-                imageStyle={{height:150,justifyContent:'flex-end'}}
-                style={{
+            source={headerimage}
+            resizeMode='cover'
+            imageStyle={{height:150,justifyContent:'flex-end'}}
+            style={{
                 height:100,
                 bottom:0,
                 justifyContent:'flex-end',
             }}
-            source={require('../assets/images/header.png')}
             > 
             </ImageBackground>
+            </TouchableWithoutFeedback>
             <View style={{padding:10}}>
                 <View style={{flexDirection:'row'}}>
                     <Image
@@ -203,19 +216,19 @@ const EditScreen = () => {
                     cachePolicy='none'/>
                     <View style={{marginLeft:40,marginTop:10}}>
                         <Text style={{color:theme.colors.tertiary,fontSize:20}}>{edit?.name}</Text>
-                        <TouchableOpacity style={{marginTop:5}} onPress={pickImage}>
+                        <TouchableOpacity style={{marginTop:5}} onPress={pickProfileImage}>
                             <Text style={{color:theme.colors.tertiary,fontSize:12}}>Edit picture</Text>
                             </TouchableOpacity>
                             </View>
                             </View>
         <View style={{marginTop:20}}>
-            {items.map(({name,id,type}) => (
+            {items.map(({id,type}) => (
                 <View key={id}>
                     <AppTextInput
                     placeholder={type}
                     backgroundColor="transparnet"
                     onChangeText={(text) => setText(text) }
-                    values={name}
+                    values={text}
                   />
                 </View>
             ))}

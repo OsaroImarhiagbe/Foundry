@@ -10,7 +10,7 @@ import {logger} from "firebase-functions/v2";
 import {onCall, HttpsError} from "firebase-functions/v2/https";
 import {onDocumentCreated} from "firebase-functions/v2/firestore";
 import {initializeApp} from "firebase-admin/app";
-import {getFirestore, FieldValue,} from "firebase-admin/firestore";
+import {getFirestore, FieldValue} from "firebase-admin/firestore";
 import {getMessaging} from "firebase-admin/messaging";
 initializeApp();
 // Create and deploy your first functions
@@ -98,8 +98,8 @@ exports.addMessage = onCall(async (request:unknown | any) => {
         text: newMessage,
         createdAt: FieldValue.serverTimestamp(),
       });
-  }catch(error){
-    logger.error('Error Processing Message:',error)
+  } catch (error) {
+    logger.error("Error Processing Message:", error);
   }
 });
 exports.newChatRooomMessage = onDocumentCreated(

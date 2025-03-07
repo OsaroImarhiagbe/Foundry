@@ -31,11 +31,63 @@ import { FlashList } from '@shopify/flash-list';
 import {PostRef, ProjectRef, UsersRef,crashlytics} from 'FIrebaseConfig';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { log, recordError, setAttributes, setUserId } from '@react-native-firebase/crashlytics';
-import { launchImageLibrary } from 'react-native-image-picker';
-import {Image as ImageCompressor} from 'react-native-compressor';
+import { useSelector } from 'react-redux';
+
+
+
+
 const PostComponent = lazy(() => import('../components/PostComponent'))
 
+type NavigationProp = {
+  ProjectScreen:undefined,
+  Welcome:{
+    screen?:string
+  },
+  SecondStack:{
+    screen?:string
+  },
+  Message:undefined,
+  Edit:undefined,
+  SkillScreen:undefined,
+  ProjectEntryScreen:undefined
+}
 
+type Navigation = NativeStackNavigationProp<NavigationProp>;
+
+
+type User = {
+  username?:string,
+  userId?:string,
+  profileUrl?:string,
+  projects?:number,
+  follow_state?:boolean,
+  connection?:string,
+  jobtitle?:string,
+  location?:string
+
+}
+type Post = {
+  auth_profile?: string;
+  like_count?: number;
+  imageUrl?: string;
+  id?: string;
+  name?: string;
+  post_id?:string,
+  content?: string;
+  date?: string;
+  comment_count?: number;
+  mount?: boolean;
+  createdAt?: FirebaseFirestoreTypes.Timestamp
+}
+interface Project{
+  id?:string,
+  project_name?:string
+}
+
+type Skill = {
+  id:string
+  skills:string
+}
 {/** NEED TO LOOK AT USEEFFECT THAT IS GRABBING POST AND PROJECTS AND SKILLS NEED TO IMPLEMENT IT FOR SKILLS AND PROJECTS*/}
 
 const Tab = createMaterialTopTabNavigator();
@@ -48,62 +100,19 @@ const AccountScreen = () => {
   const [isloading,setLoading] = useState<boolean>(false)
   const [projects,setProjects] = useState<Project[]>([])
   const [posts,setPosts] = useState<Post[]>([])
+  const [skills,setSkills] = useState<Skill[]>([])
   const { user } = useAuth();
-  const [image, setImage] = useState<string | null>(null);
-  const [filename,setFileName] = useState<string | undefined>(undefined);
   const navigation = useNavigation<Navigation>();
   const isCurrentUser = user
   const [refreshing, setRefreshing] = useState(false);
   const theme = useTheme()
   const {top} = useSafeAreaInsets()
   const {width,height} = useWindowDimensions()
+  const profileimg = useSelector((state:any) => state.user.addHeaderImage)
+  const headerimg = useSelector((state:any) => state.user.addImage)
 
 
-  type NavigationProp = {
-    ProjectScreen:undefined,
-    Welcome:{
-      screen?:string
-    },
-    SecondStack:{
-      screen?:string
-    },
-    Message:undefined,
-    Edit:undefined,
-    SkillsScreen:undefined,
-    ProjectEntryScreen:undefined
-  }
-  
-  type Navigation = NativeStackNavigationProp<NavigationProp>;
-  
-  
-  interface User{
-    username?:string,
-    userId?:string,
-    profileUrl?:string,
-    projects?:number,
-    follow_state?:boolean,
-    connection?:string,
-    jobtitle?:string,
-    location?:string
-  
-  }
-  interface Post{
-    auth_profile?: string;
-    like_count?: number;
-    imageUrl?: string;
-    id?: string;
-    name?: string;
-    post_id?:string,
-    content?: string;
-    date?: string;
-    comment_count?: number;
-    mount?: boolean;
-    createdAt?: FirebaseFirestoreTypes.Timestamp
-  }
-  interface Project{
-    id?:string,
-    project_name?:string
-  }
+
   
   const follow_items = [{count:users?.projects,content:' projects'},{count:users?.connection,content:' connection  '},{count:posts.length,content:' posts'}]
 
@@ -219,6 +228,7 @@ const AccountScreen = () => {
           async (documentSnapshot) =>{
           if(documentSnapshot.exists){
             setUsers(documentSnapshot.data())
+            setSkills(documentSnapshot.data()?.skllls)
             await Promise.all(
               [
               setUserId(crashlytics,user.userId),
@@ -246,25 +256,6 @@ const AccountScreen = () => {
 
 
 
-  const pickImage = async () => {
-    log( crashlytics,'Post Screen: Picking Images')
-    try{
-      let results = await launchImageLibrary({
-        mediaType: 'mixed',
-        quality:1,
-        videoQuality:'high'
-      })
-      if(!results.didCancel && results.assets?.length && results.assets[0].uri){
-        const uri = await ImageCompressor.compress(results.assets[0].uri)
-        setImage(uri)
-        setFileName(results?.assets[0]?.fileName)
-      }
-    }catch(error:unknown | any){
-      recordError(crashlytics,error)
-      console.error(error)
-    }
-  }
- 
 
 
 
@@ -345,12 +336,12 @@ const AccountScreen = () => {
     </SafeAreaView>
     </View>
   );
-  {/** Need to Change this Function to display skills instead for bother Account and Other User Screen */}
+
   const SkillsScreen = () => (
     <View style={{flex:1,backgroundColor:theme.colors.background}}>
     <SafeAreaView style={{flex:1,backgroundColor:theme.colors.background,padding:50}}>
       <FlashList
-      data={projects}
+      data={skills}
       contentContainerStyle={{padding:0}}
       estimatedItemSize={460}
       onRefresh={onRefresh}
@@ -371,9 +362,9 @@ const AccountScreen = () => {
         <ActivityIndicator color='#fff' size='small' animating={isloading}/>
      )}
       renderItem={({item}) => (
-      <TouchableOpacity onPress={()=>navigation.navigate('ProjectScreen')}>
+      <TouchableOpacity onPress={()=>navigation.navigate('SkillScreen')}>
         <View style={{ backgroundColor: '#252525', borderRadius: 25, padding: 30,marginBottom:10 }}>
-          <Text style={{ textAlign: 'center', color: '#fff' }}>{item?.project_name}</Text>
+          <Text style={{ textAlign: 'center', color: '#fff' }}>{item?.skills}</Text>
           </View>
           </TouchableOpacity>
           )}
@@ -400,7 +391,7 @@ const AccountScreen = () => {
         bottom:0,
         justifyContent:'flex-end',
       }}
-      source={require('../assets/images/header.png')}
+      source={headerimg}
       >
        <View style={{flexDirection:'row',justifyContent:'space-between',alignItems:'center',bottom:40}}>
        <TouchableOpacity onPress={() => navigation.navigate('Welcome',{screen:'Dash'})} style={{padding:10}}>

@@ -14,8 +14,9 @@ import firestore, { FirebaseFirestoreTypes } from '@react-native-firebase/firest
 import { useSelector } from 'react-redux';
 import {Text,Card,useTheme} from 'react-native-paper'
 import { TouchableWithoutFeedback } from 'react-native-gesture-handler';
+import FastImage from '@d11/react-native-fast-image';
 
-interface CommentProp{
+type CommentProp = {
   content?:string,
   name?:string | any,
   comment_id?:string | any,
@@ -24,6 +25,7 @@ interface CommentProp{
   auth_profile?:string,
   count?:number,
   onReplyPress: (comment_id: string, name: string) => void;
+  url?:string;
 }
 
 interface Reply{
@@ -43,6 +45,7 @@ const CommentComponent:React.FC<CommentProp> = ({
   count,
   date,
   auth_profile,
+  url,
   onReplyPress}) => {
     const [press,setIsPress] = useState(false)
     const [isloading,setLoading] = useState<boolean>(false)
@@ -138,6 +141,19 @@ const CommentComponent:React.FC<CommentProp> = ({
       marginLeft:10,
       color:theme.colors.onPrimary
     }}>{name}</Text>
+      {url && 
+      <FastImage
+      source={{
+        uri:url,
+        priority: FastImage.priority.normal
+      }}
+      resizeMode={FastImage.resizeMode.contain}
+      style={{
+        aspectRatio:1,
+        width:wp('100%'),
+        height:hp('50%'),
+        alignSelf: 'center',}}
+      />}
      <View style={{paddingLeft:5}}>
       <Text
       variant='bodySmall'
