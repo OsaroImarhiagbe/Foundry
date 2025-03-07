@@ -73,7 +73,6 @@ export const AuthContextProvider = ({children}:AuthContextProviderProps) => {
                 setUserId(crashlytics,response.user.uid),
                 setAttributes(crashlytics,{
                     user_id:response.user.uid,
-                    //username:response.user?.displayName
                 })
             ])
             return {success:true}

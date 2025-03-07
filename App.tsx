@@ -11,8 +11,6 @@ import i18n from './app/Language/i18n';
 import { PaperProvider, MD3LightTheme as DefaultTheme,MD3DarkTheme as DarkTheme } from 'react-native-paper';
 import { useColorScheme } from 'react-native';
 import { NotificationProvider } from './app/NotificationProvider';
-import 'react-native-reanimated'
-import 'react-native-gesture-handler'
 
 const SplashScreen = lazy(() => import('./app/screen/SplashScreen'))
 const AuthNavigation = lazy(() => import('./app/navigation/AuthNavigation'))
@@ -134,8 +132,7 @@ export default function App() {
   const colorScheme = useColorScheme()
   
   const theme = colorScheme === 'dark' ? darkTheme : lightTheme;
-  console.log('App:',colorScheme)
-    
+ 
   return (
     
 
@@ -147,7 +144,7 @@ export default function App() {
         <PaperProvider theme={theme}>
         <NavigationContainer>
         <NotificationProvider>
-          {isloading ? <SplashScreen/> :   <AuthNavigation/> }
+          {isloading ? <SplashScreen/>:<AuthNavigation/> }
           </NotificationProvider>
         </NavigationContainer>
         </PaperProvider>

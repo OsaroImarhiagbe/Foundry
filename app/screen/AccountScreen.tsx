@@ -31,6 +31,8 @@ import { FlashList } from '@shopify/flash-list';
 import {PostRef, ProjectRef, UsersRef,crashlytics} from 'FIrebaseConfig';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { log, recordError, setAttributes, setUserId } from '@react-native-firebase/crashlytics';
+import { launchImageLibrary } from 'react-native-image-picker';
+import {Image as ImageCompressor} from 'react-native-compressor';
 const PostComponent = lazy(() => import('../components/PostComponent'))
 
 
@@ -47,6 +49,8 @@ const AccountScreen = () => {
   const [projects,setProjects] = useState<Project[]>([])
   const [posts,setPosts] = useState<Post[]>([])
   const { user } = useAuth();
+  const [image, setImage] = useState<string | null>(null);
+  const [filename,setFileName] = useState<string | undefined>(undefined);
   const navigation = useNavigation<Navigation>();
   const isCurrentUser = user
   const [refreshing, setRefreshing] = useState(false);
@@ -103,50 +107,7 @@ const AccountScreen = () => {
   
   const follow_items = [{count:users?.projects,content:' projects'},{count:users?.connection,content:' connection  '},{count:posts.length,content:' posts'}]
 
-//   const handleSubmit = async (item:string) => {
-//     const userDoc = await collection('users').doc(user?.userId).get()
-//     const userskills = userDoc.data()?.skills || []
-//     try{
-//         if(!userskills.includes(item)){
-//             setSkills((prev) => [...prev,item])
-//             await collection('users').doc(user.userId).update({
-//                 skills:[
-//                     ...skills,
-//                     item
-//                     ]
-//             })
-//         }
-//     }catch(err){
-//         console.error('Error with adding skill:',err)
-//     }
-// }
 
-
-
-//   useEffect(() =>{
-//     const fetchSkills = async () => {
-//         setLoading(true)
-//         if(query.trim() == ''){
-//             setResults([])
-//             return
-//         }
-//         try{
-//             const res = await axios.get(`${SkillsAPIURL}skills?q=${query}`,{headers:{
-//                 "apikey": SkillsAPIKEY,
-//                 "redirect":'follow'
-//             }})
-//             setResults(res.data || [])
-//         }catch(err){
-//             console.error(`Error API:${err}`)
-//             setResults([])
-//         }finally{
-//             setLoading(false)
-//         }      
-//     }
-
-//     fetchSkills()
-
-// },[query])
   const onRefresh = useCallback(async () => {
     log(crashlytics,'Account Screen: On Refresh')
     setRefreshing(true);
@@ -284,6 +245,25 @@ const AccountScreen = () => {
   },[])
 
 
+
+  const pickImage = async () => {
+    log( crashlytics,'Post Screen: Picking Images')
+    try{
+      let results = await launchImageLibrary({
+        mediaType: 'mixed',
+        quality:1,
+        videoQuality:'high'
+      })
+      if(!results.didCancel && results.assets?.length && results.assets[0].uri){
+        const uri = await ImageCompressor.compress(results.assets[0].uri)
+        setImage(uri)
+        setFileName(results?.assets[0]?.fileName)
+      }
+    }catch(error:unknown | any){
+      recordError(crashlytics,error)
+      console.error(error)
+    }
+  }
  
 
 

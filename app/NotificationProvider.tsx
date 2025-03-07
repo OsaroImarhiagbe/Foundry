@@ -44,7 +44,7 @@ export const NotificationProvider = ({ children }:NotificationProp) => {
                 foregroundPresentationOptions: {
                     badge: true,
                     sound: true,
-                    banner: true,
+                    banner: false,
                     list: true,
                   },
                 sound:'default'

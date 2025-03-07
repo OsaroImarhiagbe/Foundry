@@ -177,7 +177,7 @@ const LoginScreen = () => {
            )}
            </Formik>
            </View>
-           <View style={{justifyContent:'center',alignItems:'center',paddingTop:50}}>
+           {/* <View style={{justifyContent:'center',alignItems:'center',paddingTop:50}}>
            <Text
            variant='bodySmall'
            style={{textAlign:'center',color:theme.colors.tertiary}}>Or Login with</Text>
@@ -196,7 +196,7 @@ const LoginScreen = () => {
            <GoogleSigninButton
             color={GoogleSigninButton.Color.Light}
             size={GoogleSigninButton.Size.Icon}/>
-            </View>
+            </View> */}
             </SafeAreaView>
    
         </CustomKeyboardView>
