@@ -89,7 +89,7 @@ const AuthNavigation = () => {
               headerShown:false,
               gestureEnabled:false,
               animation:'fade_from_bottom'
-            }}/> ): (<Stack.Screen
+            }}/> ) : (<Stack.Screen
             name="Login"
             component={LoginScreenWrapper}
             options={{

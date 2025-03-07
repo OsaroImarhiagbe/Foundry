@@ -254,7 +254,10 @@ const PostComponent: React.FC<PostComponentProps> = ({
     </View>
     {url && 
       <FastImage
-      source={{uri:url}}
+      source={{
+        uri:url,
+        priority: FastImage.priority.normal
+      }}
       resizeMode={FastImage.resizeMode.contain}
       style={{
         aspectRatio:1,

@@ -46,7 +46,7 @@ const OnboardingScreen = () => {
                }} renderMode={'SOFTWARE'} source={require('../assets/animations/animation1.json')} autoPlay loop />;
                </Text>
             ),
-            title: 'Welcome to DevGuides',
+            title: 'Welcome to Foundry',
             subtitle: 'Your journey to becoming a better developer starts here!'
             },
             {
@@ -63,7 +63,7 @@ const OnboardingScreen = () => {
                     </Text>
                 ),
                 title: 'Launch Your Next Big Idea',
-                subtitle: 'Turn your side projects into real-world applications with DevGuides'
+                subtitle: 'Turn your side projects into real-world applications with Foundry'
                 },
             {
             backgroundColor: '#0097b2',
@@ -79,7 +79,7 @@ const OnboardingScreen = () => {
                 </Text>
             ),
             title: 'Bring Your Ideas to Life',
-            subtitle: 'From concepts to code, DevGuides is here to help you make it happen'
+            subtitle: 'From concepts to code, Foundry is here to help you make it happen'
             },
             {
                 backgroundColor: color.grey,
@@ -111,7 +111,7 @@ const OnboardingScreen = () => {
                 </Text>
                 
             ),
-            title: 'Join the DevGuides Community',
+            title: 'Join the Foundry Community',
             subtitle: 'Meet like-minded developers, build connections, and grow your network'
             },
             
