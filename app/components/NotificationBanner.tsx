@@ -11,16 +11,6 @@ const NotificationBanner:React.FC<Notification> = ({title,message,visiable}) => 
   return (
     <Banner
     visible={visiable}
-    actions={[
-        {
-          label: 'Fix it',
-          onPress: () => setVisible(false),
-        },
-        {
-          label: 'Learn more',
-          onPress: () => setVisible(false),
-        },
-      ]}
     >
        {title}
        {message} 

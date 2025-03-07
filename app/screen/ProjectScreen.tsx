@@ -11,6 +11,7 @@ import { blurhash } from '../../utils';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import crashlytics from '@react-native-firebase/crashlytics'
 import { db } from 'FIrebaseConfig';
+import FastImage from '@d11/react-native-fast-image';
 interface Project{
     id?:string,
     skills?:{skill:string}[],

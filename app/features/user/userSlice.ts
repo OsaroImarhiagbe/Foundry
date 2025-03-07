@@ -12,9 +12,12 @@ export const userSlice = createSlice({
     },
     addImage:(state,action) => {
       state.profileimg = action.payload.profileimg
+    },
+    addHeaderImage:(state,action) => {
+      state.profileimg = action.payload.profileimg
     }
   }
 })
-export const { addId,addImage } = userSlice.actions
+export const { addId,addImage,addHeaderImage } = userSlice.actions
 
 export default userSlice.reducer
