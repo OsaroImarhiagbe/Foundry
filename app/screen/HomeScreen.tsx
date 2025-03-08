@@ -78,6 +78,7 @@ const HomeScreen= () => {
           const subscriber = onSnapshot(docRef,querySnapShot =>{
               if (!querySnapShot || querySnapShot.empty) {
                 setPost([]);
+                setMount(false);
                 return;
               }
               let data:Post[] = []; 
@@ -87,18 +88,15 @@ const HomeScreen= () => {
             setPost(data);
             setLastVisible(querySnapShot.docs[querySnapShot.docs.length - 1]);
             setHasMore(querySnapShot.docs.length > 0);
+            setMount(false);
           });
           return () => subscriber()
-        }  catch (error:any) {
+        } catch (error:any) {
           recordError(crashlytics,error)
-        console.error(`Error post can not be found: ${error}`);
-      }finally{
-        setMount(false)
-      } 
-    
-      
-   
-  }, [memoPost]); 
+          console.error(`Error post can not be found: ${error}`);
+          setMount(false);
+      }
+  }, []); 
 
 
   const onRefresh = useCallback(async () => {
