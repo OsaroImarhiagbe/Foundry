@@ -38,6 +38,8 @@ import {
 import { MenuItems } from '../components/CustomMenu'
 import { db, PostRef } from 'FIrebaseConfig';
 import FastImage from "@d11/react-native-fast-image";
+import { perf } from 'FIrebaseConfig';
+import { FirebasePerformanceTypes } from '@react-native-firebase/perf';
 
 
 
@@ -110,14 +112,14 @@ const PostComponent: React.FC<PostComponentProps> = ({
  
  
     const handleLike = async () => {
-
+      let trace = await perf.startTrace('post_like')
       setLoading(true)
       const docRef = doc(PostRef,id);
       try{
         await runTransaction(db,async (transaction)=>{
           const doc = await transaction.get(docRef)
           if (!doc.exists) throw new Error ('Document doesnt exists');
-
+          
           const currentLikes = doc?.data()?.like_count || 0
           const likeBy = doc?.data()?.liked_by || []
           const hasliked = likeBy.includes(user.userId)
@@ -141,9 +143,11 @@ const PostComponent: React.FC<PostComponentProps> = ({
         console.error('error liking comment:',err)
       }finally{
         setLoading(false)
+        trace.stop()
       }
     }
     const handleSend = async () => {
+      let trace = await perf.startTrace('post_send')
       if(replyingTo){
         if(!text) return;
         setLoading(true)
@@ -166,6 +170,8 @@ const PostComponent: React.FC<PostComponentProps> = ({
           } catch (error) {
             setLoading(false)
             console.error("Error with reply:", error);
+          }finally{
+            trace.stop()
           }
         }else{
           if(text.trim() === " ") return;
@@ -194,6 +200,8 @@ const PostComponent: React.FC<PostComponentProps> = ({
             setText('')
           }catch(e){
             console.error('Error with sending comments:',e)
+          }finally{
+            trace.stop()
           }
     }
   }
@@ -218,7 +226,7 @@ const PostComponent: React.FC<PostComponentProps> = ({
       >
       <Card.Content>
       <View style={styles.postContainer}>
-    <View style={styles.imageText}>
+    <View style={{flexDirection:'row'}}>
       {mount ? <Image
         style={{height:hp(3.3), aspectRatio:1, borderRadius:100}}
         source=''
@@ -246,7 +254,6 @@ const PostComponent: React.FC<PostComponentProps> = ({
     variant="bodySmall"
     style={{
     marginLeft:10,
-    marginVertical:5,
     color:theme.colors.tertiary
     }}
     >{content}</Text>
@@ -406,15 +413,12 @@ const PostComponent: React.FC<PostComponentProps> = ({
 
 
 const styles = StyleSheet.create({
-    imageText:{
-      flexDirection:'row',
-    },
     scrollViewContent: {
       flexGrow: 1,
       paddingBottom: 60,
     },
     postContainer:{
-      marginTop:5,  
+      
     },
     reactionContainer:{
       flexDirection:'row',

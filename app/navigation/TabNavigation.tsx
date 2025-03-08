@@ -4,7 +4,7 @@ import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { lazy,Suspense } from 'react';
 import { ActivityIndicator, Platform } from 'react-native';
-import { useTheme,} from 'react-native-paper';
+import { useTheme} from 'react-native-paper';
 import { Image
  } from 'expo-image';
  import { blurhash } from 'utils';
@@ -102,9 +102,14 @@ const TabNavigation = () => {
         component={ProfileScreenWrapper}
         options={{
           tabBarIcon:() => (
+            user?.profileUrl ?
             <Image
             style={{height:hp(3.3), aspectRatio:1, borderRadius:100,}}
             source={{uri:user?.profileUrl}}
+            placeholder={{blurhash}}
+            /> :  <Image
+            style={{height:hp(3.3), aspectRatio:1, borderRadius:100,}}
+            source={require('../assets/user.png')}
             placeholder={{blurhash}}
             />
           )}}
