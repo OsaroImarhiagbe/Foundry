@@ -65,11 +65,18 @@ const DrawerNavigation = () => {
       <DrawerContentScrollView {...props}>
           <View style={{ padding: 10,flexDirection:'row',alignItems:'center',justifyContent:'space-between'}}>
            <TouchableWithoutFeedback  onPress={() => props.navigation.navigate('Home',{screen:'Account'})}>
-           <Image
-            style={{height:hp(3.3), aspectRatio:1, borderRadius:100,}}
-            source={{uri:user?.profileUrl}}
-            placeholder={{blurhash}}
-            />
+            {
+              user.profileUrl ? 
+              <Image
+              style={{height:hp(3.3), aspectRatio:1, borderRadius:100,}}
+              source={{uri:user?.profileUrl}}
+              placeholder={{blurhash}}
+              /> :   <Image
+              style={{height:hp(3.3), aspectRatio:1, borderRadius:100,}}
+              source={require('../assets/user.png')}
+              placeholder={{blurhash}}
+              />
+            }
             </TouchableWithoutFeedback> 
             <Text>{user?.username}</Text>
           </View>

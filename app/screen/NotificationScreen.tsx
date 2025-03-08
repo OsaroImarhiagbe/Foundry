@@ -91,6 +91,7 @@ const NotificationScreen = () => {
      style={{flex:1,backgroundColor:theme.colors.background}}>
       <SafeAreaView style={{flex:1,backgroundColor:theme.colors.background}}>
         <FlashList
+        estimatedItemSize={460}
         data={messageNotifications}
         ListEmptyComponent={() => <View style={{paddingTop:20}}><Text
           variant='bodySmall'
@@ -112,6 +113,7 @@ const NotificationScreen = () => {
      style={{flex:1,backgroundColor:theme.colors.background}}>
       <SafeAreaView style={{flex:1,backgroundColor:theme.colors.background}}>
       <FlashList
+      estimatedItemSize={460}
         data={notification}
         ListEmptyComponent={() => <View style={{paddingTop:20}}><Text
           variant='bodySmall'
@@ -132,6 +134,7 @@ const NotificationScreen = () => {
      style={{flex:1,backgroundColor:theme.colors.background}}>
       <SafeAreaView style={{flex:1,backgroundColor:theme.colors.background}}>
       <FlashList
+      estimatedItemSize={460}
         data={messageNotifications}
         ListEmptyComponent={() => <View style={{paddingTop:20}}><Text
           variant='bodySmall'
