@@ -63,13 +63,13 @@ const PostScreen = () => {
   
 {/** TOMORROW GET IMAGE AND VIDEO OPTIMIZE ALSO IN POST AND COMMMENT COMPONENT, THIS WILL TIE INTO WITH PROJECT SCREEN AND MAYBE EDIT SCREEN */}
 
-  // useEffect(() => {
-  //   const timeout = setTimeout(() => {
-  //     textInputRef.current?.focus();
-  //   }, 1000);
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      textInputRef.current?.focus();
+    }, 1000);
 
-  //   return () => clearTimeout(timeout); 
-  // }, []);
+    return () => clearTimeout(timeout); 
+  }, []);
 
 
   const handlePost = async () => {
@@ -147,7 +147,7 @@ const PostScreen = () => {
     }
   }
   return (
-      <SafeAreaView style={[styles.screen,{backgroundColor:theme.colors.background,paddingTop:Platform.OS === 'ios' ? top : 0}]}>
+      <View style={[styles.screen,{backgroundColor:theme.colors.background,paddingTop:Platform.OS === 'ios' ? top : 0}]}>
       <View style={styles.container}>
         <View style={{flexDirection:'row',alignItems:'center'}}>
         <TouchableOpacity onPress={handleCancel}>
@@ -276,7 +276,7 @@ const PostScreen = () => {
           </View>
        </View>
         </KeyboardAvoidingView>
-    </SafeAreaView>
+    </View>
   );
 };
 

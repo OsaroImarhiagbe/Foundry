@@ -13,7 +13,8 @@ import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-nativ
 const NotificationScreen = lazy(() => import('../screen/NotificationScreen'))
 const SearchScreen = lazy(() => import('../screen/SearchScreen'))
 const StackNavigation = lazy(() => import('./StackNavigation'))
-const ProfileScreen = lazy(() => import('../screen/AccountScreen'))
+// const ProfileScreen = lazy(() => import('../screen/AccountScreen'))
+import ProfileScreen from '../screen/AccountScreen'
 
 
 const StackNavigationwrapper = () =>{
@@ -23,23 +24,25 @@ const StackNavigationwrapper = () =>{
   </Suspense>
   )}
 
-  const ProfileScreenWrapper = () =>{
-    return (
+  // const ProfileScreenWrapper = () =>{
+  //   return (
   
-      <Suspense fallback={<ActivityIndicator size='small' color='#000' />}>
-      <ProfileScreen/>
-    </Suspense>
+  //     <Suspense fallback={<ActivityIndicator size='small' color='#000' />}>
+  //     <ProfileScreen/>
+  //   </Suspense>
   
-    )
-  }
+  //   )
+  // }
 
-const SearchScreenWrapper = () => {
+// const SearchScreenWrapper = () => {
   
-    return(
-      <Suspense fallback={<ActivityIndicator size='small' color='#000'/>}>
-        <SearchScreen/>
-      </Suspense>
-    )}
+//     return(
+//       <Suspense fallback={<ActivityIndicator size='small' color='#000'/>}>
+//         <SearchScreen/>
+//       </Suspense>
+//     )
+  
+// }
 
 const NotificationScreenWrapper = () => {
   
@@ -47,7 +50,9 @@ const NotificationScreenWrapper = () => {
         <Suspense fallback={<ActivityIndicator size='small' color='#000'/>}>
         <NotificationScreen/>
       </Suspense>
-      )}
+      )
+    
+}
 
 
 const TabNavigation = () => {
@@ -83,7 +88,7 @@ const TabNavigation = () => {
      />
      <Tab.Screen
      name='Search'
-     component={SearchScreenWrapper}
+     component={SearchScreen}
      options={{
       tabBarLabel:'Search',
       tabBarIcon: () => <MaterialCommunityIcons name='account-search' size={25} color={theme.colors.tertiary}/>
@@ -99,7 +104,7 @@ const TabNavigation = () => {
      />
      <Tab.Screen 
         name="Account"
-        component={ProfileScreenWrapper}
+        component={ProfileScreen}
         options={{
           tabBarIcon:() => (
             user?.profileUrl ?
