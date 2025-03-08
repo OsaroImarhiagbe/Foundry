@@ -14,7 +14,6 @@ import {useState, useEffect,useCallback} from 'react';
 import { Image } from 'expo-image';
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import { useRoute } from '@react-navigation/native';
-import SmallButton from '../components/SmallButton';
 import FollowComponent from '../components/FollowComponent';
 import {
   doc, 
@@ -39,7 +38,7 @@ import { UsersRef,ProjectRef, PostRef,db, crashlytics} from 'FIrebaseConfig'
 const PostComponent = lazy(() => import('../components/PostComponent'))
 
 
-{/** NEED TO LOOK AT USE EFFECT THAT IS GRAB POST AND PROJECTS AND SKILLS NEED TO IMPLEMENT IT */}
+
 
 const Tab = createMaterialTopTabNavigator();
 
@@ -64,7 +63,7 @@ type RootStackParamList = {
 type Navigation = NativeStackNavigationProp<RootStackParamList>;
 
 
-interface User{
+type User = {
   username?:string,
   userId?:string,
   profileUrl?:string,
@@ -75,7 +74,7 @@ interface User{
   location?:string
 
 }
-interface Post{
+type Post ={
   auth_profile?: string;
   like_count?: number;
   imageUrl?: string;
@@ -92,22 +91,27 @@ interface Project{
   id?:string,
   project_name?:string
 }
+type Skill = {
+  id:string
+  skills:string
+}
 const OtherUserScreen = () => {
+  const [users, setUsers] = useState<User | undefined>(undefined)
+  const [isloading,setLoading] = useState(false)
+  const navigation = useNavigation<Navigation>();
+  const [isPress,setPress] = useState(false)
+  const [projects,setProjects] = useState<Project[]>([])
+  const [posts,setPosts] = useState<Post[]>([])
+  const [skills,setSkills] = useState<Skill[]>([])
+  let route = useRoute()
+  const {user} = useAuth()
+  const {userId} = route?.params as {userId:string}
+  const other_user_id = useSelector((state:any)=>state.search.searchID)
+  const [refreshing, setRefreshing] = useState(false);
+  const theme = useTheme()
+  const {top} = useSafeAreaInsets()
+  const headerimg = useSelector((state:any) => state.user.addImage)
 
-
-    const [users, setUsers] = useState<User | undefined>(undefined)
-    const [isloading,setLoading] = useState(false)
-    const navigation = useNavigation<Navigation>();
-    const [isPress,setPress] = useState(false)
-    const [projects,setProjects] = useState<Project[]>([])
-    const [posts,setPosts] = useState<Post[]>([])
-    let route = useRoute()
-    const {user} = useAuth()
-    const {userId} = route?.params as {userId:string}
-    const other_user_id = useSelector((state:any)=>state.search.searchID)
-    const [refreshing, setRefreshing] = useState(false);
-    const theme = useTheme()
-    const {top} = useSafeAreaInsets()
 
     const follow_items = [{count:users?.projects,content:'projects'},{count:users?.connection,content:'  connection   '},{count:posts.length,content:' posts'}]
 
@@ -198,6 +202,7 @@ const OtherUserScreen = () => {
         (documentSnapshot) => {
           if (documentSnapshot.exists) {
             setUsers(documentSnapshot.data());
+            setSkills(documentSnapshot.data()?.skills)
           } else {
             console.error('No such document exists!');
           }
@@ -290,7 +295,7 @@ const OtherUserScreen = () => {
     <View style={{flex:1,backgroundColor:theme.colors.background}}>
     <SafeAreaView style={{flex:1,backgroundColor:theme.colors.background,padding:50}}>
       <FlashList
-      data={projects}
+      data={skills}
       estimatedItemSize={460}
       contentContainerStyle={{padding:0}}
       onRefresh={onRefresh}
@@ -310,7 +315,7 @@ const OtherUserScreen = () => {
       renderItem={({item}) => (
         <TouchableOpacity onPress={()=>navigation.navigate('ProjectScreen')}>
         <View style={{ backgroundColor: '#252525', borderRadius: 25, padding: 30,marginBottom:10 }}>
-       <Text style={{ textAlign: 'center', color: '#fff' }}>{item?.project_name}</Text>
+       <Text style={{ textAlign: 'center', color: '#fff' }}>{item?.skills}</Text>
      </View>
      </TouchableOpacity>
       )}
@@ -363,38 +368,67 @@ const OtherUserScreen = () => {
   
     return (
         <SafeAreaView style={[styles.screen,{backgroundColor:theme.colors.background,paddingTop:Platform.OS === 'ios' ? top: 0}]}>
-            <ScrollView
+          <ScrollView
             scrollEnabled={true}
             showsVerticalScrollIndicator={false}
             style={styles.screen}
             contentContainerStyle={{flexGrow:1}}
             refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh}/>}
             >
-       <ImageBackground
-        resizeMode="cover"
-        imageStyle={{height:150,justifyContent:'flex-end'}}
-        style={{
-        height:100,
-        bottom:0,
-        justifyContent:'flex-end',
-      }}
-      source={require('../assets/images/header.png')}
-      >
-       <View style={{flexDirection:'row',justifyContent:'space-between',alignItems:'center',bottom:40}}>
-       <TouchableOpacity onPress={() => navigation.navigate('Welcome',{screen:'Dash'})} style={{padding:10}}>
-        <Icon
-        source='arrow-left-circle'
-        size={hp(3)}
-        />
-      </TouchableOpacity>
-      {
-        !other_user_id && 
-         <TouchableOpacity style={{alignItems:'flex-end',padding:5}} onPress={() => console.log('button pressed')}>
-         <Icon size={hp(3)} source='pencil' color={theme.colors.tertiary}/>
-         </TouchableOpacity>
-      }
-        </View> 
-      </ImageBackground>
+              {headerimg ? (
+                  <ImageBackground
+                  resizeMode="cover"
+                  imageStyle={{height:150,justifyContent:'flex-end'}}
+                  style={{
+                  height:100,
+                  bottom:0,
+                  justifyContent:'flex-end',
+                }}
+                source={headerimg}
+                >
+                 <View style={{flexDirection:'row',justifyContent:'space-between',alignItems:'center',bottom:40}}>
+                 <TouchableOpacity onPress={() => navigation.navigate('Welcome',{screen:'Dash'})} style={{padding:10}}>
+                  <Icon
+                  source='arrow-left-circle'
+                  size={hp(3)}
+                  />
+                </TouchableOpacity>
+                
+                 
+                   <TouchableOpacity style={{alignItems:'flex-end',padding:5}} onPress={() => console.log('button pressed')}>
+                   <Icon size={hp(3)} source='pencil' color={theme.colors.tertiary}/>
+                   </TouchableOpacity>
+                
+                  </View> 
+                </ImageBackground>
+              ) : (
+                <ImageBackground
+                resizeMode="cover"
+                imageStyle={{height:150,justifyContent:'flex-end'}}
+                style={{
+                height:100,
+                bottom:0,
+                justifyContent:'flex-end',
+              }}
+              source={require('../assets/images/header.png')}
+              >
+               <View style={{flexDirection:'row',justifyContent:'space-between',alignItems:'center',bottom:40}}>
+               <TouchableOpacity onPress={() => navigation.navigate('Welcome',{screen:'Dash'})} style={{padding:10}}>
+                <Icon
+                source='arrow-left-circle'
+                size={hp(3)}
+                />
+              </TouchableOpacity>
+              
+               
+                 <TouchableOpacity style={{alignItems:'flex-end',padding:5}} onPress={() => console.log('button pressed')}>
+                 <Icon size={hp(3)} source='account-search' color={theme.colors.tertiary}/>
+                 </TouchableOpacity>
+              
+                </View> 
+              </ImageBackground>
+              )
+            }
           <View style={{
              flexDirection:'row',
              paddingLeft:10,
@@ -421,43 +455,36 @@ const OtherUserScreen = () => {
               </View>
               <View style={{marginTop:5}}>
               <View style={{paddingLeft:20,flexDirection:'column',paddingRight:20}}>
-               <Text>{
-                    other_user_id ? (<Text
-                    variant='bodySmall'
-                      style={{
-                        color:theme.colors.onTertiary
-                      }}>@{users?.username}</Text>) 
-                    : (<Text
-                    variant='bodySmall'
-                      style={{
-                        color:theme.colors.onTertiary
-                      }}>@{users?.username}</Text>)
-                  }</Text>
-                  {users?.jobtitle &&   <Text
-                  variant='bodySmall'
-                  style={{
-                    color:theme.colors.onTertiary
-                  }}>{users?.jobtitle}</Text>}
-                  {users?.location &&    <Text
-                  variant='bodySmall'
-                  style={{
-                    color:theme.colors.onTertiary
-                  }}><EvilIcons name='location' size={15} color={theme.colors.onTertiary}/>{users?.location}</Text>}
-                   <View style={{flexDirection:'row',marginTop:10,justifyContent:'space-around',alignItems:'center'}}>
-                    {follow_items.map((item,index)=>{
-                      return <FollowComponent key={index} count={item.count} content={item.content}/>
-                      })}
-                      <View style={{marginLeft:50}}>
-                      <Button
-                      onPress={handlePress}
-                        mode='outlined' style={{
-                        backgroundColor:'transparent', 
-                        borderRadius:100,
-                        borderWidth:1,
-                        borderColor:theme.colors.tertiary}}>Connection</Button></View>
-                        </View>
-                        </View>
-                        </View>
+              <Text
+              variant='bodySmall'
+                style={{
+                  color:theme.colors.onTertiary
+                }}>@{users?.username}</Text>
+            {users?.jobtitle && <Text
+            variant='bodySmall'
+            style={{
+              color:theme.colors.onTertiary
+            }}>{users?.jobtitle}</Text>}
+            {users?.location &&    <Text
+            variant='bodySmall'
+            style={{
+              color:theme.colors.onTertiary
+            }}><EvilIcons name='location' size={15} color={theme.colors.onTertiary}/>{users?.location}</Text>}
+              <View style={{flexDirection:'row',marginTop:10,justifyContent:'space-around',alignItems:'center'}}>
+              {follow_items.map((item,index)=>{
+                return <FollowComponent key={index} count={item.count} content={item.content}/>
+                })}
+                <View style={{marginLeft:50}}>
+                <Button
+                onPress={handlePress}
+                  mode='outlined' style={{
+                  backgroundColor:'transparent', 
+                  borderRadius:100,
+                  borderWidth:1,
+                  borderColor:theme.colors.tertiary}}>Connection</Button></View>
+                  </View>
+                  </View>
+                  </View>
               <View style={{flex: 1}}>
               <Tab.Navigator
                 screenOptions={{

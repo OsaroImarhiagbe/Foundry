@@ -1,7 +1,7 @@
 import React from 'react'
 import { View,Text } from 'react-native'
 
-const TestScreen = () => {
+const SettingsScreen = () => {
   return (
     <View>
       <Text>hi</Text>
@@ -9,4 +9,4 @@ const TestScreen = () => {
   )
 }
 
-export default TestScreen
+export default SettingsScreen
