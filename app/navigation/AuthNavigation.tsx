@@ -10,51 +10,55 @@ const LoginScreen = lazy(()=> import('../screen/LoginScreen'));
 const SecondStackNavigation = lazy(() => import('../navigation/SecondStackNavigation'))
 import {log,recordError} from '@react-native-firebase/crashlytics'
 
-const RegisterScreenWrapper = () => {
-  
-    return (
-      <Suspense fallback={<ActivityIndicator size='small' color='#fff'/>}>
-      <RegisterScreen/>
-    </Suspense>
-  
-    )
-}
 
-const LoginScreenWrapper = () => {
+const RegisterScreenWrapper = () => {
   
   return (
     <Suspense fallback={<ActivityIndicator size='small' color='#fff'/>}>
-    <LoginScreen/>
+    <RegisterScreen/>
   </Suspense>
 
   )
 }
 
+const LoginScreenWrapper = () => {
+
+return (
+  <Suspense fallback={<ActivityIndicator size='small' color='#fff'/>}>
+  <LoginScreen/>
+</Suspense>
+
+)
+}
+
 const DrawerNavigationWrapper = () => {
-  
-    return (
-      <Suspense fallback={<ActivityIndicator size='small' color='#fff'/>}>
-      <DrawerNavigation/>
-    </Suspense>
-  
-    )
+
+  return (
+    <Suspense fallback={<ActivityIndicator size='small' color='#fff'/>}>
+    <DrawerNavigation/>
+  </Suspense>
+
+  )
 }
 
 
 const SecondStackNavigationWrapper = () => {
-  return (
-    <Suspense fallback={<ActivityIndicator size='small' color='#000'/>}>
-    <SecondStackNavigation/>
-  </Suspense>
-  )
+return (
+  <Suspense fallback={<ActivityIndicator size='small' color='#000'/>}>
+  <SecondStackNavigation/>
+</Suspense>
+)
 }
 const OnboardingScreenWrapper = () =>{
-  return (
-    <Suspense fallback={<ActivityIndicator size='small' color='#fff'/>}>
-    <OnboardingScreen/>
-  </Suspense>
-  )
+return (
+  <Suspense fallback={<ActivityIndicator size='small' color='#fff'/>}>
+  <OnboardingScreen/>
+</Suspense>
+)
 }
+
+
+
 const AuthNavigation = () => {
   const [showOnboarding,setShowOnboarding] = useState<boolean>(false)
   const [loading,setLoading] = useState<boolean>(false)

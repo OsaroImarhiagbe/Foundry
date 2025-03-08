@@ -1,5 +1,5 @@
 import { createDrawerNavigator, DrawerItem,DrawerContentScrollView,DrawerItemList } from '@react-navigation/drawer';
-import { NavigatorScreenParams,useNavigation} from '@react-navigation/native';
+import { useNavigation} from '@react-navigation/native';
 import { lazy,Suspense, useState } from 'react';
 import { ActivityIndicator,TouchableWithoutFeedback,View, } from 'react-native';
 import React from 'react';

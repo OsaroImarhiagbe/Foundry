@@ -1,6 +1,7 @@
 import React,
 {
   lazy,
+  Suspense,
 }from 'react'
 import {
     View,
@@ -11,7 +12,7 @@ import {heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import {Image} from 'expo-image'
 import { useAuth } from '../authContext';
 import { blurhash } from '../../utils';
-import { useTheme } from 'react-native-paper';
+import { ActivityIndicator, useTheme } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
 import { TouchableWithoutFeedback } from 'react-native-gesture-handler';
 import { FAB } from 'react-native-paper';
@@ -40,7 +41,24 @@ const FeedScreen = lazy(() => import('../screen/FeedScreen'))
 const HomeScreen = lazy(() => import('../screen/HomeScreen'))
 
 
+const HomeScreenWrapper = () => {
+  return (
+    <Suspense fallback={<ActivityIndicator size='small' color='#000'/>}>
+    <HomeScreen/>
+  </Suspense>
 
+  )
+
+}
+const FeedScreenWrapper = () => {
+  return (
+    <Suspense fallback={<ActivityIndicator size='small' color='#000'/>}>
+    <FeedScreen/>
+  </Suspense>
+
+  )
+
+}
 
 
 const DashBoardScreen = () => {
@@ -98,7 +116,8 @@ const DashBoardScreen = () => {
                 marginLeft:-30,
                 borderCurve:'continuous',
                 backgroundColor:'#fff',
-                position:'relative'
+                position:'relative',
+                zIndex:10
             }
         }}
       >
@@ -138,11 +157,11 @@ const DashBoardScreen = () => {
     >
         <Tab.Screen
         name='For You'
-        component={FeedScreen}
+        component={FeedScreenWrapper}
         />
         <Tab.Screen
         name='Community'
-        component={HomeScreen}
+        component={HomeScreenWrapper}
         />
         </Tab.Navigator>
         <FAB

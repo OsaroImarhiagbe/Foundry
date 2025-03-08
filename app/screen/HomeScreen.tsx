@@ -3,7 +3,8 @@ import React,{
   useEffect,
   lazy,
   useMemo,
-  useCallback} from 'react'
+  useCallback,
+  Suspense} from 'react'
 import {
   View,
   StyleSheet,
@@ -71,7 +72,6 @@ const HomeScreen= () => {
     let trace
     setMount(true)
     dispatch(addId({currentuserID:user?.userId}))
-    const timer = setTimeout(() => {
       log(crashlytics,'Grabbing post')
         try {
           const docRef = query(PostRef,orderBy('createdAt', 'desc'),limit(10))
@@ -95,12 +95,10 @@ const HomeScreen= () => {
       }finally{
         setMount(false)
       } 
-    },3000)
+    
       
-    return () => {
-      clearTimeout(timer);
-    };
-  }, []); 
+   
+  }, [memoPost]); 
 
 
   const onRefresh = useCallback(async () => {
@@ -201,7 +199,7 @@ const fetchMorePost = async () => {
     )}
     ListEmptyComponent={(item) => (
       <View style={{flex:1,alignItems:'center',justifyContent:'center',paddingTop:5}}>
-        <ActivityIndicator color={theme.colors.background ? '#000' :'#fff'} size='large' animating={mount}/>
+        <Text>No post at the moment</Text>
       </View>
     )}
     onEndReached={fetchMorePost}
@@ -213,7 +211,7 @@ const fetchMorePost = async () => {
     ListFooterComponent={() => (
        <ActivityIndicator color='#fff' size='small' animating={loadingMore}/>
     )}
-    renderItem={({item}) => 
+    renderItem={({item}) => <Suspense fallback={<ActivityIndicator size='small' color='#000'/>}>
       <PostComponent
       auth_profile={item.auth_profile}
       count={item.like_count}
@@ -225,7 +223,8 @@ const fetchMorePost = async () => {
           hour: '2-digit',
           minute: '2-digit',
           hour12: true})}
-      comment_count={item.comment_count}/>}
+      comment_count={item.comment_count}/>
+      </Suspense>}
     keyExtractor={(item)=> item?.post_id?.toString() || Math.random().toString()}
     /> } 
     </View>
