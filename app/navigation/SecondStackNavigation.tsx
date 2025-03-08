@@ -51,16 +51,16 @@ const ReportBugScreenWrapper = () => {
     )
   }
 
-  const PostScreenWrapper = () => {
+  // const PostScreenWrapper = () => {
   
-    return (
-      <Suspense fallback={<ActivityIndicator size='small' color='#000'/>}>
-      <PostScreen/>
-    </Suspense>
+  //   return (
+  //     <Suspense fallback={<ActivityIndicator size='small' color='#000' style={{flex:1,alignItems:'center',justifyContent:'center'}}/>}>
+  //     <PostScreen/>
+  //   </Suspense>
   
-    )
+  //   )
   
-  }
+  // }
 
   const LocationScreenWrapper = () => {
   
@@ -103,7 +103,7 @@ const SecondStackNavigation = () => {
       <Stack.Navigator>
     <Stack.Screen
       name='Post'
-      component={PostScreenWrapper}
+      component={PostScreen}
       options={{
         headerShown:false,
         gestureEnabled:false,

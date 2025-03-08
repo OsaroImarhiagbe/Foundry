@@ -8,8 +8,6 @@ const DrawerNavigation = lazy(() => import('./DrawerNavigation'))
 const OnboardingScreen = lazy(()=> import('../screen/OnboardingScreen'))
 const LoginScreen = lazy(()=> import('../screen/LoginScreen'));
 const SecondStackNavigation = lazy(() => import('../navigation/SecondStackNavigation'))
-import {log,recordError} from '@react-native-firebase/crashlytics'
-
 
 const RegisterScreenWrapper = () => {
   

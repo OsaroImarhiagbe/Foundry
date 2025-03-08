@@ -66,17 +66,13 @@ const FeedScreen = () => {
     const [mount, setMount] = useState<boolean>(false)
     const scrollY = useState(new Animated.Value(0))[0];
     const dark_or_light = useColorScheme()
-  
-  
-   
-  
-
-  
+    
     useEffect(() => {
       if (!user?.userId) return;
       setMount(true)
       dispatch(addId({currentuserID:user?.userId}))
       log(crashlytics,'Grabbing post')
+      const timer = setTimeout(() => {
         try {
           const docRef = query(PostRef,orderBy('createdAt', 'desc'),limit(10))
           const subscriber = onSnapshot(docRef,async (querySnapShot) =>{
@@ -98,7 +94,10 @@ const FeedScreen = () => {
         console.error(`Error post can not be found: ${error}`);
       }finally{
         setMount(false)
-      } 
+      }
+      },3000) 
+
+      return () => clearTimeout(timer)
     }, []); 
   
   
