@@ -88,15 +88,13 @@ const PostScreen = () => {
         auth_id:user?.userId,
         name:user?.username,
         content:text,
-        like_count: null,
-        comment_count: null,
-        liked_by: null,
+        like_count: 0,
+        comment_count: 0,
+        liked_by: [],
         category:[category],
         imageUrl:imageUrl,
         filename:filename,
         createdAt: Timestamp.fromDate(new Date())
-      }).then((results)=> {
-        console.log(results)
       }).catch((error) => {
         console.log(error)
       })
