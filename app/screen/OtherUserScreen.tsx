@@ -434,12 +434,19 @@ const OtherUserScreen = () => {
              paddingLeft:10,
              justifyContent:'space-between',
              padding:5,}}>
-          <Image
-              style={{height:hp(7), aspectRatio:1, borderRadius:100,borderWidth:1,borderColor:theme.colors.background}}
-              source={users?.profileUrl}
-              placeholder={{blurhash}}
-              cachePolicy='none'/>
-            {other_user_id &&  <Button 
+           {
+                users?.profileUrl ? 
+                <Image
+                style={{height:hp(8), aspectRatio:1, borderRadius:100,borderWidth:2,borderColor:theme.colors.background}}
+                source={users?.profileUrl}
+                placeholder={{blurhash}}
+                cachePolicy='none'/> :   <Image
+                style={{height:hp(8), aspectRatio:1, borderRadius:100,borderWidth:2,borderColor:theme.colors.background}}
+                source={require('../assets/user.png')}
+                placeholder={{blurhash}}
+                cachePolicy='none'/>
+       }
+          <Button 
             onPress={() => navigation.navigate('SecondStack',{
               screen:'Chat',
               params:{
@@ -451,7 +458,7 @@ const OtherUserScreen = () => {
             backgroundColor:'transparent', 
             borderRadius:100,
             borderWidth:1,
-            borderColor:theme.colors.tertiary}}>Message</Button>}
+            borderColor:theme.colors.tertiary}}>Message</Button>
               </View>
               <View style={{marginTop:5}}>
               <View style={{paddingLeft:20,flexDirection:'column',paddingRight:20}}>

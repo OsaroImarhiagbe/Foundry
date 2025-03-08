@@ -63,11 +63,15 @@ const DashBoardScreen = () => {
           justifyContent:'space-between',
           backgroundColor:theme.colors.background}}>
         <TouchableWithoutFeedback onPress={() => navigation.openDrawer()}>
-        <Image
+          {user.profile ?   <Image
         style={{height:hp(4.3), aspectRatio:1, borderRadius:100}}
         source={user?.profileUrl}
         placeholder={{blurhash}}
-        cachePolicy='none'/>
+        cachePolicy='none'/> :   <Image
+        style={{height:hp(4.3), aspectRatio:1, borderRadius:100}}
+        source={require('../assets/user.png')}
+        placeholder={{blurhash}}
+        cachePolicy='none'/> }
         </TouchableWithoutFeedback >
         <SearchComponent
         title='Search....'
