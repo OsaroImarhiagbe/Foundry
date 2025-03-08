@@ -30,13 +30,13 @@ const PostComponent = lazy(() => import('../components/PostComponent'))
 
 const Spacer = ({ height = 16 }) => <View style={{ height }} />;
 
-type NavigationProp = {
-    openDrawer(): undefined;
-    navigate(arg0?: string, arg1?: { screen: string; }): unknown;
-    SecondStack:undefined,
-    Home:undefined,
-    Post:undefined
-}
+// type NavigationProp = {
+//     openDrawer(): undefined;
+//     navigate(arg0?: string, arg1?: { screen: string; }): unknown;
+//     SecondStack:undefined,
+//     Home:undefined,
+//     Post:undefined
+// }
 
 interface Post{
     id: string;
@@ -70,51 +70,35 @@ const FeedScreen = () => {
   
    
   
-    // const headerOpacity = scrollY.interpolate({
-    //   inputRange: [0, 250],
-    //   outputRange: [1, 0],
-    //   extrapolate: 'clamp',
-    // });
-    // const headerBackgroundColor = scrollY.interpolate({
-    //   inputRange: [0, 250],
-    //   outputRange: ['rgba(0, 0, 0, 0)', 'rgba(0, 0,0,0)'], // Adjust the color
-    //   extrapolate: 'clamp',
-    // });
 
   
     useEffect(() => {
       if (!user?.userId) return;
       setMount(true)
       dispatch(addId({currentuserID:user?.userId}))
-      const timer = setTimeout(() => {
-        log(crashlytics,'Grabbing post')
-          try {
-            const docRef = query(PostRef,orderBy('createdAt', 'desc'),limit(10))
-            const subscriber = onSnapshot(docRef,async (querySnapShot) =>{
-                if (!querySnapShot || querySnapShot.empty) {
-                  setPost([]);
-                  return;
-                }
-                let data:Post[] = []; 
-                querySnapShot.forEach(documentSnapShot => {
-                  data.push({ ...documentSnapShot.data(),id:documentSnapShot.id });
-              } )
-              setPost(data);
-              setLastVisible(querySnapShot.docs[querySnapShot.docs.length - 1]);
-              setHasMore(querySnapShot.docs.length > 0);
-            });
-            return () => subscriber()
-          }  catch (error:unknown | any) {
-            recordError(crashlytics,error)
-          console.error(`Error post can not be found: ${error}`);
-        }finally{
-          setMount(false)
-        } 
-      },3000)
-        
-      return () => {
-        clearTimeout(timer);
-      };
+      log(crashlytics,'Grabbing post')
+        try {
+          const docRef = query(PostRef,orderBy('createdAt', 'desc'),limit(10))
+          const subscriber = onSnapshot(docRef,async (querySnapShot) =>{
+              if (!querySnapShot || querySnapShot.empty) {
+                setPost([]);
+                return;
+              }
+              let data:Post[] = []; 
+              querySnapShot.forEach(documentSnapShot => {
+                data.push({ ...documentSnapShot.data(),id:documentSnapShot.id });
+            } )
+            setPost(data);
+            setLastVisible(querySnapShot.docs[querySnapShot.docs.length - 1]);
+            setHasMore(querySnapShot.docs.length > 0);
+          });
+          return () => subscriber()
+        }  catch (error:unknown | any) {
+          recordError(crashlytics,error)
+        console.error(`Error post can not be found: ${error}`);
+      }finally{
+        setMount(false)
+      } 
     }, []); 
   
   
@@ -210,7 +194,7 @@ const FeedScreen = () => {
               )}
               ListEmptyComponent={(item) => (
                 <View style={{flex:1,alignItems:'center',justifyContent:'center',paddingTop:5}}>
-                  <ActivityIndicator color={theme.colors.background ? '#000' :'#fff'} size='large' animating={mount}/>
+                    <Text>No post at the moment</Text>
                 </View>
               )}
               onEndReached={fetchMorePost}
