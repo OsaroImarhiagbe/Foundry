@@ -112,7 +112,7 @@ const AccountScreen = () => {
   //const profileimg = useSelector((state:any) => state.user.addHeaderImage)
   const headerimg = useSelector((state:any) => state.user.addImage)
 
-  console.log('account screen',user)
+  
 
 
   
@@ -153,14 +153,14 @@ const AccountScreen = () => {
       }
   }, [user]);
 
-  // useEffect(() => {
-  //   setLoading(true)
-  //   const timer = setTimeout(() => {
-  //     setLoading(false)
-  //   },1000)
+  useEffect(() => {
+    setLoading(true)
+    const timer = setTimeout(() => {
+      setLoading(false)
+    },1000)
 
-  //   return  () => clearTimeout(timer)
-  // },[])
+    return  () => clearTimeout(timer)
+  },[])
 
 
   useEffect(() => {

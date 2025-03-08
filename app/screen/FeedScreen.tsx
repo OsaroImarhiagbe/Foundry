@@ -17,7 +17,7 @@ import { useAuth } from '../authContext';
 import { useTheme } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
 import {ActivityIndicator,Divider,Text} from 'react-native-paper';
-import { FirebaseFirestoreTypes, getDocs, limit, onSnapshot, orderBy, query, startAfter, Timestamp } from '@react-native-firebase/firestore';
+import { FirebaseFirestoreTypes, getDocs, limit, onSnapshot, orderBy, query, startAfter, Unsubscribe} from '@react-native-firebase/firestore';
 import {log,recordError,} from '@react-native-firebase/crashlytics'
 import { MotiView } from 'moti';
 import { FlashList } from '@shopify/flash-list';
@@ -72,12 +72,13 @@ const FeedScreen = () => {
       setMount(true)
       dispatch(addId({currentuserID:user?.userId}))
       log(crashlytics,'Grabbing post')
-      const timer = setTimeout(() => {
+      let subscriber:Unsubscribe;
         try {
           const docRef = query(PostRef,orderBy('createdAt', 'desc'),limit(10))
-          const subscriber = onSnapshot(docRef,async (querySnapShot) =>{
+          subscriber = onSnapshot(docRef,async (querySnapShot) =>{
               if (!querySnapShot || querySnapShot.empty) {
                 setPost([]);
+                setMount(false);
                 return;
               }
               let data:Post[] = []; 
@@ -87,17 +88,19 @@ const FeedScreen = () => {
             setPost(data);
             setLastVisible(querySnapShot.docs[querySnapShot.docs.length - 1]);
             setHasMore(querySnapShot.docs.length > 0);
+            setMount(false);
+          },error => {
+            recordError(crashlytics, error);
+            console.error(`Error in snapshot listener: ${error}`);
+            setMount(false);
           });
-          return () => subscriber()
         }  catch (error:unknown | any) {
           recordError(crashlytics,error)
         console.error(`Error post can not be found: ${error}`);
-      }finally{
-        setMount(false)
+        setMount(false);
       }
-      },3000) 
 
-      return () => clearTimeout(timer)
+      return () => { if(subscriber) subscriber()}
     }, []); 
   
   
@@ -116,11 +119,13 @@ const FeedScreen = () => {
             setLastVisible(querySnapShot.docs[querySnapShot.docs.length - 1]);
             setHasMore(querySnapShot.docs.length > 0);
             trace.putAttribute('post_count', post.length.toString());
+            setRefreshing(false)
           });
           return () => unsub()
         }  catch (error:any) {
           recordError(crashlytics,error)
           console.error(`Error post can not be found: ${error}`);
+          setRefreshing(false)
       }finally{
         setRefreshing(false);
         trace.stop()

@@ -8,13 +8,12 @@ import { blurhash } from 'utils';
 import { useAuth } from 'app/authContext';
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import { Icon,useTheme,Text} from 'react-native-paper';
-import SettingsScreen from 'app/screen/SettingsScreen';
 
 
 
 const Drawer = createDrawerNavigator();
 const TabNavigation = lazy(() => import('./TabNavigation'))
-// const SettingsScreen = lazy(() => import('../screen/SettingsScreen'))
+const SettingsScreen = lazy(() => import('../screen/SettingsScreen'))
 
 const TabNavigationWrapper = () =>{
   return (
@@ -26,15 +25,15 @@ const TabNavigationWrapper = () =>{
   )
 }
 
-// const SettingScreenWrapper = () =>{
-//   return (
+const SettingScreenWrapper = () =>{
+  return (
 
-//     <Suspense fallback={<ActivityIndicator size='small' color='#000' />}>
-//     <SettingsScreen/>
-//   </Suspense>
+    <Suspense fallback={<ActivityIndicator size='small' color='#000' />}>
+    <SettingsScreen/>
+  </Suspense>
 
-//   )
-// }
+  )
+}
 
 const DrawerNavigation = () => {
   const theme = useTheme()
@@ -117,7 +116,7 @@ const DrawerNavigation = () => {
         },
         headerShown:false,
       }}/>
-       {/* <Drawer.Screen
+       <Drawer.Screen
       name='News'
       component={SettingScreenWrapper}
       options={{
@@ -131,7 +130,7 @@ const DrawerNavigation = () => {
           color:theme.colors.tertiary,
         },
         headerShown:false,
-      }}/> */}
+      }}/>
        <Drawer.Screen
       name='Settings'
       component={SettingsScreen}
