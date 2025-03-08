@@ -1,3 +1,4 @@
+/* eslint-disable camelcase */
 /**
  * Import function triggers from their respective submodules:
  *
@@ -20,6 +21,25 @@ initializeApp();
 //   logger.info("Hello logs!", {structuredData: true});
 //   response.send("Hello from Firebase!");
 // });
+interface MessageRepsonse {
+  roomId: string;
+  request:string,
+  text:string,
+  senderName:string,
+  recipientName:string,
+  senderId:string,
+  recipientId:string
+}
+interface PostResponse{
+  auth_id: string,
+  name: string,
+  content: string
+  like_count: number
+  comment_count: number
+  liked_by: string[]
+  category: string[]
+  imageUrl: string
+}
 /**
  * Retrieves a user's device token from Firestore
  * @param {string} userId - The unique identifier of the user
@@ -73,12 +93,12 @@ async function sendNotification(userId: string,
     throw new Error("Failed to send notification");
   }
 }
-exports.addMessage = onCall(async (request:unknown | any) => {
+exports.addMessage = onCall<MessageRepsonse>(async (request) => {
   if (!request.auth) {
     throw new HttpsError(
       "unauthenticated", "This endpoint requires authentication");
   }
-  try{
+  try {
     const newMessage = request.data.text;
     const roomId = request.data.roomId;
     const senderName = request.data.senderName;
@@ -139,12 +159,12 @@ exports.newChatRooomMessage = onDocumentCreated(
       throw new Error("Failed to process new message notification");
     }
   });
-exports.addPost = onCall(async (request:unknown | any) => {
-  if(!request.auth){
+exports.addPost = onCall<PostResponse>(async (request) => {
+  if (!request.auth) {
     throw new HttpsError(
       "unauthenticated", "This endpoint requires authentication");
   }
-  try{
+  try {
     const auth_id = request.data.auth_id;
     const name = request.data.name;
     const content = request.data.content;
@@ -152,9 +172,9 @@ exports.addPost = onCall(async (request:unknown | any) => {
     const comment_count = request.data.comment_count;
     const liked_by = request.data.liked_by;
     const category = request.data.category;
-    const image = request.data.imageUrl
-    const createdAt = FieldValue.serverTimestamp()
-    const newDoc = await getFirestore().collection('posts').add({
+    const image = request.data.imageUrl;
+    const createdAt = FieldValue.serverTimestamp();
+    const newDoc = await getFirestore().collection("posts").add({
       auth_id: auth_id,
       name: name,
       content: content,
@@ -162,21 +182,19 @@ exports.addPost = onCall(async (request:unknown | any) => {
       comment_count: comment_count,
       liked_by: liked_by,
       category: category,
-      createdAt: createdAt
-    })
-    await getFirestore().collection('posts')
-    .doc(newDoc.id)
-    .update({
-      imageUrl:image,
-      post_id: newDoc.id
-    })
-    await sendNotification(auth_id, {
-      title: "Post has sent!"
+      createdAt: createdAt,
     });
-  }catch(error){
-    logger.error('Error Proccessing Post:',error)
+    await getFirestore().collection("posts").doc(newDoc.id).update({
+      imageUrl: image,
+      post_id: newDoc.id,
+    });
+    await sendNotification(auth_id, {
+      title: "Post has sent!",
+    });
+  } catch (error) {
+    logger.error("Error Proccessing Post:", error);
   }
-})
+});
 exports.newUser = onCall(async (request: unknown | any) => {
   if (!request.auth) {
     throw new HttpsError(

@@ -2,7 +2,6 @@ import { createDrawerNavigator, DrawerItem,DrawerContentScrollView,DrawerItemLis
 import { NavigatorScreenParams,useNavigation} from '@react-navigation/native';
 import { lazy,Suspense, useState } from 'react';
 import { ActivityIndicator,TouchableWithoutFeedback,View, } from 'react-native';
-import TestScreen from '../screen/TestScreen';
 import React from 'react';
 import { Image } from 'expo-image';
 import { blurhash } from 'utils';
@@ -15,12 +14,23 @@ import { Icon,useTheme,Text} from 'react-native-paper';
 
 const Drawer = createDrawerNavigator();
 const TabNavigation = lazy(() => import('./TabNavigation'))
+const SettingsScreen = lazy(() => import('../screen/SettingsScreen'))
 
 const TabNavigationWrapper = () =>{
   return (
 
     <Suspense fallback={<ActivityIndicator size='small' color='#000' />}>
     <TabNavigation/>
+  </Suspense>
+
+  )
+}
+
+const SettingScreenWrapper = () =>{
+  return (
+
+    <Suspense fallback={<ActivityIndicator size='small' color='#000' />}>
+    <SettingsScreen/>
   </Suspense>
 
   )
@@ -102,7 +112,7 @@ const DrawerNavigation = () => {
       }}/>
        <Drawer.Screen
       name='News'
-      component={TestScreen}
+      component={SettingScreenWrapper}
       options={{
         drawerIcon:({focused,color,size}) => (
           <Icon
@@ -116,12 +126,12 @@ const DrawerNavigation = () => {
         headerShown:false,
       }}/>
        <Drawer.Screen
-      name='Code'
-      component={TestScreen}
+      name='Settings'
+      component={SettingScreenWrapper}
       options={{
         drawerIcon:({focused,color,size}) => (
           <Icon
-          source="code-tags"
+          source="cog-outline"
           color={theme.colors.tertiary}
           size={size}/>
         ),

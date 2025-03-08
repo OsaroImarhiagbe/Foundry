@@ -8,7 +8,7 @@ import {
   useWindowDimensions,
   Platform,
   RefreshControl,
-  TouchableWithoutFeedback} from 'react-native'
+  } from 'react-native'
 import {lazy,Suspense} from 'react'
 import { useNavigation } from '@react-navigation/native';
 import {useState, useEffect,useCallback} from 'react';
@@ -22,13 +22,14 @@ import { createMaterialTopTabNavigator } from '@react-navigation/material-top-ta
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { 
   useTheme,
-  Text,Icon,
+  Text,
+  Icon,
   Button,
   Divider,
   ActivityIndicator} from 'react-native-paper';
 import EvilIcons from 'react-native-vector-icons/EvilIcons';
 import { FlashList } from '@shopify/flash-list';
-import {PostRef, ProjectRef, UsersRef,crashlytics} from 'FIrebaseConfig';
+import {PostRef, UsersRef,crashlytics} from 'FIrebaseConfig';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { log, recordError, setAttributes, setUserId } from '@react-native-firebase/crashlytics';
 import { useSelector } from 'react-redux';
@@ -79,7 +80,7 @@ type Post = {
   mount?: boolean;
   createdAt?: FirebaseFirestoreTypes.Timestamp
 }
-interface Project{
+type Project = {
   id?:string,
   project_name?:string
 }
@@ -88,7 +89,7 @@ type Skill = {
   id:string
   skills:string
 }
-{/** NEED TO LOOK AT USEEFFECT THAT IS GRABBING POST AND PROJECTS AND SKILLS NEED TO IMPLEMENT IT FOR SKILLS AND PROJECTS*/}
+
 
 const Tab = createMaterialTopTabNavigator();
 
@@ -108,7 +109,7 @@ const AccountScreen = () => {
   const theme = useTheme()
   const {top} = useSafeAreaInsets()
   const {width,height} = useWindowDimensions()
-  const profileimg = useSelector((state:any) => state.user.addHeaderImage)
+  //const profileimg = useSelector((state:any) => state.user.addHeaderImage)
   const headerimg = useSelector((state:any) => state.user.addImage)
 
 
@@ -174,8 +175,8 @@ const AccountScreen = () => {
         })
         setProjects(data)
         await Promise.all([
-          crashlytics.setUserId(user.userId),
-          crashlytics.setAttributes({
+          setUserId(crashlytics,user.userId),
+          setAttributes(crashlytics,{
             user_id:user.userId
           })
         ])
@@ -270,7 +271,9 @@ const AccountScreen = () => {
           onRefresh={onRefresh}
           ListEmptyComponent={(item) => (
             <View style={{flex:1,alignItems:'center',justifyContent:'center',paddingTop:5}}>
-              <ActivityIndicator color={theme.colors.background ? '#000' :'#fff'} size='large' animating={isloading}/>
+              <TouchableOpacity onPress={()=> navigation.navigate('SecondStack',{screen:'ProjectEntryScreen',})}>
+              <Text>No post at the moment</Text>
+              </TouchableOpacity>
             </View>
           )}
           onEndReachedThreshold={0.1}
@@ -383,7 +386,9 @@ const AccountScreen = () => {
     contentContainerStyle={{flexGrow:1}}
     refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh}/>}
     >
-      <ImageBackground
+      {
+        headerimg ? 
+        (<ImageBackground
         resizeMode='cover'
         imageStyle={{height:150,justifyContent:'flex-end'}}
         style={{
@@ -404,7 +409,29 @@ const AccountScreen = () => {
         <Icon size={hp(3)} source='pencil' color={theme.colors.tertiary}/>
         </TouchableOpacity>
         </View> 
-      </ImageBackground>
+      </ImageBackground>) : ( <ImageBackground
+        resizeMode='cover'
+        imageStyle={{height:150,justifyContent:'flex-end'}}
+        style={{
+        height:100,
+        bottom:0,
+        justifyContent:'flex-end',
+      }}
+      source={require('../assets/images/header.png')}
+      >
+       <View style={{flexDirection:'row',justifyContent:'space-between',alignItems:'center',bottom:40}}>
+       <TouchableOpacity onPress={() => navigation.navigate('Welcome',{screen:'Dash'})} style={{padding:10}}>
+        <Icon
+        source='arrow-left-circle'
+        size={hp(3)}
+        />
+      </TouchableOpacity>
+        <TouchableOpacity style={{alignItems:'flex-end',padding:5}} onPress={() => console.log('button pressed')}>
+        <Icon size={hp(3)} source='account-search' color={theme.colors.tertiary}/>
+        </TouchableOpacity>
+        </View> 
+      </ImageBackground>)
+      }
       <View style={{
         flexDirection:'row',
         paddingLeft:10,
@@ -415,13 +442,13 @@ const AccountScreen = () => {
           source={users?.profileUrl}
           placeholder={{blurhash}}
           cachePolicy='none'/>
-        {isCurrentUser &&  <Button 
+      <Button 
         onPress={() => navigation.navigate('Welcome',{screen:'Edit'})}
         mode='outlined' style={{
         backgroundColor:'transparent', 
         borderRadius:100,
         borderWidth:1,
-        borderColor:theme.colors.tertiary}}>Edit Profile</Button>}
+        borderColor:theme.colors.tertiary}}>Edit Profile</Button>
           </View>
           <View style={{marginTop:5}}>
           <View style={{paddingLeft:10,flexDirection:'column'}}>
