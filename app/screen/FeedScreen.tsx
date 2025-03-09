@@ -21,7 +21,7 @@ import {log,recordError,} from '@react-native-firebase/crashlytics'
 import { MotiView } from 'moti';
 import { FlashList } from '@shopify/flash-list';
 import { Skeleton } from 'moti/skeleton';
-import { crashlytics, perf, PostRef } from 'FIrebaseConfig';
+import { crashlytics, perf, PostRef } from '../../FirebaseConfig';
 import { addId } from 'app/features/user/userSlice';
 import { useDispatch } from 'react-redux';
 
@@ -73,7 +73,6 @@ const FeedScreen = () => {
       dispatch(addId({currentuserID:user?.userId}))
       log(crashlytics,'Grabbing post')
       let subscriber:Unsubscribe;
-      const timer = setTimeout(() => {
         try {
           const docRef = query(PostRef,orderBy('createdAt', 'desc'),limit(10))
           subscriber = onSnapshot(docRef,async (querySnapShot) =>{
@@ -100,10 +99,8 @@ const FeedScreen = () => {
         console.error(`Error post can not be found: ${error}`);
         setMount(false);
       }
-    },3000)
     return () => { 
-      if(subscriber && timer) { 
-        clearTimeout(timer)
+      if(subscriber) { 
         subscriber()} }
     }, []); 
   
@@ -136,10 +133,10 @@ const FeedScreen = () => {
       }
     }, [post]);
 
-    const fetchMorePost = async () => {
+    const fetchMorePost = useCallback(async () => {
       log(crashlytics,'Fetch More Post')
       let trace = await perf.startTrace('fetching_more_post_feedscreen')
-      if (loadingMore || !hasMore) return;
+      if (!loadingMore || !hasMore) return;
       if (!user?.userId) return;
       if (post.length <= 2) {
         setHasMore(false);
@@ -172,7 +169,7 @@ const FeedScreen = () => {
         setLoadingMore(false);
         trace.stop()
       }
-    }
+    },[post, lastVisible, hasMore, loadingMore, user?.userId]);
 
   return (
       <View style={{flex:1,backgroundColor:theme.colors.background}}>
@@ -185,11 +182,11 @@ const FeedScreen = () => {
                 delay:300
               }}
               style={[styles.container, styles.padded]}
-              animate={{ backgroundColor: dark_or_light === 'dark' ? '#000': '#ffffffff' }}
+              animate={{ backgroundColor: dark_or_light ? '#00000' : '#fffff' }}
             >
-            <Skeleton colorMode={dark_or_light === 'dark' ? 'dark':'light'} radius="round" height={hp(4.3)}/>
+            <Skeleton colorMode={dark_or_light ? 'dark':'light'} radius="round" height={hp(4.3)}/>
             <Spacer height={8}/>
-            <Skeleton height={'100%'} colorMode={dark_or_light === 'dark' ? 'dark':'light'} width={'100%'} radius='square'/>
+            <Skeleton height={'100%'} colorMode={dark_or_light ? 'dark':'light'} width={'100%'} radius='square'/>
             </MotiView>
               )) :  <FlashList
               contentContainerStyle={{padding:0}}

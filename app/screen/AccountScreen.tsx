@@ -29,7 +29,7 @@ import {
   ActivityIndicator} from 'react-native-paper';
 import EvilIcons from 'react-native-vector-icons/EvilIcons';
 import { FlashList } from '@shopify/flash-list';
-import {PostRef, UsersRef,crashlytics} from 'FIrebaseConfig';
+import {PostRef, UsersRef,crashlytics} from '../../FirebaseConfig';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { log, recordError, setAttributes, setUserId } from '@react-native-firebase/crashlytics';
 import { useSelector } from 'react-redux';

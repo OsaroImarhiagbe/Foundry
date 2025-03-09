@@ -6,7 +6,7 @@ import {
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {GoogleSignin,statusCodes,} from '@react-native-google-signin/google-signin';
 import {log,recordError,setAttributes,setUserId} from '@react-native-firebase/crashlytics'
-import { db,auth,functions, crashlytics } from 'FIrebaseConfig';
+import { db,auth,functions, crashlytics } from '../FirebaseConfig';
 import {httpsCallable} from '@react-native-firebase/functions'
 import { createUserWithEmailAndPassword, sendPasswordResetEmail, signInWithEmailAndPassword, } from '@react-native-firebase/auth';
 export const AuthContext = createContext<any>(null);

@@ -28,7 +28,7 @@ import MessageItem from '../components/MessageItem';
 import { FlashList } from '@shopify/flash-list';
 import { TextInput,useTheme } from 'react-native-paper';
 import { log,recordError} from '@react-native-firebase/crashlytics'
-import { db,functions, crashlytics, perf } from 'FIrebaseConfig';
+import { db,functions, crashlytics, perf } from '../../FirebaseConfig';
 import { httpsCallable } from '@react-native-firebase/functions'
 
 
@@ -95,9 +95,9 @@ const ChatScreen = () => {
       recordError(crashlytics,error)
       console.error("Error creating room:", error.message);
     }
-  },[roomId,id]);
+  },[recipientNamec, user?.username]);
 
-  const handleSend = async () => {
+  const handleSend = useCallback(async () => {
     log(crashlytics,'Chat Screen: Sening Messages ')
     let trace = await perf.startTrace('send_chat_message')
     if(messageText.trim() === '') return;
@@ -133,7 +133,7 @@ const ChatScreen = () => {
     }finally{
       trace.stop()
     }
-  }
+  },[messageText, userid, item?.userId, user?.userId, recipientNamec])
 
   return (
     <CustomKeyboardView

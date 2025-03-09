@@ -2,63 +2,59 @@
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { lazy,Suspense } from 'react';
-import { ActivityIndicator, Platform } from 'react-native';
+import { lazy,Suspense, memo } from 'react';
+import { ActivityIndicator, useColorScheme} from 'react-native';
 import { useTheme} from 'react-native-paper';
 import { Image
  } from 'expo-image';
  import { blurhash } from 'utils';
 import { useAuth } from 'app/authContext';
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
+import LazyScreenComponent from 'app/components/LazyScreenComponent';
 const NotificationScreen = lazy(() => import('../screen/NotificationScreen'))
 const SearchScreen = lazy(() => import('../screen/SearchScreen'))
 const StackNavigation = lazy(() => import('./StackNavigation'))
 const ProfileScreen = lazy(() => import('../screen/AccountScreen'))
-//import ProfileScreen from '../screen/AccountScreen'
 
 
 const StackNavigationwrapper = () =>{
   return (
-    <Suspense fallback={<ActivityIndicator size='small' color='#000'/>}>
-    <StackNavigation/>
-  </Suspense>
+    <LazyScreenComponent>
+      <StackNavigation/>
+    </LazyScreenComponent>
   )}
 
-  const ProfileScreenWrapper = () =>{
+const ProfileScreenWrapper = () =>{
     return (
   
-      <Suspense fallback={<ActivityIndicator size='small' color='#000' />}>
+     <LazyScreenComponent>
       <ProfileScreen/>
-    </Suspense>
+     </LazyScreenComponent>
   
     )
   }
-
 const SearchScreenWrapper = () => {
-  
-    return(
-      <Suspense fallback={<ActivityIndicator size='small' color='#000'/>}>
-        <SearchScreen/>
-      </Suspense>
-    )
-  
+  return(
+  <LazyScreenComponent>
+    <SearchScreen/>
+  </LazyScreenComponent>
+  )
 }
-
 const NotificationScreenWrapper = () => {
-  
-      return(
-        <Suspense fallback={<ActivityIndicator size='small' color='#000'/>}>
-        <NotificationScreen/>
-      </Suspense>
-      )
-    
-}
+  return(
+    <LazyScreenComponent>
+      <NotificationScreen/>
+    </LazyScreenComponent>
+    )
+  }
+
 
 
 const TabNavigation = () => {
   const Tab = createBottomTabNavigator()
   const theme = useTheme()
   const {user} = useAuth()
+  
 
   return (
  

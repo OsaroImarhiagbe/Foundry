@@ -36,9 +36,9 @@ import {
   MenuTrigger,
 } from 'react-native-popup-menu';
 import { MenuItems } from '../components/CustomMenu'
-import { db, PostRef } from 'FIrebaseConfig';
+import { db, PostRef } from 'FirebaseConfig';
 import FastImage from "@d11/react-native-fast-image";
-import { perf } from 'FIrebaseConfig';
+import { perf } from '../../FirebaseConfig';
 import { FirebasePerformanceTypes } from '@react-native-firebase/perf';
 
 
@@ -254,6 +254,7 @@ const PostComponent: React.FC<PostComponentProps> = ({
     variant="bodySmall"
     style={{
     marginLeft:10,
+    padding:10,
     color:theme.colors.tertiary
     }}
     >{content}</Text>
@@ -288,7 +289,7 @@ const PostComponent: React.FC<PostComponentProps> = ({
           <MaterialCommunityIcons name="heart" size={15} color={theme.colors.tertiary}/>
           <Text 
           variant='bodySmall'
-          style={{color:theme.colors.tertiary}}>{count}</Text>
+          style={{color:theme.colors.tertiary}}> {count}</Text>
         </View>
         </TouchableHighlight>
         <TouchableOpacity onPress={() => setModalVisible(true)} style={styles.reactionIcon}>
@@ -304,16 +305,13 @@ const PostComponent: React.FC<PostComponentProps> = ({
         </TouchableOpacity>
         <Menu style={styles.reactionIcon}>
       <MenuTrigger>
-      <View style={{ flexDirection: 'row', alignItems: 'center' }}>
           <Icon source='dots-horizontal' size={15} color={theme.colors.tertiary}/>
-          </View>
       </MenuTrigger>
       <MenuOptions
         customStyles={{
             optionsContainer:{
                 borderRadius:10,
                 marginTop:40,
-                marginLeft:-30,
                 borderCurve:'continuous',
                 backgroundColor:color.white,
                 position:'relative'
@@ -418,7 +416,7 @@ const styles = StyleSheet.create({
       paddingBottom: 60,
     },
     postContainer:{
-      
+      marginTop:5, 
     },
     reactionContainer:{
       flexDirection:'row',

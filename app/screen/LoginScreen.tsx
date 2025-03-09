@@ -8,7 +8,7 @@ import {
     } from 'react-native'
 import AppTextInput from '../components/AppTextInput'
 import color from '../../config/color'
-import { useState,useEffect} from 'react'
+import { useState,useEffect, useCallback} from 'react'
 import * as Yup from 'yup';
 import { Formik} from 'formik';
 import { useAuth } from '../authContext'
@@ -27,7 +27,7 @@ import { useNavigation } from '@react-navigation/native';
 import { Image } from 'expo-image';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {log,recordError} from '@react-native-firebase/crashlytics'
-import { crashlytics } from 'FIrebaseConfig';
+import { crashlytics } from '../../FirebaseConfig';
 
 
 
@@ -41,11 +41,11 @@ const LoginScreen = () => {
     const theme = useTheme()
     const {top} = useSafeAreaInsets()
     
-    useEffect(() => {
-        return () => setLoading(false)
-    }, []);
+    // useEffect(() => {
+    //     return () => setLoading(false)
+    // }, []);
 
-    const LoginPress = async (values:any,{resetForm}:any) => {
+    const LoginPress = useCallback(async (values:any,{resetForm}:any) => {
         log(crashlytics,'Login Screen: Login Press')
         setLoading(true);
         try{
@@ -60,10 +60,10 @@ const LoginScreen = () => {
         }finally{
             setLoading(false)
         }
-    }
-    const RegisterPress = () => {
+    },[])
+    const RegisterPress = useCallback(() => {
         navigation.navigate('Register' as never)
-    }
+    },[])
     const validationSchema = Yup.object().shape({
         email: Yup.string()
         .email('Invalid email')
@@ -81,17 +81,10 @@ const LoginScreen = () => {
         }
 
 
-    const handleGoogelIn = async () =>{
-        await googleSignIn()
-    }
-      
-
-
-
+    // const handleGoogelIn = async () =>{
+    //     await googleSignIn()
+    // }
   return (
-   
-  
-   
           <CustomKeyboardView inChat={true}>
             <SafeAreaView style={{flex:1,backgroundColor:theme.colors.background,marginVertical:50}}>
             <View style={{

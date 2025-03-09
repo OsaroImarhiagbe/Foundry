@@ -4,7 +4,7 @@ import notifee, { EventType } from '@notifee/react-native'
 import { useNavigation } from '@react-navigation/native';
 import { FirebaseMessagingTypes } from '@react-native-firebase/messaging';
 import { useAuth } from './authContext';
-import {crashlytics, messaging,UsersRef } from 'FIrebaseConfig';
+import {crashlytics, messaging,UsersRef } from '../FirebaseConfig';
 import { doc, setDoc} from '@react-native-firebase/firestore';
 import {log,recordError} from '@react-native-firebase/crashlytics'
 
@@ -44,7 +44,7 @@ export const NotificationProvider = ({ children }:NotificationProp) => {
                 foregroundPresentationOptions: {
                     badge: true,
                     sound: true,
-                    banner: false,
+                    banner: true,
                     list: true,
                   },
                 sound:'default'
@@ -59,8 +59,8 @@ export const NotificationProvider = ({ children }:NotificationProp) => {
         setVisible(true)
         const timer = setTimeout(() => {
           setNotification(null);
-          setVisible(false)
-        }, 9000);
+          setVisible(false);
+        }, 5000);
         return () => clearTimeout(timer)
     }catch(error:unknown | any){
         recordError(crashlytics,error)
@@ -85,7 +85,7 @@ export const NotificationProvider = ({ children }:NotificationProp) => {
         }
       }
       fetchToken()
-      }, [user?.userId]);
+      }, []);
 
 
     const handleNotificationClick = useCallback((notification:unknown | any) => {
@@ -139,14 +139,14 @@ export const NotificationProvider = ({ children }:NotificationProp) => {
         }
       });
       messaging.getInitialNotification().then((remoteMessage) => {
-            if (remoteMessage) {
-                console.log(
-                "Notification caused app to open from quit state:",
-                remoteMessage.notification
-                );
-                if (remoteMessage?.data?.screen) {
-                navigation.navigate(`${remoteMessage?.data?.screen}` as never );
-                }
+        if (remoteMessage) {
+          console.log(
+          "Notification caused app to open from quit state:",
+          remoteMessage.notification
+          );
+          if (remoteMessage?.data?.screen) {
+          navigation.navigate(`${remoteMessage?.data?.screen}` as never );
+          }
       }
     });
     messaging.setBackgroundMessageHandler(handlePushNotification)

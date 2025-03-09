@@ -1,86 +1,67 @@
 import { createStackNavigator } from '@react-navigation/stack';
-import {Suspense, useEffect,useState,lazy } from 'react';
-import { ActivityIndicator } from 'react-native';
+import {useState,lazy} from 'react';
 import {useAuth} from '../authContext';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import LazyScreenComponent from 'app/components/LazyScreenComponent';
+
 const RegisterScreen = lazy(() => import('../screen/RegisterScreen'))
 const DrawerNavigation = lazy(() => import('./DrawerNavigation'))
 const OnboardingScreen = lazy(()=> import('../screen/OnboardingScreen'))
 const LoginScreen = lazy(()=> import('../screen/LoginScreen'));
 const SecondStackNavigation = lazy(() => import('../navigation/SecondStackNavigation'))
 
-const RegisterScreenWrapper = () => {
-  
-  return (
-    <Suspense fallback={<ActivityIndicator size='small' color='#fff'/>}>
-    <RegisterScreen/>
-  </Suspense>
 
+const DrawerNavigationWrapper = () => {
+  return (
+    <LazyScreenComponent>
+      <DrawerNavigation/>
+    </LazyScreenComponent>
+  )
+}
+
+const SecondStackNavigationWrapper = () => {
+  return (
+    <LazyScreenComponent>
+      <SecondStackNavigation/>
+    </LazyScreenComponent>
+  )
+  }
+const OnboardingScreenWrapper = () =>{
+  return (
+    <LazyScreenComponent>
+      <OnboardingScreen/>
+    </LazyScreenComponent>
+)
+}
+
+const RegisterScreenWrapper = () => {
+
+  return (
+    <LazyScreenComponent>
+      <RegisterScreen/>
+    </LazyScreenComponent>
   )
 }
 
 const LoginScreenWrapper = () => {
 
 return (
-  <Suspense fallback={<ActivityIndicator size='small' color='#fff'/>}>
-  <LoginScreen/>
-</Suspense>
-
+  <LazyScreenComponent>
+    <LoginScreen/>
+  </LazyScreenComponent>
 )
 }
 
-const DrawerNavigationWrapper = () => {
-
-  return (
-    <Suspense fallback={<ActivityIndicator size='small' color='#fff'/>}>
-    <DrawerNavigation/>
-  </Suspense>
-
-  )
-}
 
 
-const SecondStackNavigationWrapper = () => {
-return (
-  <Suspense fallback={<ActivityIndicator size='small' color='#000'/>}>
-  <SecondStackNavigation/>
-</Suspense>
-)
-}
-const OnboardingScreenWrapper = () =>{
-return (
-  <Suspense fallback={<ActivityIndicator size='small' color='#fff'/>}>
-  <OnboardingScreen/>
-</Suspense>
-)
-}
 
 
 
 const AuthNavigation = () => {
   const [showOnboarding,setShowOnboarding] = useState<boolean>(false)
   const [loading,setLoading] = useState<boolean>(false)
-  const {user,isAuthenticated} = useAuth()
-
-  useEffect(()=>{
-      const  checkifOnboard = async () => {
-        try{
-          const onboardkey = await AsyncStorage.getItem('onboarded')
-          if(onboardkey =='1'){
-            setShowOnboarding(true)
-          }
-        }catch(error: unknown | any){
-          console.error('Error getting onboarding token',error)
-          setShowOnboarding(false)
-      }
-    }
-    checkifOnboard()
-  },[])
-
- 
-
-    const Stack = createStackNavigator()
-      return (
+  const {isAuthenticated} = useAuth()
+  const Stack = createStackNavigator()
+  return (
         <Stack.Navigator initialRouteName={isAuthenticated ? 'Drawer':'Login'}>
           {
           isAuthenticated  ? (
@@ -115,6 +96,7 @@ const AuthNavigation = () => {
           component={OnboardingScreenWrapper}
           options={{
             headerShown:false,
+            gestureEnabled:false,
           }}/>
        <Stack.Screen
         name='SecondStack'

@@ -1,7 +1,9 @@
 import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { lazy,Suspense } from 'react';
-import { ActivityIndicator } from 'react-native';
+import { lazy,Suspense,memo } from 'react';
+import { ActivityIndicator, useColorScheme } from 'react-native';
+import { useTheme } from 'react-native-paper';
+import LazyScreenComponent from 'app/components/LazyScreenComponent';
 const ReportBugScreen = lazy(() => import('../screen/ReportBugScreen'))
 const ContactUsScreen = lazy(() => import('../screen/ContactUsScreen'))
 const ProjectEntryScreen = lazy(() => import('../screen/ProjectEntryScreen'))
@@ -10,92 +12,88 @@ const PostScreen = lazy(() => import('../screen/PostScreen'))
 const ProjectScreen  = lazy(()=>import('../screen/ProjectScreen'))
 const LocationScreen = lazy(()=>import('../screen/LocationScreen'))
 const SkillsScreen = lazy(() => import('../screen/SkillScreen'))
-
 const ReportBugScreenWrapper = () => {
     
-    return (
-      <Suspense fallback={<ActivityIndicator size='small' color='#fff'/>}>
+  return (
+    <LazyScreenComponent>
       <ReportBugScreen/>
-    </Suspense>
-  
-    )
-  }
-  const ChatScreenWrapper = () => {
-    
-    return (
-      <Suspense fallback={<ActivityIndicator size='small' color='#000'/>}>
-      <ChatScreen />
-    </Suspense>
-    )
-  
-  }
+    </LazyScreenComponent>
 
-  const ContactUsScreenWrapper = () => {
-    
-    return (
-      <Suspense fallback={<ActivityIndicator size='small' color='#fff'/>}>
+  )
+}
+const ChatScreenWrapper = () => {
+  
+  return (
+    <LazyScreenComponent>
+      <ChatScreen/>
+    </LazyScreenComponent>
+  )
+
+}
+
+const ContactUsScreenWrapper = () => {
+  
+  return (
+    <LazyScreenComponent>
       <ContactUsScreen/>
-    </Suspense>
-  
-    )
-  }
+    </LazyScreenComponent>
 
+  )
+}
+
+
+const ProjectEntryScreenWrapper = () => {
   
-  const ProjectEntryScreenWrapper = () => {
-    
-    return (
-      <Suspense fallback={<ActivityIndicator size='small' color='#fff'/>}>
+  return (
+    <LazyScreenComponent>
       <ProjectEntryScreen/>
-    </Suspense>
-  
-    )
-  }
+    </LazyScreenComponent>
+  )
+}
 
-  // const PostScreenWrapper = () => {
-  
-  //   return (
-  //     <Suspense fallback={<ActivityIndicator size='small' color='#000' style={{flex:1,alignItems:'center',justifyContent:'center'}}/>}>
-  //     <PostScreen/>
-  //   </Suspense>
-  
-  //   )
-  
-  // }
+const PostScreenWrapper = () => {
 
-  const LocationScreenWrapper = () => {
-  
-    return (
-      <Suspense fallback={<ActivityIndicator size='small' color='#000'/>}>
+  return (
+    <LazyScreenComponent>
+      <PostScreen/>
+    </LazyScreenComponent>
+  )
+}
+
+const LocationScreenWrapper = () => {
+
+  return (
+    <LazyScreenComponent>
       <LocationScreen/>
-    </Suspense>
-  
-    )
-  
-  }
+    </LazyScreenComponent>
+  )
+}
 
-  const ProjectScreenWrapper = () => {
-  
-    return (
-      <Suspense fallback={<ActivityIndicator size='small' color='#000'/>}>
+const ProjectScreenWrapper = () => {
+
+  return (
+    <LazyScreenComponent>
       <ProjectScreen/>
-    </Suspense>
+    </LazyScreenComponent>
+  )
+
+}
+const SkillsScreenWrapper = () => {
   
-    )
-  
-  }
-  const SkillsScreenWrapper = () => {
-    
-    return (
-      <Suspense fallback={<ActivityIndicator size='small' color='#fff'/>}>
+  return (
+    <LazyScreenComponent>
       <SkillsScreen/>
-    </Suspense>
-  
-    )
-  }
+    </LazyScreenComponent>
+  )
+}
+
 
 
 const SecondStackNavigation = () => {
     const Stack = createNativeStackNavigator();
+    const dark_or_light = useColorScheme()
+    const theme = useTheme()
+
 
  
 
@@ -103,7 +101,7 @@ const SecondStackNavigation = () => {
       <Stack.Navigator>
     <Stack.Screen
       name='Post'
-      component={PostScreen}
+      component={PostScreenWrapper}
       options={{
         headerShown:false,
         gestureEnabled:false,

@@ -1,8 +1,7 @@
 import { createDrawerNavigator, DrawerItem,DrawerContentScrollView,DrawerItemList } from '@react-navigation/drawer';
 import { useNavigation} from '@react-navigation/native';
-import { lazy,Suspense, useState } from 'react';
-import { ActivityIndicator,TouchableWithoutFeedback,View, } from 'react-native';
-import React from 'react';
+import { lazy,Suspense, useState, useMemo, useCallback} from 'react';
+import { ActivityIndicator,TouchableWithoutFeedback,useColorScheme,View, } from 'react-native';
 import { Image } from 'expo-image';
 import { blurhash } from 'utils';
 import { useAuth } from 'app/authContext';
@@ -15,47 +14,51 @@ const Drawer = createDrawerNavigator();
 const TabNavigation = lazy(() => import('./TabNavigation'))
 const SettingsScreen = lazy(() => import('../screen/SettingsScreen'))
 
-const TabNavigationWrapper = () =>{
-  return (
 
-    <Suspense fallback={<ActivityIndicator size='small' color='#000' />}>
-    <TabNavigation/>
-  </Suspense>
 
-  )
-}
 
-const SettingScreenWrapper = () =>{
-  return (
-
-    <Suspense fallback={<ActivityIndicator size='small' color='#000' />}>
-    <SettingsScreen/>
-  </Suspense>
-
-  )
-}
 
 const DrawerNavigation = () => {
   const theme = useTheme()
   const {user,logout} = useAuth()
   const [loading,setLoading] = useState<boolean>(false)
   const navigation = useNavigation()
+  const dark_or_light = useColorScheme()
 
 
-  const handleLogout = async () => {
+  const TabNavigationWrapper = useMemo(() =>{
+    return () => (
+  
+      <Suspense fallback={<ActivityIndicator size='large' color={dark_or_light ? '#fff' :'#000'} style={{alignItems:'center',justifyContent:'center',flex:1,backgroundColor:theme.colors.background}}/>}>
+      <TabNavigation/>
+    </Suspense>
+  
+    )
+  },[])
+  
+  const SettingScreenWrapper = useMemo(() =>{
+    return () => (
+  
+      <Suspense fallback={<ActivityIndicator size='large' color={dark_or_light ? '#fff' :'#000'} style={{alignItems:'center',justifyContent:'center',flex:1,backgroundColor:theme.colors.background}}/>}>
+      <SettingsScreen/>
+    </Suspense>
+  
+    )
+  },[])
+
+
+  const handleLogout = useCallback(async () => {
     setLoading(true)
     try{
       await logout();
-      setTimeout(() => {
-        navigation.navigate('Login' as never)
-      }, 2000);
+      navigation.navigate('Login' as never)
     }catch(error){
       console.error(` Error failed: ${error}`)
     }finally{
       setLoading(false);
     }
 
-  }
+  },[])
   return (
 
     <Drawer.Navigator
@@ -133,7 +136,7 @@ const DrawerNavigation = () => {
       }}/>
        <Drawer.Screen
       name='Settings'
-      component={SettingsScreen}
+      component={SettingScreenWrapper}
       options={{
         drawerIcon:({focused,color,size}) => (
           <Icon
