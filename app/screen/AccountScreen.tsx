@@ -16,7 +16,7 @@ import { useAuth } from '../authContext';
 import { Image } from 'expo-image';
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import FollowComponent from '../components/FollowComponent';
-import { collection, query, where,FirebaseFirestoreTypes,doc, orderBy, onSnapshot} from '@react-native-firebase/firestore';
+import { collection, query, where,FirebaseFirestoreTypes,doc, orderBy, onSnapshot, getDoc, Unsubscribe} from '@react-native-firebase/firestore';
 import { blurhash } from '../../utils/index';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -104,7 +104,6 @@ const AccountScreen = () => {
   const [skills,setSkills] = useState<Skill[]>([])
   const { user } = useAuth();
   const navigation = useNavigation<Navigation>();
-  const isCurrentUser = user
   const [refreshing, setRefreshing] = useState(false);
   const theme = useTheme()
   const {top} = useSafeAreaInsets()
@@ -116,131 +115,113 @@ const AccountScreen = () => {
 
 
   
-  const follow_items = [{count:users?.projects,content:' projects'},{count:users?.connection,content:' connection  '},{count:posts.length,content:' posts'}]
+  const follow_items = [{count:users?.projects,content:' projects'},{count:users?.connection,content:' connection  '},{count:posts?.length,content:' posts'}]
 
 
   const onRefresh = useCallback(async () => {
     log(crashlytics,'Account Screen: On Refresh')
     setRefreshing(true);
     const userDoc = doc(UsersRef,user.userId)
+    const docRef = await getDoc(userDoc)
     try{
-      const unsub = onSnapshot( userDoc,
-        async (documentSnapshot) =>{
-        if(documentSnapshot.exists){
-          setUsers(documentSnapshot.data())
-          // await Promise.all(
-          //   [
-          //   crashlytics.setUserId(user.userId),
-          //   crashlytics.setAttributes({
-          //     id:user.userId
-          //   })
-          // ])
+        if(docRef.exists){
+          setUsers(docRef.data())
+          setSkills(docRef.data()?.skllls)
+          setProjects(docRef.data()?.projects)
+          setPosts(docRef.data()?.posts)
+          setLoading(false)
         }else{
           console.error('No such document')
-        }
-      },
-        (error:unknown | any)=>{
-          recordError(crashlytics,error)
-          console.error(`No such document ${error.message}`)
           setLoading(false)
         }
-      );
-      return () => unsub()
       }catch(error:unknown | any){
         recordError(crashlytics,error)
+        setLoading(false)
       }finally{
-        setRefreshing(false);
+        setRefreshing(false)
+        setLoading(false)
       }
   }, [user]);
 
   useEffect(() => {
-    setLoading(true)
-    const timer = setTimeout(() => {
-      setLoading(false)
-    },1000)
-
-    return  () => clearTimeout(timer)
-  },[])
-
-
-  useEffect(() => {
     log(crashlytics,'Account Screen: Grabbing Users Projects')
-    if(projects.length === 0) return;
     setLoading(true)
+    if(projects.length === 0) return;
     try{
       const collectionRef = collection(UsersRef,user.userId,'projects')
-      const unsub = onSnapshot(collectionRef,async (documentSnapshot) => {
-        let data:Project[] = []
-        documentSnapshot.forEach(doc => {
+       const unsub = onSnapshot(collectionRef,async (docRef) => {
+        if (!docRef || docRef.empty) {
+          setProjects([]);
+          setLoading(false);
+          return;
+        }
+        let data:Project[] =[]
+        docRef.forEach(doc => {
           data.push({...doc.data(),id:doc.id})
         })
         setProjects(data)
-        // await Promise.all([
-        //   setUserId(crashlytics,user.userId),
-        //   setAttributes(crashlytics,{
-        //     user_id:user.userId
-        //   })
-        // ])
+        setLoading(false)
+      },(error:unknown | any) => {
+        recordError(crashlytics,error)
+        console.error(`Error in snapshot listener: ${error.message}`)
+        setLoading(false)
       })
       return () => unsub()
-    }catch(err:any){
+    }catch(err:unknown | any){
       recordError(crashlytics,err)
-      console.error('error grabbing user post:',err.message)
-    }finally{
+      console.error('error grabbing user projects:',err.message)
       setLoading(false)
     }
-    
   },[user])
 
   useEffect(() => {
     log(crashlytics,'Account Screen: Grabbing Users Post')
     setLoading(true)
     try{
-      
       const postRef = query(PostRef,where('name','==',user?.username) ,orderBy('createdAt','desc'))
       const unsub = onSnapshot(postRef,async (querySnapshot) => {
+        if (!querySnapshot || querySnapshot.empty) {
+          setPosts([]);
+          setLoading(false);
+          return;
+        }
         let data:Post[] = []
-        querySnapshot.forEach(documentSnapshot => {
-          data.push({...documentSnapshot.data(),id:documentSnapshot.id})
+        querySnapshot.forEach(docRef => {
+          data.push({...docRef.data(),id:docRef.id})
         })
-        // await Promise.all([
-        //   setUserId(crashlytics,user.userId),
-        //   setAttributes(crashlytics,{
-        //     user_id:user.userId
-        //    })
-        // ])
         setPosts(data)
+        setLoading(false)
+      },(error:unknown | any) => {
+        recordError(crashlytics,error)
+        console.error(`Error in snapshot listener: ${error}`)
+        setLoading(false)
       })
       return () => unsub()
     }catch(err:any){
       recordError(crashlytics,err)
       console.error('error grabbing user post:',err)
-    }finally{
       setLoading(false)
     }
-    
   },[user])
 
   useEffect(() => {
     log(crashlytics,'Account Screen: Grabbing User ')
     setLoading(true)
+    setUserId(crashlytics,user.userId),
+    setAttributes(crashlytics,{
+      id:user.userId
+    })
     const userDoc = doc(UsersRef,user.userId)
     try{
         const unsub = onSnapshot(userDoc,
-          async (documentSnapshot) =>{
-          if(documentSnapshot.exists){
-            setUsers(documentSnapshot.data())
-            setSkills(documentSnapshot.data()?.skllls)
-            // await Promise.all(
-            //   [
-            //   setUserId(crashlytics,user.userId),
-            //   setAttributes(crashlytics,{
-            //     id:user.userId
-            //   })
-            // ])
+          async (docRef) =>{
+          if(docRef.exists){
+            setUsers(docRef.data())
+            setSkills(docRef.data()?.skllls)
             setLoading(false)
           }else{
             console.error('No such document')
+            setLoading(false)
           }
         },
           (error:unknown | any)=>{
@@ -252,6 +233,7 @@ const AccountScreen = () => {
         return () => unsub()
       }catch(error: unknown | any){
         recordError(crashlytics,error)
+        setLoading(false)
       }
   },[])
 
@@ -271,9 +253,7 @@ const AccountScreen = () => {
           onRefresh={onRefresh}
           ListEmptyComponent={(item) => (
             <View style={{flex:1,alignItems:'center',justifyContent:'center',paddingTop:5}}>
-              <TouchableOpacity onPress={()=> navigation.navigate('SecondStack',{screen:'ProjectEntryScreen',})}>
               <Text>No post at the moment</Text>
-              </TouchableOpacity>
             </View>
           )}
           onEndReachedThreshold={0.1}
@@ -403,10 +383,11 @@ const AccountScreen = () => {
         <Icon
         source='arrow-left-circle'
         size={hp(3)}
+        color={theme.colors.background}
         />
       </TouchableOpacity>
         <TouchableOpacity style={{alignItems:'flex-end',padding:5}} onPress={() => console.log('button pressed')}>
-        <Icon size={hp(3)} source='pencil' color={theme.colors.tertiary}/>
+        <Icon size={hp(3)} source='account-search' color={theme.colors.tertiaryContainer}/>
         </TouchableOpacity>
         </View> 
       </ImageBackground>) : ( <ImageBackground
@@ -424,10 +405,11 @@ const AccountScreen = () => {
         <Icon
         source='arrow-left-circle'
         size={hp(3)}
+        color={theme.colors.background}
         />
       </TouchableOpacity>
         <TouchableOpacity style={{alignItems:'flex-end',padding:5}} onPress={() => console.log('button pressed')}>
-        <Icon size={hp(3)} source='account-search' color={theme.colors.tertiary}/>
+        <Icon size={hp(3)} source='account-search' color={theme.colors.tertiaryContainer}/>
         </TouchableOpacity>
         </View> 
       </ImageBackground>)
