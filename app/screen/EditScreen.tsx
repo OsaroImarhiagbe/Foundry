@@ -15,11 +15,11 @@ import {getDownloadURL, putFile, ref} from '@react-native-firebase/storage';
 import { useDispatch } from 'react-redux';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import {log,recordError,} from '@react-native-firebase/crashlytics'
-import { crashlytics,UsersRef } from 'FIrebaseConfig';
+import { crashlytics,UsersRef } from 'FirebaseConfig';
 import { useTheme, Text,Icon,} from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import AppTextInput from 'app/components/AppTextInput';
-import { storage } from 'FIrebaseConfig';
+import { storage } from '../../FirebaseConfig';
 import {Image as ImageCompressor} from 'react-native-compressor';
 import {launchImageLibrary} from 'react-native-image-picker';
 import { TouchableWithoutFeedback } from 'react-native-gesture-handler';

@@ -22,7 +22,7 @@ import {
 import { Image } from 'expo-image';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { log,recordError } from '@react-native-firebase/crashlytics'
-import { crashlytics, db, UsersRef } from 'FIrebaseConfig';
+import { crashlytics, db, UsersRef } from '../../FirebaseConfig';
 import { useTheme } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
 import AppTextInput from 'app/components/AppTextInput';

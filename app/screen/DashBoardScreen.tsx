@@ -1,12 +1,15 @@
 import React,
 {
+  useCallback,
   lazy,
   Suspense,
+  memo
 }from 'react'
 import {
     View,
     StyleSheet,
-    TouchableOpacity} from 'react-native'
+    TouchableOpacity,
+    useColorScheme} from 'react-native'
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import {heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import {Image} from 'expo-image'
@@ -27,6 +30,8 @@ import { useDispatch} from 'react-redux';
 import { MenuItems } from '../components/CustomMenu'
 import { addsearchID } from 'app/features/search/searchSlice';
 import SearchComponent from 'app/components/SearchComponent';
+import { httpsCallable } from '@react-native-firebase/functions'
+import { functions } from 'FirebaseConfig';
 
 
 type NavigationProp = {
@@ -41,24 +46,38 @@ const FeedScreen = lazy(() => import('../screen/FeedScreen'))
 const HomeScreen = lazy(() => import('../screen/HomeScreen'))
 
 
-const HomeScreenWrapper = () => {
-  return (
-    <Suspense fallback={<ActivityIndicator size='small' color='#000'/>}>
-    <HomeScreen/>
-  </Suspense>
 
-  )
-
-}
-const FeedScreenWrapper = () => {
-  return (
-    <Suspense fallback={<ActivityIndicator size='small' color='#000'/>}>
-    <FeedScreen/>
-  </Suspense>
-
-  )
-
-}
+// const MemoMenu = memo(({handleSearch}:any) => {
+  
+//     return (<MenuOptions
+//     customStyles={{
+//           optionsContainer:{
+//               borderRadius:10,
+//               marginTop:40,
+//               marginLeft:-30,
+//               borderCurve:'continuous',
+//               backgroundColor:'#fff',
+//           }
+//       }}
+//     >
+//       <MenuItems 
+//       text='Anyone'
+//       action={()=> handleSearch('Anyone')}/>
+//       <Divider/>
+//        <MenuItems 
+//       text='Creativity and Innovation'
+//       action={()=> handleSearch('Creativity and Innovation')}/>
+//     <Divider/>
+//     <MenuItems 
+//       text='Collaboration and Community'
+//       action={()=> handleSearch('Collaboration and Community')}/>
+//     <Divider/>
+//     <MenuItems 
+//       text='Startup and Busniess'
+//       action={()=> handleSearch('Statup and Busniess')}/>
+//     </MenuOptions>
+//     )
+// })
 
 
 const DashBoardScreen = () => {
@@ -66,9 +85,34 @@ const DashBoardScreen = () => {
     const navigation = useNavigation<NavigationProp>()
     const theme = useTheme()
     const dispatch = useDispatch()
-    
+    const dark_or_light = useColorScheme()
 
-  
+    const handleSearch = useCallback((id:string) => {
+      dispatch(addsearchID(id))
+    },[dispatch])
+    
+    const HomeScreenWrapper = () => {
+      return (
+        <Suspense fallback={<ActivityIndicator size='large' color={dark_or_light ? '#fff' :'#000'} style={{alignItems:'center',justifyContent:'center',flex:1,backgroundColor:theme.colors.background}}/>}>
+        <HomeScreen/>
+      </Suspense>
+
+      )
+    }
+    const FeedScreenWrapper = () => {
+      return (
+        <Suspense fallback={<ActivityIndicator size='large' color={dark_or_light ? '#fff' :'#000'} style={{alignItems:'center',justifyContent:'center',flex:1,backgroundColor:theme.colors.background}}/>}>
+        <FeedScreen/>
+      </Suspense>
+      
+    )}
+
+    const testSend = useCallback(() => {
+      const addTest = httpsCallable(functions,'sendTestNotification')
+      addTest({text:'Hello'}).then((result) => {
+        console.log(result.data)
+      })
+    },[])
 
 
   return (
@@ -85,11 +129,11 @@ const DashBoardScreen = () => {
         style={{height:hp(4.3), aspectRatio:1, borderRadius:100}}
         source={user?.profileUrl}
         placeholder={{blurhash}}
-        cachePolicy='none'/> :   <Image
+        cachePolicy='memory'/> :   <Image
         style={{height:hp(4.3), aspectRatio:1, borderRadius:100}}
         source={require('../assets/user.png')}
         placeholder={{blurhash}}
-        cachePolicy='none'/> }
+        cachePolicy='memory'/> }
         </TouchableWithoutFeedback >
         <SearchComponent
         title='Search....'
@@ -100,44 +144,20 @@ const DashBoardScreen = () => {
            <Entypo name='new-message' size={20} color={theme.colors.primary}/>
         </View>
         </TouchableOpacity>
-        <Menu>
+        <TouchableOpacity
+         onPress={testSend}>
+        <View>
+           <Entypo name='note' size={20} color={theme.colors.primary}/>
+        </View>
+        </TouchableOpacity>
+        {/* <Menu>
       <MenuTrigger>
-      <View style={{flexDirection:'row',alignItems:'center'}}>
         <Icon
-         source='menu-down'
+         source='dots-horizontal'
          size={25}/>
-      </View>
       </MenuTrigger>
-      <MenuOptions
-        customStyles={{
-            optionsContainer:{
-                borderRadius:10,
-                marginTop:40,
-                marginLeft:-30,
-                borderCurve:'continuous',
-                backgroundColor:'#fff',
-                position:'relative',
-                zIndex:10
-            }
-        }}
-      >
-        <MenuItems 
-        text='Anyone'
-        action={()=>dispatch(addsearchID('Anyone'))}/>
-        <Divider/>
-         <MenuItems 
-        text='Creativity and Innovation'
-        action={()=>dispatch(addsearchID('Creativity and Innovation'))}/>
-      <Divider/>
-      <MenuItems 
-        text='Collaboration and Community'
-        action={()=> dispatch(addsearchID('Collaboration and Community'))}/>
-      <Divider/>
-      <MenuItems 
-        text='Startup and Busniess'
-        action={()=> dispatch(addsearchID('Statup and Busniess'))}/>
-      </MenuOptions>
-    </Menu>
+      <MemoMenu handleSearch={handleSearch}/>
+    </Menu> */}
         </View>
         <View style={{flex:1}}>
         <Tab.Navigator
@@ -178,14 +198,5 @@ const DashBoardScreen = () => {
   )
 }
 
-const styles = StyleSheet.create({
-    logo: {
-      width: 40,
-      height: 40, 
-    },
-    container:{
-      flex:1
-    }
-});
 
 export default DashBoardScreen

@@ -13,7 +13,7 @@ import {
   useColorScheme
 } from 'react-native'
 import { useAuth } from 'app/authContext';
-import { FirebaseFirestoreTypes,onSnapshot,doc,orderBy,query, limit,getDocs, startAfter } from '@react-native-firebase/firestore';
+import { FirebaseFirestoreTypes,onSnapshot,doc,orderBy,query, limit,getDocs, startAfter, Unsubscribe } from '@react-native-firebase/firestore';
 import { useDispatch, useSelector} from 'react-redux';
 import { addId } from '../features/user/userSlice.ts';
 import { FlashList } from "@shopify/flash-list";
@@ -22,7 +22,7 @@ import { MotiView } from 'moti';
 import { Skeleton } from 'moti/skeleton';
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import {log,recordError} from '@react-native-firebase/crashlytics'
-import { PostRef,crashlytics,perf} from 'FIrebaseConfig.ts';
+import { PostRef,crashlytics,perf} from '../../FirebaseConfig';
 const PostComponent = lazy(() => import('../components/PostComponent'))
 
 
@@ -59,7 +59,7 @@ const HomeScreen= () => {
   const dark_or_light = useColorScheme()
   const category = useSelector((state:string | any)=> state.search.searchID)
 
-
+  
   
 
   const memoPost = useMemo(() => {
@@ -72,29 +72,34 @@ const HomeScreen= () => {
     let trace
     setMount(true)
     dispatch(addId({currentuserID:user?.userId}))
-      log(crashlytics,'Grabbing post')
-        try {
-          const docRef = query(PostRef,orderBy('createdAt', 'desc'),limit(10))
-          const subscriber = onSnapshot(docRef,querySnapShot =>{
-              if (!querySnapShot || querySnapShot.empty) {
-                setPost([]);
-                setMount(false);
-                return;
-              }
-              let data:Post[] = []; 
-              querySnapShot.forEach(documentSnapShot => {
-                data.push({ ...documentSnapShot.data(),id:documentSnapShot.id });
-            } )
-            setPost(data);
-            setLastVisible(querySnapShot.docs[querySnapShot.docs.length - 1]);
-            setHasMore(querySnapShot.docs.length > 0);
+    let subscriber: Unsubscribe;
+    log(crashlytics,'Grabbing post')
+      try {
+        const docRef = query(PostRef,orderBy('createdAt', 'desc'),limit(10))
+        subscriber = onSnapshot(docRef,querySnapShot =>{
+          if (!querySnapShot || querySnapShot.empty) {
+            setPost([]);
             setMount(false);
-          });
-          return () => subscriber()
-        } catch (error:any) {
-          recordError(crashlytics,error)
-          console.error(`Error post can not be found: ${error}`);
+            return;
+          }
+          let data:Post[] = []; 
+          querySnapShot.forEach(documentSnapShot => {
+            data.push({ ...documentSnapShot.data(),id:documentSnapShot.id });
+          })
+          setPost(data);
+          setLastVisible(querySnapShot.docs[querySnapShot.docs.length - 1]);
+          setHasMore(querySnapShot.docs.length > 0);
           setMount(false);
+        });
+      } catch (error:any) {
+        recordError(crashlytics,error)
+        console.error(`Error post can not be found: ${error}`);
+        setMount(false);
+      }
+    return () => {
+        if(subscriber){
+          subscriber();
+        }
       }
   }, []); 
 
@@ -114,11 +119,13 @@ const HomeScreen= () => {
           setLastVisible(querySnapShot.docs[querySnapShot.docs.length - 1]);
           setHasMore(querySnapShot.docs.length > 0);
           trace.putAttribute('post_count', post.length.toString());
+          setRefreshing(false)
         });
         return () => unsub()
       }  catch (error:any) {
         recordError(crashlytics,error)
         console.error(`Error post can not be found: ${error}`);
+        setRefreshing(false);
     }finally{
       setRefreshing(false);
       trace.stop()
@@ -131,9 +138,9 @@ const fetchMorePost = async () => {
   log(crashlytics,'Fetch More Post')
   let trace = await perf.startTrace('fetch_more_community_posts')
   if (loadingMore || !hasMore) return;
-  if (!user?.userId) return;
   if (post.length <= 2) {
     setHasMore(false);
+    setLoadingMore(false);
     return;
   }
   setLoadingMore(true);
@@ -156,9 +163,11 @@ const fetchMorePost = async () => {
     setLastVisible(snapshot.docs[snapshot.docs.length - 1]);
     setHasMore(snapshot.docs.length > 0);
     trace.putAttribute('post_count', post.length.toString());
+    setLoadingMore(false);
   } catch (error:any) {
     recordError(crashlytics,error)
     console.error(`Error fetching more posts: ${error}`);
+    setLoadingMore(false);
   } finally {
     setLoadingMore(false);
     trace.stop()
@@ -179,11 +188,11 @@ const fetchMorePost = async () => {
       delay:300
     }}
     style={[styles.container, styles.padded]}
-    animate={{ backgroundColor: dark_or_light ? '#ffffff' : '#000000' }}
+    animate={{ backgroundColor: dark_or_light ? '#000000' : '#fffffff' }}
   >
-    <Skeleton colorMode={dark_or_light ? 'light':'dark'} radius="round" height={hp(4.3)}/>
+    <Skeleton colorMode={dark_or_light ? 'dark':'light'} radius="round" height={hp(4.3)}/>
     <Spacer height={8}/>
-    <Skeleton height={'100%'} colorMode={dark_or_light ? 'light':'dark'} width={'100%'} radius='square'/>
+    <Skeleton height={'100%'} colorMode={dark_or_light ? 'dark':'light'} width={'100%'} radius='square'/>
   </MotiView>
    ))
    : <FlashList

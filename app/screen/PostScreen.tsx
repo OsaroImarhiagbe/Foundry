@@ -30,8 +30,8 @@ import {
   MenuTrigger,
 } from 'react-native-popup-menu';
 import { MenuItems } from '../components/CustomMenu'
-import {crashlytics, functions, perf } from 'FIrebaseConfig';
-import { storage } from 'FIrebaseConfig';
+import {crashlytics, functions, perf } from '../../FirebaseConfig';
+import { storage } from 'FirebaseConfig';
 import { httpsCallable } from '@react-native-firebase/functions'
 import FastImage from "@d11/react-native-fast-image";
 import {Image as ImageCompressor} from 'react-native-compressor';
@@ -185,7 +185,8 @@ const PostScreen = () => {
                 marginLeft:-30,
                 borderCurve:'continuous',
                 backgroundColor:color.white,
-                position:'relative'
+                position:'relative',
+                zIndex:10
             }
         }}
       >

@@ -36,7 +36,7 @@ import EvilIcons from 'react-native-vector-icons/EvilIcons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { NavigatorScreenParams } from '@react-navigation/native';
 import {log,recordError, setAttributes, setUserId} from '@react-native-firebase/crashlytics'
-import { UsersRef,ProjectRef, PostRef,db, crashlytics} from 'FIrebaseConfig'
+import { UsersRef,PostRef,db, crashlytics} from '../../FirebaseConfig'
 
 const PostComponent = lazy(() => import('../components/PostComponent'))
 

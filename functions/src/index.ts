@@ -21,25 +21,7 @@ initializeApp();
 //   logger.info("Hello logs!", {structuredData: true});
 //   response.send("Hello from Firebase!");
 // });
-interface MessageRepsonse {
-  roomId: string;
-  request:string,
-  text:string,
-  senderName:string,
-  recipientName:string,
-  senderId:string,
-  recipientId:string
-}
-interface PostResponse{
-  auth_id: string,
-  name: string,
-  content: string
-  like_count: number
-  comment_count: number
-  liked_by: string[]
-  category: string[]
-  imageUrl: string
-}
+
 /**
  * Retrieves a user's device token from Firestore
  * @param {string} userId - The unique identifier of the user
@@ -93,7 +75,7 @@ async function sendNotification(userId: string,
     throw new Error("Failed to send notification");
   }
 }
-exports.addMessage = onCall<MessageRepsonse>(async (request) => {
+exports.addMessage = onCall(async (request) => {
   if (!request.auth) {
     throw new HttpsError(
       "unauthenticated", "This endpoint requires authentication");
@@ -124,7 +106,7 @@ exports.addMessage = onCall<MessageRepsonse>(async (request) => {
 });
 exports.newChatRooomMessage = onDocumentCreated(
   "/chat-rooms/{roomId}/messages/{messageId}",
-  async (event: unknown | any) => {
+  async (event) => {
     try {
       const snapshot = event.data;
       if (!snapshot) {
@@ -159,7 +141,7 @@ exports.newChatRooomMessage = onDocumentCreated(
       throw new Error("Failed to process new message notification");
     }
   });
-exports.addPost = onCall<PostResponse>(async (request) => {
+exports.addPost = onCall(async (request) => {
   if (!request.auth) {
     throw new HttpsError(
       "unauthenticated", "This endpoint requires authentication");
@@ -183,19 +165,42 @@ exports.addPost = onCall<PostResponse>(async (request) => {
       liked_by: liked_by,
       category: category,
       createdAt: createdAt,
+      imageUrl: image,
+      post_id: null,
     });
     await getFirestore().collection("posts").doc(newDoc.id).update({
-      imageUrl: image,
       post_id: newDoc.id,
-    });
-    await sendNotification(auth_id, {
-      title: "Post has sent!",
     });
   } catch (error) {
     logger.error("Error Proccessing Post:", error);
   }
 });
-exports.newUser = onCall(async (request: unknown | any) => {
+exports.newPost = onDocumentCreated(
+  "/posts/{postId}",
+  async (event) => {
+    try {
+      const snapshot = event.data;
+      if (!snapshot) {
+        logger.warn("No data associated with the event");
+        return {success: false, error: "No data found"};
+      }
+      const messageData = snapshot.data();
+      const auth_id = messageData.auth_id;
+      await sendNotification(auth_id, {
+        title: "Post has sent!",
+        body: "Your post has been successfully sent",
+        data: {
+          messageId: snapshot.id,
+          type: "new_message",
+        },
+      });
+      return {success: true, msg: "Post has been sent", postId: snapshot.id};
+    } catch (error) {
+      logger.error("Error processing new message:", error);
+      throw new Error("Failed to process new message notification");
+    }
+  });
+exports.newUser = onCall(async (request) => {
   if (!request.auth) {
     throw new HttpsError(
       "unauthenticated", "This endpoint requires authentication");
@@ -209,7 +214,7 @@ exports.newUser = onCall(async (request: unknown | any) => {
   return {success: true, msg: "New User!!"};
 });
 exports.newUserDoc = onDocumentCreated("/users/{userId}",
-  async (event:unknown | any) => {
+  async (event) => {
     try {
       const snapshot = event.data;
       if (!snapshot) {
@@ -231,12 +236,12 @@ exports.newUserDoc = onDocumentCreated("/users/{userId}",
       throw new Error("Failed to process new message notification");
     }
   });
-exports.sendTestNotification = onCall((request: unknown | any) => {
+exports.sendTestNotification = onCall(async (request) => {
   if (!request.auth) {
     throw new HttpsError("unauthenticated", "Authentication required");
   }
   try {
-    sendNotification(request.auth.uid, {
+    await sendNotification(request.auth.uid, {
       title: "Test Notification",
       body: "This is a test notification",
       data: {type: "test"},

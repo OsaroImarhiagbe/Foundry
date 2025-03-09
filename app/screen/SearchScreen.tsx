@@ -1,4 +1,4 @@
-import React,{useState, useEffect} from 'react'
+import React,{useState, useEffect, useCallback} from 'react'
 import {
   View,
   Text,
@@ -22,7 +22,7 @@ import { useTheme } from 'react-native-paper';
 import { Image } from 'expo-image';
 import { blurhash } from 'utils';
 import { useAuth } from 'app/authContext';
-import { crashlytics, UsersRef } from 'FIrebaseConfig';
+import { crashlytics, UsersRef } from '../../FirebaseConfig';
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import {log, recordError} from '@react-native-firebase/crashlytics'
 
@@ -68,7 +68,7 @@ const SearchScreen = () => {
     }
 }, [debouncedsearch]);
 
-  const handleSearch = async () => {
+  const handleSearch = useCallback(async () => {
     log(crashlytics,'Search Screen: Handle Search')
     setLoading(true)
     if(searchQuery.trim() === '') return;
@@ -91,7 +91,7 @@ const SearchScreen = () => {
     }finally{
       setLoading(false)
     }
-  }
+  },[debouncedsearch,skills_array])
 
   return (
     <View style={[styles.screen,{backgroundColor:theme.colors.background}]}>
