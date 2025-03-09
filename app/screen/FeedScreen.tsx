@@ -14,9 +14,8 @@ import {
     Animated} from 'react-native'
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import { useAuth } from '../authContext';
-import { useTheme } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
-import {ActivityIndicator,Divider,Text} from 'react-native-paper';
+import {ActivityIndicator,Divider,Text,useTheme} from 'react-native-paper';
 import { FirebaseFirestoreTypes, getDocs, limit, onSnapshot, orderBy, query, startAfter, Unsubscribe} from '@react-native-firebase/firestore';
 import {log,recordError,} from '@react-native-firebase/crashlytics'
 import { MotiView } from 'moti';
@@ -54,7 +53,6 @@ interface Post{
 
 const FeedScreen = () => {
     const navigation = useNavigation();
-    const theme = useTheme()
     const dispatch = useDispatch()
     const [refreshing, setRefreshing] = useState<boolean>(false);
     const {user} = useAuth()
@@ -65,7 +63,9 @@ const FeedScreen = () => {
     const [hasMore, setHasMore] = useState<boolean>(true);
     const [mount, setMount] = useState<boolean>(false)
     const scrollY = useState(new Animated.Value(0))[0];
+    const theme = useTheme()
     const dark_or_light = useColorScheme()
+
     
     useEffect(() => {
       if (!user?.userId) return;
@@ -73,6 +73,7 @@ const FeedScreen = () => {
       dispatch(addId({currentuserID:user?.userId}))
       log(crashlytics,'Grabbing post')
       let subscriber:Unsubscribe;
+      const timer = setTimeout(() => {
         try {
           const docRef = query(PostRef,orderBy('createdAt', 'desc'),limit(10))
           subscriber = onSnapshot(docRef,async (querySnapShot) =>{
@@ -99,8 +100,11 @@ const FeedScreen = () => {
         console.error(`Error post can not be found: ${error}`);
         setMount(false);
       }
-
-      return () => { if(subscriber) subscriber()}
+    },3000)
+    return () => { 
+      if(subscriber && timer) { 
+        clearTimeout(timer)
+        subscriber()} }
     }, []); 
   
   
@@ -181,11 +185,11 @@ const FeedScreen = () => {
                 delay:300
               }}
               style={[styles.container, styles.padded]}
-              animate={{ backgroundColor: dark_or_light ? '#ffffff' : '#000000' }}
+              animate={{ backgroundColor: dark_or_light === 'dark' ? '#000': '#ffffffff' }}
             >
-            <Skeleton colorMode={dark_or_light ? 'light':'dark'} radius="round" height={hp(4.3)}/>
+            <Skeleton colorMode={dark_or_light === 'dark' ? 'dark':'light'} radius="round" height={hp(4.3)}/>
             <Spacer height={8}/>
-            <Skeleton height={'100%'} colorMode={dark_or_light ? 'light':'dark'} width={'100%'} radius='square'/>
+            <Skeleton height={'100%'} colorMode={dark_or_light === 'dark' ? 'dark':'light'} width={'100%'} radius='square'/>
             </MotiView>
               )) :  <FlashList
               contentContainerStyle={{padding:0}}

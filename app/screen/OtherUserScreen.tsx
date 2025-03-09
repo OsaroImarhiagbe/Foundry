@@ -16,8 +16,10 @@ import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-nativ
 import { useRoute } from '@react-navigation/native';
 import FollowComponent from '../components/FollowComponent';
 import {
+  collection,
   doc, 
   FirebaseFirestoreTypes, 
+  getDoc, 
   onSnapshot, 
   orderBy, 
   query, 
@@ -33,8 +35,9 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import EvilIcons from 'react-native-vector-icons/EvilIcons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { NavigatorScreenParams } from '@react-navigation/native';
-import {log,recordError} from '@react-native-firebase/crashlytics'
+import {log,recordError, setAttributes, setUserId} from '@react-native-firebase/crashlytics'
 import { UsersRef,ProjectRef, PostRef,db, crashlytics} from 'FIrebaseConfig'
+
 const PostComponent = lazy(() => import('../components/PostComponent'))
 
 
@@ -117,32 +120,28 @@ const OtherUserScreen = () => {
 
 
     const onRefresh = useCallback(async () => {
-    log(crashlytics,'Other User Screen: useCallback')
-    setRefreshing(true);
-    try{
-      if(!other_user_id) return
-      const docRef = doc(UsersRef,other_user_id) 
-      const unsub = onSnapshot(docRef,
-          (documentSnapshot) => {
-            if (documentSnapshot.exists) {
-              setUsers(documentSnapshot.data());
-            } else {
-              console.error('No such document exists!');
-            }
-          },
-          (error) => {
-            recordError(crashlytics,error)
-            console.error(`Error fetching document: ${error}`);
+      log(crashlytics,'Account Screen: On Refresh')
+      setRefreshing(true);
+      const userDoc = doc(UsersRef,user.userId)
+      const docRef = await getDoc(userDoc)
+      try{
+          if(docRef.exists){
+            setUsers(docRef.data())
+            setSkills(docRef.data()?.skllls)
+            setProjects(docRef.data()?.projects)
+            setPosts(docRef.data()?.posts)
+            setLoading(false)
+          }else{
+            console.error('No such document')
           }
-        );
-        return () => unsub()
-    
-    }catch(error:unknown | any){
-      recordError(crashlytics,error.message)
-    }finally{
-      setRefreshing(false);
-    }
-    }, [other_user_id]);
+        }catch(error:unknown | any){
+          recordError(crashlytics,error)
+          setLoading(false)
+        }finally{
+          setRefreshing(false);
+          setLoading(false)
+        }
+    }, [user]);
 
 
 
@@ -151,18 +150,25 @@ const OtherUserScreen = () => {
       setLoading(true)
       if(projects.length === 0) return;
       try{
-        const docRef = query(ProjectRef,where('id','==',users?.userId))
-        const unsub = onSnapshot(docRef,(snapShot) => {
+        const collectionRef = collection(UsersRef,user.userId,'projects')
+        const unsub = onSnapshot(collectionRef,(docRef) => {
+          if (!docRef || docRef.empty) {
+            setProjects([]);
+            setLoading(false);
+            return;
+          }
           let data:Project[] = []
-          snapShot.forEach(doc => {
+          docRef.forEach(doc => {
             data.push({...doc.data(),id:doc.id})
           })
           setProjects(data)
+          setLoading(false)
         })
         return () => unsub()
       }catch(error:unknown | any){
         recordError(crashlytics,error)
         console.error('error grabbing user projects:',error.message)
+        setLoading(false)
       }finally{
         setLoading(false)
       }
@@ -181,11 +187,13 @@ const OtherUserScreen = () => {
             data.push({...doc.data(),id:doc.id})
           })
           setPosts(data)
+          setLoading(false)
         })
         return () => unsub()
       }catch(error:unknown | any){
         recordError(crashlytics,error)
         console.error('error grabbing user post:',error.message)
+        setLoading(false)
       }finally{
         setLoading(false)
       }
@@ -194,8 +202,11 @@ const OtherUserScreen = () => {
 
     useEffect(() => {
       log(crashlytics,'Other User Screen: Grabbing User')
-      if(!other_user_id) return
       setLoading(true) 
+      setUserId(crashlytics,other_user_id),
+      setAttributes(crashlytics,{
+        id:other_user_id
+      })
       try{
         const docRef = doc(UsersRef,other_user_id)
         const unsub = onSnapshot(docRef,
@@ -203,6 +214,7 @@ const OtherUserScreen = () => {
           if (documentSnapshot.exists) {
             setUsers(documentSnapshot.data());
             setSkills(documentSnapshot.data()?.skills)
+            setLoading(false)
           } else {
             console.error('No such document exists!');
           }
@@ -210,11 +222,13 @@ const OtherUserScreen = () => {
         (error) => {
           recordError(crashlytics,error)
           console.error(`Error fetching document: ${error}`);
+          setLoading(false)
         }
       );
       return () => unsub()
       }catch(error: unknown | any){
         recordError(crashlytics,error)
+        setLoading(false)
       }finally{
         setLoading(false)
       }
