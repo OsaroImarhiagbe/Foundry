@@ -1,5 +1,5 @@
-import React,{useState} from 'react'
-import {View,StyleSheet,TouchableOpacity,TouchableHighlight} from 'react-native'
+import React,{memo, useState} from 'react'
+import {View,StyleSheet,TouchableHighlight} from 'react-native'
 import { blurhash } from '../../utils/index'
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import { Image } from 'expo-image';
@@ -18,7 +18,7 @@ interface ReplyProp{
   reply_id?:string,
   count?:number
 }
-const ReplyComponent:React.FC<ReplyProp> = ({name,content,post_id,comment_id,reply_id,count}) => {
+const ReplyComponent:React.FC<ReplyProp> = memo(({name,content,post_id,comment_id,reply_id,count}) => {
 
     const [press,setIsPress] = useState<boolean>(false)
     const [isloading,setLoading] = useState<boolean>(false)
@@ -124,7 +124,7 @@ return (
     </Card.Content>
   </Card>
   )
-}
+})
 
 
 const styles = StyleSheet.create({

@@ -11,34 +11,34 @@ const EditScreen = lazy(() => import('../screen/EditScreen'))
 const OtherUserScreen = lazy(() => import('../screen/OtherUserScreen'))
 
 
-const MessageScreenWrapper = () => {
+const MessageScreenWrapper = memo(() => {
   return (
       <LazyScreenComponent>
       <MessageScreen/>
       </LazyScreenComponent>
-)}
+)})
 
-const HomeScreenWrapper = () => {
+const HomeScreenWrapper = memo(() => {
   return(
   <LazyScreenComponent>
     <HomeScreen/>
   </LazyScreenComponent>
   )
-}
+})
 
-const EditScreenWrapper = () => {
+const EditScreenWrapper = memo(() => {
   return (
   <LazyScreenComponent>
     <EditScreen/>
   </LazyScreenComponent>
-)}
+)})
 
-const OtherUserScreenWrapper = () => {
+const OtherUserScreenWrapper = memo(() => {
   return (
   <LazyScreenComponent>
     <OtherUserScreen/>
   </LazyScreenComponent>
-)}
+)})
 
 const StackNavigation = () => {
   const Stack = createNativeStackNavigator();

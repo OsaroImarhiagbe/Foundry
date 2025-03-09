@@ -9,12 +9,9 @@ import React,
 import {
     View,
     StyleSheet,
-    useWindowDimensions,
-    useColorScheme,
-    Animated} from 'react-native'
+    useColorScheme,} from 'react-native'
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import { useAuth } from '../authContext';
-import { useNavigation } from '@react-navigation/native';
 import {ActivityIndicator,Divider,Text,useTheme} from 'react-native-paper';
 import { FirebaseFirestoreTypes, getDocs, limit, onSnapshot, orderBy, query, startAfter, Unsubscribe} from '@react-native-firebase/firestore';
 import {log,recordError,} from '@react-native-firebase/crashlytics'
@@ -24,18 +21,14 @@ import { Skeleton } from 'moti/skeleton';
 import { crashlytics, perf, PostRef } from '../../FirebaseConfig';
 import { addId } from 'app/features/user/userSlice';
 import { useDispatch } from 'react-redux';
+import { FirebasePerformanceTypes } from '@react-native-firebase/perf';
+
 
 const PostComponent = lazy(() => import('../components/PostComponent'))
 
 const Spacer = ({ height = 16 }) => <View style={{ height }} />;
 
-// type NavigationProp = {
-//     openDrawer(): undefined;
-//     navigate(arg0?: string, arg1?: { screen: string; }): unknown;
-//     SecondStack:undefined,
-//     Home:undefined,
-//     Post:undefined
-// }
+console.log('FeedScreen renderd')
 
 interface Post{
     id: string;
@@ -52,17 +45,14 @@ interface Post{
   
 
 const FeedScreen = () => {
-    const navigation = useNavigation();
     const dispatch = useDispatch()
     const [refreshing, setRefreshing] = useState<boolean>(false);
     const {user} = useAuth()
-    const {height, width} = useWindowDimensions();
     const [post, setPost] = useState<Post[]>([])
     const [lastVisible, setLastVisible] = useState<FirebaseFirestoreTypes.QueryDocumentSnapshot<FirebaseFirestoreTypes.DocumentData> | null>(null);
     const [loadingMore, setLoadingMore] = useState<boolean>(false);
     const [hasMore, setHasMore] = useState<boolean>(true);
     const [mount, setMount] = useState<boolean>(false)
-    const scrollY = useState(new Animated.Value(0))[0];
     const theme = useTheme()
     const dark_or_light = useColorScheme()
 
@@ -72,10 +62,12 @@ const FeedScreen = () => {
       setMount(true)
       dispatch(addId({currentuserID:user?.userId}))
       log(crashlytics,'Grabbing post')
+      let trace: FirebasePerformanceTypes.Trace;
       let subscriber:Unsubscribe;
         try {
           const docRef = query(PostRef,orderBy('createdAt', 'desc'),limit(10))
           subscriber = onSnapshot(docRef,async (querySnapShot) =>{
+            trace = await perf.startTrace('feedscreen')
               if (!querySnapShot || querySnapShot.empty) {
                 setPost([]);
                 setMount(false);
@@ -94,14 +86,16 @@ const FeedScreen = () => {
             console.error(`Error in snapshot listener: ${error}`);
             setMount(false);
           });
-        }  catch (error:unknown | any) {
+        }catch (error:unknown | any) {
           recordError(crashlytics,error)
-        console.error(`Error post can not be found: ${error}`);
-        setMount(false);
+          console.error(`Error post can not be found: ${error}`);
+          setMount(false);
       }
     return () => { 
-      if(subscriber) { 
-        subscriber()} }
+      if(subscriber && trace) { 
+        subscriber()
+        trace.stop()
+      }}
     }, []); 
   
   
@@ -193,10 +187,6 @@ const FeedScreen = () => {
               data={post}
               estimatedItemSize={460}
               onRefresh={onRefresh}
-              onScroll={Animated.event(
-                [{ nativeEvent: { contentOffset: { y: scrollY } } }],
-                { useNativeDriver: false }
-              )}
               ListEmptyComponent={(item) => (
                 <View style={{flex:1,alignItems:'center',justifyContent:'center',paddingTop:5}}>
                     <Text>No post at the moment</Text>
