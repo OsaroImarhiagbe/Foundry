@@ -36,7 +36,7 @@ jobs:
         with:
           fetch-depth: 0  # Ensure full git history is fetched
 
-      - name: Check for AUTO-MERGE keyword in PR body
+      - name: Check for AUTO-MERGE keyword
         run: |
           PR_BODY=$(curl -s "https://api.github.com/repos/${GITHUB_REPOSITORY}/pulls/${GITHUB_REF#refs/pull/}/files" | jq -r '.[0].body')
           if [[ "$PR_BODY" == *"AUTO-MERGE"* ]]; then
