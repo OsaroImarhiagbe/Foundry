@@ -2,7 +2,7 @@ import { NavigationContainer} from '@react-navigation/native';
 import { MenuProvider } from 'react-native-popup-menu';
 import { AuthContextProvider } from './app/authContext';
 import { StatusBar } from 'expo-status-bar';
-import {useEffect,useState,lazy} from 'react'
+import {useEffect,useState,lazy, memo, Suspense} from 'react'
 import {store,persistor} from './app/store'
 import { Provider } from 'react-redux';
 import { PersistGate } from 'redux-persist/integration/react';
@@ -11,14 +11,14 @@ import i18n from './app/Language/i18n';
 import { PaperProvider, MD3LightTheme as DefaultTheme,MD3DarkTheme as DarkTheme } from 'react-native-paper';
 import { useColorScheme } from 'react-native';
 import { NotificationProvider } from './app/NotificationProvider';
+import { use } from 'i18next';
 
-const SplashScreen = lazy(() => import('./app/screen/SplashScreen'))
-const AuthNavigation = lazy(() => import('./app/navigation/AuthNavigation'))
+const SplashScreen = lazy(() => import('./app/screen/SplashScreen'));
+const AuthNavigation = lazy(() => import('./app/navigation/AuthNavigation'));
 
 export default function App() {
-  const [isloading,setLoading] = useState(false)
+  const [isloading,setLoading] = useState(true)
   useEffect(() => {
-    setLoading(true)
     const timer = setTimeout(() => {
       setLoading(false)
     },4000)
@@ -129,9 +129,10 @@ export default function App() {
         }
       }
 
-  const colorScheme = useColorScheme()
   
-  const theme = colorScheme === 'dark' ? darkTheme : lightTheme;
+  
+  const theme = useColorScheme() === 'dark' ? darkTheme : lightTheme;
+  console.log('App component rendered')
  
   return (
     
@@ -144,12 +145,14 @@ export default function App() {
         <PaperProvider theme={theme}>
         <NavigationContainer>
         <NotificationProvider>
+          <Suspense fallback={<SplashScreen/>}>
           {isloading ? <SplashScreen/>:<AuthNavigation/> }
+          </Suspense>
           </NotificationProvider>
         </NavigationContainer>
         </PaperProvider>
       </AuthContextProvider>
-      <StatusBar style={colorScheme === 'dark' ? 'light':'dark'} />
+      <StatusBar style={useColorScheme() === 'dark' ? 'light':'dark'} />
       </MenuProvider>
       </PersistGate>
     </Provider>

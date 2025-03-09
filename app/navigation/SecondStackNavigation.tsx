@@ -1,6 +1,6 @@
 import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { lazy,Suspense,memo } from 'react';
+import { lazy,memo } from 'react';
 import { ActivityIndicator, useColorScheme } from 'react-native';
 import { useTheme } from 'react-native-paper';
 import LazyScreenComponent from 'app/components/LazyScreenComponent';
@@ -12,7 +12,8 @@ const PostScreen = lazy(() => import('../screen/PostScreen'))
 const ProjectScreen  = lazy(()=>import('../screen/ProjectScreen'))
 const LocationScreen = lazy(()=>import('../screen/LocationScreen'))
 const SkillsScreen = lazy(() => import('../screen/SkillScreen'))
-const ReportBugScreenWrapper = () => {
+
+const ReportBugScreenWrapper = memo(() => {
     
   return (
     <LazyScreenComponent>
@@ -20,8 +21,8 @@ const ReportBugScreenWrapper = () => {
     </LazyScreenComponent>
 
   )
-}
-const ChatScreenWrapper = () => {
+})
+const ChatScreenWrapper = memo(() => {
   
   return (
     <LazyScreenComponent>
@@ -29,9 +30,9 @@ const ChatScreenWrapper = () => {
     </LazyScreenComponent>
   )
 
-}
+})
 
-const ContactUsScreenWrapper = () => {
+const ContactUsScreenWrapper = memo(() => {
   
   return (
     <LazyScreenComponent>
@@ -39,37 +40,37 @@ const ContactUsScreenWrapper = () => {
     </LazyScreenComponent>
 
   )
-}
+})
 
 
-const ProjectEntryScreenWrapper = () => {
+const ProjectEntryScreenWrapper = memo(() => {
   
   return (
     <LazyScreenComponent>
       <ProjectEntryScreen/>
     </LazyScreenComponent>
   )
-}
+})
 
-const PostScreenWrapper = () => {
+const PostScreenWrapper = memo(() => {
 
   return (
     <LazyScreenComponent>
       <PostScreen/>
     </LazyScreenComponent>
   )
-}
+})
 
-const LocationScreenWrapper = () => {
+const LocationScreenWrapper = memo(() => {
 
   return (
     <LazyScreenComponent>
       <LocationScreen/>
     </LazyScreenComponent>
   )
-}
+})
 
-const ProjectScreenWrapper = () => {
+const ProjectScreenWrapper = memo(() => {
 
   return (
     <LazyScreenComponent>
@@ -77,15 +78,15 @@ const ProjectScreenWrapper = () => {
     </LazyScreenComponent>
   )
 
-}
-const SkillsScreenWrapper = () => {
+})
+const SkillsScreenWrapper = memo(() => {
   
   return (
     <LazyScreenComponent>
       <SkillsScreen/>
     </LazyScreenComponent>
   )
-}
+})
 
 
 

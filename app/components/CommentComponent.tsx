@@ -1,4 +1,4 @@
-import React,{useState,useEffect} from 'react'
+import React,{useState,useEffect,memo} from 'react'
 import {
   View,
   StyleSheet,
@@ -37,7 +37,7 @@ interface Reply{
   createdAt?:FirebaseFirestoreTypes.Timestamp
 
 }
-const CommentComponent:React.FC<CommentProp> = ({
+const CommentComponent:React.FC<CommentProp> = memo(({
   content,
   name,
   comment_id,
@@ -219,7 +219,7 @@ const CommentComponent:React.FC<CommentProp> = ({
     </Card.Content>
   </Card>
   )
-}
+})
 
 
 const styles = StyleSheet.create({

@@ -17,14 +17,14 @@ const StackNavigation = lazy(() => import('./StackNavigation'))
 const ProfileScreen = lazy(() => import('../screen/AccountScreen'))
 
 
-const StackNavigationwrapper = () =>{
+const StackNavigationwrapper = memo(() =>{
   return (
     <LazyScreenComponent>
       <StackNavigation/>
     </LazyScreenComponent>
-  )}
+  )})
 
-const ProfileScreenWrapper = () =>{
+const ProfileScreenWrapper = memo(() =>{
     return (
   
      <LazyScreenComponent>
@@ -32,21 +32,21 @@ const ProfileScreenWrapper = () =>{
      </LazyScreenComponent>
   
     )
-  }
-const SearchScreenWrapper = () => {
+})
+const SearchScreenWrapper = memo(() => {
   return(
   <LazyScreenComponent>
     <SearchScreen/>
   </LazyScreenComponent>
   )
-}
-const NotificationScreenWrapper = () => {
+})
+const NotificationScreenWrapper = memo(() => {
   return(
     <LazyScreenComponent>
       <NotificationScreen/>
     </LazyScreenComponent>
     )
-  }
+})
 
 
 

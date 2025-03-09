@@ -28,6 +28,7 @@ const PostComponent = lazy(() => import('../components/PostComponent'))
 
 const Spacer = ({ height = 16 }) => <View style={{ height }} />;
 
+console.log('HomeScreen renderd')
 type Post = {
 
   id?: string;

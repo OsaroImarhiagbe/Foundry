@@ -2,12 +2,9 @@ import React,
 {
   useCallback,
   lazy,
-  Suspense,
-  memo
 }from 'react'
 import {
     View,
-    StyleSheet,
     TouchableOpacity,
     useColorScheme} from 'react-native'
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
@@ -32,6 +29,7 @@ import { addsearchID } from 'app/features/search/searchSlice';
 import SearchComponent from 'app/components/SearchComponent';
 import { httpsCallable } from '@react-native-firebase/functions'
 import { functions } from 'FirebaseConfig';
+import LazyScreenComponent from 'app/components/LazyScreenComponent';
 
 
 type NavigationProp = {
@@ -45,40 +43,22 @@ const Tab = createMaterialTopTabNavigator();
 const FeedScreen = lazy(() => import('../screen/FeedScreen'))
 const HomeScreen = lazy(() => import('../screen/HomeScreen'))
 
+const HomeScreenWrapper = () => {
+  return (
+    <LazyScreenComponent>
+      <HomeScreen/>
+    </LazyScreenComponent>
 
+  )
+}
+const FeedScreenWrapper = () => {
+  return (
+    <LazyScreenComponent>
+      <FeedScreen/>
+    </LazyScreenComponent>
+  )}
 
-// const MemoMenu = memo(({handleSearch}:any) => {
-  
-//     return (<MenuOptions
-//     customStyles={{
-//           optionsContainer:{
-//               borderRadius:10,
-//               marginTop:40,
-//               marginLeft:-30,
-//               borderCurve:'continuous',
-//               backgroundColor:'#fff',
-//           }
-//       }}
-//     >
-//       <MenuItems 
-//       text='Anyone'
-//       action={()=> handleSearch('Anyone')}/>
-//       <Divider/>
-//        <MenuItems 
-//       text='Creativity and Innovation'
-//       action={()=> handleSearch('Creativity and Innovation')}/>
-//     <Divider/>
-//     <MenuItems 
-//       text='Collaboration and Community'
-//       action={()=> handleSearch('Collaboration and Community')}/>
-//     <Divider/>
-//     <MenuItems 
-//       text='Startup and Busniess'
-//       action={()=> handleSearch('Statup and Busniess')}/>
-//     </MenuOptions>
-//     )
-// })
-
+console.log('DashBoardScreen rendered')
 
 const DashBoardScreen = () => {
     const {user} = useAuth()
@@ -91,21 +71,7 @@ const DashBoardScreen = () => {
       dispatch(addsearchID(id))
     },[dispatch])
     
-    const HomeScreenWrapper = () => {
-      return (
-        <Suspense fallback={<ActivityIndicator size='large' color={dark_or_light ? '#fff' :'#000'} style={{alignItems:'center',justifyContent:'center',flex:1,backgroundColor:theme.colors.background}}/>}>
-        <HomeScreen/>
-      </Suspense>
-
-      )
-    }
-    const FeedScreenWrapper = () => {
-      return (
-        <Suspense fallback={<ActivityIndicator size='large' color={dark_or_light ? '#fff' :'#000'} style={{alignItems:'center',justifyContent:'center',flex:1,backgroundColor:theme.colors.background}}/>}>
-        <FeedScreen/>
-      </Suspense>
-      
-    )}
+ 
 
     const testSend = useCallback(() => {
       const addTest = httpsCallable(functions,'sendTestNotification')
@@ -144,20 +110,46 @@ const DashBoardScreen = () => {
            <Entypo name='new-message' size={20} color={theme.colors.primary}/>
         </View>
         </TouchableOpacity>
-        <TouchableOpacity
+        {/* <TouchableOpacity
          onPress={testSend}>
         <View>
            <Entypo name='note' size={20} color={theme.colors.primary}/>
         </View>
-        </TouchableOpacity>
-        {/* <Menu>
+        </TouchableOpacity> */}
+        <Menu>
       <MenuTrigger>
         <Icon
          source='dots-horizontal'
          size={25}/>
       </MenuTrigger>
-      <MemoMenu handleSearch={handleSearch}/>
-    </Menu> */}
+      <MenuOptions
+    customStyles={{
+          optionsContainer:{
+              borderRadius:10,
+              marginTop:40,
+              marginLeft:-30,
+              borderCurve:'continuous',
+              backgroundColor:'#fff',
+          }
+      }}
+    >
+      <MenuItems 
+      text='Anyone'
+      action={()=> handleSearch('Anyone')}/>
+      <Divider/>
+       <MenuItems 
+      text='Creativity and Innovation'
+      action={()=> handleSearch('Creativity and Innovation')}/>
+    <Divider/>
+    <MenuItems 
+      text='Collaboration and Community'
+      action={()=> handleSearch('Collaboration and Community')}/>
+    <Divider/>
+    <MenuItems 
+      text='Startup and Busniess'
+      action={()=> handleSearch('Statup and Busniess')}/>
+    </MenuOptions>
+    </Menu>
         </View>
         <View style={{flex:1}}>
         <Tab.Navigator

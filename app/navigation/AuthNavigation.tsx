@@ -1,5 +1,5 @@
 import { createStackNavigator } from '@react-navigation/stack';
-import {useState,lazy} from 'react';
+import {useState,lazy, memo} from 'react';
 import {useAuth} from '../authContext';
 import LazyScreenComponent from 'app/components/LazyScreenComponent';
 
@@ -10,46 +10,46 @@ const LoginScreen = lazy(()=> import('../screen/LoginScreen'));
 const SecondStackNavigation = lazy(() => import('../navigation/SecondStackNavigation'))
 
 
-const DrawerNavigationWrapper = () => {
+const DrawerNavigationWrapper = memo(() => {
   return (
     <LazyScreenComponent>
       <DrawerNavigation/>
     </LazyScreenComponent>
   )
-}
+})
 
-const SecondStackNavigationWrapper = () => {
+const SecondStackNavigationWrapper = memo(() => {
   return (
     <LazyScreenComponent>
       <SecondStackNavigation/>
     </LazyScreenComponent>
   )
-  }
-const OnboardingScreenWrapper = () =>{
+})
+const OnboardingScreenWrapper = memo(() =>{
   return (
     <LazyScreenComponent>
       <OnboardingScreen/>
     </LazyScreenComponent>
 )
-}
+})
 
-const RegisterScreenWrapper = () => {
+const RegisterScreenWrapper = memo(() => {
 
   return (
     <LazyScreenComponent>
       <RegisterScreen/>
     </LazyScreenComponent>
   )
-}
+})
 
-const LoginScreenWrapper = () => {
+const LoginScreenWrapper = memo(() => {
 
 return (
   <LazyScreenComponent>
     <LoginScreen/>
   </LazyScreenComponent>
 )
-}
+})
 
 
 

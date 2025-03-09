@@ -1,4 +1,4 @@
-import React,{useState,useEffect} from 'react'
+import React,{useState,useEffect,memo} from 'react'
 import {View,StyleSheet,
 TouchableOpacity,
 TouchableHighlight,
@@ -39,8 +39,6 @@ import { MenuItems } from '../components/CustomMenu'
 import { db, PostRef } from 'FirebaseConfig';
 import FastImage from "@d11/react-native-fast-image";
 import { perf } from '../../FirebaseConfig';
-import { FirebasePerformanceTypes } from '@react-native-firebase/perf';
-
 
 
 interface PostComponentProps {
@@ -64,7 +62,7 @@ interface Comment{
 
 }
 
-const PostComponent: React.FC<PostComponentProps> = ({
+const PostComponent: React.FC<PostComponentProps> = memo(({
   auth_profile,
   count,
   url,
@@ -407,7 +405,7 @@ const PostComponent: React.FC<PostComponentProps> = ({
       </Card>
   </View>
   )
-}
+})
 
 
 const styles = StyleSheet.create({

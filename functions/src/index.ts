@@ -171,35 +171,19 @@ exports.addPost = onCall(async (request) => {
     await getFirestore().collection("posts").doc(newDoc.id).update({
       post_id: newDoc.id,
     });
+    await sendNotification(auth_id, {
+      title: "Post has sent!",
+      body: "Your post has been successfully sent",
+      data: {
+        type: "new_message",
+      },
+    });
+    return {success: true};
   } catch (error) {
     logger.error("Error Proccessing Post:", error);
+    throw new HttpsError("internal", "Failed to send test notification");
   }
 });
-exports.newPost = onDocumentCreated(
-  "/posts/{postId}",
-  async (event) => {
-    try {
-      const snapshot = event.data;
-      if (!snapshot) {
-        logger.warn("No data associated with the event");
-        return {success: false, error: "No data found"};
-      }
-      const messageData = snapshot.data();
-      const auth_id = messageData.auth_id;
-      await sendNotification(auth_id, {
-        title: "Post has sent!",
-        body: "Your post has been successfully sent",
-        data: {
-          messageId: snapshot.id,
-          type: "new_message",
-        },
-      });
-      return {success: true, msg: "Post has been sent", postId: snapshot.id};
-    } catch (error) {
-      logger.error("Error processing new message:", error);
-      throw new Error("Failed to process new message notification");
-    }
-  });
 exports.newUser = onCall(async (request) => {
   if (!request.auth) {
     throw new HttpsError(
