@@ -1,4 +1,4 @@
-import React, { useState,useEffect,useRef } from 'react';
+import React, { useState,useEffect,useRef, useCallback } from 'react';
 import {
   View,
   StyleSheet,
@@ -72,7 +72,7 @@ const PostScreen = () => {
   }, []);
 
 
-  const handlePost = async () => {
+  const handlePost = useCallback(async () => {
     if(text.trim() === '') return
     let trace = await perf.startTrace('sending_post_or_image')
     setLoading(true);
@@ -108,9 +108,9 @@ const PostScreen = () => {
       setLoading(false);
       trace.stop()
     }
-  };
+  },[ text, image, filename, user, category]);
 
-  const handleCancel = () => {
+  const handleCancel = useCallback(() => {
     if (hasUnsavedChanges || image) {
       Alert.alert(
         'Discard changes?',
@@ -127,8 +127,8 @@ const PostScreen = () => {
     } else {
       navigation.goBack();
     }
-  };
-  const pickImage = async () => {
+  },[ hasUnsavedChanges, image]);
+  const pickImage = useCallback(async () => {
     log( crashlytics,'Post Screen: Picking Images')
     try{
       let results = await launchImageLibrary({
@@ -145,7 +145,7 @@ const PostScreen = () => {
       recordError(crashlytics,error)
       console.error(error)
     }
-  }
+  },[setImage,setFileName])
   return (
       <View style={[styles.screen,{backgroundColor:theme.colors.background,paddingTop:Platform.OS === 'ios' ? top : 0}]}>
       <View style={styles.container}>
@@ -228,7 +228,7 @@ const PostScreen = () => {
       <View style={styles.textContainer}>
         <TextInput
           ref={textInputRef}
-          style={[styles.textArea,{color:theme.colors.tertiary}]}
+          style={[styles.textArea,{color:theme.colors.tertiary,fontSize:16}]}
           value={text}
           onChangeText={(text) => setText(text)}
           numberOfLines={10}

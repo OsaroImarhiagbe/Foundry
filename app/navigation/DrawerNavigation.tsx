@@ -72,18 +72,17 @@ const DrawerNavigation = () => {
             </TouchableWithoutFeedback> 
             <Text>{user?.username}</Text>
           </View>
-          <DrawerItemList {...props} />
+          <DrawerItemList {...props}/>
           <DrawerItem
-              label="Logout"
-              labelStyle={{
-                color:theme.colors.tertiary
-              }}
-              
-              icon={ () => (<Icon
-                source="logout"
-                color={theme.colors.tertiary}
-                size={20}/>)}
-              onPress={handleLogout}
+          label="Logout"
+          labelStyle={{
+            color:theme.colors.tertiary
+          }}
+          icon={ () => (<Icon
+            source="logout"
+            color={theme.colors.tertiary}
+            size={20}/>)}
+            onPress={handleLogout}
           />
       </DrawerContentScrollView>
     )}
@@ -109,7 +108,7 @@ const DrawerNavigation = () => {
         },
         headerShown:false,
       }}/>
-       <Drawer.Screen
+       {/* <Drawer.Screen
       name='News'
       component={SettingScreenWrapper}
       options={{
@@ -123,7 +122,7 @@ const DrawerNavigation = () => {
           color:theme.colors.tertiary,
         },
         headerShown:false,
-      }}/>
+      }}/> */}
        <Drawer.Screen
       name='Settings'
       component={SettingScreenWrapper}

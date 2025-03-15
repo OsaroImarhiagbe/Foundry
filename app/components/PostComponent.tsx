@@ -1,4 +1,4 @@
-import React,{useState,useEffect,memo} from 'react'
+import React,{useState,useEffect,memo, useCallback} from 'react'
 import {View,StyleSheet,
 TouchableOpacity,
 TouchableHighlight,
@@ -109,7 +109,7 @@ const PostComponent: React.FC<PostComponentProps> = memo(({
 
  
  
-    const handleLike = async () => {
+    const handleLike = useCallback(async () => {
       let trace = await perf.startTrace('post_like')
       setLoading(true)
       const docRef = doc(PostRef,id);
@@ -137,18 +137,21 @@ const PostComponent: React.FC<PostComponentProps> = memo(({
             liked_by:updatedLike
           })
         })
+        setLoading(false)
       }catch(err){
         console.error('error liking comment:',err)
+        setLoading(false)
       }finally{
         setLoading(false)
         trace.stop()
       }
-    }
-    const handleSend = async () => {
+    },[id])
+
+    const handleSend = useCallback(async () => {
       let trace = await perf.startTrace('post_send')
+      setLoading(true)
       if(replyingTo){
         if(!text) return;
-        setLoading(true)
           try{
             const docRef = doc(PostRef,id)
             const commetRef = collection(docRef,'comments',replyingTo,'replys')
@@ -165,11 +168,13 @@ const PostComponent: React.FC<PostComponentProps> = memo(({
             setText('');
             setReplyingTo(null);
             setReplyingToUsername(undefined);
+            setLoading(false)
           } catch (error) {
             setLoading(false)
             console.error("Error with reply:", error);
           }finally{
             trace.stop()
+            setLoading(false)
           }
         }else{
           if(text.trim() === " ") return;
@@ -196,16 +201,19 @@ const PostComponent: React.FC<PostComponentProps> = memo(({
               })
             })
             setText('')
+            setLoading(false)
           }catch(e){
             console.error('Error with sending comments:',e)
+            setLoading(false)
           }finally{
             trace.stop()
+            setLoading(false)
           }
     }
-  }
+  },[text,replyingTo,replyingToUsername])
 
 
-    const handleDelete = async () => {
+    const handleDelete = useCallback(async () => {
       try {
         const messagesRef = doc(PostRef,id)
         await deleteDoc(messagesRef)
@@ -214,7 +222,7 @@ const PostComponent: React.FC<PostComponentProps> = memo(({
         console.error('Error deleting document: ', error);
 
       }
-    }
+    },[])
   return (
     
     <View style={{flex:1}}>

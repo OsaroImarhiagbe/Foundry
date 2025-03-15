@@ -13,7 +13,7 @@ import {
   useColorScheme
 } from 'react-native'
 import { useAuth } from 'app/authContext';
-import { FirebaseFirestoreTypes,onSnapshot,doc,orderBy,query, limit,getDocs, startAfter, Unsubscribe } from '@react-native-firebase/firestore';
+import { FirebaseFirestoreTypes,onSnapshot,doc,orderBy,query, limit,getDocs, startAfter, Unsubscribe, where } from '@react-native-firebase/firestore';
 import { useDispatch, useSelector} from 'react-redux';
 import { addId } from '../features/user/userSlice.ts';
 import { FlashList } from "@shopify/flash-list";
@@ -23,12 +23,13 @@ import { Skeleton } from 'moti/skeleton';
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import {log,recordError} from '@react-native-firebase/crashlytics'
 import { PostRef,crashlytics,perf} from '../../FirebaseConfig';
+import { FirebasePerformanceTypes } from '@react-native-firebase/perf';
 const PostComponent = lazy(() => import('../components/PostComponent'))
 
 
 const Spacer = ({ height = 16 }) => <View style={{ height }} />;
 
-console.log('HomeScreen renderd')
+
 type Post = {
 
   id?: string;
@@ -50,7 +51,6 @@ const HomeScreen= () => {
   const dispatch = useDispatch()
   const [refreshing, setRefreshing] = useState<boolean>(false);
   const {user} = useAuth()
-  const {height, width} = useWindowDimensions();
   const [post, setPost] = useState<Post[]>([])
   const [lastVisible, setLastVisible] = useState<FirebaseFirestoreTypes.QueryDocumentSnapshot<FirebaseFirestoreTypes.DocumentData> | null>(null);
   const [loadingMore, setLoadingMore] = useState<boolean>(false);
@@ -65,19 +65,19 @@ const HomeScreen= () => {
 
   const memoPost = useMemo(() => {
     return post?.filter((name) => name?.category?.includes(category));
-  }, [post]);
+  }, [post,category]);
  
   
   useEffect(() => {
     if (!user?.userId) return;
-    let trace
     setMount(true)
     dispatch(addId({currentuserID:user?.userId}))
-    let subscriber: Unsubscribe;
     log(crashlytics,'Grabbing post')
+    let trace:FirebasePerformanceTypes.Trace;
       try {
-        const docRef = query(PostRef,orderBy('createdAt', 'desc'),limit(10))
-        subscriber = onSnapshot(docRef,querySnapShot =>{
+        const docRef = query(PostRef,where('category','==',category),orderBy('createdAt', 'desc'),limit(10))
+        const subscriber = onSnapshot(docRef,async (querySnapShot) =>{
+          trace = await perf.startTrace('HomeScreen')
           if (!querySnapShot || querySnapShot.empty) {
             setPost([]);
             setMount(false);
@@ -92,17 +92,16 @@ const HomeScreen= () => {
           setHasMore(querySnapShot.docs.length > 0);
           setMount(false);
         });
-      } catch (error:any) {
+        return () => subscriber()
+      } catch (error:unknown | any) {
         recordError(crashlytics,error)
         console.error(`Error post can not be found: ${error}`);
         setMount(false);
       }
-    return () => {
-        if(subscriber){
-          subscriber();
+      return () => {
+        if(trace) trace.stop()
         }
-      }
-  }, []); 
+  }, [category,user.userId]); 
 
 
   const onRefresh = useCallback(async () => {
@@ -110,7 +109,7 @@ const HomeScreen= () => {
     log(crashlytics,'Post Refresh')
     let trace = await perf.startTrace('Refreshing_community_posts_HomeScreen')
       try {
-        const docRef = query(PostRef,orderBy('createdAt', 'desc'),limit(10))
+        const docRef = query(PostRef,where('category','==',category),orderBy('createdAt', 'desc'),limit(10))
         const unsub = onSnapshot(docRef,querySnapShot =>{
             let data:Post[] = [];
             querySnapShot.forEach(documentSnapShot => {
@@ -131,7 +130,7 @@ const HomeScreen= () => {
       setRefreshing(false);
       trace.stop()
     }
-  }, [memoPost]);
+  }, [memoPost,category]);
     
   
 
@@ -146,15 +145,12 @@ const fetchMorePost = async () => {
   }
   setLoadingMore(true);
   try {
-    const docRef = lastVisible ? query(
+    const docRef = query(
       PostRef,
+      where('category','==',category),
       orderBy('createdAt','desc'),
       startAfter(lastVisible), 
-      limit(2)) : 
-      query(
-        PostRef,
-        orderBy('createdAt', 'desc'),
-        limit(2))
+      limit(2))
     const snapshot = await getDocs(docRef)
     const newPosts = snapshot.docs.map(doc => ({
       id: doc.id,
@@ -181,22 +177,41 @@ const fetchMorePost = async () => {
     <View
     style={[styles.screen,{backgroundColor:theme.colors.background}]}
     >
-   {mount ? Array.from({length:5}).map((_,index) => (
-    
+      {
+          mount ? (
+          Array.from({ length: 5 }).map((_, index) => (
     <MotiView
-    key={index}
-    transition={{
-      delay:300
-    }}
-    style={[styles.container, styles.padded]}
-    animate={{ backgroundColor: dark_or_light ? '#000000' : '#fffffff' }}
-  >
-    <Skeleton colorMode={dark_or_light ? 'dark':'light'} radius="round" height={hp(4.3)}/>
-    <Spacer height={8}/>
-    <Skeleton height={'100%'} colorMode={dark_or_light ? 'dark':'light'} width={'100%'} radius='square'/>
-  </MotiView>
-   ))
-   : <FlashList
+      key={index}
+      transition={{
+        delay: index * 100 // Creates a staggered effect
+      }}
+      style={[styles.container, styles.padded]}
+      animate={{ 
+        backgroundColor: dark_or_light ? '#000000' : '#ffffff' 
+      }}
+    >
+      <Skeleton 
+        colorMode={dark_or_light ? 'dark' : 'light'} 
+        radius="round" 
+        height={hp(4.3)}
+      />
+      <Spacer height={8}/>
+      <Skeleton 
+        height={hp(10) + (index * 5)} 
+        colorMode={dark_or_light ? 'dark' : 'light'} 
+        width={'100%'} 
+        radius="square"
+      />
+      <Spacer height={8}/>
+      <Skeleton 
+        height={hp(10) + (index * 5)} 
+        colorMode={dark_or_light ? 'dark' : 'light'} 
+        width={'100%'} 
+        radius="square"
+      />
+    </MotiView>))
+    )
+   : (<FlashList
     contentContainerStyle={{padding:0}}
     data={memoPost}
     estimatedItemSize={460}
@@ -234,7 +249,7 @@ const fetchMorePost = async () => {
       comment_count={item.comment_count}/>
       </Suspense>}
     keyExtractor={(item)=> item?.post_id?.toString() || Math.random().toString()}
-    /> } 
+    /> )} 
     </View>
   )
 }

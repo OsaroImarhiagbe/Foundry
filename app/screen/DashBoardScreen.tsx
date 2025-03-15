@@ -2,6 +2,7 @@ import React,
 {
   useCallback,
   lazy,
+  memo,
 }from 'react'
 import {
     View,
@@ -43,20 +44,20 @@ const Tab = createMaterialTopTabNavigator();
 const FeedScreen = lazy(() => import('../screen/FeedScreen'))
 const HomeScreen = lazy(() => import('../screen/HomeScreen'))
 
-const HomeScreenWrapper = () => {
+const HomeScreenWrapper = memo(() => {
   return (
     <LazyScreenComponent>
       <HomeScreen/>
     </LazyScreenComponent>
 
   )
-}
-const FeedScreenWrapper = () => {
+})
+const FeedScreenWrapper = memo(() => {
   return (
     <LazyScreenComponent>
       <FeedScreen/>
     </LazyScreenComponent>
-  )}
+  )})
 
 console.log('DashBoardScreen rendered')
 
@@ -73,12 +74,7 @@ const DashBoardScreen = () => {
     
  
 
-    const testSend = useCallback(() => {
-      const addTest = httpsCallable(functions,'sendTestNotification')
-      addTest({text:'Hello'}).then((result) => {
-        console.log(result.data)
-      })
-    },[])
+   
 
 
   return (
@@ -110,12 +106,6 @@ const DashBoardScreen = () => {
            <Entypo name='new-message' size={20} color={theme.colors.primary}/>
         </View>
         </TouchableOpacity>
-        {/* <TouchableOpacity
-         onPress={testSend}>
-        <View>
-           <Entypo name='note' size={20} color={theme.colors.primary}/>
-        </View>
-        </TouchableOpacity> */}
         <Menu>
       <MenuTrigger>
         <Icon
@@ -150,7 +140,7 @@ const DashBoardScreen = () => {
       action={()=> handleSearch('Statup and Busniess')}/>
     </MenuOptions>
     </Menu>
-        </View>
+        </View> 
         <View style={{flex:1}}>
         <Tab.Navigator
         screenOptions={{

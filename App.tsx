@@ -11,13 +11,14 @@ import i18n from './app/Language/i18n';
 import { PaperProvider, MD3LightTheme as DefaultTheme,MD3DarkTheme as DarkTheme } from 'react-native-paper';
 import { useColorScheme } from 'react-native';
 import { NotificationProvider } from './app/NotificationProvider';
-import { use } from 'i18next';
-
+import 'react-native-reanimated'
+import 'react-native-gesture-handler'
 const SplashScreen = lazy(() => import('./app/screen/SplashScreen'));
 const AuthNavigation = lazy(() => import('./app/navigation/AuthNavigation'));
 
 export default function App() {
   const [isloading,setLoading] = useState(true)
+  const colorScheme = useColorScheme();
   useEffect(() => {
     const timer = setTimeout(() => {
       setLoading(false)
@@ -131,7 +132,7 @@ export default function App() {
 
   
   
-  const theme = useColorScheme() === 'dark' ? darkTheme : lightTheme;
+  const theme = colorScheme === 'dark' ? darkTheme : lightTheme;
   console.log('App component rendered')
  
   return (
@@ -139,20 +140,24 @@ export default function App() {
 
     <I18nextProvider i18n={i18n}>
        <Provider store={store}>
-      <PersistGate loading={isloading} persistor={persistor}>
+      <PersistGate loading={null} persistor={persistor}>
         <MenuProvider>
           <AuthContextProvider>
         <PaperProvider theme={theme}>
         <NavigationContainer>
         <NotificationProvider>
-          <Suspense fallback={<SplashScreen/>}>
-          {isloading ? <SplashScreen/>:<AuthNavigation/> }
-          </Suspense>
+        {isloading ? (
+                      <SplashScreen/>
+                    ) : (
+                      <Suspense fallback={<SplashScreen/>}>
+                        <AuthNavigation/>
+                      </Suspense>
+                    )}
           </NotificationProvider>
         </NavigationContainer>
         </PaperProvider>
       </AuthContextProvider>
-      <StatusBar style={useColorScheme() === 'dark' ? 'light':'dark'} />
+      <StatusBar style={colorScheme === 'dark' ? 'light':'dark'} />
       </MenuProvider>
       </PersistGate>
     </Provider>

@@ -1,4 +1,4 @@
-import React,{useState} from 'react'
+import React,{useCallback, useState} from 'react'
 import {
   View,
   StyleSheet,
@@ -31,6 +31,8 @@ import {Image as ImageCompressor} from 'react-native-compressor';
 import {launchImageLibrary} from 'react-native-image-picker';
 import { useDispatch,useSelector } from 'react-redux';
 import { addprojectId } from 'app/features/projects/projectSlice';
+import { storage } from '../../FirebaseConfig';
+import {getDownloadURL, putFile, ref} from '@react-native-firebase/storage';
 
 const ProjectEntryScreen = () => {
     const [focus,setFocus] = useState('')
@@ -45,7 +47,7 @@ const ProjectEntryScreen = () => {
     const navigation = useNavigation()
     const dispatch = useDispatch()
 
-    const pickImage = async () => {
+    const pickImage = useCallback(async () => {
       log(crashlytics,'ProjectEntryScreen: Picking Image')
       try{
         let results = await launchImageLibrary({
@@ -61,18 +63,21 @@ const ProjectEntryScreen = () => {
         recordError(crashlytics,error)
         console.error('user cancelled the image picker.')
       }
-      }
+      },[ setImage, setFileName])
 
-    const handleSubmit = async () => {
+    const handleSubmit = useCallback(async () => {
       log(crashlytics,'ProjectEntryScreen: Handle Submit')
+      let url;
       const projectDoc = doc(UsersRef,user?.userId,'projects',projectId)
       const docRef = await getDoc(projectDoc)
-      let imageUrl = null;
-        try{
+      const imageRef = ref(storage,`/users/projects/${user.userId}/${filename}`)
+      await putFile(imageRef,image)
+      url = await getDownloadURL(imageRef)
+      try{
           if(docRef){
             await updateDoc(projectDoc,{
                 project_name: projectname,
-                image:imageUrl,
+                image:url,
                 content: text,
                 technology: [tech],
                 createdAt: Timestamp.fromDate(new Date())
@@ -82,7 +87,7 @@ const ProjectEntryScreen = () => {
           const projectRef = collection(UsersRef,user.userId,'projects')
           const newDoc = await addDoc(projectRef,{
                 project_name: projectname,
-                image:imageUrl,
+                image:url,
                 content: text,
                 technology: [tech],
                 createdAt: Timestamp.fromDate(new Date())
@@ -98,7 +103,7 @@ const ProjectEntryScreen = () => {
         }catch(error: unknown | any){
           recordError(crashlytics,error)
         }
-    }
+    },[projectname,text,tech,image,projectId])
   return (
     <TouchableWithoutFeedback onPress={()=> Keyboard.dismiss()}>
         <SafeAreaView style={[styles.screen,{backgroundColor:theme.colors.background}]}>
@@ -119,24 +124,19 @@ const ProjectEntryScreen = () => {
             />
         </View>
         </View>
-        <View style={{padding:5}}>
-        <View>
+        <View style={{padding:20}}>
             <AppTextInput
             values={projectname}
             onChangeText={(text) => setProjectName(text)}
             onFocus={()=>setFocus('projectname')}
             placeholder='Project Name...'
             color={theme.colors.tertiary}/>
-        </View>
-        <View>
             <AppTextInput
             values={text}
             onChangeText={(text) => setText(text)}
             onFocus={()=>setFocus('text')}
             placeholder='Project Overview...'
             color={theme.colors.tertiary}/>
-        </View>
-        <View>
             <AppTextInput
             values={tech}
             onChangeText={(text) => setTech(text)}
@@ -144,7 +144,6 @@ const ProjectEntryScreen = () => {
             placeholder='List Tech...'
             color={theme.colors.tertiary}
            />
-        </View>
         </View>
         <View style={{padding:10,marginVertical:10}}>
         <Button mode='outlined' onPress={handleSubmit}>Submit</Button>

@@ -1,16 +1,15 @@
 import React, { createContext, useContext, useState, useCallback,useEffect,ReactNode } from 'react';
-import NotificationBanner from './components/NotificationBanner';
 import notifee, { EventType } from '@notifee/react-native'
 import { useNavigation } from '@react-navigation/native';
 import { FirebaseMessagingTypes } from '@react-native-firebase/messaging';
 import { useAuth } from './authContext';
-import {crashlytics, messaging,UsersRef } from '../FirebaseConfig';
+import {crashlytics, messaging,NotificationsRef,UsersRef } from '../FirebaseConfig';
 import { doc, setDoc} from '@react-native-firebase/firestore';
 import {log,recordError} from '@react-native-firebase/crashlytics'
 
 const NotificationContext = createContext<any>(null);
 
-{/** NEED TO STYLE IN-APP NOTIFCATION BANNER */}
+
 export const useNotification = () => {
   const context = useContext(NotificationContext);
   if(!context){
@@ -50,17 +49,19 @@ export const NotificationProvider = ({ children }:NotificationProp) => {
                 sound:'default'
             },
         });
+        if(user?.userId){
+          await setDoc(doc(NotificationsRef,user.userId),{
+            title:title,
+            message:message,
+            data:data
+          })
+        }
         setNotification({ title, message,data });
-        await setDoc(doc(UsersRef,user.userId,'notifications'),{
-          title:title,
-          message:message,
-          data:data
-        })
         setVisible(true)
         const timer = setTimeout(() => {
           setNotification(null);
           setVisible(false);
-        }, 5000);
+        },5000);
         return () => clearTimeout(timer)
     }catch(error:unknown | any){
         recordError(crashlytics,error)
@@ -157,13 +158,6 @@ export const NotificationProvider = ({ children }:NotificationProp) => {
 
   return (
     <NotificationContext.Provider value={{ showNotification }}>
-      {notification && (
-        <NotificationBanner
-        visiable={visible}
-        title={notification.title}
-        message={notification.message}
-        />
-      )}
       {children}
     </NotificationContext.Provider>
   );
