@@ -2,7 +2,7 @@ import { NavigationContainer} from '@react-navigation/native';
 import { MenuProvider } from 'react-native-popup-menu';
 import { AuthContextProvider } from './app/authContext';
 import { StatusBar } from 'expo-status-bar';
-import {useEffect,useState,lazy, memo, Suspense} from 'react'
+import React, {lazy, useEffect, useState,} from 'react'
 import {store,persistor} from './app/store'
 import { Provider } from 'react-redux';
 import { PersistGate } from 'redux-persist/integration/react';
@@ -13,18 +13,16 @@ import { useColorScheme } from 'react-native';
 import { NotificationProvider } from './app/NotificationProvider';
 import 'react-native-reanimated'
 import 'react-native-gesture-handler'
-const SplashScreen = lazy(() => import('./app/screen/SplashScreen'));
-const AuthNavigation = lazy(() => import('./app/navigation/AuthNavigation'));
+
+
+
+
+const AuthNavigation = lazy(() => import('./app/navigation/AuthNavigation.tsx'));
+const SplashScreen = lazy(() => import('./app/screen/SplashScreen.tsx'));
 
 export default function App() {
-  const [isloading,setLoading] = useState(true)
   const colorScheme = useColorScheme();
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setLoading(false)
-    },4000)
-    return () => clearTimeout(timer)
-  },[])
+  const [loading, setLoading] = useState(true)
 
 
   const lightTheme = {
@@ -133,7 +131,14 @@ export default function App() {
   
   
   const theme = colorScheme === 'dark' ? darkTheme : lightTheme;
-  console.log('App component rendered')
+
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setLoading(false)
+    },1000)
+    return () => clearTimeout(timer)
+  },[])
  
   return (
     
@@ -146,13 +151,8 @@ export default function App() {
         <PaperProvider theme={theme}>
         <NavigationContainer>
         <NotificationProvider>
-        {isloading ? (
-                      <SplashScreen/>
-                    ) : (
-                      <Suspense fallback={<SplashScreen/>}>
-                        <AuthNavigation/>
-                      </Suspense>
-                    )}
+          {loading ? <SplashScreen/>
+          : <AuthNavigation/>}
           </NotificationProvider>
         </NavigationContainer>
         </PaperProvider>

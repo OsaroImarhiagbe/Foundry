@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useCallback,useEffect,ReactNode } from 'react';
+import React, { createContext, useContext, useState, useCallback,useEffect,ReactNode, useRef } from 'react';
 import notifee, { EventType } from '@notifee/react-native'
 import { useNavigation } from '@react-navigation/native';
 import { FirebaseMessagingTypes } from '@react-native-firebase/messaging';
@@ -32,6 +32,15 @@ export const NotificationProvider = ({ children }:NotificationProp) => {
   const {user} = useAuth()
   const [visible,setVisible] = useState<boolean>(false)
   const navigation = useNavigation();
+
+  const isMounted = useRef(true);
+
+  useEffect(() => {
+    isMounted.current = true;
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
 
   const showNotification = useCallback(async (title:string, message:string,data:any) => {
     log(crashlytics,'Notifcation Provider: Show Notification')
@@ -123,9 +132,7 @@ export const NotificationProvider = ({ children }:NotificationProp) => {
             }
         });
 
-        return () => {
-            Foreunsubscribe()
-          }
+        return () => Foreunsubscribe()
       },[handleNotificationClick])
 
     useEffect(() => {

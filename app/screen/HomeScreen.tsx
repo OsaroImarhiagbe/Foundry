@@ -2,32 +2,24 @@ import React,{
   useState,
   useEffect,
   lazy,
-  useMemo,
-  useCallback,
-  Suspense} from 'react'
+  useCallback,} from 'react'
 import {
   View,
   StyleSheet,
-  useWindowDimensions,
-  Animated,
-  useColorScheme
 } from 'react-native'
 import { useAuth } from 'app/authContext';
-import { FirebaseFirestoreTypes,onSnapshot,doc,orderBy,query, limit,getDocs, startAfter, Unsubscribe, where } from '@react-native-firebase/firestore';
+import { FirebaseFirestoreTypes,onSnapshot,doc,orderBy,query, limit,getDocs, startAfter,where } from '@react-native-firebase/firestore';
 import { useDispatch, useSelector} from 'react-redux';
 import { addId } from '../features/user/userSlice.ts';
 import { FlashList } from "@shopify/flash-list";
 import {ActivityIndicator,Text,Divider,useTheme} from 'react-native-paper'
-import { MotiView } from 'moti';
-import { Skeleton } from 'moti/skeleton';
-import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
+
 import {log,recordError} from '@react-native-firebase/crashlytics'
 import { PostRef,crashlytics,perf} from '../../FirebaseConfig';
-import { FirebasePerformanceTypes } from '@react-native-firebase/perf';
-const PostComponent = lazy(() => import('../components/PostComponent'))
+import LazyScreenComponent from 'app/components/LazyScreenComponent.tsx';
+import PostComponent from '../components/PostComponent';
 
 
-const Spacer = ({ height = 16 }) => <View style={{ height }} />;
 
 
 type Post = {
@@ -42,7 +34,6 @@ type Post = {
   category?:string;
   createdAt?: FirebaseFirestoreTypes.Timestamp
   comment_count?: number;
-  mount?:boolean
 };
 
 
@@ -54,33 +45,27 @@ const HomeScreen= () => {
   const [post, setPost] = useState<Post[]>([])
   const [lastVisible, setLastVisible] = useState<FirebaseFirestoreTypes.QueryDocumentSnapshot<FirebaseFirestoreTypes.DocumentData> | null>(null);
   const [loadingMore, setLoadingMore] = useState<boolean>(false);
-  const [hasMore, setHasMore] = useState<boolean>(true);
-  const [mount, setMount] = useState<boolean>(false)
-  const scrollY = useState(new Animated.Value(0))[0];
-  const dark_or_light = useColorScheme()
+  const [hasMore, setHasMore] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(false)
   const category = useSelector((state:string | any)=> state.search.searchID)
 
   
-  
-
-  const memoPost = useMemo(() => {
-    return post?.filter((name) => name?.category?.includes(category));
-  }, [post,category]);
- 
-  
   useEffect(() => {
-    if (!user?.userId) return;
-    setMount(true)
-    dispatch(addId({currentuserID:user?.userId}))
+    setLoading(true)
+    if (!user?.userId){
+      setLoading(false)
+      return;
+    }
     log(crashlytics,'Grabbing post')
-    let trace:FirebasePerformanceTypes.Trace;
+    dispatch(addId({currentuserID:user?.userId}))
+    const  getCategoryPost = async () => {
+    const trace = await perf.startTrace('HomeScreen')
       try {
         const docRef = query(PostRef,where('category','==',category),orderBy('createdAt', 'desc'),limit(10))
-        const subscriber = onSnapshot(docRef,async (querySnapShot) =>{
-          trace = await perf.startTrace('HomeScreen')
+        const subscriber = onSnapshot(docRef,(querySnapShot) =>{
           if (!querySnapShot || querySnapShot.empty) {
             setPost([]);
-            setMount(false);
+            setLoading(false);
             return;
           }
           let data:Post[] = []; 
@@ -90,68 +75,73 @@ const HomeScreen= () => {
           setPost(data);
           setLastVisible(querySnapShot.docs[querySnapShot.docs.length - 1]);
           setHasMore(querySnapShot.docs.length > 0);
-          setMount(false);
+          setLoading(false);
         });
-        return () => subscriber()
-      } catch (error:unknown | any) {
-        recordError(crashlytics,error)
-        console.error(`Error post can not be found: ${error}`);
-        setMount(false);
-      }
-      return () => {
-        if(trace) trace.stop()
+          return () => subscriber()
+        } catch (error:unknown | any) {
+          recordError(crashlytics,error)
+          console.error(`Error post can not be found: ${error}`);
+          setLoading(false);
+          trace.stop()
+        }finally{
+          trace.stop()
         }
-  }, [category,user.userId]); 
+      }
+    getCategoryPost()
+  }, [category]); 
+
 
 
   const onRefresh = useCallback(async () => {
+    setLoading(true)
     setRefreshing(true);
     log(crashlytics,'Post Refresh')
-    let trace = await perf.startTrace('Refreshing_community_posts_HomeScreen')
-      try {
-        const docRef = query(PostRef,where('category','==',category),orderBy('createdAt', 'desc'),limit(10))
-        const unsub = onSnapshot(docRef,querySnapShot =>{
-            let data:Post[] = [];
-            querySnapShot.forEach(documentSnapShot => {
-              data.push({ ...documentSnapShot.data(),id:documentSnapShot.id });
-          } )
-          setPost(data);
-          setLastVisible(querySnapShot.docs[querySnapShot.docs.length - 1]);
-          setHasMore(querySnapShot.docs.length > 0);
-          trace.putAttribute('post_count', post.length.toString());
-          setRefreshing(false)
-        });
-        return () => unsub()
+    const trace = await perf.startTrace('Refreshing_community_posts_HomeScreen')
+    try {
+      const docRef = query(PostRef,where('category','==',category),orderBy('createdAt', 'desc'),limit(10))
+      const documentSnapShot = await getDocs(docRef)
+        let data:Post[] = documentSnapShot.docs.map((doc) => ({
+          ...doc.data(),
+          id:doc.id,
+        }))
+        setPost(data);
+        setLastVisible(documentSnapShot.docs[documentSnapShot.docs.length - 1]);
+        setHasMore(documentSnapShot.docs.length > 0);
+        trace.putAttribute('post_count', post.length.toString());
+        setRefreshing(false)
+        setLoading(false)
       }  catch (error:any) {
         recordError(crashlytics,error)
         console.error(`Error post can not be found: ${error}`);
         setRefreshing(false);
+        setLoading(false)
     }finally{
       setRefreshing(false);
+      setLoading(false)
       trace.stop()
     }
-  }, [memoPost,category]);
+  }, [category]);
     
   
 
-const fetchMorePost = async () => {
+const fetchMorePost = useCallback(async () => {
+  setLoadingMore(true);
   log(crashlytics,'Fetch More Post')
   let trace = await perf.startTrace('fetch_more_community_posts')
   if (loadingMore || !hasMore) return;
-  if (post.length <= 2) {
+  if (post.length < 2) {
     setHasMore(false);
     setLoadingMore(false);
     return;
   }
-  setLoadingMore(true);
   try {
     const docRef = query(
       PostRef,
       where('category','==',category),
       orderBy('createdAt','desc'),
       startAfter(lastVisible), 
-      limit(2))
-    const snapshot = await getDocs(docRef)
+      limit(2));
+    const snapshot = await getDocs(docRef);
     const newPosts = snapshot.docs.map(doc => ({
       id: doc.id,
       ...doc.data(),
@@ -169,57 +159,17 @@ const fetchMorePost = async () => {
     setLoadingMore(false);
     trace.stop()
   }
-}
-
-
+},[loadingMore,hasMore,post,category,lastVisible])
 
   return (
     <View
     style={[styles.screen,{backgroundColor:theme.colors.background}]}
     >
-      {
-          mount ? (
-          Array.from({ length: 5 }).map((_, index) => (
-    <MotiView
-      key={index}
-      transition={{
-        delay: index * 100 // Creates a staggered effect
-      }}
-      style={[styles.container, styles.padded]}
-      animate={{ 
-        backgroundColor: dark_or_light ? '#000000' : '#ffffff' 
-      }}
-    >
-      <Skeleton 
-        colorMode={dark_or_light ? 'dark' : 'light'} 
-        radius="round" 
-        height={hp(4.3)}
-      />
-      <Spacer height={8}/>
-      <Skeleton 
-        height={hp(10) + (index * 5)} 
-        colorMode={dark_or_light ? 'dark' : 'light'} 
-        width={'100%'} 
-        radius="square"
-      />
-      <Spacer height={8}/>
-      <Skeleton 
-        height={hp(10) + (index * 5)} 
-        colorMode={dark_or_light ? 'dark' : 'light'} 
-        width={'100%'} 
-        radius="square"
-      />
-    </MotiView>))
-    )
-   : (<FlashList
+      <FlashList
     contentContainerStyle={{padding:0}}
-    data={memoPost}
+    data={post}
     estimatedItemSize={460}
     onRefresh={onRefresh}
-    onScroll={Animated.event(
-      [{ nativeEvent: { contentOffset: { y: scrollY } } }],
-      { useNativeDriver: false }
-    )}
     ListEmptyComponent={(item) => (
       <View style={{flex:1,alignItems:'center',justifyContent:'center',paddingTop:5}}>
         <Text>No post at the moment</Text>
@@ -232,10 +182,10 @@ const fetchMorePost = async () => {
       <Divider/>
     )}
     ListFooterComponent={() => (
-       <ActivityIndicator color='#fff' size='small' animating={loadingMore}/>
+       <ActivityIndicator color='#fff' size='small' animating={false}/>
     )}
-    renderItem={({item}) => <Suspense fallback={<ActivityIndicator size='small' color='#000'/>}>
-      <PostComponent
+    renderItem={({item}) => 
+    <PostComponent
       auth_profile={item.auth_profile}
       count={item.like_count}
       url={item.imageUrl}
@@ -247,9 +197,9 @@ const fetchMorePost = async () => {
           minute: '2-digit',
           hour12: true})}
       comment_count={item.comment_count}/>
-      </Suspense>}
+     }
     keyExtractor={(item)=> item?.post_id?.toString() || Math.random().toString()}
-    /> )} 
+    />
     </View>
   )
 }

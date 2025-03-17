@@ -21,7 +21,7 @@ import color from '../../config/color';
 import {getDownloadURL,putFile,ref} from '@react-native-firebase/storage'
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useTheme,Icon,Text,Button,Divider } from 'react-native-paper';
-import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import {  useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Image } from 'expo-image';
 import {log,recordError} from '@react-native-firebase/crashlytics'
 import {
@@ -59,13 +59,21 @@ const PostScreen = () => {
   const navigation = useNavigation<Navigation>();
   const textInputRef = useRef<TextInput>(null);
   const [category, setCategory] = useState<string>('')
+  const isMounted = useRef(true)
 
   
 {/** TOMORROW GET IMAGE AND VIDEO OPTIMIZE ALSO IN POST AND COMMMENT COMPONENT, THIS WILL TIE INTO WITH PROJECT SCREEN AND MAYBE EDIT SCREEN */}
 
+
+  useEffect(() => {
+    isMounted.current = true;
+    return () => {
+      isMounted.current = false}
+  },[])
+
   useEffect(() => {
     const timeout = setTimeout(() => {
-      textInputRef.current?.focus();
+      textInputRef.current?.focus()
     }, 1000);
 
     return () => clearTimeout(timeout); 
@@ -78,7 +86,7 @@ const PostScreen = () => {
     setLoading(true);
     try {
       const addPost = httpsCallable(functions,'addPost')
-      let imageUrl = null;
+      let imageUrl = '';
       if(image && filename){
         const imageRef = ref(storage,`/posts/images/${user.userId}/${filename}`)
         await putFile(imageRef,image)
@@ -91,12 +99,10 @@ const PostScreen = () => {
         like_count: 0,
         comment_count: 0,
         liked_by: [],
-        category:[category],
-        imageUrl:imageUrl,
-        filename:filename,
-        createdAt: Timestamp.fromDate(new Date())
+        category:category,
+        image:imageUrl,
       }).catch((error) => {
-        console.log(error)
+        console.log('Error sending:',error)
       })
       setText('');
       setImage(null);
@@ -130,6 +136,7 @@ const PostScreen = () => {
   },[ hasUnsavedChanges, image]);
   const pickImage = useCallback(async () => {
     log( crashlytics,'Post Screen: Picking Images')
+    setLoading(true)
     try{
       let results = await launchImageLibrary({
         mediaType: 'mixed',
@@ -138,12 +145,18 @@ const PostScreen = () => {
       })
       if(!results.didCancel && results.assets?.length && results.assets[0].uri){
         const uri = await ImageCompressor.compress(results.assets[0].uri)
-        setImage(uri)
-        setFileName(results?.assets[0]?.fileName)
+        if(isMounted.current){
+          setImage(uri)
+          setFileName(results?.assets[0]?.fileName)
+        }
       }
     }catch(error:unknown | any){
       recordError(crashlytics,error)
       console.error(error)
+    }finally{
+      if(isMounted.current){
+        setLoading(false)
+      }
     }
   },[setImage,setFileName])
   return (

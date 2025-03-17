@@ -1,32 +1,18 @@
 import { createDrawerNavigator, DrawerItem,DrawerContentScrollView,DrawerItemList } from '@react-navigation/drawer';
 import { useNavigation} from '@react-navigation/native';
-import { lazy,Suspense, useState, useMemo, useCallback, memo} from 'react';
-import { ActivityIndicator,TouchableWithoutFeedback,useColorScheme,View, } from 'react-native';
+import React, { useState,useCallback, memo} from 'react';
+import { TouchableWithoutFeedback,useColorScheme,View, } from 'react-native';
 import { Image } from 'expo-image';
 import { blurhash } from 'utils';
-import { useAuth } from 'app/authContext';
+import { useAuth } from '../authContext.tsx'
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import { Icon,useTheme,Text} from 'react-native-paper';
-import LazyScreenComponent from 'app/components/LazyScreenComponent';
-
-
+import SettingsScreen from '../screen/SettingsScreen.tsx';
+import TabNavigation from '../navigation/TabNavigation.tsx'
 
 const Drawer = createDrawerNavigator();
-const TabNavigation = lazy(() => import('./TabNavigation'))
-const SettingsScreen = lazy(() => import('../screen/SettingsScreen'))
 
 
-const TabNavigationWrapper = memo(() => (
-  <LazyScreenComponent>
-    <TabNavigation/>
-  </LazyScreenComponent>
-));
-
-const SettingScreenWrapper = memo(() => (
-  <LazyScreenComponent>
-    <SettingsScreen/>
-  </LazyScreenComponent>
-));
 
 
 
@@ -35,7 +21,6 @@ const DrawerNavigation = () => {
   const {user,logout} = useAuth()
   const [loading,setLoading] = useState<boolean>(false)
   const navigation = useNavigation()
-  const dark_or_light = useColorScheme()
 
   const handleLogout = useCallback(async () => {
     setLoading(true)
@@ -95,7 +80,7 @@ const DrawerNavigation = () => {
     }}>
       <Drawer.Screen
       name='Home'
-      component={TabNavigationWrapper}
+      component={TabNavigation}
       options={{
         drawerIcon:({focused,color,size}) => (
           <Icon
@@ -125,7 +110,7 @@ const DrawerNavigation = () => {
       }}/> */}
        <Drawer.Screen
       name='Settings'
-      component={SettingScreenWrapper}
+      component={SettingsScreen}
       options={{
         drawerIcon:({focused,color,size}) => (
           <Icon

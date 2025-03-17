@@ -2,51 +2,18 @@
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { lazy,Suspense, memo } from 'react';
-import { ActivityIndicator, useColorScheme} from 'react-native';
+import React, { lazy,Suspense, memo } from 'react';
 import { useTheme} from 'react-native-paper';
 import { Image
  } from 'expo-image';
  import { blurhash } from 'utils';
 import { useAuth } from 'app/authContext';
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
-import LazyScreenComponent from 'app/components/LazyScreenComponent';
-const NotificationScreen = lazy(() => import('../screen/NotificationScreen'))
-const SearchScreen = lazy(() => import('../screen/SearchScreen'))
-const StackNavigation = lazy(() => import('./StackNavigation'))
-const ProfileScreen = lazy(() => import('../screen/AccountScreen'))
+import NotificationScreen from '../screen/NotificationScreen.tsx';
+import SearchScreen from '../screen/SearchScreen.tsx';
+import StackNavigation from '../navigation/StackNavigation.tsx';
+import ProfileScreen from '../screen/AccountScreen.tsx';
 
-
-const StackNavigationwrapper = memo(() =>{
-  return (
-    <LazyScreenComponent>
-      <StackNavigation/>
-    </LazyScreenComponent>
-  )})
-
-const ProfileScreenWrapper = memo(() =>{
-    return (
-  
-     <LazyScreenComponent>
-      <ProfileScreen/>
-     </LazyScreenComponent>
-  
-    )
-})
-const SearchScreenWrapper = memo(() => {
-  return(
-  <LazyScreenComponent>
-    <SearchScreen/>
-  </LazyScreenComponent>
-  )
-})
-const NotificationScreenWrapper = memo(() => {
-  return(
-    <LazyScreenComponent>
-      <NotificationScreen/>
-    </LazyScreenComponent>
-    )
-})
 
 
 
@@ -74,7 +41,7 @@ const TabNavigation = () => {
 >
     <Tab.Screen 
       name="Welcome"
-     component={StackNavigationwrapper}
+     component={StackNavigation}
      options={{
         tabBarLabel:'Welcome',
         tabBarIcon:() => (
@@ -84,7 +51,7 @@ const TabNavigation = () => {
      />
      <Tab.Screen
      name='Search'
-     component={SearchScreenWrapper}
+     component={SearchScreen}
      options={{
       tabBarLabel:'Search',
       tabBarIcon: () => <MaterialCommunityIcons name='account-search' size={25} color={theme.colors.tertiary}/>
@@ -92,7 +59,7 @@ const TabNavigation = () => {
     />
     <Tab.Screen 
         name="Notification"
-        component={NotificationScreenWrapper}
+        component={NotificationScreen}
      options={{
         tabBarLabel: 'Notification',
         tabBarIcon:() => <MaterialIcons name='notifications' color={theme.colors.tertiary} size={25}/>
@@ -100,7 +67,7 @@ const TabNavigation = () => {
      />
      <Tab.Screen 
         name="Account"
-        component={ProfileScreenWrapper}
+        component={ProfileScreen}
         options={{
           tabBarIcon:() => (
             user?.profileUrl ?

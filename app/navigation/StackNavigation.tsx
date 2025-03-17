@@ -1,44 +1,11 @@
-import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { lazy,Suspense,memo } from 'react';
-import { ActivityIndicator, useColorScheme } from 'react-native';
-import  DashBoardScreen  from '../screen/DashBoardScreen';
-import { useTheme } from 'react-native-paper';
-import LazyScreenComponent from 'app/components/LazyScreenComponent';
-const HomeScreen = lazy(() => import('../screen/HomeScreen'))
-const MessageScreen = lazy(() => import('../screen/MessageScreen'))
-const EditScreen = lazy(() => import('../screen/EditScreen'))
-const OtherUserScreen = lazy(() => import('../screen/OtherUserScreen'))
+import React from 'react';
+import MessageScreen from '../screen/MessageScreen.tsx';
+import EditScreen from '../screen/EditScreen.tsx';
+import OtherUserScreen from '../screen/OtherUserScreen.tsx';
+import DashBoardScreen from '../screen/DashBoardScreen.tsx';
 
 
-const MessageScreenWrapper = memo(() => {
-  return (
-      <LazyScreenComponent>
-      <MessageScreen/>
-      </LazyScreenComponent>
-)})
-
-const HomeScreenWrapper = memo(() => {
-  return(
-  <LazyScreenComponent>
-    <HomeScreen/>
-  </LazyScreenComponent>
-  )
-})
-
-const EditScreenWrapper = memo(() => {
-  return (
-  <LazyScreenComponent>
-    <EditScreen/>
-  </LazyScreenComponent>
-)})
-
-const OtherUserScreenWrapper = memo(() => {
-  return (
-  <LazyScreenComponent>
-    <OtherUserScreen/>
-  </LazyScreenComponent>
-)})
 
 const StackNavigation = () => {
   const Stack = createNativeStackNavigator();
@@ -53,17 +20,9 @@ const StackNavigation = () => {
         gestureEnabled:false,
        }}
       />
-      <Stack.Screen
-        name='Main'
-        component={HomeScreenWrapper}
-        options={{
-        headerShown: false, 
-        gestureEnabled:false
-        }}
-      />
     <Stack.Screen 
      name='Message'
-     component={MessageScreenWrapper}
+     component={MessageScreen}
      options={{
       headerShown:false,
       gestureEnabled:false
@@ -71,7 +30,7 @@ const StackNavigation = () => {
      }}/>
        <Stack.Screen
       name='Edit'
-      component={EditScreenWrapper}
+      component={EditScreen}
       options={{
         headerShown:false,
         gestureEnabled:false,
@@ -80,7 +39,7 @@ const StackNavigation = () => {
       />
         <Stack.Screen
       name='SearchAccount'
-      component={OtherUserScreenWrapper}
+      component={OtherUserScreen}
       options={{
         headerShown:false,
         gestureEnabled:false
