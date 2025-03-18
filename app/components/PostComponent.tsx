@@ -6,7 +6,7 @@ KeyboardAvoidingView,
 Platform,
 Modal,
 Alert,
-LayoutChangeEvent
+useWindowDimensions,
 } from 'react-native'
 import { blurhash } from '../../utils/index'
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
@@ -89,14 +89,8 @@ const PostComponent: React.FC<PostComponentProps> = memo(({
     const {user} = useAuth();
     const [replyingTo, setReplyingTo] = useState<string | null>(null);
     const [replyingToUsername, setReplyingToUsername] = useState<string | undefined>(undefined);
+    const {width,height} = useWindowDimensions()
    
-    useEffect(() => {
-      setLoading(true)
-      const timer = setTimeout(() => {
-        setLoading(false)
-      },1000)
-      return () => clearTimeout(timer)
-    },[])
 
     useEffect(() => {
       const docRef = doc(PostRef,id)
@@ -236,21 +230,18 @@ const PostComponent: React.FC<PostComponentProps> = memo(({
 
 
   return (
-    
-    <View style={{flex:1}}>
-      <Card
-      elevation={0}
-      style={{backgroundColor:'transparent'}}
-      >
+  <Card
+  elevation={2}
+  style={{backgroundColor:'transparent',marginVertical:8,marginHorizontal:10}}
+  >
   <Card.Content>
-    <View>
     <View style={{flexDirection:'row'}}>
       <MotiView
          transition={{
           type: 'timing',
         }}>
       <Skeleton
-        show={isloading}
+        show={mount}
         radius='round'
         >
       <Image
@@ -260,9 +251,7 @@ const PostComponent: React.FC<PostComponentProps> = memo(({
         cachePolicy='none'/>
         </Skeleton>
       </MotiView>
-    <View>
-      <View style={{flexDirection:'row',alignItems:'center'}}>
-      <View style={{flexDirection:'row',alignItems:'center'}}>
+      <View style={{flexDirection:'column'}}>
       <MotiView
       transition={{
           type: 'timing',
@@ -272,7 +261,7 @@ const PostComponent: React.FC<PostComponentProps> = memo(({
       }}
       >
       <Skeleton
-      show={isloading}
+      show={mount}
       width={wp('40%')}
       >
       <Text
@@ -284,25 +273,21 @@ const PostComponent: React.FC<PostComponentProps> = memo(({
     >@{name}</Text>
       </Skeleton>
       </MotiView>
-      </View>
-    <View style={{paddingLeft:40}}>
-    </View>
-    </View>
-     <MotiView
+      <MotiView
       transition={{
         type: 'timing',
       }}
      style={{
       paddingTop:5,
-      paddingLeft:10,
+      paddingLeft:5,
      }}
      >
       <Skeleton
-      show={isloading}
+      show={mount}
       width={ url ? wp('80%') : wp('80%')}
-      height={url ? hp('50%'): 30}
+      height={url ? 30: 30}
       >
-      <Text
+    <Text
     variant="bodyMedium"
     style={{
     marginLeft:10,
@@ -310,36 +295,36 @@ const PostComponent: React.FC<PostComponentProps> = memo(({
     color:theme.colors.tertiary
     }}
     >{content}</Text>
-      </Skeleton>
-      </MotiView> 
-    </View>
-    </View>
-    {url && 
+    </Skeleton>
+    </MotiView>
+      {url && 
       <FastImage
       source={{
         uri:url,
         priority: FastImage.priority.normal
       }}
-      resizeMode={FastImage.resizeMode.contain}
+      resizeMode={FastImage.resizeMode.cover}
       style={{
-        aspectRatio:1,
-        width:wp('100%'),
-        height:hp('50%'),
-        alignSelf: 'center',}}
+        aspectRatio: 1,
+        width:370,
+        height:370,
+        borderRadius: 10,
+        marginTop: 8,
+      }}
       />}
-      <MotiView
+        <MotiView
       transition={{
         type: 'timing',
       }}
       style={{
         width:50,
-        paddingTop:5,
+        paddingTop:10,
         alignItems:'center',
         justifyContent:'center'
       }}
       >
         <Skeleton
-        show={isloading}
+        show={mount}
         width={wp('10%')}
         >
         <Text
@@ -350,7 +335,10 @@ const PostComponent: React.FC<PostComponentProps> = memo(({
        }}>{date}</Text>
         </Skeleton>
       </MotiView>
-      <View style={styles.reactionContainer}>
+    </View>
+    </View>
+    </Card.Content>
+    <View style={styles.reactionContainer}>
     <TouchableHighlight
       onShowUnderlay={() => setIsPress(true)}
       onHideUnderlay={() => setIsPress(false)}
@@ -359,7 +347,7 @@ const PostComponent: React.FC<PostComponentProps> = memo(({
       >
       <MotiView>
         <Skeleton
-        show={isloading}
+        show={mount}
         >
         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
           <MaterialCommunityIcons name="heart" size={17} color={theme.colors.tertiary}/>
@@ -378,7 +366,7 @@ const PostComponent: React.FC<PostComponentProps> = memo(({
           }}
           >
             <Skeleton
-            show={isloading}
+            show={mount}
             >
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
             <MaterialCommunityIcons name="comment-outline" size={15} color={theme.colors.tertiary}/>
@@ -396,7 +384,7 @@ const PostComponent: React.FC<PostComponentProps> = memo(({
           <MenuTrigger>
           <MotiView>
           <Skeleton
-          show={isloading}
+          show={mount}
           >
           <Icon source='dots-horizontal' size={17} color={theme.colors.tertiary}/>
           </Skeleton>
@@ -431,7 +419,6 @@ const PostComponent: React.FC<PostComponentProps> = memo(({
       </MenuOptions>
     </Menu> 
       </View>
-    </View>
     <View style={{flex:1}}>
     <Modal
     animationType="fade"
@@ -498,9 +485,7 @@ const PostComponent: React.FC<PostComponentProps> = memo(({
     </KeyboardAvoidingView>
   </Modal>
   </View>
-      </Card.Content>
-      </Card>
-  </View>
+  </Card>
   )
 })
 
@@ -511,9 +496,11 @@ const styles = StyleSheet.create({
       paddingBottom: 60,
     },
     reactionContainer:{
-      flexDirection:'row',
-      justifyContent:'space-between',
-      marginTop:5
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      paddingTop: 12,
+      paddingBottom: 8,
+      borderTopWidth: 0.5,
     },
     reactionIcon:{
       padding:5,

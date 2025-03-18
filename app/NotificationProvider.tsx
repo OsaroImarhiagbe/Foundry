@@ -58,11 +58,10 @@ export const NotificationProvider = ({ children }:NotificationProp) => {
                 sound:'default'
             },
         });
-        if(user?.userId){
+        if(user.userId){
           await setDoc(doc(NotificationsRef,user.userId),{
             title:title,
-            message:message,
-            data:data
+            message:message
           })
         }
         setNotification({ title, message,data });

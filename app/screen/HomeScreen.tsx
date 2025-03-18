@@ -1,22 +1,17 @@
 import React,{
   useState,
   useEffect,
-  lazy,
   useCallback,} from 'react'
 import {
   View,
-  StyleSheet,
 } from 'react-native'
 import { useAuth } from 'app/authContext';
 import { FirebaseFirestoreTypes,onSnapshot,doc,orderBy,query, limit,getDocs, startAfter,where } from '@react-native-firebase/firestore';
-import { useDispatch, useSelector} from 'react-redux';
-import { addId } from '../features/user/userSlice.ts';
+import { useSelector} from 'react-redux';
 import { FlashList } from "@shopify/flash-list";
 import {ActivityIndicator,Text,Divider,useTheme} from 'react-native-paper'
-
 import {log,recordError} from '@react-native-firebase/crashlytics'
 import { PostRef,crashlytics,perf} from '../../FirebaseConfig';
-import LazyScreenComponent from 'app/components/LazyScreenComponent.tsx';
 import PostComponent from '../components/PostComponent';
 
 
@@ -39,7 +34,6 @@ type Post = {
 
 const HomeScreen= () => {
   const theme = useTheme()
-  const dispatch = useDispatch()
   const [refreshing, setRefreshing] = useState<boolean>(false);
   const {user} = useAuth()
   const [post, setPost] = useState<Post[]>([])
@@ -57,8 +51,7 @@ const HomeScreen= () => {
       return;
     }
     log(crashlytics,'Grabbing post')
-    dispatch(addId({currentuserID:user?.userId}))
-    const  getCategoryPost = async () => {
+    const timer = setTimeout(async () => {
     const trace = await perf.startTrace('HomeScreen')
       try {
         const docRef = query(PostRef,where('category','==',category),orderBy('createdAt', 'desc'),limit(10))
@@ -82,12 +75,12 @@ const HomeScreen= () => {
           recordError(crashlytics,error)
           console.error(`Error post can not be found: ${error}`);
           setLoading(false);
-          trace.stop()
         }finally{
+          setLoading(false)
           trace.stop()
         }
-      }
-    getCategoryPost()
+      },4000)
+      return () => clearTimeout(timer)
   }, [category]); 
 
 
@@ -128,8 +121,8 @@ const fetchMorePost = useCallback(async () => {
   setLoadingMore(true);
   log(crashlytics,'Fetch More Post')
   let trace = await perf.startTrace('fetch_more_community_posts')
-  if (loadingMore || !hasMore) return;
-  if (post.length < 2) {
+  if (!hasMore) return;
+  if (post.length <= 2) {
     setHasMore(false);
     setLoadingMore(false);
     return;
@@ -163,64 +156,52 @@ const fetchMorePost = useCallback(async () => {
 
   return (
     <View
-    style={[styles.screen,{backgroundColor:theme.colors.background}]}
+    style={{flex:1,backgroundColor:theme.colors.background}}
     >
-      <FlashList
-    contentContainerStyle={{padding:0}}
-    data={post}
-    estimatedItemSize={460}
-    onRefresh={onRefresh}
-    ListEmptyComponent={(item) => (
-      <View style={{flex:1,alignItems:'center',justifyContent:'center',paddingTop:5}}>
-        <Text>No post at the moment</Text>
-      </View>
-    )}
-    onEndReached={fetchMorePost}
-    onEndReachedThreshold={0.1}
-    refreshing={refreshing}
-    ItemSeparatorComponent={()=> (
-      <Divider/>
-    )}
-    ListFooterComponent={() => (
-       <ActivityIndicator color='#fff' size='small' animating={false}/>
-    )}
-    renderItem={({item}) => 
-    <PostComponent
-      auth_profile={item.auth_profile}
-      count={item.like_count}
-      url={item.imageUrl}
-      id={item.post_id}
-      name={item.name}
-      content={item.content}
-      date={item?.createdAt?.toDate().toLocaleString('en-US', {
-          hour: '2-digit',
-          minute: '2-digit',
-          hour12: true})}
-      comment_count={item.comment_count}/>
-     }
-    keyExtractor={(item)=> item?.post_id?.toString() || Math.random().toString()}
-    />
+      { loading ? Array.from({length:5}).map((_,index) => (
+          <PostComponent
+          key={index}
+          mount={loading}
+        /> )): (<FlashList
+        contentContainerStyle={{padding:0}}
+        data={post}
+        estimatedItemSize={460}
+        onRefresh={onRefresh}
+        ListEmptyComponent={(item) => (
+          <View style={{flex:1,alignItems:'center',justifyContent:'center',paddingTop:5}}>
+            <Text>No post at the moment</Text>
+          </View>
+        )}
+        onEndReached={fetchMorePost}
+        onEndReachedThreshold={0.1}
+        refreshing={refreshing}
+        ItemSeparatorComponent={()=> (
+          <Divider/>
+        )}
+        ListFooterComponent={() => (
+           <ActivityIndicator color='#fff' size='small' animating={false}/>
+        )}
+        renderItem={({item}) => 
+        <PostComponent
+          auth_profile={item.auth_profile}
+          count={item.like_count}
+          url={item.imageUrl}
+          id={item.post_id}
+          name={item.name}
+          content={item.content}
+          date={item?.createdAt?.toDate().toLocaleString('en-US', {
+              hour: '2-digit',
+              minute: '2-digit',
+              hour12: true})}
+          comment_count={item.comment_count}/>
+         }
+        keyExtractor={(item)=> item?.post_id?.toString() || Math.random().toString()}
+        />
+      )
+    }
     </View>
   )
 }
 
-const styles = StyleSheet.create({
-  bodyText:{
-    fontSize:15
-  },
-  link:{
-    flexDirection:'row',
-    justifyContent:'space-evenly',
-    },
-    screen:{
-      flex:1,
-  },
-  padded: {
-    padding: 10,
-  },
-  container:{
-    flex:1
-  }
-})
 
 export default HomeScreen

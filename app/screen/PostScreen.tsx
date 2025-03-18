@@ -102,7 +102,7 @@ const PostScreen = () => {
         category:category,
         image:imageUrl,
       }).catch((error) => {
-        console.log('Error sending:',error)
+        console.error('Error sending post:',error)
       })
       setText('');
       setImage(null);
