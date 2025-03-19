@@ -2,7 +2,6 @@ import {
     View,
     StyleSheet, 
     TouchableOpacity,
-    ImageSourcePropType,
     ImageBackground} from 'react-native'
 import { useCallback, useState,} from 'react';
 import { useNavigation } from '@react-navigation/native';
@@ -12,18 +11,17 @@ import { Image } from 'expo-image';
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import { blurhash } from '../../utils/index';
 import {getDownloadURL, putFile, ref} from '@react-native-firebase/storage';
-import { useDispatch } from 'react-redux';
+import { useDispatch,useSelector } from 'react-redux';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import {log,recordError,} from '@react-native-firebase/crashlytics'
 import { crashlytics,UsersRef } from 'FirebaseConfig';
 import { useTheme, Text,Icon,} from 'react-native-paper';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import AppTextInput from 'app/components/AppTextInput';
 import { storage } from '../../FirebaseConfig';
 import {Image as ImageCompressor} from 'react-native-compressor';
 import {launchImageLibrary} from 'react-native-image-picker';
 import { TouchableWithoutFeedback } from 'react-native-gesture-handler';
-import { addHeaderImage, addImage } from 'app/features/user/userSlice';
+import { addHeaderImage, addImage } from '../features/user/userSlice';
 
 
 
@@ -34,13 +32,14 @@ type NavigationProp = {
     Welcome:{
         screen?:string
       },
+    Home:{
+        screen?:string
+    },
 }
 
 type Navigation = NativeStackNavigationProp<NavigationProp>
 
-type Edit = {
-  text:string
-}
+
 interface Form {
     name: string;
     username: string;
@@ -50,7 +49,7 @@ interface Form {
     location: string;
   }
   
-  interface Item {
+interface Item {
     id: string;
     screen: string;
     key: string;
@@ -59,15 +58,14 @@ interface Form {
   
 const EditScreen = () => {
     const navigation = useNavigation<Navigation>();
-    const [edit,setEdit] = useState<Edit | string>('')
     const [filename,setFileName] = useState<string | undefined>(undefined)
-    const [image,setImage] = useState<string | undefined>(undefined)
-    const [headerimage,setHeaderImage] = useState<ImageSourcePropType | undefined>(undefined)
+    const [image,setImage] = useState<string>('')
+    const [headerimage,setHeaderImage] = useState<string>('')
     const dispatch = useDispatch()
+    const profileimg = useSelector((state:any) => state.user.addImage)
+    const headerimg = useSelector((state:any) => state.user.addHeaderImage)
     const {user} = useAuth()
     const theme = useTheme()
-    const {top} = useSafeAreaInsets()
-    const [text,setText] = useState('')
     const [form, setForm] = useState<Form>({
         name: '',
         username: '',
@@ -76,14 +74,6 @@ const EditScreen = () => {
         jobTitle: '',
         location: ''
       })
-      
-    // const [form, setForm] = useState({
-    //     darkMode:true,
-    //     wifi:false,
-    //     showCollaborators:true,
-    //     accessibilityMode: false
-    // })
-  
     const items:Item[] = [{
               id:'1',
               type:'username',
@@ -115,27 +105,34 @@ const EditScreen = () => {
             key:'location',
         }
         ]
-    
 
+        console.log('header img',headerimg)
+      
+    
 
     const handleSave = useCallback(async() => {
         let url;
-        if(image && filename){
-            const imageRef = ref(storage,`/users/profile/${user.userId}/${filename}`)
+        let headerurl;
+        if(image && filename && headerimage){
+            const imageRef = ref(storage,`/users/profileImage/${user.userId}/${filename}`)
+            const headerRef = ref(storage,`/users/profileHeader/${user.userId}/${filename}`)
             await putFile(imageRef,image)
+            await putFile(headerRef,headerimage)
             url = await getDownloadURL(imageRef)
+            headerurl = await getDownloadURL(headerRef)
         }
         try{
             await updateDoc(doc(UsersRef,user.userId),{
                 ...form,
-                profileUrl:url || user.profileUrl
+                profileUrl:url,
+                headerUrl:headerurl
             })
             navigation.goBack()
         }catch(error:unknown | any){
             recordError(crashlytics,error)
             console.error(error)
         }
-    },[ form, image, filename, user.profileUrl, user.userId, navigation])
+    },[ form, image, filename])
 
     const pickImage = useCallback(async (type:'header' | 'profile') => {
         log(crashlytics,'Edit Screen: Pick Image')
@@ -147,8 +144,8 @@ const EditScreen = () => {
             if(!results.didCancel && results.assets?.length && results.assets[0].uri){
                 const uri = await ImageCompressor.compress(results.assets[0].uri)
                 if(type === 'header'){
-                    setHeaderImage({uri})
-                    dispatch(addHeaderImage(uri))
+                    setHeaderImage(uri)
+                    dispatch(addHeaderImage({headerimg:uri}))
                 }else{
                     setImage(uri)
                     dispatch(addImage(uri)) 
@@ -175,7 +172,7 @@ const EditScreen = () => {
             <Text
                 variant='bodyLarge'
                 style={{
-                    textAlign:'center'
+                    textAlign:'center',
                 }}
             >Edit Profile</Text>
             <TouchableOpacity onPress={handleSave}>
@@ -185,7 +182,7 @@ const EditScreen = () => {
             <TouchableWithoutFeedback onPress={() => pickImage('header')}>
                 {
                     headerimage ?  <ImageBackground
-                    source={headerimage}
+                    source={{uri:headerimg}}
                     resizeMode='cover'
                     imageStyle={{height:150,justifyContent:'flex-end'}}
                     style={{

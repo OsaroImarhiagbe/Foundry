@@ -173,6 +173,53 @@ exports.addPost = onCall(async (request) => {
     throw new HttpsError("internal", "Failed to send test notification");
   }
 });
+exports.addProject = onCall(async (request) =>{
+  if (!request.auth) {
+    throw new HttpsError("unauthenticated", "This endpoint requires authentication");
+  }
+  const {Name, Overview, Tech, currentProjectId, image} = request.data;
+  const docRef = await getFirestore()
+    .collection("projects")
+    .doc(request.auth.uid)
+    .collection("projects")
+    .doc(currentProjectId);
+  try {
+    if (docRef) {
+      await docRef.update({
+        Name: Name,
+        Overview: Overview,
+        Tech: Tech,
+        image: image,
+        updatedAt: new Date(),
+      });
+      return {success: true, projectid: docRef.id};
+    } else {
+      const newDoc = await getFirestore()
+        .collection("projects")
+        .doc(request.auth.uid)
+        .collection("projects")
+        .add({
+          Name: Name,
+          Overview: Overview,
+          Tech: Tech,
+          image: image,
+          createdAt: FieldValue.serverTimestamp(),
+        });
+      await getFirestore()
+        .collection("projects")
+        .doc(request.auth.uid)
+        .collection("projects")
+        .doc(newDoc.id)
+        .update({
+          projectid: newDoc.id,
+        });
+      return {success: true, projectid: newDoc.id};
+    }
+  } catch (error) {
+    logger.error("Error sending project", error);
+    throw new HttpsError("internal", "Failed to send project");
+  }
+});
 exports.newUser = onCall(async (request) => {
   if (!request.auth) {
     throw new HttpsError(

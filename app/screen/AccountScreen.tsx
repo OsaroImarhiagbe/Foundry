@@ -5,11 +5,9 @@ import {
   TouchableOpacity,
   SafeAreaView,
   ImageBackground,
-  useWindowDimensions,
   Platform,
   RefreshControl,
   } from 'react-native'
-import {lazy,Suspense} from 'react'
 import { useNavigation } from '@react-navigation/native';
 import {useState, useEffect,useCallback} from 'react';
 import { useAuth } from '../authContext';
@@ -33,11 +31,7 @@ import {PostRef, UsersRef,crashlytics} from '../../FirebaseConfig';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { log, recordError, setAttributes, setUserId } from '@react-native-firebase/crashlytics';
 import { useSelector } from 'react-redux';
-
-
-
-
-const PostComponent = lazy(() => import('../components/PostComponent'))
+import PostComponent from '../components/PostComponent';
 
 type NavigationProp = {
   ProjectScreen:undefined,
@@ -64,7 +58,8 @@ type User = {
   follow_state?:boolean,
   connection?:string,
   jobtitle?:string,
-  location?:string
+  location?:string,
+  headerUrl?:string
 
 }
 type Post = {
@@ -107,9 +102,7 @@ const AccountScreen = () => {
   const [refreshing, setRefreshing] = useState(false);
   const theme = useTheme()
   const {top} = useSafeAreaInsets()
-  const {width,height} = useWindowDimensions()
-  //const profileimg = useSelector((state:any) => state.user.addHeaderImage)
-  const headerimg = useSelector((state:any) => state.user.addImage)
+
 
   
 
@@ -172,13 +165,13 @@ const AccountScreen = () => {
       console.error('error grabbing user projects:',err.message)
       setLoading(false)
     }
-  },[user])
+  },[])
 
   useEffect(() => {
     log(crashlytics,'Account Screen: Grabbing Users Post')
     setLoading(true)
     try{
-      const postRef = query(PostRef,where('name','==',user?.username) ,orderBy('createdAt','desc'))
+      const postRef = query(PostRef,where('auth_id','==',user?.userId) ,orderBy('createdAt','desc'))
       const unsub = onSnapshot(postRef,async (querySnapshot) => {
         if (!querySnapshot || querySnapshot.empty) {
           setPosts([]);
@@ -202,7 +195,7 @@ const AccountScreen = () => {
       console.error('error grabbing user post:',err)
       setLoading(false)
     }
-  },[user])
+  },[])
 
   useEffect(() => {
     log(crashlytics,'Account Screen: Grabbing User ')
@@ -213,8 +206,7 @@ const AccountScreen = () => {
     })
     const userDoc = doc(UsersRef,user.userId)
     try{
-        const unsub = onSnapshot(userDoc,
-          async (docRef) =>{
+        const unsub = onSnapshot(userDoc,async (docRef) =>{
           if(docRef.exists){
             setUsers(docRef.data())
             setSkills(docRef.data()?.skllls)
@@ -251,7 +243,7 @@ const AccountScreen = () => {
           data={posts}
           estimatedItemSize={460}
           onRefresh={onRefresh}
-          ListEmptyComponent={(item) => (
+          ListEmptyComponent={() => (
             <View style={{flex:1,alignItems:'center',justifyContent:'center',paddingTop:5}}>
               <Text>No post at the moment</Text>
             </View>
@@ -264,7 +256,7 @@ const AccountScreen = () => {
           ListFooterComponent={() => (
               <ActivityIndicator color='#fff' size='small' animating={isloading}/>
           )}
-          renderItem={({item}) => <Suspense fallback={<ActivityIndicator size='small' color='#000'/>}>
+          renderItem={({item}) => 
             <PostComponent
             auth_profile={item.auth_profile}
             count={item.like_count}
@@ -277,7 +269,7 @@ const AccountScreen = () => {
                 minute: '2-digit',
                 hour12: true})}
             comment_count={item.comment_count}/>
-            </Suspense>}
+           }
           keyExtractor={(item)=> item?.post_id?.toString() || Math.random().toString()}
               />
     </SafeAreaView>
@@ -367,7 +359,7 @@ const AccountScreen = () => {
     refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh}/>}
     >
       {
-        headerimg ? 
+        users?.headerUrl ? 
         (<ImageBackground
         resizeMode='cover'
         imageStyle={{height:150,justifyContent:'flex-end'}}
@@ -376,7 +368,7 @@ const AccountScreen = () => {
         bottom:0,
         justifyContent:'flex-end',
       }}
-      source={headerimg}
+      source={{uri:users?.headerUrl}}
       >
        <View style={{flexDirection:'row',justifyContent:'space-between',alignItems:'center',bottom:40}}>
        <TouchableOpacity onPress={() => navigation.navigate('Welcome',{screen:'Dash'})} style={{padding:10}}>
