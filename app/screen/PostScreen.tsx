@@ -55,7 +55,6 @@ const PostScreen = () => {
   const [loading,setLoading] = useState<boolean>(false)
   const hasUnsavedChanges = Boolean(text);
   const {top} = useSafeAreaInsets()
-  const profileImage = useSelector((state:any) => state.user.profileImage)
   const navigation = useNavigation<Navigation>();
   const textInputRef = useRef<TextInput>(null);
   const [category, setCategory] = useState<string>('')

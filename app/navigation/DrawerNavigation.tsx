@@ -61,7 +61,8 @@ const DrawerNavigation = () => {
           <DrawerItem
           label="Logout"
           labelStyle={{
-            color:theme.colors.tertiary
+            color:theme.colors.tertiary,
+            fontSize:24
           }}
           icon={ () => (<Icon
             source="logout"
@@ -89,25 +90,11 @@ const DrawerNavigation = () => {
           size={size}/>
         ),
         drawerLabelStyle:{
-          color:theme.colors.tertiary
+          color:theme.colors.tertiary,
+          fontSize:24
         },
         headerShown:false,
       }}/>
-       {/* <Drawer.Screen
-      name='News'
-      component={SettingScreenWrapper}
-      options={{
-        drawerIcon:({focused,color,size}) => (
-          <Icon
-          source="source-branch"
-          color={theme.colors.tertiary}
-          size={size}/>
-        ),
-        drawerLabelStyle:{
-          color:theme.colors.tertiary,
-        },
-        headerShown:false,
-      }}/> */}
        <Drawer.Screen
       name='Settings'
       component={SettingsScreen}
@@ -119,7 +106,8 @@ const DrawerNavigation = () => {
           size={size}/>
         ),
         drawerLabelStyle:{
-          color:theme.colors.tertiary
+          color:theme.colors.tertiary,
+          fontSize:24
         },
         headerShown:false,
       }}/>

@@ -178,13 +178,14 @@ exports.addProject = onCall(async (request) =>{
     throw new HttpsError("unauthenticated", "This endpoint requires authentication");
   }
   const {Name, Overview, Tech, currentProjectId, image} = request.data;
-  const docRef = await getFirestore()
+  const docRef = getFirestore()
     .collection("projects")
     .doc(request.auth.uid)
     .collection("projects")
     .doc(currentProjectId);
+  const docSnapshot = await docRef.get();
   try {
-    if (docRef) {
+    if (docSnapshot.exists) {
       await docRef.update({
         Name: Name,
         Overview: Overview,

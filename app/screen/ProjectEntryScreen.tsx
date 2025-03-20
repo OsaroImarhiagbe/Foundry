@@ -31,7 +31,8 @@ import { useDispatch,useSelector } from 'react-redux';
 import { addprojectId,currentProjectId } from 'app/features/projects/projectSlice';
 import { storage,functions } from '../../FirebaseConfig';
 import {getDownloadURL, putFile, ref} from '@react-native-firebase/storage';
-import { httpsCallable } from '@react-native-firebase/functions'
+import { httpsCallable } from '@react-native-firebase/functions';
+import { Text } from 'react-native-paper';
 
 interface Form {
   Name:string | undefined,
@@ -156,10 +157,16 @@ const ProjectEntryScreen = () => {
     <TouchableWithoutFeedback onPress={()=> Keyboard.dismiss()}>
         <SafeAreaView style={[styles.screen,{backgroundColor:theme.colors.background}]}>
         <View style={{padding:5}}>
-          <View style={{flexDirection:'row',justifyContent:'space-between'}}>
+          <View style={{flexDirection:'row',justifyContent:'space-between',padding:5}}>
           <TouchableOpacity onPress={() => navigation.goBack()}>
             <Icon source='arrow-left-circle' size={25}/>
           </TouchableOpacity>
+          <Text
+          variant='titleLarge'
+          style={{
+            color:theme.colors.tertiary
+          }}
+          >Project Entry</Text>
           <TouchableOpacity onPress={pickImage}>
           <Icon source='camera' size={25}/>
         </TouchableOpacity>

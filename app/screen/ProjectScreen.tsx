@@ -57,11 +57,14 @@ const ProjectScreen = () => {
       <SafeAreaView style={styles.screen}>
         <View style={{padding:20}}>
         <View style={styles.container}>
-            {projects.length > 0 && projects[0].image ?
-              <Image
+            {projects[0].image ?
+              <FastImage
               style={{width:'100%',height:'100%',borderRadius:20}}
-              source={projects[0]?.image}
-              placeholder={{blurhash}}
+              source={{
+                uri:projects[0]?.image,
+                priority:FastImage.priority.normal
+            }}
+              resizeMode={FastImage.resizeMode.cover}
               /> : <View style={{justifyContent:'center',alignItems:'center'}}><Text>Upload Image</Text></View>
             }
         </View>

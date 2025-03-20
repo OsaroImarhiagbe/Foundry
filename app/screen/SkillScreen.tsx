@@ -86,14 +86,20 @@ const SkillScreen = () => {
             source='close'
             />
         </TouchableOpacity>
-    <View  style={{padding:20}}>
-        <Text variant='bodyLarge'>Skills</Text>
+    <View  style={{padding:20, }}>
+        <Text variant='titleLarge' style={{fontSize:24,}}>Add skill</Text>
+    </View>
+    <View style={{paddingLeft:20,bottom:0}}>
+        <Text variant='titleSmall'>Skill*</Text>
     </View>
     <Autocomplete
       data={results}
       placeholder='Enter skills...'
-      placeholderTextColor={theme.colors.tertiary}
-      containerStyle={{padding:10}}
+      placeholderTextColor={theme.colors.onTertiary}
+      containerStyle={{padding:10,backgroundColor:'transparent'}}
+      inputContainerStyle={{
+        backgroundColor:'red'
+      }}
       value={query}
       onChangeText={(text) => setQuery(text)}
       flatListProps={{
