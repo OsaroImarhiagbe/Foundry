@@ -34,8 +34,9 @@ import {crashlytics, functions, perf } from '../../FirebaseConfig';
 import { storage } from 'FirebaseConfig';
 import { httpsCallable } from '@react-native-firebase/functions'
 import FastImage from "@d11/react-native-fast-image";
-import {Image as ImageCompressor} from 'react-native-compressor';
+import {Image as ImageCompressor,Video as VideoCompressor} from 'react-native-compressor';
 import {launchImageLibrary} from 'react-native-image-picker';
+import Video, {VideoRef} from 'react-native-video';
 
 
 
@@ -48,9 +49,11 @@ type Navigation = NativeStackNavigationProp<NavigationProp, 'Dash'>;
 const PostScreen = () => {
 
   const { user } = useAuth();
+
   const theme = useTheme()
   const [text, setText] = useState<string>('');
   const [image, setImage] = useState<string | null>(null);
+  const [video, setVideo] = useState<string | undefined>(undefined);
   const [filename,setFileName] = useState<string | undefined>(undefined)
   const [loading,setLoading] = useState<boolean>(false)
   const hasUnsavedChanges = Boolean(text);
@@ -59,7 +62,7 @@ const PostScreen = () => {
   const textInputRef = useRef<TextInput>(null);
   const [category, setCategory] = useState<string>('')
   const isMounted = useRef(true)
-
+  const videoRef = useRef<VideoRef>(null);
   
 {/** TOMORROW GET IMAGE AND VIDEO OPTIMIZE ALSO IN POST AND COMMMENT COMPONENT, THIS WILL TIE INTO WITH PROJECT SCREEN AND MAYBE EDIT SCREEN */}
 
@@ -116,7 +119,7 @@ const PostScreen = () => {
   },[ text, image, filename, user, category]);
 
   const handleCancel = useCallback(() => {
-    if (hasUnsavedChanges || image) {
+    if (hasUnsavedChanges || image || video) {
       Alert.alert(
         'Discard changes?',
         'You have unsaved changes. Are you sure to discard them and leave the screen?',
@@ -132,20 +135,27 @@ const PostScreen = () => {
     } else {
       navigation.goBack();
     }
-  },[ hasUnsavedChanges, image]);
+  },[ hasUnsavedChanges, image,video]);
   const pickImage = useCallback(async () => {
     log( crashlytics,'Post Screen: Picking Images')
     setLoading(true)
     try{
-      let results = await launchImageLibrary({
+      const results = await launchImageLibrary({
         mediaType: 'mixed',
         quality:1,
-        videoQuality:'high'
+        formatAsMp4:true,
+        presentationStyle:'popover',
+        videoQuality:'high',
       })
-      if(!results.didCancel && results.assets?.length && results.assets[0].uri){
+      if(!results.didCancel && results.assets?.length && results?.assets[0]?.uri && results?.assets[0]?.fileSize){
         const uri = await ImageCompressor.compress(results.assets[0].uri)
+        const videouri = await VideoCompressor.compress(results.assets[0].uri,{
+            compressionMethod: 'auto',
+            maxSize:640
+        })
         if(isMounted.current){
           setImage(uri)
+          setVideo(videouri)
           setFileName(results?.assets[0]?.fileName)
         }
       }
@@ -240,16 +250,19 @@ const PostScreen = () => {
       <View style={styles.textContainer}>
         <TextInput
           ref={textInputRef}
-          style={[styles.textArea,{color:theme.colors.tertiary,fontSize:16}]}
+          style={{
+            borderRadius: 10,
+            padding: 20,
+            color:theme.colors.tertiary,
+            fontSize:16,}}
           value={text}
           onChangeText={(text) => setText(text)}
-          numberOfLines={10}
           multiline={true}
+          textAlignVertical='top'
           placeholder='Share your ideas....'
           placeholderTextColor='grey'
         />
          {image && 
-        <View>
           <FastImage
             source={{
               uri:image,
@@ -260,8 +273,20 @@ const PostScreen = () => {
               alignSelf: 'center',
               height:300,
             }}
-          />
-        </View>}
+          />}
+         {video && <Video 
+            source={{
+              uri: video
+            }}
+            repeat={true}
+            ref={videoRef}
+            controls={true}
+            resizeMode='contain'             
+            style={{
+              width:'100%',
+              height:250,
+            }}
+          />}
       </View>
         <KeyboardAvoidingView 
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -318,13 +343,7 @@ const styles = StyleSheet.create({
   },
   textContainer: {
     flex:1,
-    paddingHorizontal:20,
-    borderRadius: 10,
-  },
-  textArea: {
-    flex: 1,
-    borderRadius: 10,
-    padding: 20,
+    paddingHorizontal:10,
   },
   uploadImageButton: {
     padding: 12,

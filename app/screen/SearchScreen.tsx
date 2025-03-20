@@ -120,7 +120,7 @@ const SearchScreen = () => {
                    <View style={styles.userContainer}>
                  <Image
                  style={styles.image}
-                 source={{uri:item?.profileUrl}}/>
+                 source={{uri:item?.profileUrl ? item?.profileUrl : require('../assets/user.png') }}/>
                <Text style={styles.text}>{item.username}</Text>
              </View>
              </View>

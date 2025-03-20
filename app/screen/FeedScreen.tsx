@@ -44,7 +44,7 @@ const FeedScreen = () => {
     const [lastVisible, setLastVisible] = useState<FirebaseFirestoreTypes.QueryDocumentSnapshot<FirebaseFirestoreTypes.DocumentData> | null>(null);
     const [loadingMore, setLoadingMore] = useState<boolean>(false);
     const [hasMore, setHasMore] = useState<boolean>(false);
-    const [loading, setLoading] = useState<boolean>(false)
+    const [loading, setLoading] = useState<boolean>(true)
     const theme = useTheme()
 
 
@@ -52,10 +52,9 @@ const FeedScreen = () => {
   
  
     useEffect(() => {
-      setLoading(true)
       if (!user?.userId) return;
       log(crashlytics,'Grabbing post')
-      const timer = setTimeout(async () => {
+      const grabPost = async () => {
         const trace = await perf.startTrace('feedscreen')
         try {
           const docRef = query(PostRef,orderBy('createdAt', 'desc'),limit(10))
@@ -87,8 +86,8 @@ const FeedScreen = () => {
         setLoading(false)
         trace.stop()
       }
-      },4000)
-    return () => clearTimeout(timer)
+      }
+      grabPost()
     }, []); 
   
 
@@ -99,11 +98,16 @@ const FeedScreen = () => {
         try {
           const docRef = query(PostRef,orderBy('createdAt', 'desc'),limit(10))
           const unsub = onSnapshot(docRef,querySnapShot =>{
-              let data:Post[] = [];
-              querySnapShot.forEach(documentSnapShot => {
-                data.push({ ...documentSnapShot.data(),id:documentSnapShot.id });
-            } )
-            setPost(data);
+            if(!querySnapShot || querySnapShot.empty){
+              setPost([])
+              setRefreshing(false)
+              return;
+            }
+            let data:Post[] = [];
+            querySnapShot.forEach(documentSnapShot => {
+              data.push({ ...documentSnapShot.data(),id:documentSnapShot.id });
+            })
+            setPost((prev) => [...prev,...data]);
             setLastVisible(querySnapShot.docs[querySnapShot.docs.length - 1]);
             setHasMore(querySnapShot.docs.length > 0);
             trace.putAttribute('post_count', post.length.toString());
@@ -121,6 +125,7 @@ const FeedScreen = () => {
     }, []);
 
     const fetchMorePost = useCallback(async () => {
+      setLoadingMore(true);
       log(crashlytics,'Fetch More Post')
       let trace = await perf.startTrace('fetching_more_post_feedscreen')
       if (!hasMore) return;
@@ -129,7 +134,6 @@ const FeedScreen = () => {
         setLoadingMore(false);
         return;
       }
-      setLoadingMore(true);
       try {
         const docRef = query(
           PostRef,
@@ -137,6 +141,11 @@ const FeedScreen = () => {
           startAfter(lastVisible), 
           limit(2)) 
         const snapshot = await getDocs(docRef)
+        if(!snapshot){
+          setHasMore(false)
+          setLoadingMore(false)
+          return;
+        }
         const newPosts = snapshot.docs.map(doc => ({
           id: doc.id,
           ...doc.data(),

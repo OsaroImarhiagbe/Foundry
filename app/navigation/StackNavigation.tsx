@@ -1,10 +1,37 @@
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import React from 'react';
-import MessageScreen from '../screen/MessageScreen.tsx';
-import EditScreen from '../screen/EditScreen.tsx';
-import OtherUserScreen from '../screen/OtherUserScreen.tsx';
+import React, { Suspense } from 'react';
+const MessageScreen = React.lazy(() => import('../screen/MessageScreen.tsx'))
+const EditScreen = React.lazy(() => import('../screen/EditScreen.tsx'));
+const OtherUserScreen = React.lazy(() => import('../screen/OtherUserScreen.tsx'));
 import DashBoardScreen from '../screen/DashBoardScreen.tsx';
 
+
+const MessageScreenWrapper = () => {
+  return (
+    <Suspense>
+      <MessageScreen/>
+    </Suspense>
+  )
+
+}
+
+const OtherUserScreenWrapper = () => {
+  return (
+    <Suspense>
+      <OtherUserScreen/>
+    </Suspense>
+  )
+
+}
+
+const EditScreenWrapper = () => {
+  return (
+    <Suspense>
+      <EditScreen/>
+    </Suspense>
+  )
+
+}
 
 
 const StackNavigation = () => {
@@ -22,7 +49,7 @@ const StackNavigation = () => {
       />
     <Stack.Screen 
      name='Message'
-     component={MessageScreen}
+     component={MessageScreenWrapper}
      options={{
       headerShown:false,
       gestureEnabled:false
@@ -30,7 +57,7 @@ const StackNavigation = () => {
      }}/>
        <Stack.Screen
       name='Edit'
-      component={EditScreen}
+      component={EditScreenWrapper}
       options={{
         headerShown:false,
         gestureEnabled:false,
@@ -39,7 +66,7 @@ const StackNavigation = () => {
       />
         <Stack.Screen
       name='SearchAccount'
-      component={OtherUserScreen}
+      component={OtherUserScreenWrapper}
       options={{
         headerShown:false,
         gestureEnabled:false

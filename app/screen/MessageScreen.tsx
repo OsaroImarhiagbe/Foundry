@@ -27,6 +27,8 @@ import {log,recordError} from '@react-native-firebase/crashlytics'
 import { ChatRoomsRef,crashlytics} from '../../FirebaseConfig';
 import SearchComponent from 'app/components/SearchComponent';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Skeleton } from 'moti/skeleton';
+import { MotiView } from 'moti';
 
 const ChatList = lazy(() => import('../../List/ChatList'))
 
@@ -50,6 +52,7 @@ const MessageScreen = () => {
   const [refreshing, setRefreshing] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(true);
+  const [loading,setLoading] = useState<boolean>(false)
   const [lastVisible, setLastVisible] = useState<FirebaseFirestoreTypes.QueryDocumentSnapshot<FirebaseFirestoreTypes.DocumentData> | null>(null);
   const theme = useTheme()
 
@@ -59,6 +62,7 @@ const MessageScreen = () => {
         log(crashlytics,'Grabbing Users Message')
         if (!users) {
           setUsers([]);
+          setRefreshing(false)
           return;
         }
         const docRef = query(ChatRoomsRef, where('senderName','!=',user.username),where('recipientName','==',user.username))
@@ -70,23 +74,28 @@ const MessageScreen = () => {
           setUsers(data)
           setLastVisible(querySnapshot.docs[querySnapshot.docs.length - 1])
           setHasMore(querySnapshot.docs.length > 0)
+          setRefreshing(false)
         },(err)=>{
           recordError(crashlytics,err)
           console.error(`Failed to grab users: ${err.message}`)
+          setRefreshing(false)
         })
-        return unsub
+        return () => unsub()
     }catch(error:any){
       recordError(crashlytics,error)
+      setRefreshing(false)
     }finally{
-    setRefreshing(false); 
+      setRefreshing(false); 
     }
   }, [users]);
 
   useEffect(() => {
+    setLoading(true)
     try{
       log(crashlytics,'Grabbing Users Message')
       if (!users) {
         setUsers([]);
+        setLoading(false)
         return;
       }
       const docRef = query(ChatRoomsRef, where('senderName','!=',user.username),where('recipientName','==',user.username))
@@ -98,16 +107,21 @@ const MessageScreen = () => {
         setUsers(data)
         setLastVisible(querySnapshot.docs[querySnapshot.docs.length - 1])
         setHasMore(querySnapshot.docs.length > 0)
+        setLoading(false)
       },(err)=>{
         recordError(crashlytics,err)
         console.error(`Failed to grab users: ${err.message}`)
+        setLoading(false)
       })
       return unsub
     }catch(error: unknown | any){
       recordError(crashlytics,error)
       console.error('Error getting messages',error)
+      setLoading(false)
+    }finally{
+      setLoading(false)
     }
-    },[users])
+    },[user.username])
   
   const fetchMoreMessage = async () => {
     log(crashlytics,'Fetch more Message')
@@ -119,15 +133,11 @@ const MessageScreen = () => {
     }
     setLoadingMore(true);
     try {
-      const docRef = lastVisible ? query(
+      const docRef = query(
         ChatRoomsRef,
         orderBy('createdAt','desc'),
         startAfter(lastVisible), 
-        limit(2)) : 
-        query(
-          ChatRoomsRef,
-          orderBy('createdAt', 'desc'),
-          limit(2))
+        limit(2)) 
       const snapshot = await getDocs(docRef)
       const newMessgae = snapshot.docs.map(doc => ({
         id: doc.id,
@@ -136,9 +146,11 @@ const MessageScreen = () => {
       setUsers(prev => [...prev, ...newMessgae]);
       setLastVisible(snapshot.docs[snapshot.docs.length - 1]);
       setHasMore(snapshot.docs.length > 0);
+      setLoadingMore(false)
     } catch (error:unknown | any) {
       recordError(crashlytics,error)
       console.error(`Error fetching more posts: ${error}`);
+      setLoadingMore(false)
     } finally {
       setLoadingMore(false);
     }
@@ -150,7 +162,7 @@ const MessageScreen = () => {
       <View style={{flexDirection:'row',alignItems:'center',justifyContent:'space-between',marginTop:top,padding:10}}>
         <TouchableOpacity onPress={() => navigation.navigate('Dash')}>
         <Icon source='arrow-left-bold-circle' size={25}/>
-        </TouchableOpacity>3
+        </TouchableOpacity>
         <SearchComponent title='Search Message...'/>
       <Icon source='dots-horizontal' size={25}/>
       <Icon source='message' size={25}/>

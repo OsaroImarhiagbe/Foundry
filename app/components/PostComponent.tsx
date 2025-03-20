@@ -6,7 +6,6 @@ KeyboardAvoidingView,
 Platform,
 Modal,
 Alert,
-useWindowDimensions,
 } from 'react-native'
 import { blurhash } from '../../utils/index'
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
@@ -89,7 +88,6 @@ const PostComponent: React.FC<PostComponentProps> = memo(({
     const {user} = useAuth();
     const [replyingTo, setReplyingTo] = useState<string | null>(null);
     const [replyingToUsername, setReplyingToUsername] = useState<string | undefined>(undefined);
-    const {width,height} = useWindowDimensions()
    
 
     useEffect(() => {

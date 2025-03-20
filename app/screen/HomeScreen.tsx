@@ -40,18 +40,17 @@ const HomeScreen= () => {
   const [lastVisible, setLastVisible] = useState<FirebaseFirestoreTypes.QueryDocumentSnapshot<FirebaseFirestoreTypes.DocumentData> | null>(null);
   const [loadingMore, setLoadingMore] = useState<boolean>(false);
   const [hasMore, setHasMore] = useState<boolean>(false);
-  const [loading, setLoading] = useState<boolean>(false)
+  const [loading, setLoading] = useState<boolean>(true)
   const category = useSelector((state:string | any)=> state.search.searchID)
 
   
   useEffect(() => {
-    setLoading(true)
     if (!user?.userId){
       setLoading(false)
       return;
     }
     log(crashlytics,'Grabbing post')
-    const timer = setTimeout(async () => {
+    const grabPost = async () => {
     const trace = await perf.startTrace('HomeScreen')
       try {
         const docRef = query(PostRef,where('category','==',category),orderBy('createdAt', 'desc'),limit(10))
@@ -79,14 +78,13 @@ const HomeScreen= () => {
           setLoading(false)
           trace.stop()
         }
-      },4000)
-      return () => clearTimeout(timer)
+      }
+      grabPost()
   }, [category]); 
 
 
 
   const onRefresh = useCallback(async () => {
-    setLoading(true)
     setRefreshing(true);
     log(crashlytics,'Post Refresh')
     const trace = await perf.startTrace('Refreshing_community_posts_HomeScreen')
@@ -102,16 +100,13 @@ const HomeScreen= () => {
         setHasMore(documentSnapShot.docs.length > 0);
         trace.putAttribute('post_count', post.length.toString());
         setRefreshing(false)
-        setLoading(false)
       }  catch (error:any) {
         recordError(crashlytics,error)
         console.error(`Error post can not be found: ${error}`);
         setRefreshing(false);
-        setLoading(false)
-    }finally{
-      setRefreshing(false);
-      setLoading(false)
-      trace.stop()
+      }finally{
+        setRefreshing(false);
+        trace.stop()
     }
   }, [category]);
     

@@ -151,8 +151,7 @@ export default function App() {
         <PaperProvider theme={theme}>
         <NavigationContainer>
         <NotificationProvider>
-          {loading ? <SplashScreen/>
-          : <AuthNavigation/>}
+          {loading ? <SplashScreen/> : <AuthNavigation/>}
           </NotificationProvider>
         </NavigationContainer>
         </PaperProvider>
