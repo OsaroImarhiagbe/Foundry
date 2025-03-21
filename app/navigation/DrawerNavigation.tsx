@@ -1,19 +1,25 @@
 import { createDrawerNavigator, DrawerItem,DrawerContentScrollView,DrawerItemList } from '@react-navigation/drawer';
 import { useNavigation} from '@react-navigation/native';
-import React, { useState,useCallback, memo} from 'react';
+import React, { useState,useCallback, memo, Suspense} from 'react';
 import { TouchableWithoutFeedback,useColorScheme,View, } from 'react-native';
 import { Image } from 'expo-image';
 import { blurhash } from 'utils';
 import { useAuth } from '../authContext.tsx'
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import { Icon,useTheme,Text} from 'react-native-paper';
-import SettingsScreen from '../screen/SettingsScreen.tsx';
+const SettingsScreen = React.lazy(() => import('../screen/SettingsScreen.tsx'));
 import TabNavigation from '../navigation/TabNavigation.tsx'
 
 const Drawer = createDrawerNavigator();
 
 
-
+const SettingsScreenWrapper = () => {
+  return (
+    <Suspense>
+      <SettingsScreen/>
+    </Suspense>
+  )
+}
 
 
 const DrawerNavigation = () => {
@@ -97,7 +103,7 @@ const DrawerNavigation = () => {
       }}/>
        <Drawer.Screen
       name='Settings'
-      component={SettingsScreen}
+      component={SettingsScreenWrapper}
       options={{
         drawerIcon:({focused,color,size}) => (
           <Icon

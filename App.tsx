@@ -2,7 +2,7 @@ import { NavigationContainer} from '@react-navigation/native';
 import { MenuProvider } from 'react-native-popup-menu';
 import { AuthContextProvider } from './app/authContext';
 import { StatusBar } from 'expo-status-bar';
-import React, {lazy, useEffect, useState,} from 'react'
+import React, {lazy, Suspense, useEffect, useState,} from 'react'
 import {store,persistor} from './app/store'
 import { Provider } from 'react-redux';
 import { PersistGate } from 'redux-persist/integration/react';
@@ -13,12 +13,9 @@ import { useColorScheme } from 'react-native';
 import { NotificationProvider } from './app/NotificationProvider';
 import 'react-native-reanimated'
 import 'react-native-gesture-handler'
+import AuthNavigation from './app/navigation/AuthNavigation.tsx'
+import SplashScreen from './app/screen/SplashScreen.tsx'
 
-
-
-
-const AuthNavigation = lazy(() => import('./app/navigation/AuthNavigation.tsx'));
-const SplashScreen = lazy(() => import('./app/screen/SplashScreen.tsx'));
 
 export default function App() {
   const colorScheme = useColorScheme();
@@ -151,7 +148,7 @@ export default function App() {
         <PaperProvider theme={theme}>
         <NavigationContainer>
         <NotificationProvider>
-          {loading ? <SplashScreen/> : <AuthNavigation/>}
+          {loading ? <SplashScreen/>:<AuthNavigation/>}
           </NotificationProvider>
         </NavigationContainer>
         </PaperProvider>
