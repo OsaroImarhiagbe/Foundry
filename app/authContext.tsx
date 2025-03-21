@@ -6,9 +6,9 @@ import {
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {GoogleSignin,statusCodes,} from '@react-native-google-signin/google-signin';
 import {log,recordError,setAttributes,setUserId} from '@react-native-firebase/crashlytics'
-import { db,auth,functions, crashlytics } from '../FirebaseConfig';
+import { db,auth,functions, crashlytics } from '../FirebaseConfig'
 import {httpsCallable} from '@react-native-firebase/functions'
-import { createUserWithEmailAndPassword, sendPasswordResetEmail, signInWithEmailAndPassword, } from '@react-native-firebase/auth';
+import { createUserWithEmailAndPassword, onAuthStateChanged, sendPasswordResetEmail, signInWithEmailAndPassword, signOut, } from '@react-native-firebase/auth';
 export const AuthContext = createContext<any>(null);
 
 type User = {
@@ -25,42 +25,38 @@ interface AuthContextProviderProps  {
   }
   
 export const AuthContextProvider = ({children}:AuthContextProviderProps) => {
-
     const [user, setUser] = useState<User | {}>({})
     const [loading,setLoading] = useState<boolean>(false)
     const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false)
     useEffect(() => {
-        const unsub = auth.onAuthStateChanged(async (user) => {
-            log(crashlytics,'Auth COntext: Auth State Change')
-                    if(user){
-                        setIsAuthenticated(true)
-                        const docRef = doc(db,'users',user.uid);
-                        const currentUserRef = await getDoc(docRef)
-                        if (currentUserRef.exists) {
-                            const firestoreData = currentUserRef.data();
-                            await Promise.all(
-                                [
-                                setUserId(crashlytics,user.uid),
-                                setAttributes(crashlytics,{
-                                    user_id: user.uid,
-                                    username: firestoreData?.username,
-                                })
-                            ])
-                            setUser({
-                                uid: user.uid,
-                                email: user.email,
-                                username: firestoreData?.username,
-                                userId: firestoreData?.userId,
-                                profileUrl:firestoreData?.profileUrl
-                            });
-                        }
-                        await AsyncStorage.setItem('authUser',user?.uid)
-                    }else{
-                        setIsAuthenticated(false)
-                        setUser({})
-                    }
-    })
-        return () => unsub ()
+        const unsub = onAuthStateChanged(auth,async (user: unknown | any) => {
+            log(crashlytics,'Auth Context: Auth State Change')
+            if(user){
+                setIsAuthenticated(true)
+                const docRef = doc(db,'users',user.uid);
+                const currentUserRef = await getDoc(docRef)
+                const firestoreData = currentUserRef.data();
+                // await Promise.all([
+                //     setUserId(crashlytics,user.uid),
+                //     setAttributes(crashlytics,{
+                //         user_id: user.uid,
+                //         username: firestoreData?.username,
+                //     })
+                // ])
+                setUser({
+                    uid: user.uid,
+                    email: user.email,
+                    username: firestoreData?.username,
+                    userId: firestoreData?.userId,
+                    profileUrl:firestoreData?.profileUrl
+                });
+                await AsyncStorage.setItem('authUser',user?.uid)
+            }else{
+                setIsAuthenticated(false)
+                setUser({})
+            }
+        })
+        return () => unsub()
     },[])
 
     const login = async (email:string,pasword:string) => {
@@ -116,7 +112,7 @@ export const AuthContextProvider = ({children}:AuthContextProviderProps) => {
     const logout = async () => {
         log(crashlytics,'Auth Context: Logout')
         try{
-            await auth.signOut();
+            await signOut(auth);
             await AsyncStorage.removeItem('authUser')
             return {success:true,}
         }catch(error:unknown | any){

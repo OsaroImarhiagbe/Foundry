@@ -5,7 +5,8 @@ import {
   TouchableOpacity, 
   StyleSheet, 
   Switch, 
-  SafeAreaView } from 'react-native'
+  SafeAreaView, 
+  ScrollView} from 'react-native'
 import { Avatar, Icon, Text,useTheme } from 'react-native-paper';
 import Feather from 'react-native-vector-icons/Feather';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -45,7 +46,15 @@ const Sections = [
               type:'toggle'
           },
           {
-              id:4,
+            id:4,
+            tag:'darkmode',
+            icon:'theme-light-dark',
+            color:'green',
+            label:'DarkMode',
+            type:'toggle'
+        },
+          {
+              id:5,
               tag:'accessmode',
               icon:'airplay',
               color:'#fd2d54',
@@ -60,7 +69,12 @@ const Sections = [
       id:2,
       items:[
           {id:5,icon:'flag', color:'grey',label:'Report Bug', type:'link',screen:'ReportBugScreen'},
-          {id:6,icon:'mail', color:'blue',label:'Contact us', type:'link',screen:'ContactUsScreen'},]
+          {id:6,icon:'mail', color:'blue',label:'Contact us', type:'link',screen:'ContactUsScreen'},
+          {id:7,icon:'newspaper', color:'blue',label:'Privacy and Policy', type:'link',screen:'ContactUsScreen'},
+          {id:8,icon:'account', color:'blue',label:'User Agreement', type:'link',screen:'ContactUsScreen'},
+          {id:9,icon:'license', color:'blue',label:'End User License Agreement', type:'link',screen:'ContactUsScreen'},
+          {id:10,icon:'logout', color:'blue',label:'Sign Out', type:'link',screen:'ContactUsScreen'},
+          {id:11, color:'blue',label:'Version',screen:'ContactUsScreen'},]
   },
 ];
 
@@ -77,50 +91,55 @@ const SettingsScreen = () => {
     accessibilityMode: false
 })
   return (
-    <SafeAreaView style={{flex:1,backgroundColor:theme.colors.background}}>
+    <View style={{flex:1,backgroundColor:theme.colors.background,paddingTop:top}}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={{padding:10}}>
           <Icon
           size={25}
           source='arrow-left-circle'/>
         </TouchableOpacity>
-      <View style={{marginTop:top,padding:10}}>
+       <ScrollView
+       contentContainerStyle={{bottom:20,padding:20}}
+       style={{flex:1}}>
+       <View style={{marginTop:top,padding:10}}>
             {Sections.map(({header, items,id}) => (
                 <View key={id} >
                   <View style={{flexDirection:'row'}}>
                     {
-                      header === 'Settings' && <Image style={{height:hp(3.3), aspectRatio:1, borderRadius:100}}
+                      header === 'Settings' && <View style={{borderColor:theme.colors.backdrop, borderRadius:100,borderWidth:2}}><Image style={{height:hp(8), aspectRatio:1, borderRadius:100,}}
                       source={
                         user.profileUrl ? user.profileUrl : require('../assets/user.png')
                       }
                       placeholder={{blurhash}}
-                      cachePolicy='none'/>
+                      cachePolicy='none'/></View>
                     }
                     <Text
                     variant='titleLarge'
-                    style={{color:theme.colors.tertiary,marginBottom:10,marginLeft:10}}>{header}</Text>
+                    style={{
+                      color:theme.colors.tertiary,
+                      marginBottom:10,
+                      marginLeft:10}}>{header}</Text>
                     </View>
-                    {items.map(({id, icon,tag, label, type,screen}) => (
+                    {items.map(({id, icon, label, type,screen}) => (
                         <TouchableOpacity
                             key={id}
                             onPress={label === 'Language' ? () => setModalVisible(true):() => navigation.navigate(screen as never)}>
                         <View style={styles.row}>
-                            <View style={{ backgroundColor: '#3b3b3b', borderRadius: 5, width: 30, padding: 5 }}>
+                           { label !== 'Version' ? <View style={{ backgroundColor: '#3b3b3b', borderRadius: 5, width: 30, padding: 5 }}>
                                 <View style={{ alignItems: 'center' }} >
-                                <Feather name={icon} size={15} color='#fff'/>
+                                <Icon source={icon} size={16} color='#fff'/>
                                 </View>
-                            </View>
-                            <Text variant='bodyLarge' style={{color:theme.colors.tertiary,paddingLeft:10 }}>{label}</Text>
+                            </View> : <></>}
+                            <Text variant='bodyLarge' style={{color:theme.colors.tertiary,paddingLeft:10,fontSize:20}}>{label}</Text>
                             <View style={{flex:1}}/>
                             {type === 'toggle' && 
                             <Switch value={true}
                             onValueChange={value => setForm({...form,[id]: value})}/>}
-                            {type === 'link' && 
+                            {label !=='Version' && type === 'link' ? 
                             <View style={{ backgroundColor: '#3b3b3b', borderRadius: 5, width: 30, padding: 5 }}>
                                 <View style={{ alignItems: 'center' }}>
                                 <Feather name='chevron-right' size={15} color='#fff'/>
                                 </View>
-                                 
-                            </View>
+                            </View> : <></>
                           }
                         </View>
                         </TouchableOpacity>
@@ -128,8 +147,8 @@ const SettingsScreen = () => {
                 </View>
             ))}
             </View> 
-
-    </SafeAreaView>
+        </ScrollView> 
+    </View>
   )
 }
 
@@ -146,6 +165,7 @@ row:{
     alignItems:'center',
     marginBottom:12,
     borderRadius:8,
+    marginVertical:8
 
 },
 title: {

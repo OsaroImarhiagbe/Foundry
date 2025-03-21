@@ -1,44 +1,38 @@
-import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { lazy,Suspense,memo } from 'react';
-import { ActivityIndicator, useColorScheme } from 'react-native';
-import  DashBoardScreen  from '../screen/DashBoardScreen';
-import { useTheme } from 'react-native-paper';
-import LazyScreenComponent from 'app/components/LazyScreenComponent';
-const HomeScreen = lazy(() => import('../screen/HomeScreen'))
-const MessageScreen = lazy(() => import('../screen/MessageScreen'))
-const EditScreen = lazy(() => import('../screen/EditScreen'))
-const OtherUserScreen = lazy(() => import('../screen/OtherUserScreen'))
+import React, { Suspense } from 'react';
+const MessageScreen = React.lazy(() => import('../screen/MessageScreen.tsx'))
+const EditScreen = React.lazy(() => import('../screen/EditScreen.tsx'));
+const OtherUserScreen = React.lazy(() => import('../screen/OtherUserScreen.tsx'));
+import DashBoardScreen from '../screen/DashBoardScreen.tsx';
 
 
-const MessageScreenWrapper = memo(() => {
+const MessageScreenWrapper = () => {
   return (
-      <LazyScreenComponent>
+    <Suspense>
       <MessageScreen/>
-      </LazyScreenComponent>
-)})
-
-const HomeScreenWrapper = memo(() => {
-  return(
-  <LazyScreenComponent>
-    <HomeScreen/>
-  </LazyScreenComponent>
+    </Suspense>
   )
-})
 
-const EditScreenWrapper = memo(() => {
-  return (
-  <LazyScreenComponent>
-    <EditScreen/>
-  </LazyScreenComponent>
-)})
+}
 
-const OtherUserScreenWrapper = memo(() => {
+const OtherUserScreenWrapper = () => {
   return (
-  <LazyScreenComponent>
-    <OtherUserScreen/>
-  </LazyScreenComponent>
-)})
+    <Suspense>
+      <OtherUserScreen/>
+    </Suspense>
+  )
+
+}
+
+const EditScreenWrapper = () => {
+  return (
+    <Suspense>
+      <EditScreen/>
+    </Suspense>
+  )
+
+}
+
 
 const StackNavigation = () => {
   const Stack = createNativeStackNavigator();
@@ -52,14 +46,6 @@ const StackNavigation = () => {
         headerShown: false, 
         gestureEnabled:false,
        }}
-      />
-      <Stack.Screen
-        name='Main'
-        component={HomeScreenWrapper}
-        options={{
-        headerShown: false, 
-        gestureEnabled:false
-        }}
       />
     <Stack.Screen 
      name='Message'

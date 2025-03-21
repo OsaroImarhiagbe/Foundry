@@ -1,55 +1,41 @@
 import { createStackNavigator } from '@react-navigation/stack';
-import {useState,lazy, memo} from 'react';
-import {useAuth} from '../authContext';
-import LazyScreenComponent from 'app/components/LazyScreenComponent';
-
-const RegisterScreen = lazy(() => import('../screen/RegisterScreen'))
-const DrawerNavigation = lazy(() => import('./DrawerNavigation'))
-const OnboardingScreen = lazy(()=> import('../screen/OnboardingScreen'))
-const LoginScreen = lazy(()=> import('../screen/LoginScreen'));
-const SecondStackNavigation = lazy(() => import('../navigation/SecondStackNavigation'))
+import React, { memo, Suspense,} from 'react';
+import {useAuth} from '../authContext.tsx'
+import DrawerNavigation from '../navigation/DrawerNavigation.tsx'
+const SecondStackNavigation = React.lazy(() => import('../navigation/SecondStackNavigation.tsx'));
+const OnboardingScreen = React.lazy(() => import('../screen/OnboardingScreen.tsx'));
+const LoginScreen = React.lazy(() => import('../screen/LoginScreen.tsx'));
+const RegisterScreen = React.lazy(() => import('../screen/RegisterScreen.tsx'));
 
 
-const DrawerNavigationWrapper = memo(() => {
+const SecondStackNavigationWrapper = () => {
   return (
-    <LazyScreenComponent>
-      <DrawerNavigation/>
-    </LazyScreenComponent>
-  )
-})
-
-const SecondStackNavigationWrapper = memo(() => {
-  return (
-    <LazyScreenComponent>
+    <Suspense>
       <SecondStackNavigation/>
-    </LazyScreenComponent>
+    </Suspense>
   )
-})
-const OnboardingScreenWrapper = memo(() =>{
+}
+const OnboardingScreenWrapper = () => {
   return (
-    <LazyScreenComponent>
+    <Suspense>
       <OnboardingScreen/>
-    </LazyScreenComponent>
-)
-})
-
-const RegisterScreenWrapper = memo(() => {
-
-  return (
-    <LazyScreenComponent>
-      <RegisterScreen/>
-    </LazyScreenComponent>
+    </Suspense>
   )
-})
-
-const LoginScreenWrapper = memo(() => {
-
-return (
-  <LazyScreenComponent>
-    <LoginScreen/>
-  </LazyScreenComponent>
-)
-})
+}
+const LoginScreenWrapper = () => {
+  return (
+    <Suspense>
+      <LoginScreen/>
+    </Suspense>
+  )
+}
+const RegisterScreenWrapper = () => {
+  return (
+    <Suspense>
+      <RegisterScreen/>
+    </Suspense>
+  )
+}
 
 
 
@@ -57,39 +43,35 @@ return (
 
 
 const AuthNavigation = () => {
-  const [showOnboarding,setShowOnboarding] = useState<boolean>(false)
-  const [loading,setLoading] = useState<boolean>(false)
   const {isAuthenticated} = useAuth()
   const Stack = createStackNavigator()
+ 
+
+
+
   return (
         <Stack.Navigator initialRouteName={isAuthenticated ? 'Drawer':'Login'}>
-          {
-          isAuthenticated  ? (
-            <Stack.Screen
+        <Stack.Screen
             name='Drawer'
-            component={DrawerNavigationWrapper}
+            component={DrawerNavigation}
             options={{
               headerShown:false,
               gestureEnabled:false,
-              animation:'fade_from_bottom'
-            }}/> ) : (<Stack.Screen
+            }}/>
+            <Stack.Screen
             name="Login"
             component={LoginScreenWrapper}
             options={{
               headerShown:false,
               gestureEnabled:false,
-              animation:'fade_from_bottom'
-              
             }}
-          /> )
-          }
+          />
           <Stack.Screen
           name="Register"
           component={RegisterScreenWrapper}
           options={{
             headerShown:false,
             gestureEnabled:false,
-            animation:'fade_from_bottom'
           }}/>
           <Stack.Screen
           name="Onboarding"

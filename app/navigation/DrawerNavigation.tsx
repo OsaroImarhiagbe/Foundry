@@ -1,33 +1,25 @@
 import { createDrawerNavigator, DrawerItem,DrawerContentScrollView,DrawerItemList } from '@react-navigation/drawer';
 import { useNavigation} from '@react-navigation/native';
-import { lazy,Suspense, useState, useMemo, useCallback, memo} from 'react';
-import { ActivityIndicator,TouchableWithoutFeedback,useColorScheme,View, } from 'react-native';
+import React, { useState,useCallback, memo, Suspense} from 'react';
+import { TouchableWithoutFeedback,useColorScheme,View, } from 'react-native';
 import { Image } from 'expo-image';
 import { blurhash } from 'utils';
-import { useAuth } from 'app/authContext';
+import { useAuth } from '../authContext.tsx'
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import { Icon,useTheme,Text} from 'react-native-paper';
-import LazyScreenComponent from 'app/components/LazyScreenComponent';
-
-
+const SettingsScreen = React.lazy(() => import('../screen/SettingsScreen.tsx'));
+import TabNavigation from '../navigation/TabNavigation.tsx'
 
 const Drawer = createDrawerNavigator();
-const TabNavigation = lazy(() => import('./TabNavigation'))
-const SettingsScreen = lazy(() => import('../screen/SettingsScreen'))
 
 
-const TabNavigationWrapper = memo(() => (
-  <LazyScreenComponent>
-    <TabNavigation/>
-  </LazyScreenComponent>
-));
-
-const SettingScreenWrapper = memo(() => (
-  <LazyScreenComponent>
-    <SettingsScreen/>
-  </LazyScreenComponent>
-));
-
+const SettingsScreenWrapper = () => {
+  return (
+    <Suspense>
+      <SettingsScreen/>
+    </Suspense>
+  )
+}
 
 
 const DrawerNavigation = () => {
@@ -35,7 +27,6 @@ const DrawerNavigation = () => {
   const {user,logout} = useAuth()
   const [loading,setLoading] = useState<boolean>(false)
   const navigation = useNavigation()
-  const dark_or_light = useColorScheme()
 
   const handleLogout = useCallback(async () => {
     setLoading(true)
@@ -72,18 +63,18 @@ const DrawerNavigation = () => {
             </TouchableWithoutFeedback> 
             <Text>{user?.username}</Text>
           </View>
-          <DrawerItemList {...props} />
+          <DrawerItemList {...props}/>
           <DrawerItem
-              label="Logout"
-              labelStyle={{
-                color:theme.colors.tertiary
-              }}
-              
-              icon={ () => (<Icon
-                source="logout"
-                color={theme.colors.tertiary}
-                size={20}/>)}
-              onPress={handleLogout}
+          label="Logout"
+          labelStyle={{
+            color:theme.colors.tertiary,
+            fontSize:24
+          }}
+          icon={ () => (<Icon
+            source="logout"
+            color={theme.colors.tertiary}
+            size={20}/>)}
+            onPress={handleLogout}
           />
       </DrawerContentScrollView>
     )}
@@ -96,7 +87,7 @@ const DrawerNavigation = () => {
     }}>
       <Drawer.Screen
       name='Home'
-      component={TabNavigationWrapper}
+      component={TabNavigation}
       options={{
         drawerIcon:({focused,color,size}) => (
           <Icon
@@ -105,28 +96,14 @@ const DrawerNavigation = () => {
           size={size}/>
         ),
         drawerLabelStyle:{
-          color:theme.colors.tertiary
-        },
-        headerShown:false,
-      }}/>
-       <Drawer.Screen
-      name='News'
-      component={SettingScreenWrapper}
-      options={{
-        drawerIcon:({focused,color,size}) => (
-          <Icon
-          source="source-branch"
-          color={theme.colors.tertiary}
-          size={size}/>
-        ),
-        drawerLabelStyle:{
           color:theme.colors.tertiary,
+          fontSize:24
         },
         headerShown:false,
       }}/>
        <Drawer.Screen
       name='Settings'
-      component={SettingScreenWrapper}
+      component={SettingsScreenWrapper}
       options={{
         drawerIcon:({focused,color,size}) => (
           <Icon
@@ -135,7 +112,8 @@ const DrawerNavigation = () => {
           size={size}/>
         ),
         drawerLabelStyle:{
-          color:theme.colors.tertiary
+          color:theme.colors.tertiary,
+          fontSize:24
         },
         headerShown:false,
       }}/>

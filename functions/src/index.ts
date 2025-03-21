@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 /* eslint-disable camelcase */
 /**
  * Import function triggers from their respective submodules:
@@ -81,12 +82,7 @@ exports.addMessage = onCall(async (request) => {
       "unauthenticated", "This endpoint requires authentication");
   }
   try {
-    const newMessage = request.data.text;
-    const roomId = request.data.roomId;
-    const senderName = request.data.senderName;
-    const recipientName = request.data.recipientName;
-    const senderId = request.data.senderId;
-    const recipientId = request.data.recipientId;
+    const {newMessage, roomId, senderName, recipientName, senderId, recipientId} = request.data;
     await getFirestore()
       .collection("chat-rooms")
       .doc(roomId)
@@ -114,7 +110,7 @@ exports.newChatRooomMessage = onDocumentCreated(
         return {success: false, error: "No data found"};
       }
       const messageData = snapshot.data();
-      const roomId = event.params.roomId;
+      const {roomId} = event.params;
       const roomDoc = await getFirestore().collection("chat-rooms")
         .doc(roomId).get();
       if (!roomDoc.exists) {
@@ -147,14 +143,7 @@ exports.addPost = onCall(async (request) => {
       "unauthenticated", "This endpoint requires authentication");
   }
   try {
-    const auth_id = request.data.auth_id;
-    const name = request.data.name;
-    const content = request.data.content;
-    const like_count = request.data.like_count;
-    const comment_count = request.data.comment_count;
-    const liked_by = request.data.liked_by;
-    const category = request.data.category;
-    const image = request.data.imageUrl;
+    const {auth_id, name, content, like_count, comment_count, liked_by, category, image} = request.data;
     const createdAt = FieldValue.serverTimestamp();
     const newDoc = await getFirestore().collection("posts").add({
       auth_id: auth_id,
@@ -184,13 +173,60 @@ exports.addPost = onCall(async (request) => {
     throw new HttpsError("internal", "Failed to send test notification");
   }
 });
+exports.addProject = onCall(async (request) =>{
+  if (!request.auth) {
+    throw new HttpsError("unauthenticated", "This endpoint requires authentication");
+  }
+  const {Name, Overview, Tech, currentProjectId, image} = request.data;
+  const docRef = getFirestore()
+    .collection("projects")
+    .doc(request.auth.uid)
+    .collection("projects")
+    .doc(currentProjectId);
+  const docSnapshot = await docRef.get();
+  try {
+    if (docSnapshot.exists) {
+      await docRef.update({
+        Name: Name,
+        Overview: Overview,
+        Tech: Tech,
+        image: image,
+        updatedAt: new Date(),
+      });
+      return {success: true, projectid: docRef.id};
+    } else {
+      const newDoc = await getFirestore()
+        .collection("projects")
+        .doc(request.auth.uid)
+        .collection("projects")
+        .add({
+          Name: Name,
+          Overview: Overview,
+          Tech: Tech,
+          image: image,
+          createdAt: FieldValue.serverTimestamp(),
+        });
+      await getFirestore()
+        .collection("projects")
+        .doc(request.auth.uid)
+        .collection("projects")
+        .doc(newDoc.id)
+        .update({
+          projectid: newDoc.id,
+        });
+      return {success: true, projectid: newDoc.id};
+    }
+  } catch (error) {
+    logger.error("Error sending project", error);
+    throw new HttpsError("internal", "Failed to send project");
+  }
+});
 exports.newUser = onCall(async (request) => {
   if (!request.auth) {
     throw new HttpsError(
       "unauthenticated", "This endpoint requires authentication");
   }
-  const userId = request.data.userId;
-  const username = request.data.username;
+  const {username, userId} = request.data;
   await getFirestore().collection("users").doc(userId).set({
     username: username,
     userId: userId,

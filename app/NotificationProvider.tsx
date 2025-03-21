@@ -1,16 +1,15 @@
-import React, { createContext, useContext, useState, useCallback,useEffect,ReactNode } from 'react';
-import NotificationBanner from './components/NotificationBanner';
+import React, { createContext, useContext, useState, useCallback,useEffect,ReactNode, useRef } from 'react';
 import notifee, { EventType } from '@notifee/react-native'
 import { useNavigation } from '@react-navigation/native';
 import { FirebaseMessagingTypes } from '@react-native-firebase/messaging';
 import { useAuth } from './authContext';
-import {crashlytics, messaging,UsersRef } from '../FirebaseConfig';
+import {crashlytics, messaging,NotificationsRef,UsersRef } from '../FirebaseConfig';
 import { doc, setDoc} from '@react-native-firebase/firestore';
 import {log,recordError} from '@react-native-firebase/crashlytics'
 
 const NotificationContext = createContext<any>(null);
 
-{/** NEED TO STYLE IN-APP NOTIFCATION BANNER */}
+
 export const useNotification = () => {
   const context = useContext(NotificationContext);
   if(!context){
@@ -34,6 +33,15 @@ export const NotificationProvider = ({ children }:NotificationProp) => {
   const [visible,setVisible] = useState<boolean>(false)
   const navigation = useNavigation();
 
+  const isMounted = useRef(true);
+
+  useEffect(() => {
+    isMounted.current = true;
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
+
   const showNotification = useCallback(async (title:string, message:string,data:any) => {
     log(crashlytics,'Notifcation Provider: Show Notification')
     try{
@@ -50,17 +58,18 @@ export const NotificationProvider = ({ children }:NotificationProp) => {
                 sound:'default'
             },
         });
+        if(user.userId){
+          await setDoc(doc(NotificationsRef,user.userId),{
+            title:title,
+            message:message
+          })
+        }
         setNotification({ title, message,data });
-        await setDoc(doc(UsersRef,user.userId,'notifications'),{
-          title:title,
-          message:message,
-          data:data
-        })
         setVisible(true)
         const timer = setTimeout(() => {
           setNotification(null);
           setVisible(false);
-        }, 5000);
+        },5000);
         return () => clearTimeout(timer)
     }catch(error:unknown | any){
         recordError(crashlytics,error)
@@ -122,9 +131,7 @@ export const NotificationProvider = ({ children }:NotificationProp) => {
             }
         });
 
-        return () => {
-            Foreunsubscribe()
-          }
+        return () => Foreunsubscribe()
       },[handleNotificationClick])
 
     useEffect(() => {
@@ -157,13 +164,6 @@ export const NotificationProvider = ({ children }:NotificationProp) => {
 
   return (
     <NotificationContext.Provider value={{ showNotification }}>
-      {notification && (
-        <NotificationBanner
-        visiable={visible}
-        title={notification.title}
-        message={notification.message}
-        />
-      )}
       {children}
     </NotificationContext.Provider>
   );

@@ -2,9 +2,8 @@ import {
     View,
     StyleSheet, 
     TouchableOpacity,
-    ImageSourcePropType,
     ImageBackground} from 'react-native'
-import { useState,} from 'react';
+import { useCallback, useState,} from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { useAuth } from '../authContext';
 import { doc,updateDoc} from '@react-native-firebase/firestore'
@@ -12,18 +11,17 @@ import { Image } from 'expo-image';
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import { blurhash } from '../../utils/index';
 import {getDownloadURL, putFile, ref} from '@react-native-firebase/storage';
-import { useDispatch } from 'react-redux';
+import { useDispatch,useSelector } from 'react-redux';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import {log,recordError,} from '@react-native-firebase/crashlytics'
 import { crashlytics,UsersRef } from 'FirebaseConfig';
 import { useTheme, Text,Icon,} from 'react-native-paper';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import AppTextInput from 'app/components/AppTextInput';
 import { storage } from '../../FirebaseConfig';
 import {Image as ImageCompressor} from 'react-native-compressor';
 import {launchImageLibrary} from 'react-native-image-picker';
 import { TouchableWithoutFeedback } from 'react-native-gesture-handler';
-import { addHeaderImage, addImage } from 'app/features/user/userSlice';
+import { addHeaderImage, addImage } from '../features/user/userSlice';
 
 
 
@@ -34,106 +32,109 @@ type NavigationProp = {
     Welcome:{
         screen?:string
       },
+    Home:{
+        screen?:string
+    },
 }
 
 type Navigation = NativeStackNavigationProp<NavigationProp>
 
-type Edit = {
-    id?:string,
-    name?:string,
-    jobTitle?:string,
-    email?:string,
-    phone?:string
-    profileUrl?:string
-    username?:string
-}
+
+interface Form {
+    name: string;
+    username: string;
+    email: string;
+    phone: string;
+    jobTitle: string;
+    location: string;
+  }
+  
+interface Item {
+    id: string;
+    screen: string;
+    key: string;
+    type: keyof Form;
+  }
   
 const EditScreen = () => {
     const navigation = useNavigation<Navigation>();
-    const [edit,setEdit] = useState<Edit>()
     const [filename,setFileName] = useState<string | undefined>(undefined)
-    const [image,setImage] = useState<string | undefined>(undefined)
-    const [headerimage,setHeaderImage] = useState<ImageSourcePropType | undefined>(undefined)
+    const [image,setImage] = useState<string>('')
+    const [headerimage,setHeaderImage] = useState<string>('')
     const dispatch = useDispatch()
+    const profileimg = useSelector((state:any) => state.user.addImage)
+    const headerimg = useSelector((state:any) => state.user.addHeaderImage)
     const {user} = useAuth()
     const theme = useTheme()
-    const {top} = useSafeAreaInsets()
-    const [text,setText] = useState('')
-    const [form, setForm] = useState({
-        darkMode:true,
-        wifi:false,
-        showCollaborators:true,
-        accessibilityMode: false
-    })
-  
-    const items = [{
-              id:1,
-              icon:'person',
-
-              type:'Username',
+    const [form, setForm] = useState<Form>({
+        name: '',
+        username: '',
+        email: '',
+        phone: '',
+        jobTitle: '',
+        location: ''
+      })
+    const items:Item[] = [{
+              id:'1',
+              type:'username',
               screen:'EditUser',
-              color:'#fff',
-              nav:'keyboard-arrow-right'
+              key:'username'
           },
           {
-              id:2,
-              icon:'email',
-              type:'Email',
+              id:'2',
+              type:'email',
               screen:'EditEmail',
-              color:'#fff',
-              nav:'keyboard-arrow-right'
+              key:'email',
           },
           {
-              id:3,
-              icon:'phone',
-              type:'Phone',
+              id:'3',
+              type:'phone',
               screen:'EditPhone',
-              color:'#fff',
-              nav:'keyboard-arrow-right'
+              key:'phone',
           },
           {
-              id:4,
-              icon:'work',
-              type:'Job title',
+              id:'4',
+              type:'jobTitle',
               screen:'EditJob',
-              color:'#fff',
-              nav:'keyboard-arrow-right'
+              key:'jobTitle',
           },
           {
-            id:5,
-            icon:'work',
-            type:'Location',
+            id:'5',
+            type:'location',
             screen:'EditJob',
-            color:'#fff',
-            nav:'keyboard-arrow-right'
+            key:'location',
         }
         ]
+
+        console.log('header img',headerimg)
+      
     
 
-
-    const handleSave = async() => {
+    const handleSave = useCallback(async() => {
         let url;
-        if(image && filename){
-            const imageRef = ref(storage,`/users/profile/${user.userId}/${filename}`)
+        let headerurl;
+        if(image && filename && headerimage){
+            const imageRef = ref(storage,`/users/profileImage/${user.userId}/${filename}`)
+            const headerRef = ref(storage,`/users/profileHeader/${user.userId}/${filename}`)
             await putFile(imageRef,image)
+            await putFile(headerRef,headerimage)
             url = await getDownloadURL(imageRef)
+            headerurl = await getDownloadURL(headerRef)
         }
         try{
             await updateDoc(doc(UsersRef,user.userId),{
-                name:edit?.name,
-                username:edit?.username,
-                email:edit?.email,
-                jobTitle:edit?.jobTitle,
-                phone:edit?.phone,
-                profileUrl:url
+                ...form,
+                profileUrl:url,
+                headerUrl:headerurl
             })
+            navigation.goBack()
         }catch(error:unknown | any){
             recordError(crashlytics,error)
             console.error(error)
         }
-    }
+    },[ form, image, filename])
 
-    const pickHeaderImage = async () => {
+    const pickImage = useCallback(async (type:'header' | 'profile') => {
         log(crashlytics,'Edit Screen: Pick Image')
         try{
             let results = await launchImageLibrary({
@@ -142,35 +143,20 @@ const EditScreen = () => {
               })
             if(!results.didCancel && results.assets?.length && results.assets[0].uri){
                 const uri = await ImageCompressor.compress(results.assets[0].uri)
-                setHeaderImage({uri})
-                dispatch(addHeaderImage(uri))
+                if(type === 'header'){
+                    setHeaderImage(uri)
+                    dispatch(addHeaderImage({headerimg:uri}))
+                }else{
+                    setImage(uri)
+                    dispatch(addImage(uri)) 
+                }
                 setFileName(results?.assets[0]?.fileName)
             }
         }catch(error:any){
             recordError(crashlytics,error)
             console.error('Error picking image and uploading to Cloud Storage:',error.message)
         }
-        }
-    
-
-    const pickProfileImage = async () => {
-        log(crashlytics,'Edit Screen: Pick Image')
-        try{
-            let results = await launchImageLibrary({
-                mediaType:'photo',
-                quality:1
-              })
-            if(!results.didCancel && results.assets?.length && results.assets[0].uri){
-                const uri = await ImageCompressor.compress(results.assets[0].uri)
-                setImage(uri)
-                dispatch(addImage(uri))
-                setFileName(results?.assets[0]?.fileName)
-            }
-        }catch(error:any){
-            recordError(crashlytics,error)
-            console.error('Error picking image and uploading to Cloud Storage:',error.message)
-        }
-        }
+        },[dispatch])
       
 
 
@@ -186,16 +172,27 @@ const EditScreen = () => {
             <Text
                 variant='bodyLarge'
                 style={{
-                    textAlign:'center'
+                    textAlign:'center',
                 }}
             >Edit Profile</Text>
             <TouchableOpacity onPress={handleSave}>
             <Text variant='bodyLarge'>Save</Text>
             </TouchableOpacity>
             </View>
-            <TouchableWithoutFeedback onPress={pickHeaderImage}>
-            <ImageBackground
-            source={headerimage}
+            <TouchableWithoutFeedback onPress={() => pickImage('header')}>
+                {
+                    headerimage ?  <ImageBackground
+                    source={{uri:headerimg}}
+                    resizeMode='cover'
+                    imageStyle={{height:150,justifyContent:'flex-end'}}
+                    style={{
+                        height:100,
+                        bottom:0,
+                        justifyContent:'flex-end',
+                    }}
+                    > 
+                    </ImageBackground> :  <ImageBackground
+            source={require('../assets/images/header.png')}
             resizeMode='cover'
             imageStyle={{height:150,justifyContent:'flex-end'}}
             style={{
@@ -205,32 +202,38 @@ const EditScreen = () => {
             }}
             > 
             </ImageBackground>
+                }
             </TouchableWithoutFeedback>
             <View style={{padding:10}}>
+                <TouchableOpacity onPress={() => pickImage('profile')}>
                 <View style={{flexDirection:'row'}}>
-                    <Image
-                    style={{height:hp(8), aspectRatio:1, borderRadius:100,borderColor:theme.colors.background,borderWidth:1}}
-                    source={edit?.profileUrl || user.profileUrl}
-                    placeholder={{blurhash}}
-                    transition={500}
-                    cachePolicy='none'/>
-                    <View style={{marginLeft:40,marginTop:10}}>
-                        <Text style={{color:theme.colors.tertiary,fontSize:20}}>{edit?.name}</Text>
-                        <TouchableOpacity style={{marginTop:5}} onPress={pickProfileImage}>
-                            <Text style={{color:theme.colors.tertiary,fontSize:12}}>Edit picture</Text>
-                            </TouchableOpacity>
+                    {
+                        image ?  <Image
+                        style={{height:hp(8), aspectRatio:1, borderRadius:100,borderColor:theme.colors.background,borderWidth:2}}
+                        source={image}
+                        placeholder={{blurhash}}
+                        transition={500}
+                        cachePolicy='none'/> :     <Image
+                        style={{height:hp(8), aspectRatio:1, borderRadius:100,borderColor:theme.colors.background,borderWidth:2}}
+                        source={require('../assets/user.png')}
+                        placeholder={{blurhash}}
+                        transition={500}
+                        cachePolicy='none'/>
+                    }
+                    <View style={{marginLeft:40,marginTop:20}}>
+                        <Text style={{color:theme.colors.tertiary,fontSize:20}}>{form?.name}</Text>
                             </View>
                             </View>
+                </TouchableOpacity>
         <View style={{marginTop:20}}>
-            {items.map(({id,type}) => (
-                <View key={id}>
+            {items.map(({id,type,key}) => (
                     <AppTextInput
+                    key={id}
                     placeholder={type}
                     backgroundColor="transparnet"
-                    onChangeText={(text) => setText(text) }
-                    values={text}
+                    onChangeText={(text) => setForm({...form, [key]: text})}
+                    values={form[type]}
                   />
-                </View>
             ))}
         </View> 
         </View>

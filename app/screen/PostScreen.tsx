@@ -1,4 +1,4 @@
-import React, { useState,useEffect,useRef } from 'react';
+import React, { useState,useEffect,useRef, useCallback } from 'react';
 import {
   View,
   StyleSheet,
@@ -21,7 +21,7 @@ import color from '../../config/color';
 import {getDownloadURL,putFile,ref} from '@react-native-firebase/storage'
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useTheme,Icon,Text,Button,Divider } from 'react-native-paper';
-import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import {  useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Image } from 'expo-image';
 import {log,recordError} from '@react-native-firebase/crashlytics'
 import {
@@ -34,8 +34,9 @@ import {crashlytics, functions, perf } from '../../FirebaseConfig';
 import { storage } from 'FirebaseConfig';
 import { httpsCallable } from '@react-native-firebase/functions'
 import FastImage from "@d11/react-native-fast-image";
-import {Image as ImageCompressor} from 'react-native-compressor';
+import {Image as ImageCompressor,Video as VideoCompressor} from 'react-native-compressor';
 import {launchImageLibrary} from 'react-native-image-picker';
+import Video, {VideoRef} from 'react-native-video';
 
 
 
@@ -48,37 +49,46 @@ type Navigation = NativeStackNavigationProp<NavigationProp, 'Dash'>;
 const PostScreen = () => {
 
   const { user } = useAuth();
+
   const theme = useTheme()
   const [text, setText] = useState<string>('');
   const [image, setImage] = useState<string | null>(null);
+  const [video, setVideo] = useState<string | undefined>(undefined);
   const [filename,setFileName] = useState<string | undefined>(undefined)
   const [loading,setLoading] = useState<boolean>(false)
   const hasUnsavedChanges = Boolean(text);
   const {top} = useSafeAreaInsets()
-  const profileImage = useSelector((state:any) => state.user.profileImage)
   const navigation = useNavigation<Navigation>();
   const textInputRef = useRef<TextInput>(null);
   const [category, setCategory] = useState<string>('')
-
+  const isMounted = useRef(true)
+  const videoRef = useRef<VideoRef>(null);
   
 {/** TOMORROW GET IMAGE AND VIDEO OPTIMIZE ALSO IN POST AND COMMMENT COMPONENT, THIS WILL TIE INTO WITH PROJECT SCREEN AND MAYBE EDIT SCREEN */}
 
+
+  useEffect(() => {
+    isMounted.current = true;
+    return () => {
+      isMounted.current = false}
+  },[])
+
   useEffect(() => {
     const timeout = setTimeout(() => {
-      textInputRef.current?.focus();
+      textInputRef.current?.focus()
     }, 1000);
 
     return () => clearTimeout(timeout); 
   }, []);
 
 
-  const handlePost = async () => {
+  const handlePost = useCallback(async () => {
     if(text.trim() === '') return
     let trace = await perf.startTrace('sending_post_or_image')
     setLoading(true);
     try {
       const addPost = httpsCallable(functions,'addPost')
-      let imageUrl = null;
+      let imageUrl = '';
       if(image && filename){
         const imageRef = ref(storage,`/posts/images/${user.userId}/${filename}`)
         await putFile(imageRef,image)
@@ -91,12 +101,10 @@ const PostScreen = () => {
         like_count: 0,
         comment_count: 0,
         liked_by: [],
-        category:[category],
-        imageUrl:imageUrl,
-        filename:filename,
-        createdAt: Timestamp.fromDate(new Date())
+        category:category,
+        image:imageUrl,
       }).catch((error) => {
-        console.log(error)
+        console.error('Error sending post:',error)
       })
       setText('');
       setImage(null);
@@ -108,10 +116,10 @@ const PostScreen = () => {
       setLoading(false);
       trace.stop()
     }
-  };
+  },[ text, image, filename, user, category]);
 
-  const handleCancel = () => {
-    if (hasUnsavedChanges || image) {
+  const handleCancel = useCallback(() => {
+    if (hasUnsavedChanges || image || video) {
       Alert.alert(
         'Discard changes?',
         'You have unsaved changes. Are you sure to discard them and leave the screen?',
@@ -127,25 +135,39 @@ const PostScreen = () => {
     } else {
       navigation.goBack();
     }
-  };
-  const pickImage = async () => {
+  },[ hasUnsavedChanges, image,video]);
+  const pickImage = useCallback(async () => {
     log( crashlytics,'Post Screen: Picking Images')
+    setLoading(true)
     try{
-      let results = await launchImageLibrary({
+      const results = await launchImageLibrary({
         mediaType: 'mixed',
         quality:1,
-        videoQuality:'high'
+        formatAsMp4:true,
+        presentationStyle:'popover',
+        videoQuality:'high',
       })
-      if(!results.didCancel && results.assets?.length && results.assets[0].uri){
+      if(!results.didCancel && results.assets?.length && results?.assets[0]?.uri && results?.assets[0]?.fileSize){
         const uri = await ImageCompressor.compress(results.assets[0].uri)
-        setImage(uri)
-        setFileName(results?.assets[0]?.fileName)
+        const videouri = await VideoCompressor.compress(results.assets[0].uri,{
+            compressionMethod: 'auto',
+            maxSize:640
+        })
+        if(isMounted.current){
+          setImage(uri)
+          setVideo(videouri)
+          setFileName(results?.assets[0]?.fileName)
+        }
       }
     }catch(error:unknown | any){
       recordError(crashlytics,error)
       console.error(error)
+    }finally{
+      if(isMounted.current){
+        setLoading(false)
+      }
     }
-  }
+  },[setImage,setFileName])
   return (
       <View style={[styles.screen,{backgroundColor:theme.colors.background,paddingTop:Platform.OS === 'ios' ? top : 0}]}>
       <View style={styles.container}>
@@ -228,16 +250,19 @@ const PostScreen = () => {
       <View style={styles.textContainer}>
         <TextInput
           ref={textInputRef}
-          style={[styles.textArea,{color:theme.colors.tertiary}]}
+          style={{
+            borderRadius: 10,
+            padding: 20,
+            color:theme.colors.tertiary,
+            fontSize:16,}}
           value={text}
           onChangeText={(text) => setText(text)}
-          numberOfLines={10}
           multiline={true}
+          textAlignVertical='top'
           placeholder='Share your ideas....'
           placeholderTextColor='grey'
         />
          {image && 
-        <View>
           <FastImage
             source={{
               uri:image,
@@ -248,8 +273,20 @@ const PostScreen = () => {
               alignSelf: 'center',
               height:300,
             }}
-          />
-        </View>}
+          />}
+         {video && <Video 
+            source={{
+              uri: video
+            }}
+            repeat={true}
+            ref={videoRef}
+            controls={true}
+            resizeMode='contain'             
+            style={{
+              width:'100%',
+              height:250,
+            }}
+          />}
       </View>
         <KeyboardAvoidingView 
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -306,13 +343,7 @@ const styles = StyleSheet.create({
   },
   textContainer: {
     flex:1,
-    paddingHorizontal:20,
-    borderRadius: 10,
-  },
-  textArea: {
-    flex: 1,
-    borderRadius: 10,
-    padding: 20,
+    paddingHorizontal:10,
   },
   uploadImageButton: {
     padding: 12,

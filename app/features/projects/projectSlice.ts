@@ -1,19 +1,34 @@
-import { createSlice } from "@reduxjs/toolkit";
-import { act } from "react";
+import { createSlice,PayloadAction } from "@reduxjs/toolkit";
 
+interface Project{
+    id:string;
+}
+interface ProjectId {
+    id:string
+}
+interface ProjectState {
+    projectid: Project[],
+    currentId:ProjectId
+}
+
+const initialState:ProjectState = {
+    projectid: [],
+    currentId: { id: '' }
+}
 export const projectSlice = createSlice({
     name:'project',
-    initialState:{
-        projectId:''
-    },
+    initialState,
     reducers:{
-        addprojectId:(state,action) => {
-            state.projectId = action.payload.projectId
+        addprojectId:(state,action: PayloadAction<Project>) => {
+            state.projectid.push(action.payload)
+        },
+        currentProjectId:(state,action) => {
+            state.currentId = action.payload.currentId
         }
     }
 })
 
 
-export const {addprojectId} = projectSlice.actions
+export const {addprojectId, currentProjectId} = projectSlice.actions
 
 export default projectSlice.reducer

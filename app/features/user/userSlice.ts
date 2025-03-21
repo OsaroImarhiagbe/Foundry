@@ -4,7 +4,8 @@ export const userSlice = createSlice({
   name: 'user',
   initialState: {
     currentuserID:'',
-    profileimg:''
+    profileimg:'',
+    headerimg:'',
   },
   reducers: {
     addId:(state,action) =>{
@@ -14,7 +15,7 @@ export const userSlice = createSlice({
       state.profileimg = action.payload.profileimg
     },
     addHeaderImage:(state,action) => {
-      state.profileimg = action.payload.profileimg
+      state.profileimg = action.payload.headerimg
     }
   }
 })

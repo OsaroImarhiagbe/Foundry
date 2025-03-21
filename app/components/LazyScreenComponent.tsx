@@ -1,6 +1,7 @@
-import React, { Suspense, ReactNode } from 'react';
-import { ActivityIndicator, useColorScheme } from 'react-native';
+import React, {ReactNode,Suspense } from 'react';
+import { useColorScheme } from 'react-native';
 import { useTheme } from 'react-native-paper';
+import { ActivityIndicator } from 'react-native-paper';
 
 type LazyScreenProps = {
   children: ReactNode;
@@ -15,7 +16,7 @@ const LazyScreenComponent = ({ children }: LazyScreenProps) => {
       fallback={
         <ActivityIndicator
           size='large'
-          color={dark_or_light ? '#fff' : '#000'}
+          color={dark_or_light ? '#ffff' : '#000'}
           style={{
             alignItems: 'center',
             justifyContent: 'center',

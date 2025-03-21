@@ -141,7 +141,7 @@ const OtherUserScreen = () => {
           setRefreshing(false);
           setLoading(false)
         }
-    }, [user]);
+    }, [users]);
 
 
 
@@ -172,7 +172,7 @@ const OtherUserScreen = () => {
       }finally{
         setLoading(false)
       }
-    },[users])
+    },[other_user_id])
 
 
     useEffect(() => {
@@ -197,7 +197,7 @@ const OtherUserScreen = () => {
       }finally{
         setLoading(false)
       }
-    },[users])
+    },[other_user_id])
 
 
     useEffect(() => {

@@ -2,7 +2,7 @@ import { NavigationContainer} from '@react-navigation/native';
 import { MenuProvider } from 'react-native-popup-menu';
 import { AuthContextProvider } from './app/authContext';
 import { StatusBar } from 'expo-status-bar';
-import {useEffect,useState,lazy, memo, Suspense} from 'react'
+import React, {lazy, Suspense, useEffect, useState,} from 'react'
 import {store,persistor} from './app/store'
 import { Provider } from 'react-redux';
 import { PersistGate } from 'redux-persist/integration/react';
@@ -11,19 +11,15 @@ import i18n from './app/Language/i18n';
 import { PaperProvider, MD3LightTheme as DefaultTheme,MD3DarkTheme as DarkTheme } from 'react-native-paper';
 import { useColorScheme } from 'react-native';
 import { NotificationProvider } from './app/NotificationProvider';
-import { use } from 'i18next';
+import 'react-native-reanimated'
+import 'react-native-gesture-handler'
+import AuthNavigation from './app/navigation/AuthNavigation.tsx'
+import SplashScreen from './app/screen/SplashScreen.tsx'
 
-const SplashScreen = lazy(() => import('./app/screen/SplashScreen'));
-const AuthNavigation = lazy(() => import('./app/navigation/AuthNavigation'));
 
 export default function App() {
-  const [isloading,setLoading] = useState(true)
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setLoading(false)
-    },4000)
-    return () => clearTimeout(timer)
-  },[])
+  const colorScheme = useColorScheme();
+  const [loading, setLoading] = useState(true)
 
 
   const lightTheme = {
@@ -131,28 +127,33 @@ export default function App() {
 
   
   
-  const theme = useColorScheme() === 'dark' ? darkTheme : lightTheme;
-  console.log('App component rendered')
+  const theme = colorScheme === 'dark' ? darkTheme : lightTheme;
+
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setLoading(false)
+    },1000)
+    return () => clearTimeout(timer)
+  },[])
  
   return (
     
 
     <I18nextProvider i18n={i18n}>
        <Provider store={store}>
-      <PersistGate loading={isloading} persistor={persistor}>
+      <PersistGate loading={null} persistor={persistor}>
         <MenuProvider>
           <AuthContextProvider>
         <PaperProvider theme={theme}>
         <NavigationContainer>
         <NotificationProvider>
-          <Suspense fallback={<SplashScreen/>}>
-          {isloading ? <SplashScreen/>:<AuthNavigation/> }
-          </Suspense>
+          {loading ? <SplashScreen/>:<AuthNavigation/>}
           </NotificationProvider>
         </NavigationContainer>
         </PaperProvider>
       </AuthContextProvider>
-      <StatusBar style={useColorScheme() === 'dark' ? 'light':'dark'} />
+      <StatusBar style={colorScheme === 'dark' ? 'light':'dark'} />
       </MenuProvider>
       </PersistGate>
     </Provider>

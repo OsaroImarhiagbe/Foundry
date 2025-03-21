@@ -1,18 +1,18 @@
 import React,
 {
+  Suspense,
   useCallback,
-  lazy,
 }from 'react'
 import {
     View,
     TouchableOpacity,
-    useColorScheme} from 'react-native'
+    } from 'react-native'
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import {heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import {Image} from 'expo-image'
 import { useAuth } from '../authContext';
 import { blurhash } from '../../utils';
-import { ActivityIndicator, useTheme } from 'react-native-paper';
+import { useTheme } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
 import { TouchableWithoutFeedback } from 'react-native-gesture-handler';
 import { FAB } from 'react-native-paper';
@@ -24,12 +24,11 @@ import {
   MenuTrigger,
 } from 'react-native-popup-menu';
 import { useDispatch} from 'react-redux';
-import { MenuItems } from '../components/CustomMenu'
-import { addsearchID } from 'app/features/search/searchSlice';
-import SearchComponent from 'app/components/SearchComponent';
-import { httpsCallable } from '@react-native-firebase/functions'
-import { functions } from 'FirebaseConfig';
-import LazyScreenComponent from 'app/components/LazyScreenComponent';
+import { MenuItems } from '../components/CustomMenu';
+import { addsearchID } from '../features/search/searchSlice';
+import SearchComponent from '../components/SearchComponent';
+import HomeScreen from '../screen/HomeScreen.tsx'
+import FeedScreen from '../screen/FeedScreen.tsx'
 
 
 type NavigationProp = {
@@ -40,32 +39,18 @@ type NavigationProp = {
   Post:undefined
 }
 const Tab = createMaterialTopTabNavigator();
-const FeedScreen = lazy(() => import('../screen/FeedScreen'))
-const HomeScreen = lazy(() => import('../screen/HomeScreen'))
 
-const HomeScreenWrapper = () => {
-  return (
-    <LazyScreenComponent>
-      <HomeScreen/>
-    </LazyScreenComponent>
 
-  )
-}
-const FeedScreenWrapper = () => {
-  return (
-    <LazyScreenComponent>
-      <FeedScreen/>
-    </LazyScreenComponent>
-  )}
 
-console.log('DashBoardScreen rendered')
+
+
+
 
 const DashBoardScreen = () => {
     const {user} = useAuth()
     const navigation = useNavigation<NavigationProp>()
     const theme = useTheme()
     const dispatch = useDispatch()
-    const dark_or_light = useColorScheme()
 
     const handleSearch = useCallback((id:string) => {
       dispatch(addsearchID(id))
@@ -73,12 +58,7 @@ const DashBoardScreen = () => {
     
  
 
-    const testSend = useCallback(() => {
-      const addTest = httpsCallable(functions,'sendTestNotification')
-      addTest({text:'Hello'}).then((result) => {
-        console.log(result.data)
-      })
-    },[])
+   
 
 
   return (
@@ -110,12 +90,6 @@ const DashBoardScreen = () => {
            <Entypo name='new-message' size={20} color={theme.colors.primary}/>
         </View>
         </TouchableOpacity>
-        {/* <TouchableOpacity
-         onPress={testSend}>
-        <View>
-           <Entypo name='note' size={20} color={theme.colors.primary}/>
-        </View>
-        </TouchableOpacity> */}
         <Menu>
       <MenuTrigger>
         <Icon
@@ -150,7 +124,7 @@ const DashBoardScreen = () => {
       action={()=> handleSearch('Statup and Busniess')}/>
     </MenuOptions>
     </Menu>
-        </View>
+        </View> 
         <View style={{flex:1}}>
         <Tab.Navigator
         screenOptions={{
@@ -169,11 +143,11 @@ const DashBoardScreen = () => {
     >
         <Tab.Screen
         name='For You'
-        component={FeedScreenWrapper}
+        component={FeedScreen}
         />
         <Tab.Screen
         name='Community'
-        component={HomeScreenWrapper}
+        component={HomeScreen}
         />
         </Tab.Navigator>
         <FAB

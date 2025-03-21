@@ -40,7 +40,7 @@ const NotificationScreen = () => {
     log(crashlytics,'Notification Screen: get Notifications')
     try{
       if(user){
-        const docRef = collection(db,'users',user?.userId,'notifications')
+        const docRef = collection(NotificationsRef,user.userId)
         const unsub = onSnapshot(docRef,(querySnapshot)=>{
         let messageOnly:Notification[] = []
         let all:Notification[] = []

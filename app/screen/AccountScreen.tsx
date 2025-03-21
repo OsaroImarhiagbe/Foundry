@@ -5,11 +5,9 @@ import {
   TouchableOpacity,
   SafeAreaView,
   ImageBackground,
-  useWindowDimensions,
   Platform,
   RefreshControl,
   } from 'react-native'
-import {lazy,Suspense} from 'react'
 import { useNavigation } from '@react-navigation/native';
 import {useState, useEffect,useCallback} from 'react';
 import { useAuth } from '../authContext';
@@ -33,11 +31,9 @@ import {PostRef, UsersRef,crashlytics} from '../../FirebaseConfig';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { log, recordError, setAttributes, setUserId } from '@react-native-firebase/crashlytics';
 import { useSelector } from 'react-redux';
-
-
-
-
-const PostComponent = lazy(() => import('../components/PostComponent'))
+import PostComponent from '../components/PostComponent';
+import { Skeleton } from 'moti/skeleton';
+import { MotiView } from 'moti';
 
 type NavigationProp = {
   ProjectScreen:undefined,
@@ -64,7 +60,8 @@ type User = {
   follow_state?:boolean,
   connection?:string,
   jobtitle?:string,
-  location?:string
+  location?:string,
+  headerUrl?:string
 
 }
 type Post = {
@@ -98,7 +95,7 @@ const Tab = createMaterialTopTabNavigator();
 const AccountScreen = () => {
 
   const [users, setUsers] = useState<User | undefined>(undefined)
-  const [isloading,setLoading] = useState<boolean>(false)
+  const [isloading,setLoading] = useState<boolean>(true)
   const [projects,setProjects] = useState<Project[]>([])
   const [posts,setPosts] = useState<Post[]>([])
   const [skills,setSkills] = useState<Skill[]>([])
@@ -107,9 +104,7 @@ const AccountScreen = () => {
   const [refreshing, setRefreshing] = useState(false);
   const theme = useTheme()
   const {top} = useSafeAreaInsets()
-  const {width,height} = useWindowDimensions()
-  //const profileimg = useSelector((state:any) => state.user.addHeaderImage)
-  const headerimg = useSelector((state:any) => state.user.addImage)
+
 
   
 
@@ -118,34 +113,108 @@ const AccountScreen = () => {
   const follow_items = [{count:users?.projects,content:' projects'},{count:users?.connection,content:' connection  '},{count:posts?.length,content:' posts'}]
 
 
-  const onRefresh = useCallback(async () => {
-    log(crashlytics,'Account Screen: On Refresh')
-    setRefreshing(true);
+  const UserRefresh = useCallback(async () => {
+    setRefreshing(true)
+    log(crashlytics,'Account Screen: User Refresh')
     const userDoc = doc(UsersRef,user.userId)
     const docRef = await getDoc(userDoc)
     try{
         if(docRef.exists){
           setUsers(docRef.data())
-          setSkills(docRef.data()?.skllls)
-          setProjects(docRef.data()?.projects)
-          setPosts(docRef.data()?.posts)
-          setLoading(false)
+          setRefreshing(false)
         }else{
           console.error('No such document')
-          setLoading(false)
+          setRefreshing(false)
         }
       }catch(error:unknown | any){
         recordError(crashlytics,error)
-        setLoading(false)
+        setRefreshing(false)
       }finally{
         setRefreshing(false)
-        setLoading(false)
       }
-  }, [user]);
+  }, []);
+  const ProjectRefresh = useCallback(async () => {
+    setRefreshing(true)
+    log(crashlytics,'Account Screen: On Refresh')
+    try{
+      const collectionRef = collection(UsersRef,user.userId,'projects')
+       const unsub = onSnapshot(collectionRef,async (querySnapshot) => {
+        if (!querySnapshot || querySnapshot.empty) {
+          setProjects([]);
+          setRefreshing(false);
+          return;
+        }
+        let data:Project[] =[]
+        querySnapshot.forEach(doc => {
+          data.push({...doc.data(),id:doc.id})
+        })
+        setProjects(data)
+        setRefreshing(false)
+      },(error:unknown | any) => {
+        recordError(crashlytics,error)
+        console.error(`Error in snapshot listener: ${error.message}`)
+        setRefreshing(false)
+      })
+      return () => unsub()
+    }catch(err:unknown | any){
+      recordError(crashlytics,err)
+      console.error('error grabbing user projects:',err.message)
+      setRefreshing(false)
+    }
+  }, []);
+  const PostRefresh = useCallback(async () => {
+    setRefreshing(true)
+    log(crashlytics,'Account Screen: POST Refresh')
+    try{
+      const postRef = query(PostRef,where('auth_id','==',user?.userId) ,orderBy('createdAt','desc'))
+      const unsub = onSnapshot(postRef,async (querySnapshot) => {
+        if (!querySnapshot || querySnapshot.empty) {
+          setPosts([]);
+          setRefreshing(false);
+          return;
+        }
+        let data:Post[] = []
+        querySnapshot.forEach(docRef => {
+          data.push({...docRef.data(),id:docRef.id})
+        })
+        setPosts(data)
+        setRefreshing(false)
+      },(error:unknown | any) => {
+        recordError(crashlytics,error)
+        console.error(`Error in snapshot listener: ${error}`)
+        setRefreshing(false)
+      })
+      return () => unsub()
+    }catch(err:any){
+      recordError(crashlytics,err)
+      console.error('error grabbing user post:',err)
+      setRefreshing(false)
+    }
+  }, []);
+
+  const SkillRefresh = useCallback(async () => {
+    setRefreshing(true)
+    log(crashlytics,'Account Screen: On Refresh')
+    const userDoc = doc(UsersRef,user.userId)
+    const docRef = await getDoc(userDoc)
+    try{
+        if(docRef.exists){
+          setUsers(docRef.data())
+          setRefreshing(false)
+        }else{
+          console.error('No such document')
+          setRefreshing(false)
+        }
+      }catch(error:unknown | any){
+        recordError(crashlytics,error)
+        setRefreshing(false)
+      }finally{
+        setRefreshing(false)
+      }
+  }, []);
 
   useEffect(() => {
     log(crashlytics,'Account Screen: Grabbing Users Projects')
-    setLoading(true)
     if(projects.length === 0) return;
     try{
       const collectionRef = collection(UsersRef,user.userId,'projects')
@@ -172,13 +241,12 @@ const AccountScreen = () => {
       console.error('error grabbing user projects:',err.message)
       setLoading(false)
     }
-  },[user])
+  },[])
 
   useEffect(() => {
     log(crashlytics,'Account Screen: Grabbing Users Post')
-    setLoading(true)
     try{
-      const postRef = query(PostRef,where('name','==',user?.username) ,orderBy('createdAt','desc'))
+      const postRef = query(PostRef,where('auth_id','==',user?.userId) ,orderBy('createdAt','desc'))
       const unsub = onSnapshot(postRef,async (querySnapshot) => {
         if (!querySnapshot || querySnapshot.empty) {
           setPosts([]);
@@ -202,19 +270,17 @@ const AccountScreen = () => {
       console.error('error grabbing user post:',err)
       setLoading(false)
     }
-  },[user])
+  },[])
 
   useEffect(() => {
     log(crashlytics,'Account Screen: Grabbing User ')
-    setLoading(true)
     setUserId(crashlytics,user.userId),
     setAttributes(crashlytics,{
       id:user.userId
     })
     const userDoc = doc(UsersRef,user.userId)
     try{
-        const unsub = onSnapshot(userDoc,
-          async (docRef) =>{
+        const unsub = onSnapshot(userDoc,async (docRef) =>{
           if(docRef.exists){
             setUsers(docRef.data())
             setSkills(docRef.data()?.skllls)
@@ -250,8 +316,8 @@ const AccountScreen = () => {
           contentContainerStyle={{padding:0}}
           data={posts}
           estimatedItemSize={460}
-          onRefresh={onRefresh}
-          ListEmptyComponent={(item) => (
+          onRefresh={PostRefresh}
+          ListEmptyComponent={() => (
             <View style={{flex:1,alignItems:'center',justifyContent:'center',paddingTop:5}}>
               <Text>No post at the moment</Text>
             </View>
@@ -264,7 +330,7 @@ const AccountScreen = () => {
           ListFooterComponent={() => (
               <ActivityIndicator color='#fff' size='small' animating={isloading}/>
           )}
-          renderItem={({item}) => <Suspense fallback={<ActivityIndicator size='small' color='#000'/>}>
+          renderItem={({item}) => 
             <PostComponent
             auth_profile={item.auth_profile}
             count={item.like_count}
@@ -277,7 +343,7 @@ const AccountScreen = () => {
                 minute: '2-digit',
                 hour12: true})}
             comment_count={item.comment_count}/>
-            </Suspense>}
+           }
           keyExtractor={(item)=> item?.post_id?.toString() || Math.random().toString()}
               />
     </SafeAreaView>
@@ -292,7 +358,7 @@ const AccountScreen = () => {
           contentContainerStyle={{padding:0}}
           estimatedItemSize={460}
           data={projects}
-          onRefresh={onRefresh}
+          onRefresh={ProjectRefresh}
           keyExtractor={(item)=> item?.id?.toString() || Math.random().toString()}
           ListEmptyComponent={(item) => (
             <View style={{flex:1,alignItems:'center',justifyContent:'center',paddingTop:5}}>
@@ -327,7 +393,7 @@ const AccountScreen = () => {
       data={skills}
       contentContainerStyle={{padding:0}}
       estimatedItemSize={460}
-      onRefresh={onRefresh}
+      onRefresh={SkillRefresh}
       keyExtractor={(item)=> item?.id?.toString() || Math.random().toString()}
       ListEmptyComponent={(item) => (
         <View style={{flex:1,alignItems:'center',justifyContent:'center',paddingTop:5}}>
@@ -364,10 +430,10 @@ const AccountScreen = () => {
     showsVerticalScrollIndicator={false}
     style={styles.screen}
     contentContainerStyle={{flexGrow:1}}
-    refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh}/>}
+    refreshControl={<RefreshControl refreshing={refreshing} onRefresh={UserRefresh}/>}
     >
       {
-        headerimg ? 
+        users?.headerUrl ? 
         (<ImageBackground
         resizeMode='cover'
         imageStyle={{height:150,justifyContent:'flex-end'}}
@@ -376,7 +442,7 @@ const AccountScreen = () => {
         bottom:0,
         justifyContent:'flex-end',
       }}
-      source={headerimg}
+      source={{uri:users?.headerUrl}}
       >
        <View style={{flexDirection:'row',justifyContent:'space-between',alignItems:'center',bottom:40}}>
        <TouchableOpacity onPress={() => navigation.navigate('Welcome',{screen:'Dash'})} style={{padding:10}}>
@@ -420,16 +486,44 @@ const AccountScreen = () => {
         justifyContent:'space-between',
         padding:5,}}>
        {
-        users?.profileUrl ? 
-        <Image
+        users?.profileUrl ?
+        <MotiView
+        transition={{
+          type: 'timing',
+        }}
+        >
+          <Skeleton
+           show={isloading}
+          radius='round'
+          >
+          <Image
         style={{height:hp(8), aspectRatio:1, borderRadius:100,borderWidth:2,borderColor:theme.colors.background}}
         source={users?.profileUrl}
         placeholder={{blurhash}}
-        cachePolicy='none'/> :   <Image
-        style={{height:hp(8), aspectRatio:1, borderRadius:100,borderWidth:2,borderColor:theme.colors.background}}
+        cachePolicy='none'/>
+          </Skeleton>
+        </MotiView>  :  
+        <MotiView
+        transition={{
+          type: 'timing',
+        }}
+        >
+          <Skeleton
+          show={isloading}
+          radius='round'
+          >
+          <Image
+        style={{
+          height:hp(8), 
+          aspectRatio:1, 
+          borderRadius:100,
+          borderWidth:2,
+          borderColor:theme.colors.background}}
         source={require('../assets/user.png')}
         placeholder={{blurhash}}
         cachePolicy='none'/>
+          </Skeleton>
+        </MotiView>
        }   
       <Button 
         onPress={() => navigation.navigate('Welcome',{screen:'Edit'})}
@@ -441,21 +535,43 @@ const AccountScreen = () => {
           </View>
           <View style={{marginTop:5}}>
           <View style={{paddingLeft:10,flexDirection:'column'}}>
-          <Text
-          variant='bodySmall'
-          style={{
-            color:theme.colors.onTertiary
+            <MotiView
+            transition={{
+              type:'timing',
+            }}
+            >
+              <Skeleton
+              show={isloading}
+              >
+              <Text
+              variant='bodySmall'
+              style={{
+                color:theme.colors.onTertiary
             }}>@{users?.username}</Text>
-              {users?.jobtitle &&   <Text
+              </Skeleton>
+            </MotiView>
+            <MotiView
+            transition={{
+              type: 'timing',
+            }}
+            >
+              <Skeleton show={isloading}>
+              <Text
               variant='bodySmall'
               style={{
                 color:theme.colors.onTertiary
-              }}>{users?.jobtitle}</Text>}
-              {users?.location &&    <Text
+              }}>{users?.jobtitle}</Text>
+              </Skeleton>
+            </MotiView>
+              <MotiView>
+                <Skeleton show={isloading}>
+                <Text
               variant='bodySmall'
               style={{
                 color:theme.colors.onTertiary
-              }}><EvilIcons name='location' size={15} color={theme.colors.onTertiary}/>{users?.location}</Text>}
+              }}><EvilIcons name='location' size={15} color={theme.colors.onTertiary}/>{users?.location}</Text>
+                </Skeleton>
+              </MotiView>
               <View style={{flexDirection:'row',marginTop:10}}>
               {follow_items.map((item,index)=>{
                   return <FollowComponent key={index} count={item.count} content={item.content}/>
@@ -531,7 +647,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    height: '70%', // Adjust this to control fade height
+    height: '70%',
   },
 })
 export default AccountScreen

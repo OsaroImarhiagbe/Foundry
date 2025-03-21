@@ -41,9 +41,7 @@ const LoginScreen = () => {
     const theme = useTheme()
     const {top} = useSafeAreaInsets()
     
-    // useEffect(() => {
-    //     return () => setLoading(false)
-    // }, []);
+
 
     const LoginPress = useCallback(async (values:any,{resetForm}:any) => {
         log(crashlytics,'Login Screen: Login Press')
