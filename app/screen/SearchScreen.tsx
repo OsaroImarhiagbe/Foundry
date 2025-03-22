@@ -56,7 +56,7 @@ const SearchScreen = () => {
   const theme = useTheme()
   const {user} = useAuth()
 
-  const debouncedsearch = useDebounce(searchQuery,5000)
+  const debouncedsearch = useDebounce(searchQuery,300)
   const dispatch = useDispatch()
 
   useEffect(() => {
@@ -146,7 +146,7 @@ const styles = StyleSheet.create({
   userContainer:{
     padding:10,
     flexDirection:'row',
-    backgroundColor:'#00bf63',
+    backgroundColor:'transparent',
     borderRadius:20
 
   },

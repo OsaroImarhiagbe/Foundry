@@ -33,7 +33,7 @@ jest.mock('react-native-responsive-screen', () => ({
 jest.mock('expo-image', () => ({
   Image: 'MockedImage'
 }));
-jest.mock('FIrebaseConfig', () => ({
+jest.mock('FirebaseConfig', () => ({
   db: 'mockedDB',
   PostRef: 'mockedPostRef'
 }));

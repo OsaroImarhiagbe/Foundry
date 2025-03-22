@@ -58,7 +58,7 @@ interface Item {
   
 const EditScreen = () => {
     const navigation = useNavigation<Navigation>();
-    const [filename,setFileName] = useState<string | undefined>(undefined)
+    const [filename,setFileName] = useState<string>('')
     const [image,setImage] = useState<string>('')
     const [headerimage,setHeaderImage] = useState<string>('')
     const dispatch = useDispatch()
@@ -106,14 +106,13 @@ const EditScreen = () => {
         }
         ]
 
-        console.log('header img',headerimg)
       
     
 
     const handleSave = useCallback(async() => {
-        let url;
-        let headerurl;
-        if(image && filename && headerimage){
+        let url = '';
+        let headerurl='';
+        if(image || headerimage){
             const imageRef = ref(storage,`/users/profileImage/${user.userId}/${filename}`)
             const headerRef = ref(storage,`/users/profileHeader/${user.userId}/${filename}`)
             await putFile(imageRef,image)
@@ -130,7 +129,7 @@ const EditScreen = () => {
             navigation.goBack()
         }catch(error:unknown | any){
             recordError(crashlytics,error)
-            console.error(error)
+            console.error('Error Saving:',error.message)
         }
     },[ form, image, filename])
 
@@ -150,7 +149,7 @@ const EditScreen = () => {
                     setImage(uri)
                     dispatch(addImage(uri)) 
                 }
-                setFileName(results?.assets[0]?.fileName)
+                setFileName(results?.assets[0]?.fileName || '')
             }
         }catch(error:any){
             recordError(crashlytics,error)

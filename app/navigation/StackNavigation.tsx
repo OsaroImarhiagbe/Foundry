@@ -1,37 +1,47 @@
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import React, { Suspense } from 'react';
+import FallBackComponent from '../components/FallBackComponent.tsx';
 const MessageScreen = React.lazy(() => import('../screen/MessageScreen.tsx'))
 const EditScreen = React.lazy(() => import('../screen/EditScreen.tsx'));
 const OtherUserScreen = React.lazy(() => import('../screen/OtherUserScreen.tsx'));
-import DashBoardScreen from '../screen/DashBoardScreen.tsx';
+const DashBoardScreen = React.lazy(() => import('../screen/DashBoardScreen.tsx'));
 
 
-const MessageScreenWrapper = () => {
+const MessageScreenWrapper = React.memo(() => {
   return (
-    <Suspense>
+    <Suspense fallback={<FallBackComponent/>}>
       <MessageScreen/>
     </Suspense>
   )
 
-}
+})
 
-const OtherUserScreenWrapper = () => {
+const OtherUserScreenWrapper = React.memo(() => {
   return (
-    <Suspense>
+    <Suspense fallback={<FallBackComponent/>}>
       <OtherUserScreen/>
     </Suspense>
   )
 
-}
+})
 
-const EditScreenWrapper = () => {
+const EditScreenWrapper = React.memo(() => {
   return (
-    <Suspense>
+    <Suspense fallback={<FallBackComponent/>}>
       <EditScreen/>
     </Suspense>
   )
 
-}
+})
+
+const DashBoardScreenWrapper = React.memo(() => {
+  return (
+    <Suspense fallback={<FallBackComponent/>}>
+      <DashBoardScreen/>
+    </Suspense>
+  )
+
+})
 
 
 const StackNavigation = () => {
@@ -41,7 +51,7 @@ const StackNavigation = () => {
     initialRouteName='Dash'>
         <Stack.Screen
         name='Dash'
-        component={DashBoardScreen}
+        component={DashBoardScreenWrapper}
         options={{
         headerShown: false, 
         gestureEnabled:false,

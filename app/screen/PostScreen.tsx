@@ -63,8 +63,7 @@ const PostScreen = () => {
   const [category, setCategory] = useState<string>('')
   const isMounted = useRef(true)
   const videoRef = useRef<VideoRef>(null);
-  
-{/** TOMORROW GET IMAGE AND VIDEO OPTIMIZE ALSO IN POST AND COMMMENT COMPONENT, THIS WILL TIE INTO WITH PROJECT SCREEN AND MAYBE EDIT SCREEN */}
+
 
 
   useEffect(() => {
@@ -89,10 +88,15 @@ const PostScreen = () => {
     try {
       const addPost = httpsCallable(functions,'addPost')
       let imageUrl = '';
+      let videoUrl = '';
       if(image && filename){
         const imageRef = ref(storage,`/posts/images/${user.userId}/${filename}`)
         await putFile(imageRef,image)
         imageUrl = await getDownloadURL(imageRef)
+      }else if(video && filename){
+        const videoRef = ref(storage,`/posts/videos/${user.userId}/${filename}`)
+        await putFile(videoRef,video)
+        videoUrl = await getDownloadURL(videoRef)
       }
       addPost({
         auth_id:user?.userId,
@@ -103,15 +107,16 @@ const PostScreen = () => {
         liked_by: [],
         category:category,
         image:imageUrl,
+        video:videoUrl
       }).catch((error) => {
-        console.error('Error sending post:',error)
+        console.error('Error sending post:',error.message)
       })
       setText('');
       setImage(null);
       setCategory('');
       navigation.goBack();
     } catch (error:unknown | any) {
-      console.error("Error creating room:", error);
+      console.error("Error sending post:", error);
     }finally{
       setLoading(false);
       trace.stop()
@@ -147,6 +152,7 @@ const PostScreen = () => {
         presentationStyle:'popover',
         videoQuality:'high',
       })
+      console.log('video',results)
       if(!results.didCancel && results.assets?.length && results?.assets[0]?.uri && results?.assets[0]?.fileSize){
         const uri = await ImageCompressor.compress(results.assets[0].uri)
         const videouri = await VideoCompressor.compress(results.assets[0].uri,{

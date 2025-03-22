@@ -143,7 +143,7 @@ exports.addPost = onCall(async (request) => {
       "unauthenticated", "This endpoint requires authentication");
   }
   try {
-    const {auth_id, name, content, like_count, comment_count, liked_by, category, image} = request.data;
+    const {auth_id, name, content, like_count, comment_count, liked_by, category, image, video} = request.data;
     const createdAt = FieldValue.serverTimestamp();
     const newDoc = await getFirestore().collection("posts").add({
       auth_id: auth_id,
@@ -156,6 +156,7 @@ exports.addPost = onCall(async (request) => {
       createdAt: createdAt,
       imageUrl: image,
       post_id: null,
+      videoUrl: video,
     });
     await getFirestore().collection("posts").doc(newDoc.id).update({
       post_id: newDoc.id,

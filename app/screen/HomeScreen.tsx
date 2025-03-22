@@ -190,7 +190,7 @@ const fetchMorePost = useCallback(async () => {
               hour12: true})}
           comment_count={item.comment_count}/>
          }
-        keyExtractor={(item)=> item?.post_id?.toString() || Math.random().toString()}
+        keyExtractor={(item,index)=> item?.post_id?.toString() || `default-${index}`}
         />
       )
     }

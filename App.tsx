@@ -15,7 +15,10 @@ import 'react-native-reanimated'
 import 'react-native-gesture-handler'
 import AuthNavigation from './app/navigation/AuthNavigation.tsx'
 import SplashScreen from './app/screen/SplashScreen.tsx'
-
+import { DefaultTheme as Defaulttheme, DarkTheme as Darktheme } from '@react-navigation/native';
+import notifee, { EventType } from '@notifee/react-native'
+import { recordError } from '@react-native-firebase/crashlytics';
+import { crashlytics } from 'FirebaseConfig.ts';
 
 export default function App() {
   const colorScheme = useColorScheme();
@@ -126,13 +129,13 @@ export default function App() {
       }
 
   
-  
   const theme = colorScheme === 'dark' ? darkTheme : lightTheme;
 
 
   useEffect(() => {
     const timer = setTimeout(() => {
       setLoading(false)
+      notifee.setBadgeCount(0).catch((error:unknown | any) => recordError(crashlytics,error))
     },1000)
     return () => clearTimeout(timer)
   },[])
@@ -146,7 +149,7 @@ export default function App() {
         <MenuProvider>
           <AuthContextProvider>
         <PaperProvider theme={theme}>
-        <NavigationContainer>
+        <NavigationContainer theme={colorScheme === 'dark' ? Darktheme : Defaulttheme}>
         <NotificationProvider>
           {loading ? <SplashScreen/>:<AuthNavigation/>}
           </NotificationProvider>

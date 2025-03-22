@@ -1,4 +1,4 @@
-import React,{useState,useEffect,memo, useCallback} from 'react'
+import React,{useState,useEffect,memo, useCallback, useRef} from 'react'
 import {View,StyleSheet,
 TouchableOpacity,
 TouchableHighlight,
@@ -41,6 +41,8 @@ import FastImage from "@d11/react-native-fast-image";
 import { perf } from '../../FirebaseConfig';
 import { Skeleton } from 'moti/skeleton';
 import { MotiView } from 'moti';
+import Video, { VideoRef } from 'react-native-video';
+
 
 
 interface PostComponentProps {
@@ -53,6 +55,7 @@ interface PostComponentProps {
   date?: string;
   comment_count?: number;
   mount?: boolean;
+  video?:string
 }
 interface Comment{
   id?:string | any,
@@ -74,6 +77,7 @@ const PostComponent: React.FC<PostComponentProps> = memo(({
   date,
   comment_count,
   mount,
+  video
 }) => {
 
  
@@ -88,7 +92,7 @@ const PostComponent: React.FC<PostComponentProps> = memo(({
     const {user} = useAuth();
     const [replyingTo, setReplyingTo] = useState<string | null>(null);
     const [replyingToUsername, setReplyingToUsername] = useState<string | undefined>(undefined);
-   
+    const videoRef = useRef<VideoRef>(null);
 
     useEffect(() => {
       const docRef = doc(PostRef,id)
@@ -310,6 +314,21 @@ const PostComponent: React.FC<PostComponentProps> = memo(({
         marginTop: 8,
       }}
       />}
+      {video && <Video 
+            source={{
+              uri: video
+            }}
+            repeat={true}
+            ref={videoRef}
+            controls={true}
+            resizeMode='cover'             
+            style={{
+              width: 370,
+              height: 400,
+              borderRadius: 10,
+              overflow: 'hidden',
+            }}
+          />}
         <MotiView
       transition={{
         type: 'timing',

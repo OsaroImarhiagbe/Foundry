@@ -33,7 +33,8 @@ interface Post{
     content?: string;
     createdAt?: FirebaseFirestoreTypes.Timestamp
     comment_count?: number;
-    mount?:boolean
+    mount?:boolean,
+    videoUrl?:string
   };
   
 
@@ -50,6 +51,7 @@ const FeedScreen = () => {
 
 
   
+    
  
     useEffect(() => {
       if (!user?.userId) return;
@@ -107,7 +109,7 @@ const FeedScreen = () => {
             querySnapShot.forEach(documentSnapShot => {
               data.push({ ...documentSnapShot.data(),id:documentSnapShot.id });
             })
-            setPost((prev) => [...prev,...data]);
+            setPost(data);
             setLastVisible(querySnapShot.docs[querySnapShot.docs.length - 1]);
             setHasMore(querySnapShot.docs.length > 0);
             trace.putAttribute('post_count', post.length.toString());
@@ -125,10 +127,9 @@ const FeedScreen = () => {
     }, []);
 
     const fetchMorePost = useCallback(async () => {
-      setLoadingMore(true);
       log(crashlytics,'Fetch More Post')
       let trace = await perf.startTrace('fetching_more_post_feedscreen')
-      if (!hasMore) return;
+      if (!loadingMore || !hasMore) return;
       if (post.length <= 2) {
         setHasMore(false);
         setLoadingMore(false);
@@ -190,14 +191,15 @@ const FeedScreen = () => {
                 <Divider/>
               )}
               ListFooterComponent={() => (
-                  <ActivityIndicator color='#fff' size='small' animating={loadingMore}/>
+                  <ActivityIndicator color='#fff' size='small' animating={false}/>
               )}
-              keyExtractor={(item)=> item?.post_id?.toString() || Math.random().toString()}
+              keyExtractor={(item,index) => item?.post_id?.toString() || `defualt-${index}`}
               renderItem={({item}) =>
              <PostComponent
                   auth_profile={item.auth_profile}
                   count={item.like_count}
                   url={item.imageUrl}
+                  video={item.videoUrl}
                   id={item.post_id}
                   name={item.name}
                   content={item.content}

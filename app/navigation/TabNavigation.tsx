@@ -9,10 +9,44 @@ import { Image
  import { blurhash } from 'utils';
 import { useAuth } from 'app/authContext';
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
-import NotificationScreen from '../screen/NotificationScreen.tsx';
-import SearchScreen from '../screen/SearchScreen.tsx';
-import StackNavigation from '../navigation/StackNavigation.tsx';
-import ProfileScreen from '../screen/AccountScreen.tsx';
+import FallBackComponent from '../components/FallBackComponent.tsx';
+const NotificationScreen = React.lazy(() => import('../screen/NotificationScreen.tsx'));
+const SearchScreen = React.lazy(() => import('../screen/SearchScreen.tsx'));
+const StackNavigation = React.lazy(() => import('../navigation/StackNavigation.tsx'));
+const ProfileScreen = React.lazy(() => import('../screen/AccountScreen.tsx'));
+
+const ProfileScreenWrapper = React.memo(() => {
+  return (
+    <Suspense fallback={<FallBackComponent/>}>
+      <ProfileScreen/>
+    </Suspense>
+  )
+})
+
+const SearchScreenWrapper = React.memo(() => {
+  return (
+    <Suspense fallback={<FallBackComponent/>}>
+      <SearchScreen/>
+    </Suspense>
+  )
+})
+
+const NotificationScreenWrapper = React.memo(() => {
+  return (
+    <Suspense fallback={<FallBackComponent/>}>
+      <NotificationScreen/>
+    </Suspense>
+  )
+})
+
+const StackNavigationWrapper = React.memo(() => {
+  return (
+    <Suspense fallback={<FallBackComponent/>}>
+      <StackNavigation/>
+    </Suspense>
+  )
+})
+
 
 
 
@@ -39,9 +73,10 @@ const TabNavigation = () => {
     }
   }}
 >
-    <Tab.Screen 
+
+  <Tab.Screen 
       name="Welcome"
-     component={StackNavigation}
+     component={StackNavigationWrapper}
      options={{
         tabBarLabel:'Welcome',
         tabBarIcon:() => (
@@ -51,7 +86,7 @@ const TabNavigation = () => {
      />
      <Tab.Screen
      name='Search'
-     component={SearchScreen}
+     component={SearchScreenWrapper}
      options={{
       tabBarLabel:'Search',
       tabBarIcon: () => <MaterialCommunityIcons name='account-search' size={25} color={theme.colors.tertiary}/>
@@ -59,7 +94,7 @@ const TabNavigation = () => {
     />
     <Tab.Screen 
         name="Notification"
-        component={NotificationScreen}
+        component={NotificationScreenWrapper}
      options={{
         tabBarLabel: 'Notification',
         tabBarIcon:() => <MaterialIcons name='notifications' color={theme.colors.tertiary} size={25}/>
@@ -67,7 +102,7 @@ const TabNavigation = () => {
      />
      <Tab.Screen 
         name="Account"
-        component={ProfileScreen}
+        component={ProfileScreenWrapper}
         options={{
           tabBarIcon:() => (
             user?.profileUrl ?
@@ -82,6 +117,7 @@ const TabNavigation = () => {
             />
           )}}
      />
+
       </Tab.Navigator>
   
 

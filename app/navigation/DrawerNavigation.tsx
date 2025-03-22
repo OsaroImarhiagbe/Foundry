@@ -7,19 +7,21 @@ import { blurhash } from 'utils';
 import { useAuth } from '../authContext.tsx'
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import { Icon,useTheme,Text} from 'react-native-paper';
-const SettingsScreen = React.lazy(() => import('../screen/SettingsScreen.tsx'));
-import TabNavigation from '../navigation/TabNavigation.tsx'
+import FallBackComponent from '../components/FallBackComponent.tsx';
+import TabNavigation from '../navigation/TabNavigation.tsx';
 
+const SettingsScreen = React.lazy(() => import('../screen/SettingsScreen.tsx'));
 const Drawer = createDrawerNavigator();
 
 
-const SettingsScreenWrapper = () => {
+const SettingsScreenWrapper = React.memo(() => {
   return (
-    <Suspense>
+    <Suspense fallback={<FallBackComponent/>}>
       <SettingsScreen/>
     </Suspense>
   )
-}
+})
+
 
 
 const DrawerNavigation = () => {

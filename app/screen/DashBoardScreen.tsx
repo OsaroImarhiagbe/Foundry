@@ -27,10 +27,11 @@ import { useDispatch} from 'react-redux';
 import { MenuItems } from '../components/CustomMenu';
 import { addsearchID } from '../features/search/searchSlice';
 import SearchComponent from '../components/SearchComponent';
-import HomeScreen from '../screen/HomeScreen.tsx'
-import FeedScreen from '../screen/FeedScreen.tsx'
-
-
+import { functions } from '../../FirebaseConfig.ts';
+import { httpsCallable } from '@react-native-firebase/functions'
+import FallBackComponent from '../components/FallBackComponent.tsx';
+const HomeScreen = React.lazy(() => import('../screen/HomeScreen.tsx'));
+const FeedScreen = React.lazy(() => import('../screen/FeedScreen.tsx'));
 type NavigationProp = {
   openDrawer(): undefined;
   navigate(arg0?: string, arg1?: { screen: string; }): unknown;
@@ -41,8 +42,20 @@ type NavigationProp = {
 const Tab = createMaterialTopTabNavigator();
 
 
-
-
+const HomeScreenWrapper = React.memo(() => {
+  return (
+    <Suspense fallback={<FallBackComponent/>}>
+      <HomeScreen/>
+    </Suspense>
+  )
+})
+const FeedScreenWrapper = React.memo(() => {
+  return (
+    <Suspense fallback={<FallBackComponent/>}>
+      <FeedScreen/>
+    </Suspense>
+  )
+})
 
 
 
@@ -58,6 +71,11 @@ const DashBoardScreen = () => {
     
  
 
+
+    const testNotification = useCallback(async () => {
+      const sendTestNotification = httpsCallable(functions,'sendTestNotification')
+      await sendTestNotification()
+    },[])
    
 
 
@@ -85,7 +103,7 @@ const DashBoardScreen = () => {
         title='Search....'
         />
        <TouchableOpacity
-         onPress={() => navigation.navigate('Message')}>
+         onPress={testNotification}>
         <View>
            <Entypo name='new-message' size={20} color={theme.colors.primary}/>
         </View>
@@ -143,11 +161,11 @@ const DashBoardScreen = () => {
     >
         <Tab.Screen
         name='For You'
-        component={FeedScreen}
+        component={FeedScreenWrapper}
         />
         <Tab.Screen
         name='Community'
-        component={HomeScreen}
+        component={HomeScreenWrapper}
         />
         </Tab.Navigator>
         <FAB

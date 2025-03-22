@@ -1,8 +1,6 @@
 import React,{
   useState,
   useEffect,
-  lazy,
-  Suspense,
   useCallback} from 'react'
 import {
   View, 
@@ -14,34 +12,45 @@ import {
 import { useAuth } from '../authContext';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import color from '../../config/color';
-import { useTheme,Text } from 'react-native-paper';
-import { db,UsersRef,NotificationsRef, crashlytics} from '../../FirebaseConfig';
+import { useTheme,Text, Divider } from 'react-native-paper';
+import { crashlytics, db} from '../../FirebaseConfig';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { log,recordError } from '@react-native-firebase/crashlytics'
 import { FlashList } from '@shopify/flash-list';
+import { MotiView } from 'moti';
+import { Skeleton } from 'moti/skeleton';
 
 
 interface Notification{
   id?:string,
   title?:string,
-  body?:string
+  message?:string
 }
 const NotificationScreen = () => {
   const {user} = useAuth()
   const [messageNotifications,setMessageNotifications] = useState<Notification[]>([])
   const [notification,setNotification] = useState<Notification[]>([])
   const [refreshing, setRefreshing] = useState<boolean>(false);
+  const [loading,setLoading] = useState<boolean>(true)
   const {top} = useSafeAreaInsets()
   const Tab = createMaterialTopTabNavigator()
   const theme = useTheme()
 
 
-  const getNotifications = useCallback(() => {
-    log(crashlytics,'Notification Screen: get Notifications')
+
+
+  const onRefresh = useCallback(() => {
+    log(crashlytics,'Notification Screen: On Refresh')
+    setRefreshing(true);
     try{
-      if(user){
-        const docRef = collection(NotificationsRef,user.userId)
+        const docRef = collection(db,'users',user.userId,'notifcations')
         const unsub = onSnapshot(docRef,(querySnapshot)=>{
+          if(!querySnapshot || querySnapshot.empty){
+            setMessageNotifications([])
+            setNotification([])
+            setRefreshing(false)
+            return;
+          }
         let messageOnly:Notification[] = []
         let all:Notification[] = []
         querySnapshot.forEach((documentSnapshot)=>{
@@ -52,104 +61,169 @@ const NotificationScreen = () => {
         })
         setMessageNotifications([...messageOnly])
         setNotification([...all])
+        setRefreshing(false)
       })
-      return unsub
-      }
+      return () => unsub()
     }catch(error:unknown | any){
       recordError(crashlytics,error)
       console.error('Error grabbing notifications:',error.message)
       return ()  => {}
-    }
-  },[user?.userId])
-
-  const onRefresh = useCallback(() => {
-    log(crashlytics,'Notification Screen: On Refresh')
-    setRefreshing(true);
-    try{
-      getNotifications()
-    }catch(error:unknown | any){
-      recordError(crashlytics,error)
-      console.error('Error getting notifications',error.message)
     }finally{
       setRefreshing(false)
     }
-  }, [getNotifications]);
+  }, []);
 
 
 
   useEffect(() => {
-    const unsubscribe = getNotifications()
-    return () => {
-      unsubscribe
+    try{
+        const docRef = collection(db,'users',user.userId,'notifications')
+        const unsub = onSnapshot(docRef,(querySnapshot)=>{
+          if(!querySnapshot || querySnapshot.empty){
+            setMessageNotifications([])
+            setNotification([])
+            setLoading(false)
+            return
+          }
+        let messageOnly:Notification[] = []
+        let all:Notification[] = []
+        querySnapshot.forEach((documentSnapshot)=>{
+          all.push({...documentSnapshot.data(),id:documentSnapshot.id})
+          if (documentSnapshot.data().data == 'message'){
+            messageOnly.push({...documentSnapshot.data()})
+          }
+        })
+        setMessageNotifications(messageOnly)
+        setNotification(all)
+        setLoading(false)
+      })
+      return () => unsub()
+    }catch(error:unknown | any){
+      recordError(crashlytics,error)
+      console.error('Error grabbing notifications:',error.message)
+      setLoading(false)
+    }finally{
+      setLoading(false)
     }
-  }, [getNotifications])
+  }, [])
 
 
 
-  const MessagesNotifications = () => (
+  const MessagesNotifications = React.memo(() => (
     <View
      style={{flex:1,backgroundColor:theme.colors.background}}>
       <SafeAreaView style={{flex:1,backgroundColor:theme.colors.background}}>
         <FlashList
+        onRefresh={onRefresh}
         estimatedItemSize={460}
+        refreshing={refreshing}
+        keyExtractor={(item) => item.id?.toString() || Math.random().toString() }
         data={messageNotifications}
         ListEmptyComponent={() => <View style={{paddingTop:20}}><Text
           variant='bodySmall'
         style={{ color: '#fff', textAlign: 'center',fontSize:16}}>No Notifications Available</Text></View>}
         renderItem={({item}) =>  
-          <View style={{padding: 10}}>
-            <View style={{backgroundColor:color.grey,padding:20,borderRadius:20}}>
-            <Text style={styles.notificationTitle}>{item.title}</Text>
-            <Text style={styles.notificationText}>{item.body}</Text>
+          <MotiView
+          transition={{
+            type:'timing'
+          }}
+          style={{padding: 10}}>
+            <Skeleton>
+            <View style={{padding:20,borderRadius:20}}>
+            <Text
+            variant='bodyMedium'
+             style={{
+              color:theme.colors.tertiary
+            }}>{item.title}</Text>
+            <Text variant='bodyMedium'
+             style={{
+              color:theme.colors.tertiary
+            }}>{item.message}</Text>
             </View>
-          </View>}/>
+            </Skeleton>
+          </MotiView>}/>
     </SafeAreaView>
     </View>
     
-  ); 
+  )); 
   
-  const Notifcations = () => (
+  const Notifcations = React.memo(() => (
     <View
      style={{flex:1,backgroundColor:theme.colors.background}}>
       <SafeAreaView style={{flex:1,backgroundColor:theme.colors.background}}>
       <FlashList
-      estimatedItemSize={460}
-        data={notification}
-        ListEmptyComponent={() => <View style={{paddingTop:20}}><Text
+      onRefresh={onRefresh}
+      keyExtractor={(item,index) => item.id?.toString() || `defualt-${index}`}
+      estimatedItemSize={460} 
+      data={notification}
+      refreshing={refreshing}
+      ItemSeparatorComponent={()=> (
+        <Divider/>
+      )}
+      ListEmptyComponent={() => <View style={{paddingTop:20}}><Text
           variant='bodySmall'
         style={{ color: '#fff', textAlign: 'center',fontSize:16}}>No Notifications Available</Text></View>}
         renderItem={({item}) =>  
-          <View style={{padding: 10}}>
-            <View style={{backgroundColor:color.grey,padding:20,borderRadius:20}}>
-            <Text style={styles.notificationTitle}>{item.title}</Text>
-            <Text style={styles.notificationText}>{item.body}</Text>
-            </View>
-          </View>}/>
+          <MotiView
+        transition={{
+          type:'timing'
+        }}
+        style={{padding: 10}}>
+        <Skeleton>
+        <View style={{padding:20,borderRadius:20}}>
+        <Text
+        variant='bodyMedium'
+         style={{
+          color:theme.colors.tertiary
+        }}>{item.title}</Text>
+        <Text variant='bodyMedium'
+         style={{
+          color:theme.colors.tertiary
+        }}>{item.message}</Text>
+        </View>
+        </Skeleton>
+      </MotiView>}/>
     </SafeAreaView>
     </View>
     
-  );
-  const Mentions = () => (
+  ));
+  const Mentions = React.memo(() => (
     <View
      style={{flex:1,backgroundColor:theme.colors.background}}>
       <SafeAreaView style={{flex:1,backgroundColor:theme.colors.background}}>
       <FlashList
+      refreshing={refreshing}
+      onRefresh={onRefresh}
       estimatedItemSize={460}
-        data={messageNotifications}
-        ListEmptyComponent={() => <View style={{paddingTop:20}}><Text
+      keyExtractor={(item,index) => item.id?.toString() || `default-${index}`}
+      data={messageNotifications}
+      ListEmptyComponent={() => <View style={{paddingTop:20}}><Text
           variant='bodySmall'
         style={{ color: '#fff', textAlign: 'center',fontSize:16}}>No Notifications Available</Text></View>}
         renderItem={({item}) =>  
-          <View style={{padding: 10}}>
-            <View style={{backgroundColor:color.grey,padding:20,borderRadius:20}}>
-            <Text style={styles.notificationTitle}>{item.title}</Text>
-            <Text style={styles.notificationText}>{item.body}</Text>
+          <MotiView
+        transition={{
+          type:'timing'
+        }}
+        style={{padding: 10}}>
+            <Skeleton>
+            <View style={{padding:20,borderRadius:20}}>
+            <Text
+            variant='bodyMedium'
+             style={{
+              color:theme.colors.tertiary
+            }}>{item.title}</Text>
+            <Text variant='bodyMedium'
+             style={{
+              color:theme.colors.tertiary
+            }}>{item.message}</Text>
             </View>
-          </View>}/>
+            </Skeleton>
+          </MotiView>}/>
     </SafeAreaView>
     </View>
     
-  );
+  ));
   return (
    <View style={[styles.screen,{backgroundColor:theme.colors.background}]}>
     <View style={[styles.headingContainer,{marginTop:top}]}>
@@ -189,6 +263,7 @@ const NotificationScreen = () => {
       component={Notifcations}
       options={{
         tabBarLabel:'All',
+        tabBarBadge: () => <Text>{notification.length}</Text>,
         tabBarLabelStyle:{
           color:theme.colors.tertiary,
           fontSize:20
@@ -218,15 +293,5 @@ const styles = StyleSheet.create({
     headingContainer:{
       padding:10,
     },
-    notificationTitle:{
-      color:color.textcolor,
-      fontFamily:color.textFont,
-      fontSize:20
-    },
-    notificationText:{
-      color:color.textcolor,
-      fontFamily:color.textFont,
-      fontSize:15
-    }
 })
 export default NotificationScreen

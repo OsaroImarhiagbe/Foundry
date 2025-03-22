@@ -3,8 +3,8 @@ import notifee, { EventType } from '@notifee/react-native'
 import { useNavigation } from '@react-navigation/native';
 import { FirebaseMessagingTypes } from '@react-native-firebase/messaging';
 import { useAuth } from './authContext';
-import {crashlytics, messaging,NotificationsRef,UsersRef } from '../FirebaseConfig';
-import { doc, setDoc} from '@react-native-firebase/firestore';
+import {crashlytics, messaging,NotificationsRef,UsersRef,db } from '../FirebaseConfig';
+import { doc, setDoc,FieldValue, addDoc, collection} from '@react-native-firebase/firestore';
 import {log,recordError} from '@react-native-firebase/crashlytics'
 
 const NotificationContext = createContext<any>(null);
@@ -33,15 +33,6 @@ export const NotificationProvider = ({ children }:NotificationProp) => {
   const [visible,setVisible] = useState<boolean>(false)
   const navigation = useNavigation();
 
-  const isMounted = useRef(true);
-
-  useEffect(() => {
-    isMounted.current = true;
-    return () => {
-      isMounted.current = false;
-    };
-  }, []);
-
   const showNotification = useCallback(async (title:string, message:string,data:any) => {
     log(crashlytics,'Notifcation Provider: Show Notification')
     try{
@@ -58,43 +49,23 @@ export const NotificationProvider = ({ children }:NotificationProp) => {
                 sound:'default'
             },
         });
-        if(user.userId){
-          await setDoc(doc(NotificationsRef,user.userId),{
-            title:title,
-            message:message
+        if(user && user.userId){
+          await addDoc(collection(db,'users', user.userId, 'notifications'), {
+            title: title,
+            message: message,
+            timestamp: new Date()
           })
+        }else{
+          console.error('Error adding notification')
         }
         setNotification({ title, message,data });
         setVisible(true)
-        const timer = setTimeout(() => {
-          setNotification(null);
-          setVisible(false);
-        },5000);
-        return () => clearTimeout(timer)
     }catch(error:unknown | any){
         recordError(crashlytics,error)
         console.error('Error with notification permission:',error.message)
     }
-  }, []);
-   
-    useEffect(() => {
-      log(crashlytics,'Notifcation Provider: Getting token')
-      if (!user?.userId) return;
-      const fetchToken = async () => {
-        try{
-          await notifee.requestPermission();
-          const token = await messaging.getToken();
-          if (!token) throw new Error('Failed to get FCM token');      
-          await setDoc(doc(UsersRef,user.userId),{
-            token:token
-          },{merge:true})
-        }catch(error: unknown | any){
-          recordError(crashlytics,error)
-          console.error('Error grabbing token:',error)
-        }
-      }
-      fetchToken()
-      }, []);
+  }, [user, user.userId]);
+
 
 
     const handleNotificationClick = useCallback((notification:unknown | any) => {
@@ -110,6 +81,7 @@ export const NotificationProvider = ({ children }:NotificationProp) => {
       if(notification?.title && notification?.body){
         await showNotification(notification?.title,notification?.body,data)
       }
+      await notifee.incrementBadgeCount();
     },[showNotification])
 
 
@@ -126,8 +98,11 @@ export const NotificationProvider = ({ children }:NotificationProp) => {
         });
 
         notifee.onBackgroundEvent(async ({type,detail})=>{
+          const {notification} = detail
             if(type === EventType.PRESS){
               handleNotificationClick(detail.notification)
+              await notifee.decrementBadgeCount();
+              await notifee.cancelNotification(notification?.id || '')
             }
         });
 
