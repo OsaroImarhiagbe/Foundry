@@ -4,7 +4,7 @@ import { useNavigation } from '@react-navigation/native';
 import { FirebaseMessagingTypes } from '@react-native-firebase/messaging';
 import { useAuth } from './authContext';
 import {crashlytics, messaging,NotificationsRef,UsersRef,db } from '../FirebaseConfig';
-import { doc, setDoc,FieldValue, addDoc, collection} from '@react-native-firebase/firestore';
+import { doc, setDoc,FieldValue, addDoc, collection, getDocs} from '@react-native-firebase/firestore';
 import {log,recordError} from '@react-native-firebase/crashlytics'
 
 const NotificationContext = createContext<any>(null);
@@ -29,6 +29,7 @@ interface NotificationData {
 }
 export const NotificationProvider = ({ children }:NotificationProp) => {
   const [notification, setNotification] = useState<NotificationData | null>(null);
+  const [notificationCount, setNotificationCount] = useState<number | undefined>(undefined);
   const {user} = useAuth()
   const [visible,setVisible] = useState<boolean>(false)
   const navigation = useNavigation();
@@ -65,6 +66,20 @@ export const NotificationProvider = ({ children }:NotificationProp) => {
         console.error('Error with notification permission:',error.message)
     }
   }, [user, user.userId]);
+
+  const getNotificationCount = useCallback(async () => {
+    const collectionRef = collection(db,'users', user.userId, 'notifications')
+    const colRef = await getDocs(collectionRef)
+    return colRef.size
+  },[])
+
+  useEffect(() => {
+    const fetchCount = async () => {
+      const count = await getNotificationCount()
+      setNotificationCount(count)
+    }
+    fetchCount()
+  },[notification])
 
 
 
@@ -138,7 +153,7 @@ export const NotificationProvider = ({ children }:NotificationProp) => {
 
 
   return (
-    <NotificationContext.Provider value={{ showNotification }}>
+    <NotificationContext.Provider value={{ showNotification,notificationCount }}>
       {children}
     </NotificationContext.Provider>
   );

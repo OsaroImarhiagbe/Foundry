@@ -12,11 +12,8 @@ import {
 import { blurhash } from '../../utils/index';
 import { useAuth } from '../authContext';
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
-import { useSelector } from 'react-redux';
 import { useNavigation } from '@react-navigation/native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-import {
-  Timestamp}from '@react-native-firebase/firestore'
 import color from '../../config/color';
 import {getDownloadURL,putFile,ref} from '@react-native-firebase/storage'
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -30,8 +27,7 @@ import {
   MenuTrigger,
 } from 'react-native-popup-menu';
 import { MenuItems } from '../components/CustomMenu'
-import {crashlytics, functions, perf } from '../../FirebaseConfig';
-import { storage } from 'FirebaseConfig';
+import {crashlytics, functions, perf,storage } from '../../FirebaseConfig';
 import { httpsCallable } from '@react-native-firebase/functions'
 import FastImage from "@d11/react-native-fast-image";
 import {Image as ImageCompressor,Video as VideoCompressor} from 'react-native-compressor';

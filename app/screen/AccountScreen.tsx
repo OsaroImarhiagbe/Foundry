@@ -15,7 +15,7 @@ import { useAuth } from '../authContext';
 import { Image } from 'expo-image';
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import FollowComponent from '../components/FollowComponent';
-import { collection, query, where,FirebaseFirestoreTypes,doc, orderBy, onSnapshot, getDoc, Unsubscribe} from '@react-native-firebase/firestore';
+import { collection, where,FirebaseFirestoreTypes,doc, orderBy, onSnapshot, getDoc, Unsubscribe} from '@react-native-firebase/firestore';
 import { blurhash } from '../../utils/index';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -28,13 +28,13 @@ import {
   ActivityIndicator} from 'react-native-paper';
 import EvilIcons from 'react-native-vector-icons/EvilIcons';
 import { FlashList } from '@shopify/flash-list';
-import {PostRef, ProjectRef, UsersRef,crashlytics} from '../../FirebaseConfig';
+import {PostRef, ProjectRef, UsersRef,crashlytics, database} from '../../FirebaseConfig';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { log, recordError, setAttributes, setUserId } from '@react-native-firebase/crashlytics';
-import { useSelector } from 'react-redux';
 import PostComponent from '../components/PostComponent';
 import { Skeleton } from 'moti/skeleton';
 import { MotiView } from 'moti';
+import { equalTo, onValue, orderByChild, ref,query } from '@react-native-firebase/database';
 
 type NavigationProp = {
   ProjectScreen:undefined,
@@ -167,16 +167,18 @@ const AccountScreen = () => {
     setRefreshing(true)
     log(crashlytics,'Account Screen: POST Refresh')
     try{
-      const postRef = query(PostRef,where('auth_id','==',user?.userId) ,orderBy('createdAt','desc'))
-      const unsub = onSnapshot(postRef,async (querySnapshot) => {
-        if (!querySnapshot || querySnapshot.empty) {
+      const postRef = ref(database,'/posts')
+      const orderedQuery = query(postRef,orderByChild('auth_id'),equalTo(user.userId),)
+      const unsub = onValue(orderedQuery,async (snapshot) => {
+        if (!snapshot.exists()) {
           setPosts([]);
           setRefreshing(false);
           return;
         }
-        let data:Post[] = []
-        querySnapshot.forEach(docRef => {
-          data.push({...docRef.data(),id:docRef.id})
+        const data:Post[] = []
+        snapshot.forEach(childSnapshot => {
+          data.push({...childSnapshot.val(),id:childSnapshot.key})
+          return true
         })
         setPosts(data)
         setRefreshing(false)
@@ -247,16 +249,18 @@ const AccountScreen = () => {
   useEffect(() => {
     log(crashlytics,'Account Screen: Grabbing Users Post')
     try{
-      const postRef = query(PostRef,where('auth_id','==',user?.userId) ,orderBy('createdAt','desc'))
-      const unsub = onSnapshot(postRef,async (querySnapshot) => {
-        if (!querySnapshot || querySnapshot.empty) {
+      const postRef = ref(database,'/posts')
+      const orderedQuery = query(postRef,orderByChild('auth_id'),equalTo(user.userId),)
+      const unsub = onValue(orderedQuery,async (snapshot) => {
+        if (!snapshot.exists()) {
           setPosts([]);
           setLoading(false);
           return;
         }
-        let data:Post[] = []
-        querySnapshot.forEach(docRef => {
-          data.push({...docRef.data(),id:docRef.id})
+        const data:Post[] = []
+        snapshot.forEach(childSnapshot => {
+          data.push({...childSnapshot.val(),id:childSnapshot.key})
+          return true
         })
         setPosts(data)
         setLoading(false)
@@ -324,19 +328,7 @@ const AccountScreen = () => {
           onRefresh={PostRefresh}
           ListEmptyComponent={() => (
             <View style={{flex:1,alignItems:'center',justifyContent:'center',paddingTop:5}}>
-              <MotiView
-           transition={{
-            type:'timing'
-           }}
-            >
-              <Skeleton
-                show={isloading}
-                radius='round'
-                colorMode={dark_or_light ? 'dark':'light'}
-                >
               <Text variant='bodyMedium'>No post at the moment</Text>
-              </Skeleton>
-              </MotiView>
             </View>
           )}
           onEndReachedThreshold={0.1}
@@ -352,7 +344,7 @@ const AccountScreen = () => {
             auth_profile={item.auth_profile}
             count={item.like_count}
             url={item.imageUrl}
-            id={item.post_id}
+            post_id={item.post_id}
             name={item.name}
             content={item.content}
             mount={isloading}

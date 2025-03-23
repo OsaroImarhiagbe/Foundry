@@ -263,7 +263,6 @@ const NotificationScreen = () => {
       component={Notifcations}
       options={{
         tabBarLabel:'All',
-        tabBarBadge: () => <Text>{notification.length}</Text>,
         tabBarLabelStyle:{
           color:theme.colors.tertiary,
           fontSize:20

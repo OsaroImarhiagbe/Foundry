@@ -19,8 +19,7 @@ import {
   doc, 
   FirebaseFirestoreTypes, 
   onSnapshot, 
-  orderBy, 
-  query, 
+  orderBy,  
   runTransaction, 
   Timestamp } from '@react-native-firebase/firestore';
 import CommentComponent from './CommentComponent';
@@ -36,12 +35,16 @@ import {
   MenuTrigger,
 } from 'react-native-popup-menu';
 import { MenuItems } from '../components/CustomMenu'
-import { db, PostRef } from 'FirebaseConfig';
+import { crashlytics, database, db, PostRef } from 'FirebaseConfig';
 import FastImage from "@d11/react-native-fast-image";
 import { perf } from '../../FirebaseConfig';
 import { Skeleton } from 'moti/skeleton';
 import { MotiView } from 'moti';
 import Video, { VideoRef } from 'react-native-video';
+import { functions } from '../../FirebaseConfig.ts';
+import { httpsCallable } from '@react-native-firebase/functions'
+import { recordError } from '@react-native-firebase/crashlytics';
+import {ref,FirebaseDatabaseTypes, orderByChild, limitToFirst, startAt, query, equalTo, onValue, } from '@react-native-firebase/database';
 
 
 
@@ -49,7 +52,7 @@ interface PostComponentProps {
   auth_profile?: string;
   count?: number;
   url?: string;
-  id?: string;
+  post_id?: string;
   name?: string;
   content?: string;
   date?: string;
@@ -71,7 +74,7 @@ const PostComponent: React.FC<PostComponentProps> = memo(({
   auth_profile,
   count,
   url,
-  id,
+  post_id,
   name,
   content,
   date,
@@ -84,7 +87,7 @@ const PostComponent: React.FC<PostComponentProps> = memo(({
 
 
     const [press,setIsPress] = useState<boolean>(false)
-    const [isloading,setLoading] = useState<boolean>(false)
+    const [isloading,setLoading] = useState<boolean>(true)
     const [modalVisible, setModalVisible] = useState<boolean>(false);
     const [comments, setComment] = useState<Comment[]>([])
     const [text,setText] = useState('')
@@ -95,53 +98,34 @@ const PostComponent: React.FC<PostComponentProps> = memo(({
     const videoRef = useRef<VideoRef>(null);
 
     useEffect(() => {
-      const docRef = doc(PostRef,id)
-      const commentRef = collection(docRef,'comments')
-      const q = query(commentRef, orderBy('createdAt','desc'))
-       const subscriber = onSnapshot(q, (querySnapShot) => {
-              if (!querySnapShot || querySnapShot.empty) {
+      const docRef = ref(database,`/comments/${post_id}`)
+      const q = query(docRef, orderByChild('createdAt'))
+       const subscriber = onValue(q, (snapshot) => {
+              if (!snapshot.exists()) {
                 setComment([]);
+                setLoading(false)
                 return;
               }
               let data:Comment[] = []
-              querySnapShot.forEach(documentSnapshot => {
-                data.push({ ...documentSnapshot.data(),id:documentSnapshot.id });
+              snapshot.forEach(childSnapshot => {
+                data.push({ ...childSnapshot.val(),id:childSnapshot.key });
+                return true;
               })
               setComment(data)
     }) 
           return () => subscriber()
-    },[id])
+    },[post_id])
 
 
  
-    const handleLike = useCallback(async () => {
+    const LikeButton = useCallback(async () => {
       let trace = await perf.startTrace('post_like')
-      setLoading(true)
-      const docRef = doc(PostRef,id);
       try{
-        await runTransaction(db,async (transaction)=>{
-          const doc = await transaction.get(docRef)
-          if (!doc.exists) throw new Error ('Document doesnt exists');
-          
-          const currentLikes = doc?.data()?.like_count || 0
-          const likeBy = doc?.data()?.liked_by || []
-          const hasliked = likeBy.includes(user.userId)
-
-          let newlike
-          let updatedLike
-
-          if(hasliked){
-            newlike = currentLikes - 1
-            updatedLike = likeBy.filter((id:string)=> id != user?.userId)
-          }else{
-            newlike = currentLikes + 1
-            updatedLike = [...likeBy,user.userId]
-          }
-          transaction.update(docRef,{
-            like_count:newlike,
-            liked_by:updatedLike
-          })
-        })
+        const handleLike = httpsCallable(functions,"handleLike")
+        await handleLike({
+          post_id:post_id,
+          currentUser: user.userId
+        }).catch((error: unknown | any) => recordError(crashlytics, error))
         setLoading(false)
       }catch(err){
         console.error('error liking comment:',err)
@@ -150,86 +134,55 @@ const PostComponent: React.FC<PostComponentProps> = memo(({
         setLoading(false)
         trace.stop()
       }
-    },[id])
+    },[post_id])
 
-    const handleSend = useCallback(async () => {
+    const SendReplyorComment = useCallback(async () => {
       let trace = await perf.startTrace('post_send')
-      setLoading(true)
-      if(replyingTo){
-        if(!text) return;
-          try{
-            const docRef = doc(PostRef,id)
-            const commetRef = collection(docRef,'comments',replyingTo,'replys')
-            const newDoc = await addDoc(commetRef,{
-              id:user.userId,
-              name: user?.username,
-              content:text,
-              createdAt: Timestamp.fromDate(new Date()),
-              parentId:replyingTo
-            })
-            await newDoc.update({
-              id:newDoc.id
-            })
-            setText('');
-            setReplyingTo(null);
-            setReplyingToUsername(undefined);
-            setLoading(false)
-          } catch (error) {
-            setLoading(false)
-            console.error("Error with reply:", error);
-          }finally{
-            trace.stop()
-            setLoading(false)
-          }
-        }else{
-          if(text.trim() === " ") return;
-          try{
-            const docRef = doc(PostRef,id)
-            const commetRef = collection(docRef,'comments')
-            const newDoc = await addDoc(commetRef,{
-              parentId:null,
-              content:text,
-              auth_profile:auth_profile,
-              name:user?.username,
-              createdAt: Timestamp.fromDate(new Date())
-            })
-            await newDoc.update({
-              id:newDoc.id
-            })
-            const postDocRef = doc(PostRef,id)
-            await runTransaction(db,async (transaction)=>{
-              const doc = await transaction.get(postDocRef)
-              if (!doc.exists) throw new Error('Doc does not exists!!')
-              const commentCount = doc?.data()?.comment_count || 0
-              transaction.update(postDocRef,{
-                comment_count:commentCount + 1
-              })
-            })
-            setText('')
-            setLoading(false)
-          }catch(e){
-            console.error('Error with sending comments:',e)
-            setLoading(false)
-          }finally{
-            trace.stop()
-            setLoading(false)
-          }
-    }
-  },[text,replyingTo,replyingToUsername])
+      const handleSend = httpsCallable(functions,'handleSend')
+      try{
+        await handleSend({
+          post_id:post_id,
+          name:user.username,
+          content:text,
+          auth_profile:auth_profile,
+          comment_id: replyingTo,
+          createdAt: Timestamp.fromDate(new Date())
+        }).catch((error) => error)
+        setText('');
+        setReplyingTo(null);
+        setReplyingToUsername(undefined);
+        setLoading(false)
+      }catch(error:unknown | any){
+        recordError(crashlytics,error)
+        setLoading(false)
+      }finally{
+        setLoading(false)
+        trace.stop()
+      }
+  },[text,replyingTo,replyingToUsername,post_id])
 
 
     const handleDelete = useCallback(async () => {
       try {
-        const messagesRef = doc(PostRef,id)
-        await deleteDoc(messagesRef)
+        const messagesRef = ref(database,`/comments/${post_id}`)
+        await messagesRef.remove()
         Alert.alert('Post Deleted!')
       } catch (error) {
         console.error('Error deleting document: ', error);
 
       }
-    },[])
+    },[post_id])
 
 
+    const handleModalVisibility = useCallback(() => {
+      setModalVisible((prev) => !prev)
+    },[modalVisible])
+
+    const handleIsPress = useCallback(() => {
+      setIsPress(prev => !prev)
+    },[press])
+
+ 
 
   return (
   <Card
@@ -357,9 +310,9 @@ const PostComponent: React.FC<PostComponentProps> = memo(({
     </Card.Content>
     <View style={styles.reactionContainer}>
     <TouchableHighlight
-      onShowUnderlay={() => setIsPress(true)}
-      onHideUnderlay={() => setIsPress(false)}
-      onPress={handleLike}
+      onShowUnderlay={handleIsPress}
+      onHideUnderlay={handleIsPress}
+      onPress={LikeButton}
       style={styles.reactionIcon}
       >
       <MotiView>
@@ -375,7 +328,7 @@ const PostComponent: React.FC<PostComponentProps> = memo(({
         </Skeleton>
         </MotiView>  
         </TouchableHighlight>
-        <TouchableOpacity onPress={() => setModalVisible(true)} style={styles.reactionIcon}>
+        <TouchableOpacity onPress={handleModalVisibility} style={styles.reactionIcon}>
           <MotiView
           style={{
             alignItems: 'center',
@@ -450,9 +403,9 @@ const PostComponent: React.FC<PostComponentProps> = memo(({
             <View style={{ flexDirection: 'row', justifyContent: 'space-between',alignItems:'center' }}>
               <Text
               variant='titleMedium'
-              onPress={() => setModalVisible(!modalVisible)}
+              onPress={handleModalVisibility}
               style={{ fontFamily:color.textFont}}>Comments</Text>
-              <TouchableOpacity onPress={handleSend}>
+              <TouchableOpacity onPress={SendReplyorComment}>
                 <View style={styles.sendButton}>
                   <Feather name="send" size={hp(2.0)} color="#000" />
                 </View>
@@ -468,7 +421,7 @@ const PostComponent: React.FC<PostComponentProps> = memo(({
             <FlashList
             data={comments}
             estimatedItemSize={500}
-            keyExtractor={(item) => item?.id?.toString() || Math.random().toString()}
+            keyExtractor={(item,index) => item?.id?.toString() || `default-${index}`}
             renderItem={({item}) => (
               <CommentComponent
                     auth_profile={item.auth_profile}
@@ -476,7 +429,7 @@ const PostComponent: React.FC<PostComponentProps> = memo(({
                     content={item.content}
                     name={item.name}
                     comment_id={item.id}
-                    post_id={id}
+                    post_id={post_id}
                     date={item?.createdAt?.toDate().toLocaleString('en-US', {
                   hour: '2-digit',
                   minute: '2-digit',

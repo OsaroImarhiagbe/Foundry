@@ -9,7 +9,7 @@ import {
   ImageBackground,
   SafeAreaView,
   useColorScheme} from 'react-native'
-import {lazy,Suspense} from 'react'
+import React,{lazy,Suspense} from 'react'
 import { useNavigation } from '@react-navigation/native';
 import {useState, useEffect,useCallback} from 'react';
 import { Image } from 'expo-image';
@@ -22,8 +22,8 @@ import {
   FirebaseFirestoreTypes, 
   getDoc, 
   onSnapshot, 
-  orderBy, 
-  query, 
+  orderBy,
+  query as firestoreQuery,  
   runTransaction,
   where} from '@react-native-firebase/firestore'
 import { blurhash } from '../../utils/index';
@@ -37,10 +37,11 @@ import EvilIcons from 'react-native-vector-icons/EvilIcons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { NavigatorScreenParams } from '@react-navigation/native';
 import {log,recordError, setAttributes, setUserId} from '@react-native-firebase/crashlytics'
-import { UsersRef,PostRef,db, crashlytics, ProjectRef} from '../../FirebaseConfig'
+import { UsersRef,PostRef,db, crashlytics, ProjectRef, database} from '../../FirebaseConfig'
 import { MotiView } from 'moti';
 import { Skeleton } from 'moti/skeleton';
 import PostComponent from '../components/PostComponent';
+import { equalTo, orderByChild, ref, query as databaseQuery, onValue } from '@react-native-firebase/database';
 
 
 
@@ -176,16 +177,18 @@ const OtherUserScreen = () => {
       setRefreshing(true)
       log(crashlytics,'Account Screen: POST Refresh')
       try{
-        const postRef = query(PostRef,where('auth_id','==',user?.userId) ,orderBy('createdAt','desc'))
-        const unsub = onSnapshot(postRef,async (querySnapshot) => {
-          if (!querySnapshot || querySnapshot.empty) {
+        const postRef = ref(database,'/posts')
+        const orderedQuery = databaseQuery(postRef, orderByChild('auth_id'), equalTo(other_user_id));
+        const unsub = onValue(orderedQuery,async (snapshot) => {
+          if (!snapshot.exists()) {
             setPosts([]);
             setRefreshing(false);
             return;
           }
-          let data:Post[] = []
-          querySnapshot.forEach(docRef => {
-            data.push({...docRef.data(),id:docRef.id})
+          const data:Post[] = []
+          snapshot.forEach(childSnapshot => {
+            data.push({...childSnapshot.val(),id:childSnapshot.key})
+            return true
           })
           setPosts(data)
           setRefreshing(false)
@@ -257,16 +260,18 @@ const OtherUserScreen = () => {
       log(crashlytics,'Other User Screen: Grabbing Posts')
       if (!users?.username) return;  
       try{
-        const docRef = query(PostRef, where('auth_id','==',users.userId),orderBy('createdAt','desc'))
-        const unsub = onSnapshot(docRef,(querySnapshot) => {
-          if(!querySnapshot || querySnapshot.empty){
+        const postRef = ref(database,'/posts')
+        const orderedQuery = databaseQuery(postRef,orderByChild('auth_id'),equalTo(other_user_id),)
+        const unsub = onValue(orderedQuery,(snapshot) => {
+          if(!snapshot.exists()){
             setPosts([])
             setLoading(false)
             return;
           }
-          let data:Post[] = []
-          querySnapshot.forEach(doc => {
-            data.push({...doc.data(),id:doc.id})
+          const data:Post[] = []
+          snapshot.forEach(childSnapshot => {
+            data.push({...childSnapshot.val(),id:childSnapshot.key})
+            return true
           })
           setPosts(data)
           setLoading(false)
@@ -293,6 +298,7 @@ const OtherUserScreen = () => {
         const unsub = onSnapshot(docRef,(documentSnapshot) => {
           if(!documentSnapshot){
             setUsers(undefined)
+            setLoading(false)
             return;
           }
           if (documentSnapshot.exists) {
@@ -319,7 +325,7 @@ const OtherUserScreen = () => {
     
   },[other_user_id])
 
-  const Post = () => (
+  const Post = React.memo(() => (
     <View
      style={{flex:1,backgroundColor:theme.colors.background}}>
       <SafeAreaView style={{flex:1,backgroundColor:theme.colors.background}}>
@@ -359,7 +365,7 @@ const OtherUserScreen = () => {
                   <PostComponent auth_profile={item.auth_profile}
                   count={item.like_count}
                   url={item.imageUrl}
-                  id={item.post_id}
+                  post_id={item.post_id}
                   name={item.name}
                   content={item.content}
                   date={item?.createdAt?.toDate().toLocaleString('en-US', {
@@ -374,9 +380,9 @@ const OtherUserScreen = () => {
     </SafeAreaView>
     </View>
     
-  ); 
+  )); 
   
-  const Projects = () => (
+  const Projects = React.memo(() => (
     <View style={{flex:1,backgroundColor:theme.colors.background}}>
     <SafeAreaView style={{flex:1,backgroundColor:theme.colors.background,padding:50}}>
       <FlashList
@@ -421,9 +427,9 @@ const OtherUserScreen = () => {
       />
     </SafeAreaView>
     </View>
-  );
+  ));
 
-  const SkillsScreen = () => (
+  const SkillsScreen = React.memo(() => (
     <View style={{flex:1,backgroundColor:theme.colors.background}}>
     <SafeAreaView style={{flex:1,backgroundColor:theme.colors.background,padding:50}}>
       <FlashList
@@ -433,21 +439,7 @@ const OtherUserScreen = () => {
       onRefresh={SkillRefresh}
       ListEmptyComponent={(item) => (
         <View style={{flex:1,alignItems:'center',justifyContent:'center',paddingTop:5}}>
-          <MotiView
-             transition={{
-              type:'timing'
-             }}
-             style={{
-              width:100,}}
-              >
-                <Skeleton
-                  show={isloading}
-                  radius='round'
-                  colorMode={dark_or_light ? 'dark':'light'}
-                  >
                 <Text variant='bodyMedium'>No skill displayed</Text>
-                </Skeleton>
-                </MotiView>
           </View>
         )}
       onEndReachedThreshold={0.1}
@@ -468,7 +460,7 @@ const OtherUserScreen = () => {
       />
     </SafeAreaView>
     </View>
-  );
+  ));
 
   const handlePress = useCallback(async () =>{
     try{

@@ -7,13 +7,12 @@ import React,
 import {
     View,
     } from 'react-native'
-
 import { useAuth } from '../authContext';
 import {ActivityIndicator,Divider,Text,useTheme} from 'react-native-paper';
-import { FirebaseFirestoreTypes, getDocs, limit, onSnapshot, orderBy, query, startAfter, Unsubscribe} from '@react-native-firebase/firestore';
+import {ref,FirebaseDatabaseTypes, orderByChild, limitToFirst, startAt, query,onValue,} from '@react-native-firebase/database';
 import {log,recordError,} from '@react-native-firebase/crashlytics'
 import { FlashList } from '@shopify/flash-list';
-import { crashlytics, perf, PostRef } from '../../FirebaseConfig';
+import { crashlytics, perf, database,} from '../../FirebaseConfig';
 import PostComponent from '../components/PostComponent';
 
 
@@ -31,7 +30,7 @@ interface Post{
     post_id?: string;
     name?: string;
     content?: string;
-    createdAt?: FirebaseFirestoreTypes.Timestamp
+    createdAt?:Date;
     comment_count?: number;
     mount?:boolean,
     videoUrl?:string
@@ -42,9 +41,9 @@ const FeedScreen = () => {
     const [refreshing, setRefreshing] = useState<boolean>(false);
     const {user} = useAuth()
     const [post, setPost] = useState<Post[]>([])
-    const [lastVisible, setLastVisible] = useState<FirebaseFirestoreTypes.QueryDocumentSnapshot<FirebaseFirestoreTypes.DocumentData> | null>(null);
+    const [lastVisible, setLastVisible] = useState<FirebaseDatabaseTypes.DataSnapshot | null>(null);
     const [loadingMore, setLoadingMore] = useState<boolean>(false);
-    const [hasMore, setHasMore] = useState<boolean>(false);
+    const [hasMore, setHasMore] = useState<boolean>(true);
     const [loading, setLoading] = useState<boolean>(true)
     const theme = useTheme()
 
@@ -56,25 +55,27 @@ const FeedScreen = () => {
     useEffect(() => {
       if (!user?.userId) return;
       log(crashlytics,'Grabbing post')
-      const grabPost = async () => {
+      const grabInitialPost = async () => {
         const trace = await perf.startTrace('feedscreen')
         try {
-          const docRef = query(PostRef,orderBy('createdAt', 'desc'),limit(10))
-          const subscriber = onSnapshot(docRef,(querySnapShot) =>{
-              if (!querySnapShot || querySnapShot.empty) {
+          const docRef = ref(database,'/posts')
+          const orderedQuery = query(docRef,orderByChild('createdAt'),limitToFirst(5))
+          const subscriber = onValue(orderedQuery,(snapshot: FirebaseDatabaseTypes.DataSnapshot) =>{
+              if (!snapshot.exists()) {
                 setPost([]);
                 setLoading(false);
                 return;
               }
-              let data:Post[] = []; 
-              querySnapShot.forEach(documentSnapShot => {
-                data.push({ ...documentSnapShot.data(),id:documentSnapShot.id });
-            } )
+              const data:Post[] = []
+              snapshot.forEach((childSnapshot) => {
+                data.push({...childSnapshot.val(), id:childSnapshot.key})
+                return true;
+              })
             setPost(data);
-            setLastVisible(querySnapShot.docs[querySnapShot.docs.length - 1]);
-            setHasMore(querySnapShot.docs.length > 0);
+            setLastVisible(snapshot.child(data[data.length - 1]?.createdAt?.toString() || ''));
+            setHasMore(data.length === 5);
             setLoading(false);
-          },error => {
+          },(error:unknown | any) => {
             recordError(crashlytics, error);
             console.error(`Error in snapshot listener: ${error}`);
             setLoading(false);
@@ -89,7 +90,7 @@ const FeedScreen = () => {
         trace.stop()
       }
       }
-      grabPost()
+      grabInitialPost()
     }, []); 
   
 
@@ -97,25 +98,28 @@ const FeedScreen = () => {
       setRefreshing(true);
       let trace = await perf.startTrace('refreshing_post_feedscreen')
       log(crashlytics,'Post Refresh')
+    
         try {
-          const docRef = query(PostRef,orderBy('createdAt', 'desc'),limit(10))
-          const unsub = onSnapshot(docRef,querySnapShot =>{
-            if(!querySnapShot || querySnapShot.empty){
+          const docRef = ref(database,'/posts')
+          const orderedQuery = query(docRef,orderByChild('createdAt'),limitToFirst(5))
+          const subscriber = onValue(orderedQuery,(snapshot:FirebaseDatabaseTypes.DataSnapshot) =>{
+            if(!snapshot.exists()){
               setPost([])
               setRefreshing(false)
               return;
             }
-            let data:Post[] = [];
-            querySnapShot.forEach(documentSnapShot => {
-              data.push({ ...documentSnapShot.data(),id:documentSnapShot.id });
+            const data:Post[] = []
+            snapshot.forEach((childSnapshot) => {
+              data.push({...childSnapshot.val(),id:childSnapshot.key})
+              return true;
             })
-            setPost(data);
-            setLastVisible(querySnapShot.docs[querySnapShot.docs.length - 1]);
-            setHasMore(querySnapShot.docs.length > 0);
+            setPost((prev) => [...prev, ...data]);
+            setLastVisible(snapshot.child(data[data.length -1].createdAt?.toString() || ''));
+            setHasMore(data.length === 5);
             trace.putAttribute('post_count', post.length.toString());
             setRefreshing(false)
           });
-          return () => unsub()
+          return () => subscriber()
         }  catch (error:any) {
           recordError(crashlytics,error)
           console.error(`Error post can not be found: ${error}`);
@@ -127,35 +131,31 @@ const FeedScreen = () => {
     }, []);
 
     const fetchMorePost = useCallback(async () => {
+      setLoadingMore(true)
       log(crashlytics,'Fetch More Post')
       let trace = await perf.startTrace('fetching_more_post_feedscreen')
-      if (!loadingMore || !hasMore) return;
-      if (post.length <= 2) {
-        setHasMore(false);
-        setLoadingMore(false);
-        return;
-      }
+      if (!lastVisible || !hasMore) return;
       try {
-        const docRef = query(
-          PostRef,
-          orderBy('createdAt','desc'),
-          startAfter(lastVisible), 
-          limit(2)) 
-        const snapshot = await getDocs(docRef)
-        if(!snapshot){
-          setHasMore(false)
-          setLoadingMore(false)
-          return;
-        }
-        const newPosts = snapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
-        setPost(prevPosts => [...prevPosts, ...newPosts]);
-        setLastVisible(snapshot.docs[snapshot.docs.length - 1]);
-        setHasMore(snapshot.docs.length > 0);
+        const docRef = ref(database,'/posts')
+        const orderedQuery = query(docRef,orderByChild('createdAt'),startAt(lastVisible.val().createdAt),limitToFirst(5))
+        const subscriber = onValue(orderedQuery,(snapshot:FirebaseDatabaseTypes.DataSnapshot) => {
+          if(!snapshot.exists()){
+            setHasMore(false)
+            setLoadingMore(false)
+            return;
+          }
+        const data:Post[] = []
+        snapshot.forEach((childSnapshot) => {
+          data.push({...childSnapshot.val(),id:childSnapshot.key})
+          return true
+        })
+        setPost((prev) => [...prev,...data]);
+        setLastVisible(snapshot.child(data[data.length -1].createdAt?.toString() || ''));
+        setHasMore(data.length === 5);
         trace.putAttribute('post_count', post.length.toString());
         setLoadingMore(false);
+        })
+        return () => subscriber()
       } catch (error:any) {
         recordError(crashlytics,error)
         console.error(`Error fetching more posts: ${error}`);
@@ -185,13 +185,13 @@ const FeedScreen = () => {
                 </View>
               )}
               onEndReached={fetchMorePost}
-              onEndReachedThreshold={0.1}
+              onEndReachedThreshold={0.5}
               refreshing={refreshing}
               ItemSeparatorComponent={()=> (
                 <Divider/>
               )}
               ListFooterComponent={() => (
-                  <ActivityIndicator color='#fff' size='small' animating={false}/>
+                  <ActivityIndicator color='#fff' size='small' animating={loadingMore}/>
               )}
               keyExtractor={(item,index) => item?.post_id?.toString() || `defualt-${index}`}
               renderItem={({item}) =>
@@ -200,10 +200,10 @@ const FeedScreen = () => {
                   count={item.like_count}
                   url={item.imageUrl}
                   video={item.videoUrl}
-                  id={item.post_id}
+                  post_id={item.post_id}
                   name={item.name}
                   content={item.content}
-                  date={item?.createdAt?.toDate().toLocaleString('en-US', {
+                  date={item?.createdAt?.toLocaleString('en-US', {
                     hour: '2-digit',
                     minute: '2-digit',
                     hour12: true

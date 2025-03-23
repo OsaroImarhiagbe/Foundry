@@ -14,6 +14,7 @@ import {onDocumentCreated} from "firebase-functions/v2/firestore";
 import {initializeApp} from "firebase-admin/app";
 import {getFirestore, FieldValue} from "firebase-admin/firestore";
 import {getMessaging} from "firebase-admin/messaging";
+import {getDatabase, ServerValue} from "firebase-admin/database";
 initializeApp();
 // Create and deploy your first functions
 // https://firebase.google.com/docs/functions/get-started
@@ -144,8 +145,10 @@ exports.addPost = onCall(async (request) => {
   }
   try {
     const {auth_id, name, content, like_count, comment_count, liked_by, category, image, video} = request.data;
-    const createdAt = FieldValue.serverTimestamp();
-    const newDoc = await getFirestore().collection("posts").add({
+    const createdAt = ServerValue.TIMESTAMP;
+    const postRef = getDatabase().ref("/posts");
+    const newPost = postRef.push();
+    await newPost.set({
       auth_id: auth_id,
       name: name,
       content: content,
@@ -155,11 +158,11 @@ exports.addPost = onCall(async (request) => {
       category: category,
       createdAt: createdAt,
       imageUrl: image,
-      post_id: null,
+      post_id: " ",
       videoUrl: video,
     });
-    await getFirestore().collection("posts").doc(newDoc.id).update({
-      post_id: newDoc.id,
+    await newPost.update({
+      post_id: newPost.key,
     });
     await sendNotification(auth_id, {
       title: "Post has sent!",
@@ -172,6 +175,134 @@ exports.addPost = onCall(async (request) => {
   } catch (error) {
     logger.error("Error Proccessing Post:", error);
     throw new HttpsError("internal", "Failed to send test notification");
+  }
+});
+exports.handleLike = onCall( async (request) => {
+  if (!request.auth) {
+    throw new HttpsError("unauthenticated", "This endpoint requires authentication");
+  }
+  try {
+    const {post_id, currentUser, comment_id, reply_id} = request.data;
+    if (post_id) {
+      const docRef = getDatabase().ref(`/posts/${post_id}`);
+      await docRef.transaction((currentData) => {
+        if (!currentData) {
+          throw new HttpsError("not-found", "Document doesn't exist");
+        }
+        const currentLikes = currentData?.data()?.like_count || 0;
+        const likeBy = currentData?.liked_by || [];
+        const hasliked = likeBy.includes(currentUser);
+        let newlike;
+        let updatedLike;
+        if (hasliked) {
+          newlike = currentLikes - 1;
+          updatedLike = likeBy.filter((id:string)=> id != currentUser);
+        } else {
+          newlike = currentLikes + 1;
+          updatedLike = [...likeBy, currentUser];
+        }
+        return {
+          ...currentData,
+          like_count: newlike,
+          liked_by: updatedLike,
+        };
+      });
+    } else if (comment_id) {
+      const docRef = getDatabase().ref(`/comments/${comment_id}`);
+      await docRef.transaction((currentData) => {
+        if (!currentData) {
+          throw new HttpsError("not-found", "Document doesn't exist");
+        }
+        const currentLikes = currentData?.data()?.like_count || 0;
+        const likeBy = currentData?.liked_by || [];
+        const hasliked = likeBy.includes(currentUser);
+        let newlike;
+        let updatedLike;
+        if (hasliked) {
+          newlike = currentLikes - 1;
+          updatedLike = likeBy.filter((id:string)=> id != currentUser);
+        } else {
+          newlike = currentLikes + 1;
+          updatedLike = [...likeBy, currentUser];
+        }
+        return {
+          ...currentData,
+          like_count: newlike,
+          liked_by: updatedLike,
+        };
+      });
+    } else {
+      const docRef = getDatabase().ref(`/replys/${reply_id}`);
+      await docRef.transaction((currentData) => {
+        if (!currentData) {
+          throw new HttpsError("not-found", "Document doesn't exist");
+        }
+        const currentLikes = currentData?.data()?.like_count || 0;
+        const likeBy = currentData?.liked_by || [];
+        const hasliked = likeBy.includes(currentUser);
+        let newlike;
+        let updatedLike;
+        if (hasliked) {
+          newlike = currentLikes - 1;
+          updatedLike = likeBy.filter((id:string)=> id != currentUser);
+        } else {
+          newlike = currentLikes + 1;
+          updatedLike = [...likeBy, currentUser];
+        }
+        return {
+          ...currentData,
+          like_count: newlike,
+          liked_by: updatedLike,
+        };
+      });
+    }
+  } catch (error) {
+    logger.error("Error handling like", error);
+    throw new HttpsError("internal", "Failed to Like");
+  }
+});
+exports.handleSend = onCall(async (request) => {
+  if (!request.auth) {
+    throw new HttpsError("unauthenticated", "This endpoint requires authentication");
+  }
+  const {post_id, name, content, createdAt, auth_profile, comment_id} = request.data;
+  if (comment_id) {
+    const docRef = getDatabase().ref(`/replys/${comment_id}`);
+    const newReply = docRef.push();
+    await newReply.set({
+      name: name,
+      content: content,
+      parentId: comment_id,
+      createdAt: createdAt,
+    });
+    await newReply.update({
+      id: newReply.key,
+    });
+  } else {
+    try {
+      const docRef = getDatabase().ref(`/comments/${post_id}`);
+      const newComment = docRef.push();
+      await newComment.set({
+        parentId: " ",
+        content: content,
+        auth_profile: auth_profile,
+        name: name,
+        createdAt: createdAt,
+      });
+      await newComment.update({
+        comment_id: newComment.key,
+      });
+      const postRef = getDatabase().ref(`/posts/${post_id}`);
+      await postRef.transaction((currentData) => {
+        const commentCount = currentData.comment_count || 0;
+
+        return {
+          commentCount: commentCount +1,
+        };
+      });
+    } catch (error) {
+      logger.error("Error handling Comments or Replys", error);
+    }
   }
 });
 exports.addProject = onCall(async (request) =>{

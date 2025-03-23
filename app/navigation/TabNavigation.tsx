@@ -3,13 +3,14 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import React, { lazy,Suspense, memo } from 'react';
-import { useTheme} from 'react-native-paper';
+import { useTheme,Text} from 'react-native-paper';
 import { Image
  } from 'expo-image';
  import { blurhash } from 'utils';
 import { useAuth } from 'app/authContext';
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import FallBackComponent from '../components/FallBackComponent.tsx';
+import {useNotification} from '../NotificationProvider.tsx'
 const NotificationScreen = React.lazy(() => import('../screen/NotificationScreen.tsx'));
 const SearchScreen = React.lazy(() => import('../screen/SearchScreen.tsx'));
 const StackNavigation = React.lazy(() => import('../navigation/StackNavigation.tsx'));
@@ -55,6 +56,7 @@ const TabNavigation = () => {
   const Tab = createBottomTabNavigator()
   const theme = useTheme()
   const {user} = useAuth()
+  const {notificationCount} = useNotification()
   
 
   return (
@@ -96,8 +98,9 @@ const TabNavigation = () => {
         name="Notification"
         component={NotificationScreenWrapper}
      options={{
-        tabBarLabel: 'Notification',
-        tabBarIcon:() => <MaterialIcons name='notifications' color={theme.colors.tertiary} size={25}/>
+      tabBarBadge: notificationCount,
+      tabBarLabel: 'Notification',
+      tabBarIcon:() => (<MaterialIcons name='notifications' color={theme.colors.tertiary} size={25}/>)
      }}
      />
      <Tab.Screen 
