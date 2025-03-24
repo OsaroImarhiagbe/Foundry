@@ -9,7 +9,7 @@ import { Image
  import { blurhash } from 'utils';
 import { useAuth } from 'app/authContext';
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
-import FallBackComponent from '../components/FallBackComponent.tsx';
+import LazyScreenComponent from '../components/LazyScreenComponent.tsx';
 import {useNotification} from '../NotificationProvider.tsx'
 const NotificationScreen = React.lazy(() => import('../screen/NotificationScreen.tsx'));
 const SearchScreen = React.lazy(() => import('../screen/SearchScreen.tsx'));
@@ -18,33 +18,33 @@ const ProfileScreen = React.lazy(() => import('../screen/AccountScreen.tsx'));
 
 const ProfileScreenWrapper = React.memo(() => {
   return (
-    <Suspense fallback={<FallBackComponent/>}>
+    <LazyScreenComponent>
       <ProfileScreen/>
-    </Suspense>
+    </LazyScreenComponent>
   )
 })
 
 const SearchScreenWrapper = React.memo(() => {
   return (
-    <Suspense fallback={<FallBackComponent/>}>
+    <LazyScreenComponent>
       <SearchScreen/>
-    </Suspense>
+    </LazyScreenComponent>
   )
 })
 
 const NotificationScreenWrapper = React.memo(() => {
   return (
-    <Suspense fallback={<FallBackComponent/>}>
+    <LazyScreenComponent>
       <NotificationScreen/>
-    </Suspense>
+    </LazyScreenComponent>
   )
 })
 
 const StackNavigationWrapper = React.memo(() => {
   return (
-    <Suspense fallback={<FallBackComponent/>}>
+    <LazyScreenComponent>
       <StackNavigation/>
-    </Suspense>
+    </LazyScreenComponent>
   )
 })
 

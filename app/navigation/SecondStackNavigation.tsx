@@ -1,6 +1,6 @@
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import React, { Suspense } from 'react';
-import FallBackComponent from '../components/FallBackComponent.tsx';
+import LazyScreenComponent from '../components/LazyScreenComponent.tsx';
 const ReportBugScreen = React.lazy(() => import('../screen/ReportBugScreen.tsx'));
 const ContactUsScreen = React.lazy(() => import('../screen/ContactUsScreen.tsx'));
 const ProjectEntryScreen = React.lazy(() => import('../screen/ProjectEntryScreen.tsx'));
@@ -13,65 +13,65 @@ const SkillsScreen = React.lazy(() => import('../screen/SkillScreen.tsx'));
 
 const ReportBugScreenWrapper = React.memo(() => {
   return (
-    <Suspense fallback={<FallBackComponent/>}>
+    <LazyScreenComponent>
       <ReportBugScreen/>
-    </Suspense>
+    </LazyScreenComponent>
   )
 })
 
 const ContactUsScreenWrapper = React.memo(() => {
   return (
-    <Suspense fallback={<FallBackComponent/>}>
+    <LazyScreenComponent>
       <ContactUsScreen/>
-    </Suspense>
+    </LazyScreenComponent>
   )
 })
 
 const  ProjectEntryScreenWrapper = React.memo(() => {
   return (
-    <Suspense fallback={<FallBackComponent/>}>
+    <LazyScreenComponent>
       <ProjectEntryScreen/>
-    </Suspense>
+    </LazyScreenComponent>
   )
 })
 
 const ChatScreenWrapper = React.memo(() => {
   return (
-    <Suspense fallback={<FallBackComponent/>}>
+    <LazyScreenComponent>
       <ChatScreen/>
-    </Suspense>
+    </LazyScreenComponent>
   )
 })
 
 const PostScreenWrapper = React.memo(() => {
   return (
-    <Suspense fallback={<FallBackComponent/>}>
+    <LazyScreenComponent>
       <PostScreen/>
-    </Suspense>
+    </LazyScreenComponent>
   )
 })
 
 const ProjectScreenWrapper = React.memo(() => {
   return (
-    <Suspense fallback={<FallBackComponent/>}>
+    <LazyScreenComponent>
       <ProjectScreen/>
-    </Suspense>
+    </LazyScreenComponent>
   )
 })
 
 const LocationScreenWrapper = React.memo(() => {
   return (
-    <Suspense fallback={<FallBackComponent/>}>
+    <LazyScreenComponent>
       <LocationScreen/>
-    </Suspense>
+    </LazyScreenComponent>
   )
 })
 
 const SkillsScreenWrapper = React.memo(() => {
   return (
-    <Suspense fallback={<FallBackComponent/>}>
+    <LazyScreenComponent>
       <SkillsScreen/>
-    </Suspense>
+    </LazyScreenComponent>
   )
 })
 

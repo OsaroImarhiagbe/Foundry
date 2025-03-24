@@ -2,7 +2,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 import React, {Suspense} from 'react';
 import {useAuth} from '../authContext.tsx'
 import DrawerNavigation from '../navigation/DrawerNavigation.tsx';
-import FallBackComponent from '../components/FallBackComponent.tsx';
+import LazyScreenComponent from '../components/LazyScreenComponent.tsx';
 const SecondStackNavigation = React.lazy(() => import('../navigation/SecondStackNavigation.tsx'));
 const OnboardingScreen = React.lazy(() => import('../screen/OnboardingScreen.tsx'));
 const LoginScreen = React.lazy(() => import('../screen/LoginScreen.tsx'));
@@ -11,30 +11,30 @@ const RegisterScreen = React.lazy(() => import('../screen/RegisterScreen.tsx'));
 
 const SecondStackNavigationWrapper = React.memo(() => {
   return (
-    <Suspense fallback={<FallBackComponent/>}>
+    <LazyScreenComponent>
       <SecondStackNavigation/>
-    </Suspense>
+    </LazyScreenComponent>
   )
 })
 const OnboardingScreenWrapper = React.memo(() => {
   return (
-    <Suspense fallback={<FallBackComponent/>}>
+    <LazyScreenComponent>
       <OnboardingScreen/>
-    </Suspense>
+      </LazyScreenComponent>
   )
 })
 const LoginScreenWrapper = React.memo(() => {
   return (
-    <Suspense fallback={<FallBackComponent/>}>
+    <LazyScreenComponent>
       <LoginScreen/>
-    </Suspense>
+      </LazyScreenComponent>
   )
 })
 const RegisterScreenWrapper = React.memo(() => {
   return (
-    <Suspense fallback={<FallBackComponent/>}>
+    <LazyScreenComponent>
       <RegisterScreen/>
-    </Suspense>
+      </LazyScreenComponent>
   )
 })
 
