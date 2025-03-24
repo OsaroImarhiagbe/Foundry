@@ -1,14 +1,14 @@
 import { View, Text, StyleSheet, TouchableHighlight,TouchableOpacity} from 'react-native'
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useAuth } from '../authContext';
 import { blurhash } from '../../utils/index';
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import { Image } from 'expo-image';
-import firestore, { FirebaseFirestoreTypes } from '@react-native-firebase/firestore';
-import { getRoomID,formatDate } from '../../utils';
+import { getRoomID,} from '../../utils';
 import Swipeable from 'react-native-gesture-handler/ReanimatedSwipeable';
 import { useDispatch} from 'react-redux';
 import {removeID} from '../features/Message/messageidSlice';
+import { getDatabase, onValue } from '@react-native-firebase/database';
 
 interface ChatRoomProp{
   next_item?:any,
@@ -18,8 +18,9 @@ interface ChatRoomProp{
 
 interface Message {
   userId?: string;
-  text?: string;
-  createdAt?: FirebaseFirestoreTypes.Timestamp
+  content?: string;
+  createdAt?: Date,
+  senderId?:string
 }
 
 const ChatRoom:React.FC<ChatRoomProp> = ({next_item, onPress,User}) => {
@@ -30,71 +31,59 @@ const ChatRoom:React.FC<ChatRoomProp> = ({next_item, onPress,User}) => {
     const {user } = useAuth();
     const dispatch = useDispatch()
     const [lastMessage, setLastMessage] = useState<Message | null>(null);
+    const [time,setTime] = useState('')
     useEffect(() => {
         const roomId = getRoomID(User?.userId,next_item?.userId)
-        const docRef = firestore().collection('chat-rooms').doc(roomId);
-        const messageRef = docRef.collection('messages').orderBy('createdAt','desc')
-        const unsub = messageRef.onSnapshot((documentSnapshot) => {
-          let allmessage = documentSnapshot.docs.map(doc => {
-            return doc.data()
-          });
-          setLastMessage(allmessage[0] ? allmessage[0]: null)
+        const chatsRef = getDatabase().ref(`/chats/${roomId}/lastMessage`);
+        const unsub = onValue(chatsRef,(snapshot) => {
+          if(snapshot.exists()){
+            const Message = snapshot.val()
+            setLastMessage(Message.content || null)
+            setTime(Message.createdAt)
+          }else{
+            setLastMessage(null)
+          }
       })
         return () => unsub()
 
       },[User?.userId, next_item?.userId])
 
-      const renderTime = () => {
-        if(lastMessage?.createdAt){
-            let date = lastMessage?.createdAt
-            return formatDate(new Date(date?.seconds * 1000))
-        }
-      }
-      const renderLastMessage =() => {
+      const renderLastMessage = useCallback(() => {
         if(typeof lastMessage == 'undefined') return 'Loading...'
         if(lastMessage){
-            if(User.userId == lastMessage.userId){
-                return 'You: '+ lastMessage?.text
+            if(User.userId == lastMessage.senderId){
+                return 'You: '+ lastMessage?.content
             }
-            return lastMessage?.text;
+            return lastMessage?.content;
         }else{
             return 'Say Hi'
         }
-      }
+      },[lastMessage])
 
-      const handleDelete = async () => {
+      const handleDelete = useCallback(async () => {
         try {
           const roomId = getRoomID(User?.userId,next_item?.userId)
-          const messagesRef = firestore().collection('chat-rooms').doc(roomId).collection('messages')
-          const messagesSnapshot = await messagesRef.get();
-          const docPromise = messagesSnapshot.docs.map((messageDoc) => {
-               return messageDoc.ref.delete();
-            });
-          await Promise.all(docPromise)
-
-          const roomRef = firestore().collection('chat-rooms').doc(roomId)
-          const sent_message = firestore().collection('sent-message-id').doc(next_item.userId)
-          await roomRef.delete()
-          await sent_message.delete()
+          const messagesRef = getDatabase().ref(`/messages/${roomId}`);
+          await messagesRef.remove();
+          const chatsRef = getDatabase().ref(`/chats/${roomId}`)
+          await chatsRef.remove()
           dispatch(removeID(next_item.userId))
         } catch (error) {
           console.error('Error deleting document: ', error);
 
         }
-      };
+      },[User?.userId,next_item?.userId]);
       
 
-      const renderRightActions = () =>{
+      const renderRightActions = useCallback(() =>{
         return (
           <View style={{borderRadius:15,backgroundColor: '#252525', justifyContent: 'center', alignItems: 'center', paddingHorizontal: 20 }}>
               <TouchableOpacity onPress={handleDelete} >
             <Text style={{color: 'white',fontWeight: 'bold',}}>Delete</Text>
           </TouchableOpacity>
           </View>
-        
-          
         )
-      }
+      },[handleDelete])
   return (
  
     <Swipeable renderRightActions={renderRightActions}>
@@ -113,7 +102,7 @@ const ChatRoom:React.FC<ChatRoomProp> = ({next_item, onPress,User}) => {
              <Text numberOfLines={1} style={styles.title}>{next_item?.name}</Text>
              <Text  numberOfLines={2} style={styles.subTitle} >{renderLastMessage()}</Text>
          </View>
-         <Text  numberOfLines={2} style={styles.subTitle} >{renderTime()}</Text>
+         <Text  numberOfLines={2} style={styles.subTitle} >{time}</Text>
         </View>
     </TouchableHighlight>
     </Swipeable>

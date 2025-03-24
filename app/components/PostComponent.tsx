@@ -12,16 +12,6 @@ import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-nativ
 import { Image } from 'expo-image';
 import { useAuth } from '../authContext';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import { 
-  addDoc, 
-  collection, 
-  deleteDoc, 
-  doc, 
-  FirebaseFirestoreTypes, 
-  onSnapshot, 
-  orderBy,  
-  runTransaction, 
-  Timestamp } from '@react-native-firebase/firestore';
 import CommentComponent from './CommentComponent';
 import color from '../../config/color';
 import Feather from 'react-native-vector-icons/Feather';
@@ -45,6 +35,7 @@ import { functions } from '../../FirebaseConfig.ts';
 import { httpsCallable } from '@react-native-firebase/functions'
 import { recordError } from '@react-native-firebase/crashlytics';
 import {ref,FirebaseDatabaseTypes, orderByChild, limitToFirst, startAt, query, equalTo, onValue, } from '@react-native-firebase/database';
+import { TimeAgo } from '../../utils/index';
 
 
 
@@ -66,7 +57,7 @@ interface Comment{
   like_count?:number,
   content?:string,
   name?:string | any,
-  createdAt?:FirebaseFirestoreTypes.Timestamp
+  createdAt?:number
 
 }
 
@@ -96,6 +87,7 @@ const PostComponent: React.FC<PostComponentProps> = memo(({
     const [replyingTo, setReplyingTo] = useState<string | null>(null);
     const [replyingToUsername, setReplyingToUsername] = useState<string | undefined>(undefined);
     const videoRef = useRef<VideoRef>(null);
+ 
 
     useEffect(() => {
       const docRef = ref(database,`/comments/${post_id}`)
@@ -146,7 +138,6 @@ const PostComponent: React.FC<PostComponentProps> = memo(({
           content:text,
           auth_profile:auth_profile,
           comment_id: replyingTo,
-          createdAt: Timestamp.fromDate(new Date())
         }).catch((error) => error)
         setText('');
         setReplyingTo(null);
@@ -430,10 +421,7 @@ const PostComponent: React.FC<PostComponentProps> = memo(({
                     name={item.name}
                     comment_id={item.id}
                     post_id={post_id}
-                    date={item?.createdAt?.toDate().toLocaleString('en-US', {
-                  hour: '2-digit',
-                  minute: '2-digit',
-                  hour12: true})}
+                    date={TimeAgo(item?.createdAt ?? 0)}
                     onReplyPress={(id,name) => {
                       setReplyingTo(id);
                       setReplyingToUsername(name);

@@ -14,7 +14,7 @@ import {log,recordError,} from '@react-native-firebase/crashlytics'
 import { FlashList } from '@shopify/flash-list';
 import { crashlytics, perf, database,} from '../../FirebaseConfig';
 import PostComponent from '../components/PostComponent';
-
+import { TimeAgo } from '../../utils/index';
 
 
 
@@ -30,7 +30,7 @@ interface Post{
     post_id?: string;
     name?: string;
     content?: string;
-    createdAt?:Date;
+    createdAt?:number;
     comment_count?: number;
     mount?:boolean,
     videoUrl?:string
@@ -203,11 +203,7 @@ const FeedScreen = () => {
                   post_id={item.post_id}
                   name={item.name}
                   content={item.content}
-                  date={item?.createdAt?.toLocaleString('en-US', {
-                    hour: '2-digit',
-                    minute: '2-digit',
-                    hour12: true
-                  })}
+                  date={TimeAgo(item?.createdAt ?? 0)}
                   comment_count={item.comment_count}/>}/>
                 )}
     </View>

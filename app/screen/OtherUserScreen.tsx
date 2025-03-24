@@ -37,11 +37,12 @@ import EvilIcons from 'react-native-vector-icons/EvilIcons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { NavigatorScreenParams } from '@react-navigation/native';
 import {log,recordError, setAttributes, setUserId} from '@react-native-firebase/crashlytics'
-import { UsersRef,PostRef,db, crashlytics, ProjectRef, database} from '../../FirebaseConfig'
+import { UsersRef,PostRef,db, crashlytics, ProjectRef, database, functions} from '../../FirebaseConfig'
 import { MotiView } from 'moti';
 import { Skeleton } from 'moti/skeleton';
 import PostComponent from '../components/PostComponent';
 import { equalTo, orderByChild, ref, query as databaseQuery, onValue } from '@react-native-firebase/database';
+import { httpsCallable } from '@react-native-firebase/functions';
 
 
 
@@ -463,44 +464,17 @@ const OtherUserScreen = () => {
   ));
 
   const handlePress = useCallback(async () =>{
+    const handleFollow = httpsCallable(functions,'handleFollow');
     try{
-      const docRef = doc(UsersRef,other_user_id)
-      await runTransaction(db, async(transaction)=>{
-        const doc = await transaction.get(docRef)
-        if(!doc.exists) throw new Error("Doc doesn't exists!")
-        
-        const currentConnectCount = doc?.data()?.connection || 0
-        const follow_by = doc?.data()?.follow_by || []
-        const hasFollowed = follow_by.includes(user.userId)
-
-        let newFollowed;
-        let updateFollow;
-        let newState;
-
-        if(hasFollowed){
-          newFollowed = currentConnectCount - 1
-          updateFollow = follow_by.filter((id:string)=> id != user.userId)
-          newState = false
-          setPress(newState)
-        }else{
-          newFollowed = currentConnectCount + 1
-          updateFollow = [...follow_by,user.userId]
-          newState = true
-          setPress(newState)
-        }
-        transaction.update(docRef,{
-          connection: newFollowed,
-          follow_by:updateFollow,
-          follow_state:newState
-        })
-        
-      })
+      await handleFollow({
+        other_user_id:other_user_id,
+        currentUser:user.userId,
+      }).then((results) => results.data).catch(error => recordError(crashlytics,error))
     }catch(error:unknown | any){
       recordError(crashlytics,error)
       console.error(error)
-
     }
-  },[])
+  },[other_user_id,user.userId])
   
   if(isloading) return null
   

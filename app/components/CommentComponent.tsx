@@ -19,6 +19,7 @@ import {endBefore, FirebaseDatabaseTypes, limitToLast, onValue, orderByChild, qu
 import { log, recordError } from '@react-native-firebase/crashlytics';
 import { FlashList } from '@shopify/flash-list';
 import { httpsCallable } from '@react-native-firebase/functions';
+import { TimeAgo } from '../../utils/index';
 
 type CommentProp = {
   content?:string,
@@ -33,12 +34,12 @@ type CommentProp = {
 }
 
 interface Reply{
-  id?:string,
+  reply_id?:string,
   auth_profile?:string,
   like_count?:number,
   content?:string,
   name?:string,
-  createdAt?:Date
+  createdAt?:number
 
 }
 const CommentComponent:React.FC<CommentProp> = memo(({
@@ -68,7 +69,7 @@ const CommentComponent:React.FC<CommentProp> = memo(({
       log(crashlytics,'Fetching replies')
       const fetchReply = () => {
         try {
-          const docRef = ref(database,`/replys/${comment_id}`)
+          const docRef = ref(database,`/replies/${comment_id}`)
           const queryOrderBy = query(docRef,orderByChild('createdAt'),limitToLast(5))
           const unsub = onValue(queryOrderBy,(snapshot)=>{
             if(!snapshot.exists()){
@@ -253,12 +254,13 @@ const CommentComponent:React.FC<CommentProp> = memo(({
       data={reply}
       renderItem={({item}) => (
         <ReplyComponent
-        key={item.id}
-        reply_id={item.id}
+        key={item.reply_id}
+        reply_id={item.reply_id}
         name={item.name}
         content={item.content}
         post_id={post_id} 
         comment_id={comment_id}
+        date={TimeAgo(item.createdAt ?? 0)}
         count={item.like_count}/>
       )}
       />}

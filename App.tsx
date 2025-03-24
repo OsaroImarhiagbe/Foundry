@@ -19,6 +19,7 @@ import { DefaultTheme as Defaulttheme, DarkTheme as Darktheme } from '@react-nav
 import notifee, { EventType } from '@notifee/react-native'
 import { recordError } from '@react-native-firebase/crashlytics';
 import { crashlytics } from 'FirebaseConfig.ts';
+import Toast from 'react-native-toast-message'
 
 export default function App() {
   const colorScheme = useColorScheme();
@@ -154,6 +155,7 @@ export default function App() {
           {loading ? <SplashScreen/>:<AuthNavigation/>}
           </NotificationProvider>
         </NavigationContainer>
+         <Toast />
         </PaperProvider>
       </AuthContextProvider>
       <StatusBar style={colorScheme === 'dark' ? 'light':'dark'} />

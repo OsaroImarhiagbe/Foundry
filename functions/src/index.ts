@@ -11,6 +11,7 @@
 import {logger} from "firebase-functions/v2";
 import {onCall, HttpsError} from "firebase-functions/v2/https";
 import {onDocumentCreated} from "firebase-functions/v2/firestore";
+import {onValueWritten} from "firebase-functions/v2/database";
 import {initializeApp} from "firebase-admin/app";
 import {getFirestore, FieldValue} from "firebase-admin/firestore";
 import {getMessaging} from "firebase-admin/messaging";
@@ -83,61 +84,69 @@ exports.addMessage = onCall(async (request) => {
       "unauthenticated", "This endpoint requires authentication");
   }
   try {
-    const {newMessage, roomId, senderName, recipientName, senderId, recipientId} = request.data;
-    await getFirestore()
-      .collection("chat-rooms")
-      .doc(roomId)
-      .collection("messages")
-      .add({
+    const {content, roomId, senderName, recipientName, senderId, recipientId, status} = request.data;
+    const messageRef = getDatabase().ref(`/messages/${roomId}`);
+    const newMessage = messageRef.push();
+    await newMessage.set({
+      senderId: senderId,
+      recipientId: recipientId,
+      roomId: roomId,
+      senderName: senderName,
+      recipientName: recipientName,
+      content: content,
+      status: status,
+      createdAt: ServerValue.TIMESTAMP,
+    });
+    const chatRef = getDatabase().ref(`/chats/${roomId}`);
+    await chatRef.update({
+      lastMessage: {
         senderId: senderId,
         recipientId: recipientId,
         roomId: roomId,
         senderName: senderName,
+        status: status,
         recipientName: recipientName,
-        text: newMessage,
-        createdAt: FieldValue.serverTimestamp(),
-      });
+        content: content,
+        createdAt: ServerValue.TIMESTAMP,
+      },
+    });
   } catch (error) {
     logger.error("Error Processing Message:", error);
   }
 });
-exports.newChatRooomMessage = onDocumentCreated(
-  "/chat-rooms/{roomId}/messages/{messageId}",
-  async (event) => {
-    try {
-      const snapshot = event.data;
-      if (!snapshot) {
-        logger.warn("No data associated with the event");
-        return {success: false, error: "No data found"};
-      }
-      const messageData = snapshot.data();
-      const {roomId} = event.params;
-      const roomDoc = await getFirestore().collection("chat-rooms")
-        .doc(roomId).get();
-      if (!roomDoc.exists) {
-        logger.warn(`Room ${roomId} not found`);
-        return {success: false, error: "Room not found"};
-      }
-      const roomData = roomDoc.data();
-      const participantId = roomData?.recipientId.find(
-        (Id: string) => Id !== messageData.senderId);
-      if (participantId) {
-        await sendNotification(participantId, {
-          title: "New Message",
-          body: `You have a new message from ${roomData?.senderName}`,
-          data: {
-            roomId,
-            messageId: snapshot.id,
-            type: "new_message",
-          },
-        });
-      }
-      return {success: true};
-    } catch (error) {
-      logger.error("Error processing new message:", error);
-      throw new Error("Failed to process new message notification");
+exports.newChatRooomMessage = onValueWritten("/messages/{roomId}", async (event) => {
+  try {
+    const snapshot = event.data;
+    if (!snapshot) {
+      logger.warn("No data associated with the event");
+      return {success: false, error: "No data found"};
     }
-  });
+    const {roomId} = event.params;
+    const chatRef = await getDatabase().ref(`/chats/${roomId}`).get();
+    if (!chatRef.exists()) {
+      logger.warn(`Room ${roomId} not found`);
+      return {success: false, error: "Room not found"};
+    }
+    const senderId = chatRef.val().participants.senderId;
+    const room = chatRef.val();
+    const participantId = room?.participants.recipientId.find((id:string) => id !== senderId);
+    if (participantId) {
+      await sendNotification(participantId, {
+        title: "New Message",
+        body: `You have a new message from ${room?.participants.senderName}`,
+        data: {
+          roomId,
+          messageId: snapshot.after.key,
+          type: "message",
+        },
+      });
+    }
+    return {success: true};
+  } catch (error) {
+    logger.error("Error processing new message:", error);
+    throw new Error("Failed to process new message notification");
+  }
+});
 exports.addPost = onCall(async (request) => {
   if (!request.auth) {
     throw new HttpsError(
@@ -145,7 +154,6 @@ exports.addPost = onCall(async (request) => {
   }
   try {
     const {auth_id, name, content, like_count, comment_count, liked_by, category, image, video} = request.data;
-    const createdAt = ServerValue.TIMESTAMP;
     const postRef = getDatabase().ref("/posts");
     const newPost = postRef.push();
     await newPost.set({
@@ -156,20 +164,12 @@ exports.addPost = onCall(async (request) => {
       comment_count: comment_count,
       liked_by: liked_by,
       category: category,
-      createdAt: createdAt,
+      createdAt: Date.now(),
       imageUrl: image,
-      post_id: " ",
       videoUrl: video,
     });
     await newPost.update({
       post_id: newPost.key,
-    });
-    await sendNotification(auth_id, {
-      title: "Post has sent!",
-      body: "Your post has been successfully sent",
-      data: {
-        type: "new_message",
-      },
     });
     return {success: true};
   } catch (error) {
@@ -261,22 +261,52 @@ exports.handleLike = onCall( async (request) => {
     throw new HttpsError("internal", "Failed to Like");
   }
 });
+exports.handleFollow = onCall(async (request) => {
+  if (!request.auth) {
+    throw new HttpsError("unauthenticated", "This endpoint requires authentication");
+  }
+  const {other_user_id, currentUser} = request.data;
+  try {
+    const UserRef = getDatabase().ref(`/users/${other_user_id}`);
+    const results = await UserRef.transaction((currentData)=>{
+      const currentConnectCount = currentData?.connection || 0;
+      const follow_by = currentData?.follow_by || [];
+      const hasFollowed = follow_by.includes(currentUser);
+
+
+      const newFollowed = hasFollowed ? currentConnectCount - 1 : currentConnectCount + 1;
+      const updateFollow = hasFollowed ? follow_by.filter((id:string)=> id != currentUser) :[...follow_by, currentUser];
+      return {
+        connection: newFollowed,
+        follow_by: updateFollow,
+        follow_state: newState,
+      };
+    });
+
+    const newState = results?.snapshot.val().follow_by.includes(currentUser);
+    return {sucess: true, followState: newState};
+  } catch (error:unknown | any) {
+    logger.error("Error handling follow", error);
+    throw new HttpsError("internal", "Error handling Follow");
+  }
+});
 exports.handleSend = onCall(async (request) => {
   if (!request.auth) {
     throw new HttpsError("unauthenticated", "This endpoint requires authentication");
   }
-  const {post_id, name, content, createdAt, auth_profile, comment_id} = request.data;
+  const {post_id, name, content, auth_profile, comment_id} = request.data;
   if (comment_id) {
-    const docRef = getDatabase().ref(`/replys/${comment_id}`);
+    const docRef = getDatabase().ref(`/replies/${comment_id}`);
     const newReply = docRef.push();
     await newReply.set({
       name: name,
       content: content,
+      auth_profile: auth_profile,
       parentId: comment_id,
-      createdAt: createdAt,
+      createdAt: Date.now(),
     });
     await newReply.update({
-      id: newReply.key,
+      reply_id: newReply.key,
     });
   } else {
     try {
@@ -287,7 +317,7 @@ exports.handleSend = onCall(async (request) => {
         content: content,
         auth_profile: auth_profile,
         name: name,
-        createdAt: createdAt,
+        createdAt: Date.now(),
       });
       await newComment.update({
         comment_id: newComment.key,

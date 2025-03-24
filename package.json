@@ -61,6 +61,7 @@
     "@shopify/flash-list": "1.7.3",
     "axios": "^1.8.3",
     "cors": "^2.8.5",
+    "date-fns": "^4.1.0",
     "eslint": "^9.22.0",
     "expo": "^52.0.39",
     "expo-constants": "~17.0.3",

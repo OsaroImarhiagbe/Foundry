@@ -18,6 +18,7 @@ interface ReplyProp{
   post_id?:string,
   comment_id?:string,
   reply_id?:string,
+  date?:string
   count?:number
 }
 const ReplyComponent:React.FC<ReplyProp> = memo(({name,content,post_id,comment_id,reply_id,count}) => {

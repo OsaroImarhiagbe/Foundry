@@ -33,6 +33,7 @@ import FastImage from "@d11/react-native-fast-image";
 import {Image as ImageCompressor,Video as VideoCompressor} from 'react-native-compressor';
 import {launchImageLibrary} from 'react-native-image-picker';
 import Video, {VideoRef} from 'react-native-video';
+import Toast from 'react-native-toast-message'
 
 
 
@@ -79,6 +80,7 @@ const PostScreen = () => {
 
   const handlePost = useCallback(async () => {
     if(text.trim() === '') return
+    log(crashlytics,'Handle Post')
     let trace = await perf.startTrace('sending_post_or_image')
     setLoading(true);
     try {
@@ -103,21 +105,31 @@ const PostScreen = () => {
         liked_by: [],
         category:category,
         image:imageUrl,
-        video:videoUrl
+        video:videoUrl,
       }).catch((error) => {
+        recordError(crashlytics,error)
         console.error('Error sending post:',error.message)
       })
       setText('');
       setImage(null);
       setCategory('');
       navigation.goBack();
+      Toast.show({
+        type: 'success',
+        text1: 'Post Sent!',
+        position:'top',
+        autoHide:true,
+        visibilityTime:4000,
+      });
+      setLoading(false)
     } catch (error:unknown | any) {
+      recordError(crashlytics,error)
       console.error("Error sending post:", error);
     }finally{
       setLoading(false);
       trace.stop()
     }
-  },[ text, image, filename, user, category]);
+  },[ text, image, filename, user, category,video]);
 
   const handleCancel = useCallback(() => {
     if (hasUnsavedChanges || image || video) {

@@ -14,31 +14,26 @@ import ChatRoomHeader from '../components/ChatRoomHeader';
 import { useNavigation } from '@react-navigation/native';
 import { useDispatch } from 'react-redux';
 import { addID } from '../features/Message/messageidSlice';
-import {
-  collection,
-  FirebaseFirestoreTypes,
-  Timestamp,
-  onSnapshot,
-  doc,
-  orderBy,
-  query,
-  setDoc
-} from '@react-native-firebase/firestore'
 import MessageItem from '../components/MessageItem';
 import { FlashList } from '@shopify/flash-list';
 import { TextInput,useTheme } from 'react-native-paper';
 import { log,recordError} from '@react-native-firebase/crashlytics'
-import { db,functions, crashlytics, perf } from '../../FirebaseConfig';
+import { functions, crashlytics, perf, database,} from '../../FirebaseConfig';
 import { httpsCallable } from '@react-native-firebase/functions'
+import { limitToLast, onValue, orderByChild, ref,query, FirebaseDatabaseTypes } from '@react-native-firebase/database';
 
 
 
 
 
 type ChatScreenRouteProp = RouteProp<{ Chat: { item: any,userid:string,name:string } }, 'Chat'>;
-
+interface Messages{
+  id?:string,
+  text?:string,
+  recipentId?:string
+}
 const ChatScreen = () => {
-  const [messages, setMessages] = useState<FirebaseFirestoreTypes.DocumentData[]>([]);
+  const [messages, setMessages] = useState<Messages[]>([]);
   const route = useRoute<ChatScreenRouteProp>();
   const {item,userid,name} = route?.params;
   const { user } = useAuth();
@@ -62,14 +57,17 @@ const ChatScreen = () => {
   useEffect(() => {
     log(crashlytics,'Chat Screen: Grabbing messages')
     const loadMessages = (roomId:string) => {
-      const docRef = doc(db,"chat-rooms",roomId);
-      const messageRef = collection(docRef,'messages')
-      const q = query(messageRef ,orderBy('createdAt', 'asc'))
-      let unsub = onSnapshot(q,(documentSnapshot) => {
-        let allMessages = documentSnapshot.docs.map((doc) => doc.data());
-        setMessages(allMessages);
+      const messageRef = ref(database,`/messages/${roomId}`);
+      const q = query(messageRef ,orderByChild('createdAt'),limitToLast(20))
+      const unsub = onValue(q,(snapshot) => {
+        const allMessages:Messages[] = []
+        snapshot.forEach((childSnapshot) => {
+          allMessages.push({...childSnapshot.val(),id:childSnapshot.key})
+          return true;
+        })
+        setMessages(allMessages as Messages[])
       });
-      return unsub;
+      return () => unsub();
     };
     if (roomId && id) {
       createRoom(roomId,id);
@@ -83,13 +81,23 @@ const ChatScreen = () => {
   const createRoom = useCallback(async (roomId:string,id:string) => {
     log(crashlytics,'Chat Screen: Creating Chat Room')
     try{
-      await setDoc(doc(db,'chat-rooms',roomId), {
-        roomId:roomId,
-        createdAt: Timestamp.fromDate(new Date()),
-        recipientId:[id],
-        recipentName:recipientNamec,
-        senderName:user?.username,
-        senderId:user?.userId,
+      const chatroomRef = ref(database,`/chats/${roomId}`)
+      await chatroomRef.set({
+        participants:{
+          senderId:user?.userId,
+          recipientId:[id],
+          recipientName:recipientNamec,
+          senderName:user?.username
+        },
+        lastMessage:{
+          roomId:roomId,
+          senderId:" ",
+          content:" ",
+          status:"pending",
+          createdAt: Date.now(),
+          recipientName:recipientNamec,
+          senderName:user?.username
+        }
       })
     } catch (error:unknown | any) {
       recordError(crashlytics,error)
@@ -115,7 +123,8 @@ const ChatScreen = () => {
         roomId: roomId,
         senderName: user?.username,
         recipientName: recipientNamec,
-        text: messageText,
+        content: messageText,
+        status:"sent"
       }).then((results) => {
         console.log(results)
       }).catch((error) => {

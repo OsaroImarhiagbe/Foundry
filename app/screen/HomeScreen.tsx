@@ -14,6 +14,7 @@ import {log,recordError} from '@react-native-firebase/crashlytics'
 import { PostRef,crashlytics,perf,database} from '../../FirebaseConfig';
 import {ref,FirebaseDatabaseTypes, orderByChild, limitToFirst, startAt, query, equalTo, onValue, } from '@react-native-firebase/database';
 import PostComponent from '../components/PostComponent';
+import { TimeAgo } from '../../utils/index';
 
 
 
@@ -28,7 +29,7 @@ type Post = {
   name?: string;
   content?: string;
   category?:string;
-  createdAt?: Date;
+  createdAt?: number;
   comment_count?: number;
 };
 
@@ -195,10 +196,7 @@ const fetchMorePost = useCallback(async () => {
           post_id={item.post_id}
           name={item.name}
           content={item.content}
-          date={item?.createdAt?.toLocaleString('en-US', {
-              hour: '2-digit',
-              minute: '2-digit',
-              hour12: true})}
+          date={TimeAgo(item?.createdAt ?? 0)}
           comment_count={item.comment_count}/>
          }
         keyExtractor={(item,index)=> item?.post_id?.toString() || `default-${index}`}
