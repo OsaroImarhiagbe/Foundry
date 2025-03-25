@@ -28,8 +28,8 @@ import { MenuItems } from '../components/CustomMenu';
 import { addsearchID } from '../features/search/searchSlice';
 import SearchComponent from '../components/SearchComponent';
 import { functions } from '../../FirebaseConfig.ts';
+import LazyScreenComponent from 'app/components/LazyScreenComponent.tsx';
 import { httpsCallable } from '@react-native-firebase/functions'
-import FallBackComponent from '../components/FallBackComponent.tsx';
 const HomeScreen = React.lazy(() => import('../screen/HomeScreen.tsx'));
 const FeedScreen = React.lazy(() => import('../screen/FeedScreen.tsx'));
 type NavigationProp = {
@@ -44,16 +44,16 @@ const Tab = createMaterialTopTabNavigator();
 
 const HomeScreenWrapper = React.memo(() => {
   return (
-    <Suspense fallback={<FallBackComponent/>}>
+    <LazyScreenComponent>
       <HomeScreen/>
-    </Suspense>
+      </LazyScreenComponent>
   )
 })
 const FeedScreenWrapper = React.memo(() => {
   return (
-    <Suspense fallback={<FallBackComponent/>}>
+    <LazyScreenComponent>
       <FeedScreen/>
-    </Suspense>
+    </LazyScreenComponent>
   )
 })
 
@@ -72,11 +72,9 @@ const DashBoardScreen = () => {
  
 
 
-    const testNotification = useCallback(async () => {
-      const sendTestNotification = httpsCallable(functions,'sendTestNotification')
-      await sendTestNotification()
+    const handleMessage = useCallback(() => {
+      navigation.navigate('Message')
     },[])
-   
 
 
   return (
@@ -103,7 +101,7 @@ const DashBoardScreen = () => {
         title='Search....'
         />
        <TouchableOpacity
-         onPress={testNotification}>
+         onPress={handleMessage}>
         <View>
            <Entypo name='new-message' size={20} color={theme.colors.primary}/>
         </View>

@@ -289,7 +289,7 @@ const PostComponent: React.FC<PostComponentProps> = memo(({
         type: 'timing',
       }}
       style={{
-        width:50,
+        width:110,
         paddingTop:10,
         alignItems:'center',
         justifyContent:'center'

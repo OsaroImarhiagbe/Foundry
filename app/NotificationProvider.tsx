@@ -84,9 +84,8 @@ export const NotificationProvider = ({ children }:NotificationProp) => {
       const unsub = onValue(collectionRef,(snapshot) => {
         if(snapshot.exists()){
           count = snapshot.numChildren();
-        }else{
-          console.error('Not count!')
-        }return () => unsub()
+        }
+        return () => unsub()
       })
     }catch(error:unknown| any){
       recordError(crashlytics,error)

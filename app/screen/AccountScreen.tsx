@@ -16,7 +16,7 @@ import { Image } from 'expo-image';
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import FollowComponent from '../components/FollowComponent';
 import { collection, where,FirebaseFirestoreTypes,doc, orderBy, onSnapshot, getDoc, Unsubscribe} from '@react-native-firebase/firestore';
-import { blurhash } from '../../utils/index';
+import { blurhash, TimeAgo } from '../../utils/index';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { 
@@ -76,7 +76,7 @@ type Post = {
   date?: string;
   comment_count?: number;
   mount?: boolean;
-  createdAt?: FirebaseFirestoreTypes.Timestamp
+  createdAt?:number
 }
 type Project = {
   id?:string,
@@ -250,17 +250,16 @@ const AccountScreen = () => {
     log(crashlytics,'Account Screen: Grabbing Users Post')
     try{
       const postRef = ref(database,'/posts')
-      const orderedQuery = query(postRef,orderByChild('auth_id'),equalTo(user.userId),)
-      const unsub = onValue(orderedQuery,async (snapshot) => {
+      const orderedQuery = query(postRef,orderByChild('createdAt'),equalTo(user.userId))
+      const unsub = onValue(orderedQuery,(snapshot) => {
         if (!snapshot.exists()) {
           setPosts([]);
           setLoading(false);
           return;
         }
         const data:Post[] = []
-        snapshot.forEach(childSnapshot => {
-          data.push({...childSnapshot.val(),id:childSnapshot.key})
-          return true
+        Object.keys(snapshot.val()).forEach(key => {
+          data.push({...snapshot.val()[key],id:key})
         })
         setPosts(data)
         setLoading(false)
@@ -283,8 +282,8 @@ const AccountScreen = () => {
     setAttributes(crashlytics,{
       id:user.userId
     })
-    const userDoc = doc(UsersRef,user.userId)
     try{
+      const userDoc = doc(UsersRef,user.userId)
         const unsub = onSnapshot(userDoc,(documentSnapshot) =>{
           if(!documentSnapshot){
             setUsers(undefined)
@@ -342,19 +341,16 @@ const AccountScreen = () => {
           renderItem={({item}) => 
             <PostComponent
             auth_profile={item.auth_profile}
-            count={item.like_count}
+            like_count={item.like_count}
             url={item.imageUrl}
             post_id={item.post_id}
             name={item.name}
             content={item.content}
             mount={isloading}
-            date={item?.createdAt?.toDate().toLocaleString('en-US', {
-                hour: '2-digit',
-                minute: '2-digit',
-                hour12: true})}
+            date={TimeAgo(item?.createdAt ?? 0)}
             comment_count={item.comment_count}/>
            }
-          keyExtractor={(item)=> item?.post_id?.toString() || Math.random().toString()}
+          keyExtractor={(item)=> item?.post_id?.toString() || `defualt-${item.id}`}
               />
     </SafeAreaView>
     </View>
@@ -369,7 +365,7 @@ const AccountScreen = () => {
           estimatedItemSize={460}
           data={projects}
           onRefresh={ProjectRefresh}
-          keyExtractor={(item)=> item?.id?.toString() || Math.random().toString()}
+          keyExtractor={(item)=> item?.id?.toString() || `defualt-${item.id}`}
           ListEmptyComponent={(item) => (
             <View style={{flex:1,alignItems:'center',justifyContent:'center',paddingTop:5}}>
               <TouchableOpacity onPress={()=> navigation.navigate('SecondStack',{screen:'ProjectEntryScreen',})}>
@@ -418,7 +414,7 @@ const AccountScreen = () => {
       contentContainerStyle={{padding:0}}
       estimatedItemSize={460}
       onRefresh={SkillRefresh}
-      keyExtractor={(item)=> item?.id?.toString() || Math.random().toString()}
+      keyExtractor={(item)=> item?.id?.toString() ||  `defualt-${item.id}`}
       ListEmptyComponent={(item) => (
       <View style={{flex:1,alignItems:'center',justifyContent:'center',paddingTop:5}}>
            <TouchableOpacity onPress={()=> navigation.navigate('SecondStack',{screen:'SkillScreen',})}>

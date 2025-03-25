@@ -11,7 +11,7 @@ import { useSelector} from 'react-redux';
 import { FlashList } from "@shopify/flash-list";
 import {ActivityIndicator,Text,Divider,useTheme} from 'react-native-paper'
 import {log,recordError} from '@react-native-firebase/crashlytics'
-import { PostRef,crashlytics,perf,database} from '../../FirebaseConfig';
+import { crashlytics,perf,database} from '../../FirebaseConfig';
 import {ref,FirebaseDatabaseTypes, orderByChild, limitToFirst, startAt, query, equalTo, onValue, limitToLast, } from '@react-native-firebase/database';
 import PostComponent from '../components/PostComponent';
 import { TimeAgo } from '../../utils/index';
@@ -64,9 +64,8 @@ const HomeScreen= () => {
             return;
           }
           const data:Post[] = []; 
-          snapshot.forEach(childSnapshot => {
-            data.push({ ...childSnapshot.val(),id:childSnapshot.key });
-            return true
+          Object.keys(snapshot).forEach(key => {
+            data.push({ ...snapshot.val()[key],id:key });
           })
           setPost(data);
           setLastVisible(snapshot.child(data[data.length -1].createdAt?.toString() || ''));
@@ -102,9 +101,8 @@ const HomeScreen= () => {
           return;
         }
         const data:Post[] = []
-        snapshot.forEach((childSnapshot) => {
-          data.push({...childSnapshot.val(),id:childSnapshot.key})
-          return true;
+        Object.keys(snapshot).forEach((key) => {
+          data.push({...snapshot.val()[key],id:key})
         })
         setPost((prev) => [...prev,...data]);
         setLastVisible(snapshot.child(data[data.length -1].createdAt?.toString() || ''));
@@ -140,9 +138,8 @@ const fetchMorePost = useCallback(async () => {
         return;
       }
       const data:Post[] = []
-      snapshot.forEach((childSnapshot) => {
-        data.push({...childSnapshot.val(),id:childSnapshot.key})
-        return true;
+      Object.keys(snapshot).forEach((key) => {
+        data.push({...snapshot.val()[key],id:key})
       })
     setPost(prev => [...prev, ...data]);
     setLastVisible(snapshot.child(data[data.length -1].createdAt?.toString() || ''));

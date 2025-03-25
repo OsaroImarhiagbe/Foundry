@@ -9,7 +9,7 @@ import {
     } from 'react-native'
 import { useAuth } from '../authContext';
 import {ActivityIndicator,Divider,Text,useTheme} from 'react-native-paper';
-import {ref,FirebaseDatabaseTypes, orderByChild, limitToFirst, startAt, query,onValue, limitToLast} from '@react-native-firebase/database';
+import {ref,FirebaseDatabaseTypes, orderByChild, startAt, query,onValue, limitToLast, onChildAdded, limitToFirst} from '@react-native-firebase/database';
 import {log,recordError,} from '@react-native-firebase/crashlytics'
 import { FlashList } from '@shopify/flash-list';
 import { crashlytics, perf, database,} from '../../FirebaseConfig';
@@ -49,34 +49,34 @@ const FeedScreen = () => {
 
 
   
-    
+   
  
     useEffect(() => {
       if (!user?.userId) return;
       log(crashlytics,'Grabbing post')
-      const grabInitialPost = async () => {
-        const trace = await perf.startTrace('feedscreen')
+      //
         try {
-          const docRef = ref(database,'/posts')
-          const orderedQuery = query(docRef,orderByChild('createdAt'),limitToLast(5))
+          const postRef = ref(database,'/posts')
+          const orderedQuery = query(postRef,orderByChild('createdAt'),limitToFirst(10))
           const subscriber = onValue(orderedQuery,(snapshot: FirebaseDatabaseTypes.DataSnapshot) =>{
               if (!snapshot.exists()) {
                 setPost([]);
                 setLoading(false);
                 return;
               }
-              const data:Post[] = []
-              snapshot.forEach((childSnapshot) => {
-                data.push({...childSnapshot.val(), id:childSnapshot.key})
-                return true;
-              })
+              
+              const data: Post[] = [];
+              Object.keys(snapshot.val()).forEach((key) => {
+                data.push({ ...snapshot.val()[key], id:key });
+              });
             setPost(data);
-            setLastVisible(snapshot.child(data[data.length - 1]?.createdAt?.toString() || ''));
-            setHasMore(data.length === 5);
+            const lastPost = data[data.length - 1];
+            setLastVisible(snapshot.child(lastPost.id?.toString() || ''));
+            setHasMore(snapshot.val().length > 0);
             setLoading(false);
           },(error:unknown | any) => {
             recordError(crashlytics, error);
-            console.error(`Error in snapshot listener: ${error}`);
+            console.error(`Error in snapshot listener Feed Screen: ${error}`);
             setLoading(false);
           });
           return () => subscriber()
@@ -86,10 +86,7 @@ const FeedScreen = () => {
           setLoading(false);
       }finally{
         setLoading(false)
-        trace.stop()
       }
-      }
-      grabInitialPost()
     }, []); 
   
 
@@ -108,13 +105,13 @@ const FeedScreen = () => {
               return;
             }
             const data:Post[] = []
-            snapshot.forEach((childSnapshot) => {
-              data.push({...childSnapshot.val(),id:childSnapshot.key})
-              return true;
+            Object.keys(snapshot.val()).forEach((key) => {
+              data.push({...snapshot.val()[key],id:key})
             })
-            setPost((prev) => [...prev, ...data]);
-            setLastVisible(snapshot.child(data[data.length -1].createdAt?.toString() || ''));
-            setHasMore(data.length === 5);
+            setPost(data);
+            const lastPost = data[data.length - 1];
+            setLastVisible(snapshot.child(lastPost.createdAt?.toString() || ''));
+            setHasMore(data.length > 0);
             trace.putAttribute('post_count', post.length.toString());
             setRefreshing(false)
           });
@@ -144,13 +141,14 @@ const FeedScreen = () => {
             return;
           }
         const data:Post[] = []
-        snapshot.forEach((childSnapshot) => {
-          data.push({...childSnapshot.val(),id:childSnapshot.key})
+        Object.keys(snapshot.val()).forEach((key) => {
+          data.push({...snapshot.val()[key],id:key})
           return true
         })
         setPost((prev) => [...prev,...data]);
-        setLastVisible(snapshot.child(data[data.length -1].createdAt?.toString() || ''));
-        setHasMore(data.length === 5);
+        const lastPost = data[data.length - 1];
+        setLastVisible(snapshot.child(lastPost.id?.toString() || ''));
+        setHasMore(data.length > 0);
         trace.putAttribute('post_count', post.length.toString());
         setLoadingMore(false);
         })
@@ -190,9 +188,9 @@ const FeedScreen = () => {
                 <Divider/>
               )}
               ListFooterComponent={() => (
-                  <ActivityIndicator color='#fff' size='small' animating={loadingMore}/>
+                  <ActivityIndicator color='#fff' size='small' animating={false}/>
               )}
-              keyExtractor={(item,index) => item?.post_id?.toString() || `defualt-${index}`}
+              keyExtractor={(item) => item?.post_id?.toString() || `default-${item.id}`}
               renderItem={({item}) =>
              <PostComponent
                   auth_profile={item.auth_profile}

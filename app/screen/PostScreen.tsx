@@ -71,7 +71,7 @@ const PostScreen = () => {
   useEffect(() => {
     const timeout = setTimeout(() => {
       textInputRef.current?.focus()
-    }, 1000);
+    }, 100);
 
     return () => clearTimeout(timeout); 
   }, []);
@@ -116,10 +116,11 @@ const PostScreen = () => {
       navigation.goBack();
       Toast.show({
         type: 'success',
-        text1: 'Post Sent!',
+        text1: 'Your post was sent',
         position:'top',
         autoHide:true,
-        visibilityTime:4000,
+        visibilityTime:3000,
+        topOffset:top,
       });
       setLoading(false)
     } catch (error:unknown | any) {
