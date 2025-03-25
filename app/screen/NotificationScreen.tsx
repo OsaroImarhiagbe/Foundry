@@ -6,25 +6,24 @@ import {
   View, 
   StyleSheet,
   SafeAreaView} from 'react-native'
-import {
-  collection,
-  onSnapshot,} from '@react-native-firebase/firestore'
 import { useAuth } from '../authContext';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
-import color from '../../config/color';
 import { useTheme,Text, Divider } from 'react-native-paper';
-import { crashlytics, db} from '../../FirebaseConfig';
+import { crashlytics, database,} from '../../FirebaseConfig';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { log,recordError } from '@react-native-firebase/crashlytics'
 import { FlashList } from '@shopify/flash-list';
 import { MotiView } from 'moti';
 import { Skeleton } from 'moti/skeleton';
+import { onValue, ref, update } from '@react-native-firebase/database';
+import { useNotification } from '../NotificationProvider';
 
 
 interface Notification{
-  id?:string,
-  title?:string,
-  message?:string
+  id:string,
+  title:string,
+  message:string,
+  timestamp:string
 }
 const NotificationScreen = () => {
   const {user} = useAuth()
@@ -34,6 +33,7 @@ const NotificationScreen = () => {
   const [loading,setLoading] = useState<boolean>(true)
   const {top} = useSafeAreaInsets()
   const Tab = createMaterialTopTabNavigator()
+  const {setNotificationCount} = useNotification();
   const theme = useTheme()
 
 
@@ -43,21 +43,26 @@ const NotificationScreen = () => {
     log(crashlytics,'Notification Screen: On Refresh')
     setRefreshing(true);
     try{
-        const docRef = collection(db,'users',user.userId,'notifcations')
-        const unsub = onSnapshot(docRef,(querySnapshot)=>{
-          if(!querySnapshot || querySnapshot.empty){
+      const notificationRef = ref(database,`/notfications/${user.userId}`)
+        const unsub = onValue(notificationRef,(snapshot)=>{
+          if(!snapshot.exists()){
             setMessageNotifications([])
             setNotification([])
             setRefreshing(false)
             return;
           }
-        let messageOnly:Notification[] = []
-        let all:Notification[] = []
-        querySnapshot.forEach((documentSnapshot)=>{
-          all.push({...documentSnapshot.data(),id:documentSnapshot.id})
-          if (documentSnapshot.data().data == 'message'){
-            messageOnly.push({...documentSnapshot.data()})
+        const messageOnly:Notification[] = []
+        const all:Notification[] = []
+        snapshot.forEach((childSnapshot)=>{
+          all.push({...childSnapshot.val(),id:childSnapshot.key})
+          update(ref(database, `/notfications/${user.userId}/${childSnapshot.key}`), { isRead: true })
+          setNotificationCount(null)
+          if (childSnapshot.val().data.type == 'message'){
+            update(ref(database, `/notfications/${user.userId}/${childSnapshot.key}`), { isRead: true })
+            setNotificationCount(null)
+            messageOnly.push({...childSnapshot.val()})
           }
+          return true;
         })
         setMessageNotifications([...messageOnly])
         setNotification([...all])
@@ -67,7 +72,7 @@ const NotificationScreen = () => {
     }catch(error:unknown | any){
       recordError(crashlytics,error)
       console.error('Error grabbing notifications:',error.message)
-      return ()  => {}
+      setLoading(false)
     }finally{
       setRefreshing(false)
     }
@@ -77,21 +82,26 @@ const NotificationScreen = () => {
 
   useEffect(() => {
     try{
-        const docRef = collection(db,'users',user.userId,'notifications')
-        const unsub = onSnapshot(docRef,(querySnapshot)=>{
-          if(!querySnapshot || querySnapshot.empty){
+        const notificationRef = ref(database,`/notfications/${user.userId}`)
+        const unsub = onValue(notificationRef,(snapshot)=>{
+          if(!snapshot.exists()){
             setMessageNotifications([])
             setNotification([])
             setLoading(false)
             return
           }
-        let messageOnly:Notification[] = []
-        let all:Notification[] = []
-        querySnapshot.forEach((documentSnapshot)=>{
-          all.push({...documentSnapshot.data(),id:documentSnapshot.id})
-          if (documentSnapshot.data().data == 'message'){
-            messageOnly.push({...documentSnapshot.data()})
+        const messageOnly:Notification[] = []
+        const all:Notification[] = []
+        snapshot.forEach((childSnapshot)=>{
+          all.push({...childSnapshot.val(),id:childSnapshot.key})
+          update(ref(database, `/notfications/${user.userId}/${childSnapshot.key}`), { isRead: true })
+          setNotificationCount(null)
+          if (childSnapshot.val().data.type == 'message'){
+            update(ref(database, `/notfications/${user.userId}/${childSnapshot.key}`), { isRead: true })
+            setNotificationCount(null)
+            messageOnly.push({...childSnapshot.val()})
           }
+          return true
         })
         setMessageNotifications(messageOnly)
         setNotification(all)
@@ -180,6 +190,10 @@ const NotificationScreen = () => {
          style={{
           color:theme.colors.tertiary
         }}>{item.message}</Text>
+         <Text variant='bodyMedium'
+         style={{
+          color:theme.colors.tertiary
+        }}>{item.timestamp}</Text>
         </View>
         </Skeleton>
       </MotiView>}/>

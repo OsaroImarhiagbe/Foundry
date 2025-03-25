@@ -27,8 +27,10 @@ type CommentProp = {
   comment_id?:string | any,
   post_id?:string,
   date?:string,
+  comment_count?: number
   auth_profile?:string,
-  count?:number,
+  like_count?:number,
+  liked_by?: string[]
   onReplyPress: (comment_id: string, name: string) => void;
   url?:string;
 }
@@ -47,7 +49,8 @@ const CommentComponent:React.FC<CommentProp> = memo(({
   name,
   comment_id,
   post_id,
-  count,
+  comment_count,
+  like_count,
   date,
   auth_profile,
   url,
@@ -230,7 +233,7 @@ const CommentComponent:React.FC<CommentProp> = memo(({
                      <MaterialCommunityIcons name="heart" size={15} color={theme.colors.onTertiary}/>
                      <Text
                      variant='bodySmall'
-                     style={styles.reactionText}>{count}</Text>
+                     style={styles.reactionText}>{like_count}</Text>
                  </View>
                  </TouchableHighlight>
         <TouchableOpacity onPress={() => {

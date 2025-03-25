@@ -34,14 +34,14 @@ import Video, { VideoRef } from 'react-native-video';
 import { functions } from '../../FirebaseConfig.ts';
 import { httpsCallable } from '@react-native-firebase/functions'
 import { recordError } from '@react-native-firebase/crashlytics';
-import {ref,FirebaseDatabaseTypes, orderByChild, limitToFirst, startAt, query, equalTo, onValue, } from '@react-native-firebase/database';
+import {ref,FirebaseDatabaseTypes, orderByChild, query,  onValue, } from '@react-native-firebase/database';
 import { TimeAgo } from '../../utils/index';
 
 
 
 interface PostComponentProps {
   auth_profile?: string;
-  count?: number;
+  like_count?: number;
   url?: string;
   post_id?: string;
   name?: string;
@@ -52,18 +52,20 @@ interface PostComponentProps {
   video?:string
 }
 interface Comment{
-  id?:string | any,
+  comment_id?:string | any,
   auth_profile?:string,
   like_count?:number,
+  comment_count?: number
+  liked_by?: string[]
   content?:string,
   name?:string | any,
-  createdAt?:number
+  createdAt?:number,
+  parentId:string
 
 }
 
 const PostComponent: React.FC<PostComponentProps> = memo(({
-  auth_profile,
-  count,
+  like_count,
   url,
   post_id,
   name,
@@ -90,22 +92,28 @@ const PostComponent: React.FC<PostComponentProps> = memo(({
  
 
     useEffect(() => {
-      const docRef = ref(database,`/comments/${post_id}`)
-      const q = query(docRef, orderByChild('createdAt'))
-       const subscriber = onValue(q, (snapshot) => {
-              if (!snapshot.exists()) {
-                setComment([]);
+      try{
+        const docRef = ref(database,`/comments/${post_id}`)
+        const q = query(docRef, orderByChild('createdAt'))
+         const subscriber = onValue(q, (snapshot: FirebaseDatabaseTypes.DataSnapshot) => {
+                if (!snapshot.exists()) {
+                  setComment([]);
+                  setLoading(false)
+                  return;
+                }
+                let data:Comment[] = []
+                snapshot.forEach(childSnapshot => {
+                  data.push({ ...childSnapshot.val(),id:childSnapshot.key });
+                  return true;
+                })
+                setComment(data)
                 setLoading(false)
-                return;
-              }
-              let data:Comment[] = []
-              snapshot.forEach(childSnapshot => {
-                data.push({ ...childSnapshot.val(),id:childSnapshot.key });
-                return true;
-              })
-              setComment(data)
-    }) 
-          return () => subscriber()
+      }) 
+            return () => subscriber()
+      }catch(error:unknown | any){
+        recordError(crashlytics,error)
+        console.error('Error grabbing comments',error)
+      }
     },[post_id])
 
 
@@ -136,9 +144,12 @@ const PostComponent: React.FC<PostComponentProps> = memo(({
           post_id:post_id,
           name:user.username,
           content:text,
-          auth_profile:auth_profile,
+          auth_profile:user.profileUrl,
           comment_id: replyingTo,
-        }).catch((error) => error)
+          like_count: 0,
+          comment_count: 0,
+          liked_by: [],
+        }).catch((error) => recordError(crashlytics,error))
         setText('');
         setReplyingTo(null);
         setReplyingToUsername(undefined);
@@ -155,7 +166,7 @@ const PostComponent: React.FC<PostComponentProps> = memo(({
 
     const handleDelete = useCallback(async () => {
       try {
-        const messagesRef = ref(database,`/comments/${post_id}`)
+        const messagesRef = ref(database,`/posts/${post_id}`)
         await messagesRef.remove()
         Alert.alert('Post Deleted!')
       } catch (error) {
@@ -314,7 +325,7 @@ const PostComponent: React.FC<PostComponentProps> = memo(({
           <MaterialCommunityIcons name="heart" size={17} color={theme.colors.tertiary}/>
           <Text 
           variant='bodySmall'
-          style={{color:theme.colors.tertiary}}> {count}</Text>
+          style={{color:theme.colors.tertiary}}> {like_count}</Text>
         </View>
         </Skeleton>
         </MotiView>  
@@ -412,15 +423,17 @@ const PostComponent: React.FC<PostComponentProps> = memo(({
             <FlashList
             data={comments}
             estimatedItemSize={500}
-            keyExtractor={(item,index) => item?.id?.toString() || `default-${index}`}
+            keyExtractor={(item,index) => item?.comment_id?.toString() || `default-${index}`}
             renderItem={({item}) => (
               <CommentComponent
                     auth_profile={item.auth_profile}
-                    count={item.like_count}
+                    like_count={item.like_count}
+                    liked_by={item.liked_by}
+                    comment_count={item.comment_count}
                     content={item.content}
                     name={item.name}
-                    comment_id={item.id}
-                    post_id={post_id}
+                    comment_id={item.comment_id}
+                    post_id={item.parentId}
                     date={TimeAgo(item?.createdAt ?? 0)}
                     onReplyPress={(id,name) => {
                       setReplyingTo(id);

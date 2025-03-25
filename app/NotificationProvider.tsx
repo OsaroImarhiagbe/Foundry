@@ -3,10 +3,10 @@ import notifee, { EventType } from '@notifee/react-native'
 import { useNavigation } from '@react-navigation/native';
 import { FirebaseMessagingTypes } from '@react-native-firebase/messaging';
 import { useAuth } from './authContext';
-import {crashlytics, messaging,NotificationsRef,UsersRef,db } from '../FirebaseConfig';
-import { doc, setDoc,FieldValue, addDoc, collection, getDocs} from '@react-native-firebase/firestore';
+import {crashlytics, messaging, database } from '../FirebaseConfig';
 import {log,recordError} from '@react-native-firebase/crashlytics'
-
+import { TimeAgo} from '../utils/index';
+import { onValue, ref } from '@react-native-firebase/database';
 const NotificationContext = createContext<any>(null);
 
 
@@ -29,18 +29,24 @@ interface NotificationData {
 }
 export const NotificationProvider = ({ children }:NotificationProp) => {
   const [notification, setNotification] = useState<NotificationData | null>(null);
-  const [notificationCount, setNotificationCount] = useState<number | undefined>(undefined);
+  const [notificationCount, setNotificationCount] = useState<number | null>(null);
   const {user} = useAuth()
   const [visible,setVisible] = useState<boolean>(false)
   const navigation = useNavigation();
 
-  const showNotification = useCallback(async (title:string, message:string,data:any) => {
+  const showNotification = useCallback(async (title:string, message:string,data:any,image?:string | undefined) => {
     log(crashlytics,'Notifcation Provider: Show Notification')
     try{
         await notifee.displayNotification({
             title: title,
             body:message,
             ios: {
+              attachments: [
+                {
+                  thumbnailHidden:false,
+                  url: image || ''
+                }
+              ],
                 foregroundPresentationOptions: {
                     badge: true,
                     sound: true,
@@ -51,10 +57,14 @@ export const NotificationProvider = ({ children }:NotificationProp) => {
             },
         });
         if(user && user.userId){
-          await addDoc(collection(db,'users', user.userId, 'notifications'), {
+          const notificationRef = ref(database,`/notifications/${user.userId}`)
+          const newNotification = notificationRef.push()
+          await newNotification.set({
             title: title,
             message: message,
-            timestamp: new Date()
+            timestamp:TimeAgo(Date.now()),
+            data:data,
+            isRead:false
           })
         }else{
           console.error('Error adding notification')
@@ -68,10 +78,21 @@ export const NotificationProvider = ({ children }:NotificationProp) => {
   }, [user, user.userId]);
 
   const getNotificationCount = useCallback(async () => {
-    const collectionRef = collection(db,'users', user.userId, 'notifications')
-    const colRef = await getDocs(collectionRef)
-    return colRef.size
-  },[])
+    const collectionRef = ref(database,`/notifications/${user.userId}`)
+    let count:number = 0;
+    try{
+      const unsub = onValue(collectionRef,(snapshot) => {
+        if(snapshot.exists()){
+          count = snapshot.numChildren();
+        }else{
+          console.error('Not count!')
+        }return () => unsub()
+      })
+    }catch(error:unknown| any){
+      recordError(crashlytics,error)
+    }
+    return count
+  },[user.userId])
 
   useEffect(() => {
     const fetchCount = async () => {
@@ -153,7 +174,7 @@ export const NotificationProvider = ({ children }:NotificationProp) => {
 
 
   return (
-    <NotificationContext.Provider value={{ showNotification,notificationCount }}>
+    <NotificationContext.Provider value={{ showNotification,notificationCount,setNotificationCount }}>
       {children}
     </NotificationContext.Provider>
   );

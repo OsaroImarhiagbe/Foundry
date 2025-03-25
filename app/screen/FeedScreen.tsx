@@ -9,7 +9,7 @@ import {
     } from 'react-native'
 import { useAuth } from '../authContext';
 import {ActivityIndicator,Divider,Text,useTheme} from 'react-native-paper';
-import {ref,FirebaseDatabaseTypes, orderByChild, limitToFirst, startAt, query,onValue,} from '@react-native-firebase/database';
+import {ref,FirebaseDatabaseTypes, orderByChild, limitToFirst, startAt, query,onValue, limitToLast} from '@react-native-firebase/database';
 import {log,recordError,} from '@react-native-firebase/crashlytics'
 import { FlashList } from '@shopify/flash-list';
 import { crashlytics, perf, database,} from '../../FirebaseConfig';
@@ -33,8 +33,7 @@ interface Post{
     createdAt?:number;
     comment_count?: number;
     mount?:boolean,
-    videoUrl?:string
-  };
+    videoUrl?:string,};
   
 
 const FeedScreen = () => {
@@ -59,7 +58,7 @@ const FeedScreen = () => {
         const trace = await perf.startTrace('feedscreen')
         try {
           const docRef = ref(database,'/posts')
-          const orderedQuery = query(docRef,orderByChild('createdAt'),limitToFirst(5))
+          const orderedQuery = query(docRef,orderByChild('createdAt'),limitToLast(5))
           const subscriber = onValue(orderedQuery,(snapshot: FirebaseDatabaseTypes.DataSnapshot) =>{
               if (!snapshot.exists()) {
                 setPost([]);
@@ -101,7 +100,7 @@ const FeedScreen = () => {
     
         try {
           const docRef = ref(database,'/posts')
-          const orderedQuery = query(docRef,orderByChild('createdAt'),limitToFirst(5))
+          const orderedQuery = query(docRef,orderByChild('createdAt'),limitToLast(5))
           const subscriber = onValue(orderedQuery,(snapshot:FirebaseDatabaseTypes.DataSnapshot) =>{
             if(!snapshot.exists()){
               setPost([])
@@ -137,7 +136,7 @@ const FeedScreen = () => {
       if (!lastVisible || !hasMore) return;
       try {
         const docRef = ref(database,'/posts')
-        const orderedQuery = query(docRef,orderByChild('createdAt'),startAt(lastVisible.val().createdAt),limitToFirst(5))
+        const orderedQuery = query(docRef,orderByChild('createdAt'),startAt(lastVisible.val().createdAt),limitToLast(5))
         const subscriber = onValue(orderedQuery,(snapshot:FirebaseDatabaseTypes.DataSnapshot) => {
           if(!snapshot.exists()){
             setHasMore(false)
@@ -197,7 +196,7 @@ const FeedScreen = () => {
               renderItem={({item}) =>
              <PostComponent
                   auth_profile={item.auth_profile}
-                  count={item.like_count}
+                  like_count={item.like_count}
                   url={item.imageUrl}
                   video={item.videoUrl}
                   post_id={item.post_id}

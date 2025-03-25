@@ -14,7 +14,6 @@ import { useAuth } from '../authContext';
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
 import { useNavigation } from '@react-navigation/native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-import color from '../../config/color';
 import {getDownloadURL,putFile,ref} from '@react-native-firebase/storage'
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useTheme,Icon,Text,Button,Divider } from 'react-native-paper';
@@ -98,6 +97,7 @@ const PostScreen = () => {
       }
       addPost({
         auth_id:user?.userId,
+        auth_profile:user?.profileUrl,
         name:user?.username,
         content:text,
         like_count: 0,
@@ -160,7 +160,6 @@ const PostScreen = () => {
         presentationStyle:'popover',
         videoQuality:'high',
       })
-      console.log('video',results)
       if(!results.didCancel && results.assets?.length && results?.assets[0]?.uri && results?.assets[0]?.fileSize){
         const uri = await ImageCompressor.compress(results.assets[0].uri)
         const videouri = await VideoCompressor.compress(results.assets[0].uri,{
@@ -192,12 +191,19 @@ const PostScreen = () => {
          size={25}/>
         </TouchableOpacity>
         <View style={{paddingLeft:15}}>
-        <Image
+         {
+          user.profileUrl ?    <Image
           source={user?.profileUrl}
           placeholder={{blurhash}}
           style={{height:hp(3.3), aspectRatio:1, borderRadius:100}}
           transition={500}
+          /> :    <Image
+          source={require('../assets/user.png')}
+          placeholder={{blurhash}}
+          style={{height:hp(3.3), aspectRatio:1, borderRadius:100}}
+          transition={500}
           />
+         } 
         </View>
         </View>
         <View style={{flexDirection:'row',alignItems:'center'}}>
@@ -220,7 +226,7 @@ const PostScreen = () => {
                 marginTop:40,
                 marginLeft:-30,
                 borderCurve:'continuous',
-                backgroundColor:color.white,
+                backgroundColor:'#fff',
                 position:'relative',
                 zIndex:10
             }

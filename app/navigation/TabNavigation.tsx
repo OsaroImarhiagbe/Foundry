@@ -98,7 +98,7 @@ const TabNavigation = () => {
         name="Notification"
         component={NotificationScreenWrapper}
      options={{
-      tabBarBadge: notificationCount,
+      tabBarBadge: notificationCount  ? notificationCount : null,
       tabBarLabel: 'Notification',
       tabBarIcon:() => (<MaterialIcons name='notifications' color={theme.colors.tertiary} size={25}/>)
      }}

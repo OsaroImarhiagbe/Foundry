@@ -153,11 +153,12 @@ exports.addPost = onCall(async (request) => {
       "unauthenticated", "This endpoint requires authentication");
   }
   try {
-    const {auth_id, name, content, like_count, comment_count, liked_by, category, image, video} = request.data;
+    const {auth_id, auth_profile, name, content, like_count, comment_count, liked_by, category, image, video} = request.data;
     const postRef = getDatabase().ref("/posts");
     const newPost = postRef.push();
     await newPost.set({
       auth_id: auth_id,
+      auth_profile: auth_profile,
       name: name,
       content: content,
       like_count: like_count,
@@ -208,7 +209,7 @@ exports.handleLike = onCall( async (request) => {
         };
       });
     } else if (comment_id) {
-      const docRef = getDatabase().ref(`/comments/${comment_id}`);
+      const docRef = getDatabase().ref(`/comments/${post_id}/${comment_id}`);
       await docRef.transaction((currentData) => {
         if (!currentData) {
           throw new HttpsError("not-found", "Document doesn't exist");
@@ -232,7 +233,7 @@ exports.handleLike = onCall( async (request) => {
         };
       });
     } else {
-      const docRef = getDatabase().ref(`/replys/${reply_id}`);
+      const docRef = getDatabase().ref(`/replys/${comment_id}/${reply_id}`);
       await docRef.transaction((currentData) => {
         if (!currentData) {
           throw new HttpsError("not-found", "Document doesn't exist");
@@ -294,7 +295,7 @@ exports.handleSend = onCall(async (request) => {
   if (!request.auth) {
     throw new HttpsError("unauthenticated", "This endpoint requires authentication");
   }
-  const {post_id, name, content, auth_profile, comment_id} = request.data;
+  const {post_id, name, content, auth_profile, comment_id, like_count, comment_count, liked_by} = request.data;
   if (comment_id) {
     const docRef = getDatabase().ref(`/replies/${comment_id}`);
     const newReply = docRef.push();
@@ -313,11 +314,14 @@ exports.handleSend = onCall(async (request) => {
       const docRef = getDatabase().ref(`/comments/${post_id}`);
       const newComment = docRef.push();
       await newComment.set({
-        parentId: " ",
+        parentId: post_id,
         content: content,
         auth_profile: auth_profile,
         name: name,
         createdAt: Date.now(),
+        like_count: like_count,
+        comment_count: comment_count,
+        liked_by: liked_by,
       });
       await newComment.update({
         comment_id: newComment.key,

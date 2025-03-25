@@ -12,7 +12,7 @@ import { FlashList } from "@shopify/flash-list";
 import {ActivityIndicator,Text,Divider,useTheme} from 'react-native-paper'
 import {log,recordError} from '@react-native-firebase/crashlytics'
 import { PostRef,crashlytics,perf,database} from '../../FirebaseConfig';
-import {ref,FirebaseDatabaseTypes, orderByChild, limitToFirst, startAt, query, equalTo, onValue, } from '@react-native-firebase/database';
+import {ref,FirebaseDatabaseTypes, orderByChild, limitToFirst, startAt, query, equalTo, onValue, limitToLast, } from '@react-native-firebase/database';
 import PostComponent from '../components/PostComponent';
 import { TimeAgo } from '../../utils/index';
 
@@ -56,7 +56,7 @@ const HomeScreen= () => {
     const trace = await perf.startTrace('HomeScreen')
       try {
         const docRef = ref(database,'/posts')
-        const orderedQuery = query(docRef,orderByChild('createdAt'),equalTo(category),limitToFirst(5))
+        const orderedQuery = query(docRef,orderByChild('createdAt'),equalTo(category),limitToLast(5))
         const subscriber = onValue(orderedQuery,(snapshot:FirebaseDatabaseTypes.DataSnapshot) =>{
           if (!snapshot.exists()) {
             setPost([]);
@@ -94,8 +94,8 @@ const HomeScreen= () => {
     const trace = await perf.startTrace('Refreshing_community_posts_HomeScreen')
     try {
       const docRef = ref(database,'/posts')
-      const orderedQuery = query(docRef,orderByChild('createdAt'),equalTo(category),limitToFirst(5))
-      const subscriber = onValue(orderedQuery,(snapshot) => {
+      const orderedQuery = query(docRef,orderByChild('createdAt'),equalTo(category),limitToLast(5))
+      const subscriber = onValue(orderedQuery,(snapshot: FirebaseDatabaseTypes.DataSnapshot) => {
         if(!snapshot.exists()){
           setPost([])
           setRefreshing(false)
@@ -133,7 +133,7 @@ const fetchMorePost = useCallback(async () => {
   try {
     const docRef = ref(database,'/posts')
     const orderedQuery = query(docRef,orderByChild('createdAt'),equalTo(category),startAt(lastVisible.val().createdAt),limitToFirst(5))
-    const subscriber = onValue(orderedQuery,(snapshot) => {
+    const subscriber = onValue(orderedQuery,(snapshot: FirebaseDatabaseTypes.DataSnapshot) => {
       if(!snapshot.exists()){
         setPost([])
         setLoadingMore(false)
@@ -144,7 +144,7 @@ const fetchMorePost = useCallback(async () => {
         data.push({...childSnapshot.val(),id:childSnapshot.key})
         return true;
       })
-    setPost(prevPosts => [...prevPosts, ...data]);
+    setPost(prev => [...prev, ...data]);
     setLastVisible(snapshot.child(data[data.length -1].createdAt?.toString() || ''));
     setHasMore(data.length === 5);
     trace.putAttribute('post_count', post.length.toString());
@@ -191,7 +191,7 @@ const fetchMorePost = useCallback(async () => {
         renderItem={({item}) => 
         <PostComponent
           auth_profile={item.auth_profile}
-          count={item.like_count}
+          like_count={item.like_count}
           url={item.imageUrl}
           post_id={item.post_id}
           name={item.name}
