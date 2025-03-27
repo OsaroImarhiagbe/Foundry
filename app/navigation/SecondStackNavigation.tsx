@@ -3,9 +3,6 @@ import React, { Suspense } from 'react';
 import LazyScreenComponent from '../components/LazyScreenComponent.tsx';
 const ReportBugScreen = React.lazy(() => import('../screen/ReportBugScreen.tsx'));
 const ContactUsScreen = React.lazy(() => import('../screen/ContactUsScreen.tsx'));
-const ChatScreen = React.lazy(() => import('../screen/ChatScreen.tsx'));
-const PostScreen = React.lazy(() => import('../screen/PostScreen.tsx'));
-const ProjectScreen = React.lazy(() => import('../screen/ProjectScreen.tsx'));
 const LocationScreen = React.lazy(() => import('../screen/LocationScreen.tsx'));
 
 
@@ -27,29 +24,8 @@ const ContactUsScreenWrapper = React.memo(() => {
 })
 
 
-const ChatScreenWrapper = React.memo(() => {
-  return (
-    <LazyScreenComponent>
-      <ChatScreen/>
-    </LazyScreenComponent>
-  )
-})
 
-const PostScreenWrapper = React.memo(() => {
-  return (
-    <LazyScreenComponent>
-      <PostScreen/>
-    </LazyScreenComponent>
-  )
-})
 
-const ProjectScreenWrapper = React.memo(() => {
-  return (
-    <LazyScreenComponent>
-      <ProjectScreen/>
-    </LazyScreenComponent>
-  )
-})
 
 const LocationScreenWrapper = React.memo(() => {
   return (
@@ -72,22 +48,7 @@ const SecondStackNavigation = () => {
       screenOptions={{
         gestureEnabled:false
       }}>
-    <Stack.Screen
-      name='Post'
-      component={PostScreenWrapper}
-      options={{
-        headerShown:false,
-        gestureEnabled:false,
-      }}
-      />
-    <Stack.Screen
-    name="ProjectScreen"
-    component={ProjectScreenWrapper}
-    options={{
-        headerShown:false,
-        
-    }}/>
-        <Stack.Screen
+  <Stack.Screen
     name="LocationScreen"
     component={LocationScreenWrapper}
     options={{
@@ -108,15 +69,6 @@ const SecondStackNavigation = () => {
         headerShown:false,
         
     }}/>
- 
-    <Stack.Screen
-      name='Chat'
-      component={ChatScreenWrapper}
-      options={{
-      headerShown:false,
-      gestureEnabled:false
-      }}
-        />
 </Stack.Navigator>
     );
   }

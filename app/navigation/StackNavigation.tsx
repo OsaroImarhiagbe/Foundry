@@ -7,6 +7,9 @@ const OtherUserScreen = React.lazy(() => import('../screen/OtherUserScreen.tsx')
 const DashBoardScreen = React.lazy(() => import('../screen/DashBoardScreen.tsx'));
 const ProjectEntryScreen = React.lazy(() => import('../screen/ProjectEntryScreen.tsx'));
 const SkillsScreen = React.lazy(() => import('../screen/SkillScreen.tsx'));
+const ChatScreen = React.lazy(() => import('../screen/ChatScreen.tsx'));
+const PostScreen = React.lazy(() => import('../screen/PostScreen.tsx'));
+const ProjectScreen = React.lazy(() => import('../screen/ProjectScreen.tsx'));
 const MessageScreenWrapper = React.memo(() => {
   return (
     <LazyScreenComponent>
@@ -14,14 +17,14 @@ const MessageScreenWrapper = React.memo(() => {
     </LazyScreenComponent>
   )
 
-})
+});
 const  ProjectEntryScreenWrapper = React.memo(() => {
   return (
     <LazyScreenComponent>
       <ProjectEntryScreen/>
     </LazyScreenComponent>
   )
-})
+});
 
 const OtherUserScreenWrapper = React.memo(() => {
   return (
@@ -55,7 +58,28 @@ const SkillsScreenWrapper = React.memo(() => {
       <SkillsScreen/>
     </LazyScreenComponent>
   )
-})
+});
+const ChatScreenWrapper = React.memo(() => {
+  return (
+    <LazyScreenComponent>
+      <ChatScreen/>
+    </LazyScreenComponent>
+  )
+});
+const PostScreenWrapper = React.memo(() => {
+  return (
+    <LazyScreenComponent>
+      <PostScreen/>
+    </LazyScreenComponent>
+  )
+});
+const ProjectScreenWrapper = React.memo(() => {
+  return (
+    <LazyScreenComponent>
+      <ProjectScreen/>
+    </LazyScreenComponent>
+  )
+});
 
 
 const StackNavigation = () => {
@@ -68,7 +92,6 @@ const StackNavigation = () => {
         component={DashBoardScreenWrapper}
         options={{
         headerShown: false, 
-        gestureEnabled:false,
        }}
       />
     <Stack.Screen 
@@ -76,8 +99,7 @@ const StackNavigation = () => {
      component={MessageScreenWrapper}
      options={{
       headerShown:false,
-      gestureEnabled:false
-      
+      gestureEnabled:false,
      }}/>
        <Stack.Screen
       name='Edit'
@@ -85,7 +107,6 @@ const StackNavigation = () => {
       options={{
         headerShown:false,
         gestureEnabled:false,
-        presentation:'modal'
       }}
       />
         <Stack.Screen
@@ -109,6 +130,32 @@ const StackNavigation = () => {
       headerShown:false,
       gestureEnabled:false,
       presentation:'modal'
+    }}/>
+    <Stack.Screen
+      name='Chat'
+      component={ChatScreenWrapper}
+      options={{
+      headerShown:false,
+      gestureEnabled:false,
+      presentation:'fullScreenModal'
+      }}/>
+    <Stack.Screen
+      name='Post'
+      component={PostScreenWrapper}
+      options={{
+        headerShown:false,
+        gestureEnabled:false,
+        animation:'slide_from_bottom',
+        animationDuration:500
+      }}
+      />
+    <Stack.Screen
+    name="ProjectScreen"
+    component={ProjectScreenWrapper}
+    options={{
+        headerShown:false,
+        gestureEnabled:false,
+        presentation:'fullScreenModal'
     }}/>
     </Stack.Navigator>
   );

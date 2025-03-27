@@ -113,7 +113,7 @@ const SearchScreen = () => {
         {isloading ? <ActivityIndicator size='small' color='#fff'/> :
                <FlatList
                data={results}
-               keyExtractor={(item) => item?.userId?.toString() || Math.random().toString()}
+               keyExtractor={(item,index) => item?.id?.toString() || `defualt-${index}`}
                renderItem={({item}) =>
                  <TouchableOpacity onPress={() => navigation.navigate('Welcome',{screen:'SearchAccount',params:{userId:item?.userId}})}>
                      <View style={{padding:10}}> 

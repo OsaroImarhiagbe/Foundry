@@ -177,7 +177,7 @@ const DashBoardScreen = () => {
           mode='elevated'
           color={theme.colors.primary}
           style={{position:'absolute',right:16,top:hp(65),alignItems:'center'}}
-          onPress={() => navigation.navigate('News',{screen:'Post'})}
+          onPress={() => navigation.navigate('Post')}
         />
         </View>
     </View>

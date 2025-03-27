@@ -25,24 +25,25 @@ import {  useSafeAreaInsets } from 'react-native-safe-area-context';
 
 
 interface Post{
-    id: string;
-    auth_profile?: string;
-    like_count?: number;
-    imageUrl?: string;
-    post_id?: string;
-    name?: string;
-    content?: string;
-    createdAt?:number;
-    comment_count?: number;
-    mount?:boolean,
-    videoUrl?:string,};
+  key?:string,
+  id?:string;
+  auth_profile?: string;
+  like_count?: number;
+  imageUrl?: string;
+  post_id?: string;
+  name?: string;
+  content?: string;
+  createdAt?:number;
+  comment_count?: number;
+  mount?:boolean,
+  videoUrl?:string,};
   
 
 const FeedScreen = () => {
     const [refreshing, setRefreshing] = useState<boolean>(false);
     const {user} = useAuth()
     const [post, setPost] = useState<Post[]>([])
-    const [lastVisible, setLastVisible] = useState<FirebaseDatabaseTypes.DataSnapshot | null>(null);
+    const [lastVisible, setLastVisible] = useState<Post[]>([]);
     const [loadingMore, setLoadingMore] = useState<boolean>(false);
     const [hasMore, setHasMore] = useState<boolean>(true);
     const [loading, setLoading] = useState<boolean>(true)
@@ -72,7 +73,7 @@ const FeedScreen = () => {
       log(crashlytics,'Grabbing post')
         try {
           const postRef = ref(database,'/posts')
-          const orderedQuery = query(postRef,orderByChild('createdAt'),limitToFirst(10))
+          const orderedQuery = query(postRef,orderByChild('createdAt'),limitToLast(10))
           const subscriber = onValue(orderedQuery,(snapshot: FirebaseDatabaseTypes.DataSnapshot) =>{
               if (!snapshot.exists()) {
                 setPost([]);
@@ -85,9 +86,8 @@ const FeedScreen = () => {
                 data.push({ ...snapshot.val()[key], id:key });
               });
             setPost(data);
-            const lastPost = data[data.length - 1];
-            setLastVisible(snapshot.child(lastPost.id?.toString() || ''));
-            setHasMore(snapshot.val().length > 0);
+            setLastVisible([{key: data[data.length - 1].key}]);
+            setHasMore(data.length > 0);
             setLoading(false);
           },(error:unknown | any) => {
             recordError(crashlytics, error);
@@ -124,8 +124,7 @@ const FeedScreen = () => {
               data.push({...snapshot.val()[key],id:key})
             })
             setPost(data);
-            const lastPost = data[data.length - 1];
-            setLastVisible(snapshot.child(lastPost.createdAt?.toString() || ''));
+            setLastVisible([{key: data[data.length - 1].key}]);
             setHasMore(data.length > 0);
             trace.putAttribute('post_count', post.length.toString());
             setRefreshing(false)
@@ -145,10 +144,14 @@ const FeedScreen = () => {
       setLoadingMore(true)
       log(crashlytics,'Fetch More Post')
       let trace = await perf.startTrace('fetching_more_post_feedscreen')
-      if (!lastVisible || !hasMore) return;
+      if (!lastVisible || !hasMore || !loadingMore){
+        setHasMore(false)
+        setLoadingMore(false)
+        return;
+      }
       try {
         const docRef = ref(database,'/posts')
-        const orderedQuery = query(docRef,orderByChild('createdAt'),startAt(lastVisible.val().createdAt),limitToLast(5))
+        const orderedQuery = query(docRef,orderByChild('createdAt'),startAt(lastVisible[0].key),limitToFirst(5))
         const subscriber = onValue(orderedQuery,(snapshot:FirebaseDatabaseTypes.DataSnapshot) => {
           if(!snapshot.exists()){
             setHasMore(false)
@@ -161,9 +164,8 @@ const FeedScreen = () => {
           return true
         })
         setPost((prev) => [...prev,...data]);
-        const lastPost = data[data.length - 1];
-        setLastVisible(snapshot.child(lastPost.id?.toString() || ''));
-        setHasMore(data.length > 0);
+        setLastVisible([{key: data[data.length - 1].key}]);
+        setHasMore(false);
         trace.putAttribute('post_count', post.length.toString());
         setLoadingMore(false);
         })
@@ -203,7 +205,7 @@ const FeedScreen = () => {
                 <Divider/>
               )}
               ListFooterComponent={() => (
-                  <ActivityIndicator color='#fff' size='small' animating={false}/>
+                  <ActivityIndicator color='#fff' size='small' animating={loadingMore}/>
               )}
               keyExtractor={(item) => item?.post_id?.toString() || `default-${item.id}`}
               renderItem={({item}) =>

@@ -175,7 +175,11 @@ const MessageScreen = () => {
         </View>)}
       renderItem={({item}) => (
         <LazyScreenComponent>
+          <MotiView>
+            <Skeleton>
             <ChatList currentUser={user} otherusers={users}/>
+            </Skeleton>
+          </MotiView>
         </LazyScreenComponent>
       )}
       />

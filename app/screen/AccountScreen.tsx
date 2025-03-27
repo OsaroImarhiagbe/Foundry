@@ -397,7 +397,7 @@ const AccountScreen = () => {
             <ActivityIndicator color='#fff' size='small' animating={isloading}/>
          )}
           renderItem={({item}) => (
-            <TouchableOpacity onPress={()=>navigation.navigate('ProjectScreen')}>
+            <TouchableOpacity onPress={()=>navigation.navigate('Welcome',{screen:'ProjectScreen'})}>
              <View style={{ backgroundColor: '#252525', borderRadius: 25, padding: 30,marginBottom:10 }}>
             <Text style={{ textAlign: 'center', color: '#fff' }}>{item?.project_name}</Text>
           </View>

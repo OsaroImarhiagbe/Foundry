@@ -20,7 +20,7 @@ import { TimeAgo } from '../../utils/index';
 
 
 type Post = {
-
+  key?:string,
   id?: string;
   auth_profile?: string;
   like_count?: number;
@@ -39,7 +39,7 @@ const HomeScreen= () => {
   const [refreshing, setRefreshing] = useState<boolean>(false);
   const {user} = useAuth()
   const [post, setPost] = useState<Post[]>([])
-  const [lastVisible, setLastVisible] = useState<FirebaseDatabaseTypes.DataSnapshot | null>(null);
+  const [lastVisible, setLastVisible] = useState<Post[]>([]);
   const [loadingMore, setLoadingMore] = useState<boolean>(false);
   const [hasMore, setHasMore] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(true)
@@ -68,8 +68,8 @@ const HomeScreen= () => {
             data.push({ ...snapshot.val()[key],id:key });
           })
           setPost(data);
-          setLastVisible(snapshot.child(data[data.length -1].createdAt?.toString() || ''));
-          setHasMore(data.length === 5);
+          setLastVisible([{key: data[data.length - 1].key}]);
+          setHasMore(data.length > 0);
           setLoading(false);
         });
           return () => subscriber()
@@ -105,8 +105,8 @@ const HomeScreen= () => {
           data.push({...snapshot.val()[key],id:key})
         })
         setPost((prev) => [...prev,...data]);
-        setLastVisible(snapshot.child(data[data.length -1].createdAt?.toString() || ''));
-        setHasMore(data.length === 5);
+        setLastVisible([{key: data[data.length - 1].key}]);
+        setHasMore(data.length > 0);
         trace.putAttribute('post_count', post.length.toString());
         setRefreshing(false)
       })
@@ -130,20 +130,20 @@ const fetchMorePost = useCallback(async () => {
   if (!lastVisible || !hasMore) return;
   try {
     const docRef = ref(database,'/posts')
-    const orderedQuery = query(docRef,orderByChild('createdAt'),equalTo(category),startAt(lastVisible.val().createdAt),limitToFirst(5))
+    const orderedQuery = query(docRef,orderByChild('createdAt'),equalTo(category),startAt(lastVisible[0].key),limitToFirst(5))
     const subscriber = onValue(orderedQuery,(snapshot: FirebaseDatabaseTypes.DataSnapshot) => {
       if(!snapshot.exists()){
         setPost([])
         setLoadingMore(false)
         return;
       }
-      const data:Post[] = []
+      const morePost:Post[] = []
       Object.keys(snapshot).forEach((key) => {
-        data.push({...snapshot.val()[key],id:key})
+        morePost.push({...snapshot.val()[key],id:key})
       })
-    setPost(prev => [...prev, ...data]);
-    setLastVisible(snapshot.child(data[data.length -1].createdAt?.toString() || ''));
-    setHasMore(data.length === 5);
+    setPost(prev => [...prev, ...morePost]);
+    setLastVisible([{key: morePost[morePost.length - 1].key}]);
+    setHasMore(morePost.length > 0 );
     trace.putAttribute('post_count', post.length.toString());
     setLoadingMore(false);
     })
