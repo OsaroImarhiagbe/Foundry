@@ -22,7 +22,7 @@ const ProfileScreenWrapper = React.memo(() => {
       <ProfileScreen/>
     </LazyScreenComponent>
   )
-})
+});
 
 const SearchScreenWrapper = React.memo(() => {
   return (
@@ -30,7 +30,8 @@ const SearchScreenWrapper = React.memo(() => {
       <SearchScreen/>
     </LazyScreenComponent>
   )
-})
+});
+
 
 const NotificationScreenWrapper = React.memo(() => {
   return (
@@ -38,7 +39,7 @@ const NotificationScreenWrapper = React.memo(() => {
       <NotificationScreen/>
     </LazyScreenComponent>
   )
-})
+});
 
 const StackNavigationWrapper = React.memo(() => {
   return (
@@ -46,7 +47,7 @@ const StackNavigationWrapper = React.memo(() => {
       <StackNavigation/>
     </LazyScreenComponent>
   )
-})
+});
 
 
 
@@ -65,7 +66,6 @@ const TabNavigation = () => {
   initialRouteName='Welcome'
   screenOptions={{
     headerShown: false,
-    tabBarShowLabel: false,
     tabBarStyle: {
       borderTopWidth: 0.5,
       borderColor:theme.colors.primary,
@@ -73,14 +73,12 @@ const TabNavigation = () => {
       elevation: 0, 
       shadowOpacity: 0, 
     }
-  }}
->
-
+  }}> 
   <Tab.Screen 
       name="Welcome"
      component={StackNavigationWrapper}
      options={{
-        tabBarLabel:'Welcome',
+        tabBarLabel:'Home',
         tabBarIcon:() => (
         <MaterialCommunityIcons name='home' color={theme.colors.tertiary} size={25}
         />),   
@@ -95,11 +93,11 @@ const TabNavigation = () => {
      }}
     />
     <Tab.Screen 
-        name="Notification"
-        component={NotificationScreenWrapper}
+    name="Notification"
+    component={NotificationScreenWrapper}
      options={{
       tabBarBadge: notificationCount  ? notificationCount : null,
-      tabBarLabel: 'Notification',
+      tabBarLabel: 'Notifications',
       tabBarIcon:() => (<MaterialIcons name='notifications' color={theme.colors.tertiary} size={25}/>)
      }}
      />
@@ -107,20 +105,20 @@ const TabNavigation = () => {
         name="Account"
         component={ProfileScreenWrapper}
         options={{
+          tabBarLabel:'Profile',
           tabBarIcon:() => (
             user?.profileUrl ?
             <Image
-            style={{height:hp(3.3), aspectRatio:1, borderRadius:100,}}
+            style={{height:hp(2.5), aspectRatio:1, borderRadius:100,}}
             source={{uri:user?.profileUrl}}
             placeholder={{blurhash}}
             /> :  <Image
-            style={{height:hp(3.3), aspectRatio:1, borderRadius:100,}}
+            style={{height:hp(2.5), aspectRatio:1, borderRadius:100,}}
             source={require('../assets/user.png')}
             placeholder={{blurhash}}
             />
           )}}
      />
-
       </Tab.Navigator>
   
 

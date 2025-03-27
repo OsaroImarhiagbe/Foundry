@@ -15,9 +15,14 @@ import axios from 'axios'
 import { UsersRef } from '../../FirebaseConfig'
 import {SkillsAPIKEY,SkillsAPIURL} from '@env'
 import { useTheme,Text, Icon } from 'react-native-paper'
-import { useNavigation } from '@react-navigation/native'
+import { useNavigation, } from '@react-navigation/native'
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 
+
+type NavigationProp = {
+    navigate(arg0?: string, arg1?: { screen: string; }): unknown;
+    Acount:undefined
+}
 
 const SkillScreen = () => {
     const [ query, setQuery ] = useState('');

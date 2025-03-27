@@ -2,39 +2,30 @@ import React, {
   useState,
   useEffect,
   lazy,
-  Suspense,
   useCallback} from 'react'
 import {
   View,
   StyleSheet,
   TouchableOpacity
   } from 'react-native'
-import {
-  FirebaseFirestoreTypes,
-  where,
-  onSnapshot,
-  query,
-  orderBy,
-  limit,
-  startAfter, 
-  getDocs } from '@react-native-firebase/firestore';
 import { useAuth } from '../authContext';
 import { useNavigation } from '@react-navigation/native';
 import { FlashList } from '@shopify/flash-list';
 import { ActivityIndicator,Text,useTheme,Icon } from 'react-native-paper';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import {log,recordError} from '@react-native-firebase/crashlytics'
-import { ChatRoomsRef,crashlytics} from '../../FirebaseConfig';
+import { crashlytics, database} from '../../FirebaseConfig';
 import SearchComponent from 'app/components/SearchComponent';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Skeleton } from 'moti/skeleton';
 import { MotiView } from 'moti';
-
-const ChatList = lazy(() => import('../../List/ChatList'))
+import LazyScreenComponent from '../components/LazyScreenComponent';
+import { limitToFirst, onValue, orderByChild, ref, startAt, query } from '@react-native-firebase/database';
+const ChatList = React.lazy(() => import('../../List/ChatList'))
 
 
 interface User{
-  id?:string
+  key:string,
 }
 
 type NavigationProp = {
@@ -51,9 +42,9 @@ const MessageScreen = () => {
   const { user} = useAuth();
   const [refreshing, setRefreshing] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
-  const [hasMore, setHasMore] = useState(true);
-  const [loading,setLoading] = useState<boolean>(false)
-  const [lastVisible, setLastVisible] = useState<FirebaseFirestoreTypes.QueryDocumentSnapshot<FirebaseFirestoreTypes.DocumentData> | null>(null);
+  const [hasMore, setHasMore] = useState(false);
+  const [loading,setLoading] = useState<boolean>(true)
+  const [lastVisible, setLastVisible] = useState<User[]>([]);
   const theme = useTheme()
 
   const onRefresh = useCallback(() => {
@@ -65,23 +56,19 @@ const MessageScreen = () => {
           setRefreshing(false)
           return;
         }
-        const docRef = query(ChatRoomsRef, where('senderName','!=',user.username),where('recipientName','==',user.username))
-        const unsub = onSnapshot(docRef,(querySnapshot) =>{
-          let data:User[] = []
-          querySnapshot.forEach(doc => {
-            data.push({...doc.data()})
-          })
+        const chatRef = ref(database,`/chats`)
+        const unsub = onValue(chatRef,(snapshot) =>{
+          const data:User[] = []
+          Object.keys(snapshot.val()).forEach(key => {
+            data.push({...snapshot.val()[key], id: key})
+          }) 
           setUsers(data)
-          setLastVisible(querySnapshot.docs[querySnapshot.docs.length - 1])
-          setHasMore(querySnapshot.docs.length > 0)
-          setRefreshing(false)
-        },(err)=>{
-          recordError(crashlytics,err)
-          console.error(`Failed to grab users: ${err.message}`)
+          setLastVisible([{key: users[users.length - 1].key}])
+          setHasMore(data.length > 0)
           setRefreshing(false)
         })
         return () => unsub()
-    }catch(error:any){
+      }catch(error:any){
       recordError(crashlytics,error)
       setRefreshing(false)
     }finally{
@@ -90,30 +77,29 @@ const MessageScreen = () => {
   }, [users]);
 
   useEffect(() => {
-    setLoading(true)
+    log(crashlytics,'Grabbing Users Message')
     try{
-      log(crashlytics,'Grabbing Users Message')
-      if (!users) {
-        setUsers([]);
-        setLoading(false)
-        return;
-      }
-      const docRef = query(ChatRoomsRef, where('senderName','!=',user.username),where('recipientName','==',user.username))
-      const unsub = onSnapshot(docRef,(querySnapshot) =>{
-        let data:User[] = []
-        querySnapshot.forEach(doc => {
-          data.push({...doc.data()})
+      const chatsRef = ref(database,`/chats`)
+      const unsub = onValue(chatsRef,(snapshot) =>{
+        if(!snapshot.exists()){
+          setUsers([])
+          setLoading(false)
+          return;
+        }
+        const data:User[] = []
+        Object.keys(snapshot.val()).forEach(key => {
+          data.push({...snapshot.val()[key],id:key})
         })
         setUsers(data)
-        setLastVisible(querySnapshot.docs[querySnapshot.docs.length - 1])
-        setHasMore(querySnapshot.docs.length > 0)
+        setLastVisible([{ key: data[data.length - 1].key }])
+        setHasMore(data.length > 0)
         setLoading(false)
       },(err)=>{
         recordError(crashlytics,err)
         console.error(`Failed to grab users: ${err.message}`)
         setLoading(false)
       })
-      return unsub
+      return () => unsub();
     }catch(error: unknown | any){
       recordError(crashlytics,error)
       console.error('Error getting messages',error)
@@ -121,32 +107,36 @@ const MessageScreen = () => {
     }finally{
       setLoading(false)
     }
-    },[user.username])
+    },[])
   
   const fetchMoreMessage = async () => {
+    setLoadingMore(true);
     log(crashlytics,'Fetch more Message')
-    if (loadingMore || !hasMore) return;
-    if (!user?.userId) return;
     if (users.length <= 2) {
       setHasMore(false);
+      setLoadingMore(false)
       return;
     }
-    setLoadingMore(true);
     try {
-      const docRef = query(
-        ChatRoomsRef,
-        orderBy('createdAt','desc'),
-        startAfter(lastVisible), 
-        limit(2)) 
-      const snapshot = await getDocs(docRef)
-      const newMessgae = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-      setUsers(prev => [...prev, ...newMessgae]);
-      setLastVisible(snapshot.docs[snapshot.docs.length - 1]);
-      setHasMore(snapshot.docs.length > 0);
-      setLoadingMore(false)
+      const chatsRef = ref(database,'/chats')
+      const chatQuery = query(chatsRef,orderByChild('createdAt'),startAt(lastVisible[0].key),limitToFirst(5))
+      const unsub = onValue(chatQuery,(snapshot) => {
+        if(!snapshot.exists()){
+          setUsers([])
+          setHasMore(false)
+          setLoadingMore(false)
+          return;
+        }
+        const morePost:User[] = []
+        Object.keys(snapshot.val()).forEach((key) => {
+          morePost.push({...snapshot.val()[key],id:key})
+        })
+        setUsers(prev => [...prev, ...morePost]);
+        setLastVisible([{key: morePost[morePost.length - 1].key}])
+        setHasMore(false);
+        setLoadingMore(false)
+      })
+      return () => unsub()
     } catch (error:unknown | any) {
       recordError(crashlytics,error)
       console.error(`Error fetching more posts: ${error}`);
@@ -160,7 +150,7 @@ const MessageScreen = () => {
   return (
     <View style={[styles.screen,{backgroundColor:theme.colors.background}]}>
       <View style={{flexDirection:'row',alignItems:'center',justifyContent:'space-between',marginTop:top,padding:10}}>
-        <TouchableOpacity onPress={() => navigation.navigate('Dash')}>
+        <TouchableOpacity onPress={() => navigation.goBack()}>
         <Icon source='arrow-left-bold-circle' size={25}/>
         </TouchableOpacity>
         <SearchComponent title='Search Message...'/>
@@ -174,7 +164,7 @@ const MessageScreen = () => {
       data={users}
       refreshing={refreshing}
       onEndReached={fetchMoreMessage}
-      onEndReachedThreshold={0.1}
+      onEndReachedThreshold={0.5}
       ListFooterComponent={() => (<ActivityIndicator size='small' color='#fff' animating={loadingMore}/>)}
       ListEmptyComponent={() => ( <View style={{justifyContent:'center',alignItems:'center',flex:1,marginTop:20}}>
         <Text
@@ -184,9 +174,9 @@ const MessageScreen = () => {
         }}>Send a new message!</Text>
         </View>)}
       renderItem={({item}) => (
-        <Suspense fallback={<ActivityIndicator size='small' color='#fff'/>}>
+        <LazyScreenComponent>
             <ChatList currentUser={user} otherusers={users}/>
-        </Suspense>
+        </LazyScreenComponent>
       )}
       />
       </View>

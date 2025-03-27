@@ -119,7 +119,7 @@ const PostScreen = () => {
         text1: 'Your post was sent',
         position:'top',
         autoHide:true,
-        visibilityTime:3000,
+        visibilityTime:5000,
         topOffset:top,
       });
       setLoading(false)

@@ -41,7 +41,7 @@ type NavigationProp = {
   Welcome:{
     screen?:string
   },
-  SecondStack:{
+  News:{
     screen?:string
   },
   Message:undefined,
@@ -176,9 +176,8 @@ const AccountScreen = () => {
           return;
         }
         const data:Post[] = []
-        snapshot.forEach(childSnapshot => {
-          data.push({...childSnapshot.val(),id:childSnapshot.key})
-          return true
+        Object.keys(snapshot.val()).forEach(key => {
+          data.push({...snapshot.val(),id:key})
         })
         setPosts(data)
         setRefreshing(false)
@@ -250,7 +249,7 @@ const AccountScreen = () => {
     log(crashlytics,'Account Screen: Grabbing Users Post')
     try{
       const postRef = ref(database,'/posts')
-      const orderedQuery = query(postRef,orderByChild('createdAt'),equalTo(user.userId))
+      const orderedQuery = query(postRef,orderByChild('auth_id'),equalTo(user.userId))
       const unsub = onValue(orderedQuery,(snapshot) => {
         if (!snapshot.exists()) {
           setPosts([]);
@@ -272,6 +271,8 @@ const AccountScreen = () => {
     }catch(err:any){
       recordError(crashlytics,err)
       console.error('error grabbing user post:',err)
+      setLoading(false)
+    }finally{
       setLoading(false)
     }
   },[])
@@ -316,7 +317,7 @@ const AccountScreen = () => {
 
 
 
-  const Post = React.memo(() => (
+  const Post = () => (
     <View
      style={{flex:1,backgroundColor:theme.colors.background}}>
       <SafeAreaView style={{flex:1,backgroundColor:theme.colors.background}}>
@@ -355,7 +356,7 @@ const AccountScreen = () => {
     </SafeAreaView>
     </View>
     
-  )); 
+  ); 
   
   const Projects = React.memo(() => (
     <View style={{flex:1,backgroundColor:theme.colors.background}}>
@@ -368,7 +369,7 @@ const AccountScreen = () => {
           keyExtractor={(item)=> item?.id?.toString() || `defualt-${item.id}`}
           ListEmptyComponent={(item) => (
             <View style={{flex:1,alignItems:'center',justifyContent:'center',paddingTop:5}}>
-              <TouchableOpacity onPress={()=> navigation.navigate('SecondStack',{screen:'ProjectEntryScreen',})}>
+              <TouchableOpacity onPress={()=> navigation.navigate('Welcome',{screen:'ProjectEntryScreen'})}>
               <MotiView
            transition={{
             type:'timing'
@@ -417,7 +418,7 @@ const AccountScreen = () => {
       keyExtractor={(item)=> item?.id?.toString() ||  `defualt-${item.id}`}
       ListEmptyComponent={(item) => (
       <View style={{flex:1,alignItems:'center',justifyContent:'center',paddingTop:5}}>
-           <TouchableOpacity onPress={()=> navigation.navigate('SecondStack',{screen:'SkillScreen',})}>
+           <TouchableOpacity onPress={()=> navigation.navigate('Welcome',{screen:'SkillScreen',})}>
            <MotiView
            transition={{
             type:'timing'

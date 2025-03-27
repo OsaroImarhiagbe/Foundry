@@ -67,11 +67,13 @@ export const AuthContextProvider = ({children}:AuthContextProviderProps) => {
                   }catch(error: unknown | any){
                     recordError(crashlytics,error)
                     console.error('Error grabbing token:',error)
+                    setLoading(false)
                   }
                 await AsyncStorage.setItem('authUser',user?.uid)
             }else{
                 setIsAuthenticated(false)
                 setUser({})
+                setLoading(false)
             }
         })
         return () => {
@@ -178,7 +180,7 @@ export const AuthContextProvider = ({children}:AuthContextProviderProps) => {
         }
     }
     return (
-        <AuthContext.Provider value={{user,isAuthenticated,login,register,logout,resetpassword}} >
+        <AuthContext.Provider value={{user,isAuthenticated,login,register,logout,resetpassword,}} >
             {children}
         </AuthContext.Provider>
     )

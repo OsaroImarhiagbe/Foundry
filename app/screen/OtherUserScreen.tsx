@@ -64,7 +64,7 @@ type RootStackParamList = {
   Welcome?: {
     screen?: string;
   };
-  SecondStack?: NavigatorScreenParams<SecondStackParamList>;
+  News?: NavigatorScreenParams<SecondStackParamList>;
 }
 
 type Navigation = NativeStackNavigationProp<RootStackParamList>;
@@ -364,7 +364,7 @@ const OtherUserScreen = () => {
             <Suspense key={item.post_id} fallback={<ActivityIndicator size="small" color="#000" />}>
                 <View style={{padding: 10 }}>
                   <PostComponent auth_profile={item.auth_profile}
-                  count={item.like_count}
+                  like_count={item.like_count}
                   url={item.imageUrl}
                   post_id={item.post_id}
                   name={item.name}
@@ -621,7 +621,7 @@ style={{
       colorMode={dark_or_light ? 'dark':'light'}
       show={isloading}>
         <Button
-        onPress={() => navigation.navigate('SecondStack',{
+        onPress={() => navigation.navigate('News',{
           screen:'Chat',
           params:{
             userid:userId,

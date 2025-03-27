@@ -2,6 +2,7 @@ import React,
 {
   Suspense,
   useCallback,
+  useEffect,
 }from 'react'
 import {
     View,
@@ -30,12 +31,13 @@ import SearchComponent from '../components/SearchComponent';
 import { functions } from '../../FirebaseConfig.ts';
 import LazyScreenComponent from 'app/components/LazyScreenComponent.tsx';
 import { httpsCallable } from '@react-native-firebase/functions'
+import {  useSafeAreaInsets } from 'react-native-safe-area-context';
 const HomeScreen = React.lazy(() => import('../screen/HomeScreen.tsx'));
 const FeedScreen = React.lazy(() => import('../screen/FeedScreen.tsx'));
 type NavigationProp = {
   openDrawer(): undefined;
   navigate(arg0?: string, arg1?: { screen: string; }): unknown;
-  SecondStack:undefined,
+  News:undefined,
   Home:undefined,
   Post:undefined
 }
@@ -63,6 +65,7 @@ const DashBoardScreen = () => {
     const {user} = useAuth()
     const navigation = useNavigation<NavigationProp>()
     const theme = useTheme()
+    const {top} = useSafeAreaInsets()
     const dispatch = useDispatch()
 
     const handleSearch = useCallback((id:string) => {
@@ -71,6 +74,7 @@ const DashBoardScreen = () => {
     
  
 
+  
 
     const handleMessage = useCallback(() => {
       navigation.navigate('Message')
@@ -173,7 +177,7 @@ const DashBoardScreen = () => {
           mode='elevated'
           color={theme.colors.primary}
           style={{position:'absolute',right:16,top:hp(65),alignItems:'center'}}
-          onPress={() => navigation.navigate('SecondStack',{screen:'Post'})}
+          onPress={() => navigation.navigate('News',{screen:'Post'})}
         />
         </View>
     </View>

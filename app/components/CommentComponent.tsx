@@ -15,7 +15,7 @@ import {Text,Card,useTheme, ActivityIndicator} from 'react-native-paper'
 import { TouchableWithoutFeedback } from 'react-native-gesture-handler';
 import FastImage from '@d11/react-native-fast-image';
 import { crashlytics, database, functions } from '../../FirebaseConfig';
-import {endBefore, FirebaseDatabaseTypes, limitToLast, onValue, orderByChild, query, ref} from '@react-native-firebase/database'
+import {endAt, endBefore, FirebaseDatabaseTypes, limitToLast, onValue, orderByChild, query, ref} from '@react-native-firebase/database'
 import { log, recordError } from '@react-native-firebase/crashlytics';
 import { FlashList } from '@shopify/flash-list';
 import { httpsCallable } from '@react-native-firebase/functions';
@@ -108,7 +108,7 @@ const CommentComponent:React.FC<CommentProp> = memo(({
       setLoadingMore(true)
       if (!lastVisible || !hasMore) return;
       const docRef = ref(database,`/replys/${comment_id}`)
-      const queryOrderBy = query(docRef, orderByChild('createdAt'), endBefore(lastVisible?.val()?.createdAt), limitToLast(5))
+      const queryOrderBy = query(docRef, orderByChild('createdAt'), endAt(lastVisible?.val()?.createdAt), limitToLast(5))
       try{
         const subscriber = onValue(queryOrderBy,(snapshot) => {
           if(!snapshot.exists()){

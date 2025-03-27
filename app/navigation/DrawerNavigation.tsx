@@ -1,15 +1,16 @@
 import { createDrawerNavigator, DrawerItem,DrawerContentScrollView,DrawerItemList } from '@react-navigation/drawer';
 import { useNavigation} from '@react-navigation/native';
-import React, { useState,useCallback, memo, Suspense} from 'react';
+import React, { useState,useCallback, memo, Suspense, useEffect} from 'react';
 import { TouchableWithoutFeedback,useColorScheme,View, } from 'react-native';
 import { Image } from 'expo-image';
 import { blurhash } from 'utils';
-import { useAuth } from '../authContext.tsx'
+import { useAuth } from '../authContext.tsx';
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import { Icon,useTheme,Text} from 'react-native-paper';
 import LazyScreenComponent from '../components/LazyScreenComponent.tsx';
 import TabNavigation from '../navigation/TabNavigation.tsx';
-
+import SplashScreen from '../screen/SplashScreen.tsx';
+const SecondStackNavigation = React.lazy(() => import('../navigation/SecondStackNavigation.tsx'));
 const SettingsScreen = React.lazy(() => import('../screen/SettingsScreen.tsx'));
 const Drawer = createDrawerNavigator();
 
@@ -21,14 +22,22 @@ const SettingsScreenWrapper = React.memo(() => {
     </LazyScreenComponent>
   )
 })
+const SecondStackNavigationWrapper = React.memo(() => {
+  return (
+    <LazyScreenComponent>
+      <SecondStackNavigation/>
+    </LazyScreenComponent>
+  )
+})
 
 
 
 const DrawerNavigation = () => {
   const theme = useTheme()
-  const {user,logout} = useAuth()
-  const [loading,setLoading] = useState<boolean>(false)
+  const {user,logout,loading} = useAuth()
+  const [isloading,setLoading] = useState<boolean>(true)
   const navigation = useNavigation()
+
 
   const handleLogout = useCallback(async () => {
     setLoading(true)
@@ -42,6 +51,23 @@ const DrawerNavigation = () => {
     }
 
   },[])
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setLoading(false)
+    }, 2000);
+    return () => clearTimeout(timer)
+  },[])
+
+
+
+
+  if(isloading){
+    return (
+      <SplashScreen/>
+    )
+  }
+
   return (
 
     <Drawer.Navigator
@@ -103,9 +129,25 @@ const DrawerNavigation = () => {
         },
         headerShown:false,
       }}/>
-       <Drawer.Screen
+    <Drawer.Screen
       name='Settings'
       component={SettingsScreenWrapper}
+      options={{
+        drawerIcon:({focused,color,size}) => (
+          <Icon
+          source="cog-outline"
+          color={theme.colors.tertiary}
+          size={size}/>
+        ),
+        drawerLabelStyle:{
+          color:theme.colors.tertiary,
+          fontSize:24
+        },
+        headerShown:false,
+      }}/>
+  <Drawer.Screen
+      name='News'
+      component={SecondStackNavigationWrapper}
       options={{
         drawerIcon:({focused,color,size}) => (
           <Icon

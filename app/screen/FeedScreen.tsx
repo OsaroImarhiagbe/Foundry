@@ -3,6 +3,7 @@ import React,
   useEffect,
   useState,
   useCallback,
+  useRef
 }from 'react'
 import {
     View,
@@ -15,7 +16,8 @@ import { FlashList } from '@shopify/flash-list';
 import { crashlytics, perf, database,} from '../../FirebaseConfig';
 import PostComponent from '../components/PostComponent';
 import { TimeAgo } from '../../utils/index';
-
+import Toast from 'react-native-toast-message'
+import {  useSafeAreaInsets } from 'react-native-safe-area-context';
 
 
 
@@ -45,16 +47,29 @@ const FeedScreen = () => {
     const [hasMore, setHasMore] = useState<boolean>(true);
     const [loading, setLoading] = useState<boolean>(true)
     const theme = useTheme()
+    const {top} = useSafeAreaInsets()
+    const isMountRef = useRef(false)
 
 
 
+
+
+    useEffect(() => {
+      Toast.show({
+        type: 'success',
+        text1: `Welcome Back ${user.username}`,
+        position:'top',
+        autoHide:true,
+        visibilityTime:5000,
+        topOffset:top,
+      })
+    },[])
   
    
  
     useEffect(() => {
       if (!user?.userId) return;
       log(crashlytics,'Grabbing post')
-      //
         try {
           const postRef = ref(database,'/posts')
           const orderedQuery = query(postRef,orderByChild('createdAt'),limitToFirst(10))

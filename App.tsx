@@ -8,22 +8,25 @@ import { Provider } from 'react-redux';
 import { PersistGate } from 'redux-persist/integration/react';
 import { I18nextProvider } from 'react-i18next';
 import i18n from './app/Language/i18n';
-import { PaperProvider, MD3LightTheme as DefaultTheme,MD3DarkTheme as DarkTheme } from 'react-native-paper';
+import { PaperProvider, MD3LightTheme as DefaultTheme,MD3DarkTheme as DarkTheme, } from 'react-native-paper';
 import { useColorScheme } from 'react-native';
 import { NotificationProvider } from './app/NotificationProvider';
 import 'react-native-reanimated'
 import 'react-native-gesture-handler'
 import AuthNavigation from './app/navigation/AuthNavigation.tsx'
-import SplashScreen from './app/screen/SplashScreen.tsx'
+import DrawerNavigation from './app/navigation/DrawerNavigation.tsx';
 import { DefaultTheme as Defaulttheme, DarkTheme as Darktheme } from '@react-navigation/native';
-import notifee, { EventType } from '@notifee/react-native'
+import notifee from '@notifee/react-native'
 import { recordError } from '@react-native-firebase/crashlytics';
 import { crashlytics } from 'FirebaseConfig.ts';
-import Toast, { BaseToast, ErrorToast } from 'react-native-toast-message'
+import Toast from 'react-native-toast-message'
+import { useAuth } from '././app/authContext.tsx';
 
-export default function App() {
+
+
+function AppContent() {
+  const {isAuthenticated} = useAuth();
   const colorScheme = useColorScheme();
-  const [loading, setLoading] = useState(true)
 
 
   const lightTheme = {
@@ -131,20 +134,29 @@ export default function App() {
 
   
   const theme = colorScheme === 'dark' ? darkTheme : lightTheme;
+  return (
+<PaperProvider theme={theme}>
+        <NavigationContainer theme={colorScheme === 'dark' ? Darktheme : Defaulttheme}>
+        <NotificationProvider>
+          {isAuthenticated ? <DrawerNavigation/> : <AuthNavigation/>}
+          </NotificationProvider>
+        </NavigationContainer>
+         <Toast/>
+        </PaperProvider>
+  )
+}
 
-  const toastConfig = {
-    success: () => (
-      <BaseToast
-        style={{backgroundColor:'transprent', borderWidth:1 }}
-      />
-    ),
-  }
+
+
+
+
+export default function App() {
+  const colorScheme = useColorScheme();
+
+
+
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setLoading(false)
-      notifee.setBadgeCount(0).catch((error:unknown | any) => recordError(crashlytics,error))
-    },1000)
-    return () => clearTimeout(timer)
+    notifee.setBadgeCount(0).catch((error:unknown | any) => recordError(crashlytics,error))
   },[])
  
   return (
@@ -154,15 +166,8 @@ export default function App() {
        <Provider store={store}>
       <PersistGate loading={null} persistor={persistor}>
         <MenuProvider>
-          <AuthContextProvider>
-        <PaperProvider theme={theme}>
-        <NavigationContainer theme={colorScheme === 'dark' ? Darktheme : Defaulttheme}>
-        <NotificationProvider>
-          {loading ? <SplashScreen/>:<AuthNavigation/>}
-          </NotificationProvider>
-        </NavigationContainer>
-         <Toast config={toastConfig}/>
-        </PaperProvider>
+      <AuthContextProvider>
+        <AppContent/>
       </AuthContextProvider>
       <StatusBar style={colorScheme === 'dark' ? 'light':'dark'} />
       </MenuProvider>

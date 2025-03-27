@@ -3,12 +3,11 @@ import React, { Suspense } from 'react';
 import LazyScreenComponent from '../components/LazyScreenComponent.tsx';
 const ReportBugScreen = React.lazy(() => import('../screen/ReportBugScreen.tsx'));
 const ContactUsScreen = React.lazy(() => import('../screen/ContactUsScreen.tsx'));
-const ProjectEntryScreen = React.lazy(() => import('../screen/ProjectEntryScreen.tsx'));
 const ChatScreen = React.lazy(() => import('../screen/ChatScreen.tsx'));
 const PostScreen = React.lazy(() => import('../screen/PostScreen.tsx'));
 const ProjectScreen = React.lazy(() => import('../screen/ProjectScreen.tsx'));
 const LocationScreen = React.lazy(() => import('../screen/LocationScreen.tsx'));
-const SkillsScreen = React.lazy(() => import('../screen/SkillScreen.tsx'));
+
 
 
 const ReportBugScreenWrapper = React.memo(() => {
@@ -27,13 +26,6 @@ const ContactUsScreenWrapper = React.memo(() => {
   )
 })
 
-const  ProjectEntryScreenWrapper = React.memo(() => {
-  return (
-    <LazyScreenComponent>
-      <ProjectEntryScreen/>
-    </LazyScreenComponent>
-  )
-})
 
 const ChatScreenWrapper = React.memo(() => {
   return (
@@ -67,13 +59,7 @@ const LocationScreenWrapper = React.memo(() => {
   )
 })
 
-const SkillsScreenWrapper = React.memo(() => {
-  return (
-    <LazyScreenComponent>
-      <SkillsScreen/>
-    </LazyScreenComponent>
-  )
-})
+
 
 
 
@@ -81,7 +67,8 @@ const SkillsScreenWrapper = React.memo(() => {
 const SecondStackNavigation = () => {
     const Stack = createNativeStackNavigator()
     return (
-      <Stack.Navigator 
+      <Stack.Navigator
+      initialRouteName='Post' 
       screenOptions={{
         gestureEnabled:false
       }}>
@@ -121,13 +108,7 @@ const SecondStackNavigation = () => {
         headerShown:false,
         
     }}/>
-    <Stack.Screen
-    name="ProjectEntryScreen"
-    component={ProjectEntryScreenWrapper}
-    options={{
-        headerShown:false,
-        presentation:'modal'
-    }}/>
+ 
     <Stack.Screen
       name='Chat'
       component={ChatScreenWrapper}
@@ -136,14 +117,7 @@ const SecondStackNavigation = () => {
       gestureEnabled:false
       }}
         />
-  <Stack.Screen
-    name="SkillScreen"
-    component={SkillsScreenWrapper}
-    options={{
-      headerShown:false,
-    }}/>
-
-      </Stack.Navigator>
+</Stack.Navigator>
     );
   }
 export default SecondStackNavigation

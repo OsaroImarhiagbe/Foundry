@@ -5,8 +5,8 @@ const MessageScreen = React.lazy(() => import('../screen/MessageScreen.tsx'))
 const EditScreen = React.lazy(() => import('../screen/EditScreen.tsx'));
 const OtherUserScreen = React.lazy(() => import('../screen/OtherUserScreen.tsx'));
 const DashBoardScreen = React.lazy(() => import('../screen/DashBoardScreen.tsx'));
-
-
+const ProjectEntryScreen = React.lazy(() => import('../screen/ProjectEntryScreen.tsx'));
+const SkillsScreen = React.lazy(() => import('../screen/SkillScreen.tsx'));
 const MessageScreenWrapper = React.memo(() => {
   return (
     <LazyScreenComponent>
@@ -14,6 +14,13 @@ const MessageScreenWrapper = React.memo(() => {
     </LazyScreenComponent>
   )
 
+})
+const  ProjectEntryScreenWrapper = React.memo(() => {
+  return (
+    <LazyScreenComponent>
+      <ProjectEntryScreen/>
+    </LazyScreenComponent>
+  )
 })
 
 const OtherUserScreenWrapper = React.memo(() => {
@@ -41,6 +48,13 @@ const DashBoardScreenWrapper = React.memo(() => {
     </LazyScreenComponent>
   )
 
+})
+const SkillsScreenWrapper = React.memo(() => {
+  return (
+    <LazyScreenComponent>
+      <SkillsScreen/>
+    </LazyScreenComponent>
+  )
 })
 
 
@@ -81,6 +95,21 @@ const StackNavigation = () => {
         headerShown:false,
         gestureEnabled:false
       }}/>
+  <Stack.Screen
+    name="ProjectEntryScreen"
+    component={ProjectEntryScreenWrapper}
+    options={{
+        headerShown:false,
+        presentation:'modal'
+    }}/>
+      <Stack.Screen
+    name="SkillScreen"
+    component={SkillsScreenWrapper}
+    options={{
+      headerShown:false,
+      gestureEnabled:false,
+      presentation:'modal'
+    }}/>
     </Stack.Navigator>
   );
 }
