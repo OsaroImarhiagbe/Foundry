@@ -39,7 +39,10 @@ import { equalTo, onValue, orderByChild, ref,query } from '@react-native-firebas
 type NavigationProp = {
   ProjectScreen:undefined,
   Welcome:{
-    screen?:string
+    screen?:string,
+    params?:{
+      screen?:string
+    }
   },
   News:{
     screen?:string
@@ -312,12 +315,18 @@ const AccountScreen = () => {
       }
   },[])
 
+  const handleProjectEntry = useCallback(() => {
+    navigation.navigate('ProjectEntryScreen')
+  },[])
+
+  const handleEdit = useCallback(() => {
+    navigation.navigate('Edit')
+  },[])
 
 
 
 
-
-  const Post = () => (
+  const Post = React.memo(() => (
     <View
      style={{flex:1,backgroundColor:theme.colors.background}}>
       <SafeAreaView style={{flex:1,backgroundColor:theme.colors.background}}>
@@ -356,7 +365,7 @@ const AccountScreen = () => {
     </SafeAreaView>
     </View>
     
-  ); 
+  )); 
   
   const Projects = React.memo(() => (
     <View style={{flex:1,backgroundColor:theme.colors.background}}>
@@ -369,7 +378,7 @@ const AccountScreen = () => {
           keyExtractor={(item)=> item?.id?.toString() || `defualt-${item.id}`}
           ListEmptyComponent={(item) => (
             <View style={{flex:1,alignItems:'center',justifyContent:'center',paddingTop:5}}>
-              <TouchableOpacity onPress={()=> navigation.navigate('Welcome',{screen:'ProjectEntryScreen'})}>
+              <TouchableOpacity onPress={handleProjectEntry}>
               <MotiView
            transition={{
             type:'timing'
@@ -418,7 +427,7 @@ const AccountScreen = () => {
       keyExtractor={(item)=> item?.id?.toString() ||  `defualt-${item.id}`}
       ListEmptyComponent={(item) => (
       <View style={{flex:1,alignItems:'center',justifyContent:'center',paddingTop:5}}>
-           <TouchableOpacity onPress={()=> navigation.navigate('Welcome',{screen:'SkillScreen',})}>
+           <TouchableOpacity onPress={()=> navigation.navigate('SkillScreen')}>
            <MotiView
            transition={{
             type:'timing'
@@ -605,7 +614,7 @@ const AccountScreen = () => {
         colorMode={dark_or_light ? 'dark':'light'}
         show={isloading}>
         <Button 
-        onPress={() => navigation.navigate('Welcome',{screen:'Edit'})}
+        onPress={handleEdit}
         mode='outlined' style={{
         backgroundColor:'transparent', 
         borderRadius:100,

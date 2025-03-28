@@ -14,15 +14,9 @@ import {useNotification} from '../NotificationProvider.tsx'
 const NotificationScreen = React.lazy(() => import('../screen/NotificationScreen.tsx'));
 const SearchScreen = React.lazy(() => import('../screen/SearchScreen.tsx'));
 const StackNavigation = React.lazy(() => import('../navigation/StackNavigation.tsx'));
-const ProfileScreen = React.lazy(() => import('../screen/AccountScreen.tsx'));
+const SecondStackNavigation = React.lazy(() => import('../navigation/SecondStackNavigation.tsx'));
 
-const ProfileScreenWrapper = React.memo(() => {
-  return (
-    <LazyScreenComponent>
-      <ProfileScreen/>
-    </LazyScreenComponent>
-  )
-});
+
 
 const SearchScreenWrapper = React.memo(() => {
   return (
@@ -48,7 +42,13 @@ const StackNavigationWrapper = React.memo(() => {
     </LazyScreenComponent>
   )
 });
-
+const SecondStackNavigationWrapper = React.memo(() => {
+  return (
+    <LazyScreenComponent>
+      <SecondStackNavigation/>
+    </LazyScreenComponent>
+  )
+});
 
 
 
@@ -102,10 +102,10 @@ const TabNavigation = () => {
      }}
      />
      <Tab.Screen 
-        name="Account"
-        component={ProfileScreenWrapper}
+        name="You"
+        component={SecondStackNavigation}
         options={{
-          tabBarLabel:'Profile',
+          tabBarLabel:'You',
           tabBarIcon:() => (
             user?.profileUrl ?
             <Image

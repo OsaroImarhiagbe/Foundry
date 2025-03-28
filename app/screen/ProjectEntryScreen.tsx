@@ -22,7 +22,8 @@ import {
 import { log,recordError } from '@react-native-firebase/crashlytics'
 import { crashlytics, ProjectRef} from '../../FirebaseConfig';
 import { useTheme } from 'react-native-paper';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation,} from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import AppTextInput from 'app/components/AppTextInput';
 import FastImage from "@d11/react-native-fast-image";
 import {Image as ImageCompressor} from 'react-native-compressor';
@@ -34,6 +35,14 @@ import {getDownloadURL, putFile, ref} from '@react-native-firebase/storage';
 import { httpsCallable } from '@react-native-firebase/functions';
 import { Text } from 'react-native-paper';
 
+
+type NavigationProp ={
+  Home?:{
+    screen?:string
+  }
+}
+
+type Navigation = NativeStackNavigationProp<NavigationProp>
 interface Form {
   Name:string | undefined,
   Overview:string | undefined,
@@ -80,7 +89,7 @@ const ProjectEntryScreen = () => {
     const currentProjectId = useSelector((state:any) => state.project.currentProjectId)
     const theme = useTheme()
     const {user} = useAuth()
-    const navigation = useNavigation()
+    const navigation = useNavigation<Navigation>()
     const dispatch = useDispatch()
 
     useEffect(() => {

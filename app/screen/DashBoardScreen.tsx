@@ -1,8 +1,7 @@
 import React,
 {
-  Suspense,
   useCallback,
-  useEffect,
+  useRef,
 }from 'react'
 import {
     View,
@@ -35,6 +34,7 @@ import {  useSafeAreaInsets } from 'react-native-safe-area-context';
 const HomeScreen = React.lazy(() => import('../screen/HomeScreen.tsx'));
 const FeedScreen = React.lazy(() => import('../screen/FeedScreen.tsx'));
 type NavigationProp = {
+  toggleDrawer(): undefined;
   openDrawer(): undefined;
   navigate(arg0?: string, arg1?: { screen: string; }): unknown;
   News:undefined,
@@ -80,6 +80,14 @@ const DashBoardScreen = () => {
       navigation.navigate('Message')
     },[])
 
+    const handleDrawer = useCallback(() => {
+      navigation.toggleDrawer()
+    },[])
+
+    const handlePost = useCallback(() => {
+      navigation.navigate('Post')
+    },[])
+
 
   return (
     <View style={{flex:1,paddingTop:hp(5),backgroundColor:theme.colors.background}}> 
@@ -90,7 +98,7 @@ const DashBoardScreen = () => {
           padding:10,
           justifyContent:'space-between',
           backgroundColor:theme.colors.background}}>
-        <TouchableWithoutFeedback onPress={() => navigation.openDrawer()}>
+        <TouchableWithoutFeedback onPress={handleDrawer}>
           {user.profile ?   <Image
         style={{height:hp(4.3), aspectRatio:1, borderRadius:100}}
         source={user?.profileUrl}
@@ -177,7 +185,7 @@ const DashBoardScreen = () => {
           mode='elevated'
           color={theme.colors.primary}
           style={{position:'absolute',right:16,top:hp(65),alignItems:'center'}}
-          onPress={() => navigation.navigate('Post')}
+          onPress={handlePost}
         />
         </View>
     </View>

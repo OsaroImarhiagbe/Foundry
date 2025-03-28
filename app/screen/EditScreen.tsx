@@ -22,19 +22,33 @@ import {Image as ImageCompressor} from 'react-native-compressor';
 import {launchImageLibrary} from 'react-native-image-picker';
 import { TouchableWithoutFeedback } from 'react-native-gesture-handler';
 import { addHeaderImage, addImage } from '../features/user/userSlice';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 
 
 
 type NavigationProp = {
-    Profile:{user:any},
+    Profile?:{user?:any},
     Message:undefined
-    Welcome:{
+    Welcome?:{
         screen?:string
       },
-    Home:{
+    Home?:{
+        params?:{
+            screen?:string
+        }
         screen?:string
     },
+    Account:undefined,
+    News?:{
+        screen?:string
+    },
+    Drawer:{
+        screen:string,
+        params:{
+            screen:string
+        }
+    }
 }
 
 type Navigation = NativeStackNavigationProp<NavigationProp>
@@ -66,6 +80,7 @@ const EditScreen = () => {
     const headerimg = useSelector((state:any) => state.user.addHeaderImage)
     const {user} = useAuth()
     const theme = useTheme()
+    const {top} = useSafeAreaInsets();
     const [form, setForm] = useState<Form>({
         name: '',
         username: '',
@@ -160,7 +175,7 @@ const EditScreen = () => {
 
 
   return (
-    <View style={[styles.screen,{backgroundColor:theme.colors.background,paddingTop:10}]}>
+    <View style={[styles.screen,{backgroundColor:theme.colors.background,paddingTop:top}]}>
     <View style={{flexDirection:'row',padding:5,alignItems:'center',justifyContent:'space-between'}}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
             <Icon

@@ -10,7 +10,6 @@ import { Icon,useTheme,Text} from 'react-native-paper';
 import LazyScreenComponent from '../components/LazyScreenComponent.tsx';
 import TabNavigation from '../navigation/TabNavigation.tsx';
 import SplashScreen from '../screen/SplashScreen.tsx';
-const SecondStackNavigation = React.lazy(() => import('../navigation/SecondStackNavigation.tsx'));
 const SettingsScreen = React.lazy(() => import('../screen/SettingsScreen.tsx'));
 const Drawer = createDrawerNavigator();
 
@@ -22,13 +21,6 @@ const SettingsScreenWrapper = React.memo(() => {
     </LazyScreenComponent>
   )
 })
-const SecondStackNavigationWrapper = React.memo(() => {
-  return (
-    <LazyScreenComponent>
-      <SecondStackNavigation/>
-    </LazyScreenComponent>
-  )
-})
 
 
 
@@ -36,20 +28,17 @@ const DrawerNavigation = () => {
   const theme = useTheme()
   const {user,logout,loading} = useAuth()
   const [isloading,setLoading] = useState<boolean>(true)
-  const navigation = useNavigation()
 
 
   const handleLogout = useCallback(async () => {
     setLoading(true)
     try{
       await logout();
-      navigation.navigate('Login' as never)
     }catch(error){
       console.error(` Error failed: ${error}`)
     }finally{
       setLoading(false);
     }
-
   },[])
 
   useEffect(() => {
@@ -75,7 +64,7 @@ const DrawerNavigation = () => {
     drawerContent={props => (
       <DrawerContentScrollView {...props}>
           <View style={{ padding: 10,flexDirection:'row',alignItems:'center',justifyContent:'space-between'}}>
-           <TouchableWithoutFeedback  onPress={() => props.navigation.navigate('Home',{screen:'Account'})}>
+           <TouchableWithoutFeedback  onPress={() => props.navigation.navigate('Home',{screen:'You'})}>
             {
               user.profileUrl ? 
               <Image
@@ -107,7 +96,8 @@ const DrawerNavigation = () => {
       </DrawerContentScrollView>
     )}
     screenOptions={{
-      drawerType:'back',
+      swipeEnabled:true,
+      drawerType:'front',
       drawerStyle:{
         backgroundColor:theme.colors.background,
         paddingTop:hp(5),
@@ -132,22 +122,6 @@ const DrawerNavigation = () => {
     <Drawer.Screen
       name='Settings'
       component={SettingsScreenWrapper}
-      options={{
-        drawerIcon:({focused,color,size}) => (
-          <Icon
-          source="cog-outline"
-          color={theme.colors.tertiary}
-          size={size}/>
-        ),
-        drawerLabelStyle:{
-          color:theme.colors.tertiary,
-          fontSize:24
-        },
-        headerShown:false,
-      }}/>
-  <Drawer.Screen
-      name='News'
-      component={SecondStackNavigationWrapper}
       options={{
         drawerIcon:({focused,color,size}) => (
           <Icon
