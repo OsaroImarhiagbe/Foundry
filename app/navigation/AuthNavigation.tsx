@@ -8,13 +8,6 @@ const RegisterScreen = React.lazy(() => import('../screen/RegisterScreen.tsx'));
 
 
 
-const OnboardingScreenWrapper = React.memo(() => {
-  return (
-    <LazyScreenComponent>
-      <OnboardingScreen/>
-      </LazyScreenComponent>
-  )
-})
 const LoginScreenWrapper = React.memo(() => {
   return (
     <LazyScreenComponent>
@@ -56,13 +49,6 @@ const AuthNavigation = () => {
           <Stack.Screen
           name="Register"
           component={RegisterScreenWrapper}
-          options={{
-            headerShown:false,
-            gestureEnabled:false,
-          }}/>
-          <Stack.Screen
-          name="Onboarding"
-          component={OnboardingScreenWrapper}
           options={{
             headerShown:false,
             gestureEnabled:false,

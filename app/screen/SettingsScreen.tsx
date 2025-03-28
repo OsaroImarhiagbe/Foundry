@@ -25,7 +25,7 @@ const Sections = [
       items:[
           {
               id:1,
-              icon:'globe', 
+              icon:'earth', 
               color:'orange',
               label:'Language', 
               type:'link',
@@ -38,29 +38,13 @@ const Sections = [
               label:'Location', 
               type:'link',},
           {
-              id:3,
-              tag:'showusers',
-              icon:'users',
-              color:'green',
-              label:'Show',
-              type:'toggle'
-          },
-          {
-            id:4,
+            id:3,
             tag:'darkmode',
             icon:'theme-light-dark',
             color:'green',
             label:'DarkMode',
             type:'toggle'
-        },
-          {
-              id:5,
-              tag:'accessmode',
-              icon:'airplay',
-              color:'#fd2d54',
-              label:'Access',
-              type:'toggle'
-          }, 
+        }, 
       ],
   },
   {
@@ -132,7 +116,7 @@ const SettingsScreen = () => {
                             <Text variant='bodyLarge' style={{color:theme.colors.tertiary,paddingLeft:10,fontSize:20}}>{label}</Text>
                             <View style={{flex:1}}/>
                             {type === 'toggle' && 
-                            <Switch value={true}
+                            <Switch value={false}
                             onValueChange={value => setForm({...form,[id]: value})}/>}
                             {label !=='Version' && type === 'link' ? 
                             <View style={{ backgroundColor: '#3b3b3b', borderRadius: 5, width: 30, padding: 5 }}>

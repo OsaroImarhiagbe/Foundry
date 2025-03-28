@@ -1,7 +1,6 @@
 import { createDrawerNavigator, DrawerItem,DrawerContentScrollView,DrawerItemList } from '@react-navigation/drawer';
-import { useNavigation} from '@react-navigation/native';
-import React, { useState,useCallback, memo, Suspense, useEffect} from 'react';
-import { TouchableWithoutFeedback,useColorScheme,View, } from 'react-native';
+import React, { useState,useCallback, useEffect, useRef} from 'react';
+import { TouchableWithoutFeedback,View} from 'react-native';
 import { Image } from 'expo-image';
 import { blurhash } from 'utils';
 import { useAuth } from '../authContext.tsx';
@@ -10,7 +9,9 @@ import { Icon,useTheme,Text} from 'react-native-paper';
 import LazyScreenComponent from '../components/LazyScreenComponent.tsx';
 import TabNavigation from '../navigation/TabNavigation.tsx';
 import SplashScreen from '../screen/SplashScreen.tsx';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 const SettingsScreen = React.lazy(() => import('../screen/SettingsScreen.tsx'));
+const OnboardingScreen = React.lazy(() => import('../screen/OnboardingScreen.tsx'));
 const Drawer = createDrawerNavigator();
 
 
@@ -22,11 +23,20 @@ const SettingsScreenWrapper = React.memo(() => {
   )
 })
 
+const OnboardingScreenWrapper = React.memo(() => {
+  return (
+    <LazyScreenComponent>
+      <OnboardingScreen/>
+      </LazyScreenComponent>
+  )
+})
+
 
 
 const DrawerNavigation = () => {
   const theme = useTheme()
-  const {user,logout,loading} = useAuth()
+  const {user,logout,} = useAuth()
+  const [Onboarding,setOnboardingStatus] = useState<string | null>()
   const [isloading,setLoading] = useState<boolean>(true)
 
 
@@ -44,18 +54,29 @@ const DrawerNavigation = () => {
   useEffect(() => {
     const timer = setTimeout(() => {
       setLoading(false)
-    }, 2000);
+    },500);
     return () => clearTimeout(timer)
   },[])
 
+  useEffect(() => {
+    const status = async () => {
+      const OnboardStatus = await AsyncStorage.getItem('onboarded')
+      if(isloading && OnboardStatus === '1'){
+        return (
+          <SplashScreen/>
+        )
+      }else{
+        return(
+          <OnboardingScreenWrapper/>
+        )
+      }
+    }
+    status();
+  },[])
+
+  
 
 
-
-  if(isloading){
-    return (
-      <SplashScreen/>
-    )
-  }
 
   return (
 

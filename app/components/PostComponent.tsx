@@ -6,6 +6,7 @@ KeyboardAvoidingView,
 Platform,
 Modal,
 Alert,
+useColorScheme
 } from 'react-native'
 import { blurhash } from '../../utils/index'
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
@@ -89,6 +90,9 @@ const PostComponent: React.FC<PostComponentProps> = memo(({
     const [replyingTo, setReplyingTo] = useState<string | null>(null);
     const [replyingToUsername, setReplyingToUsername] = useState<string | undefined>(undefined);
     const videoRef = useRef<VideoRef>(null);
+    const colorScheme = useColorScheme()
+
+    const colorMode = colorScheme ? 'light' : 'dark'
  
 
     useEffect(() => {
@@ -196,8 +200,10 @@ const PostComponent: React.FC<PostComponentProps> = memo(({
       <MotiView
          transition={{
           type: 'timing',
-        }}>
+        }}
+        >
       <Skeleton
+      colorMode={colorMode}
         show={mount}
         radius='round'
         >
@@ -218,6 +224,7 @@ const PostComponent: React.FC<PostComponentProps> = memo(({
       }}
       >
       <Skeleton
+      colorMode={colorMode}
       show={mount}
       width={wp('40%')}
       >
@@ -240,6 +247,7 @@ const PostComponent: React.FC<PostComponentProps> = memo(({
      }}
      >
       <Skeleton
+      colorMode={colorMode}
       show={mount}
       width={ url ? wp('80%') : wp('80%')}
       height={url ? 30: 30}
@@ -296,6 +304,7 @@ const PostComponent: React.FC<PostComponentProps> = memo(({
       }}
       >
         <Skeleton
+        colorMode={colorMode}
         show={mount}
         width={wp('10%')}
         >
@@ -319,6 +328,7 @@ const PostComponent: React.FC<PostComponentProps> = memo(({
       >
       <MotiView>
         <Skeleton
+        colorMode={colorMode}
         show={mount}
         >
         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
@@ -338,6 +348,7 @@ const PostComponent: React.FC<PostComponentProps> = memo(({
           }}
           >
             <Skeleton
+            colorMode={colorMode}
             show={mount}
             >
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
@@ -356,6 +367,7 @@ const PostComponent: React.FC<PostComponentProps> = memo(({
           <MenuTrigger>
           <MotiView>
           <Skeleton
+          colorMode={colorMode}
           show={mount}
           >
           <Icon source='dots-horizontal' size={17} color={theme.colors.tertiary}/>
@@ -393,7 +405,8 @@ const PostComponent: React.FC<PostComponentProps> = memo(({
       </View>
     <View style={{flex:1}}>
     <Modal
-    animationType="fade"
+    style={{flex:1}}
+    animationType='slide'
     transparent={true}
     visible={modalVisible}>
     <KeyboardAvoidingView
@@ -401,7 +414,7 @@ const PostComponent: React.FC<PostComponentProps> = memo(({
       keyboardVerticalOffset={0}
       style={styles.centeredView}>
         <View style={styles.commentView}>
-          <View style={[styles.modalView,{backgroundColor:theme.colors.onSecondary}]}>
+          <View style={[styles.modalView,{backgroundColor:theme.colors.onBackground}]}>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between',alignItems:'center' }}>
               <Text
               variant='titleMedium'
@@ -446,9 +459,9 @@ const PostComponent: React.FC<PostComponentProps> = memo(({
                 outlineStyle={{borderRadius:30}}
                 value={replyingTo ? replyingToUsername : text}
                 onChangeText={(text) => setText(text)}
-                style={styles.textinput}
+                style={[styles.textinput,{backgroundColor:'transparent'}]}
                 placeholder="Write a comment..."
-                placeholderTextColor="#000"
+                placeholderTextColor={theme.colors.onTertiary}
                 />
               </View>
           </View>
@@ -471,7 +484,6 @@ const styles = StyleSheet.create({
       justifyContent: 'space-between',
       paddingTop: 12,
       paddingBottom: 8,
-      borderTopWidth: 0.5,
     },
     reactionIcon:{
       padding:5,
@@ -489,6 +501,8 @@ const styles = StyleSheet.create({
       paddingTop: 20,
       width:wp('100%'),
       height:hp('55%'),
+      borderWidth: 2,
+      borderColor:'#000'
     },
     centeredView: {
       flex: 1,
@@ -500,8 +514,7 @@ const styles = StyleSheet.create({
       fontSize: hp(2),
       color: '#000',
       flexDirection: 'row',
-      paddingHorizontal: 10,
-      backgroundColor: '#fff',    
+      paddingHorizontal: 10,  
     },
     sendButton: {
       padding: 10,
