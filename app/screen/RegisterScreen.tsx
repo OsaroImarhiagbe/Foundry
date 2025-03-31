@@ -1,4 +1,4 @@
-import React, {useState} from 'react'
+import React, {useCallback, useState} from 'react'
 import {
     View,
     StyleSheet,
@@ -19,7 +19,9 @@ import { TouchableWithoutFeedback } from 'react-native-gesture-handler';
 import { Button,useTheme } from 'react-native-paper';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import {log,recordError} from '@react-native-firebase/crashlytics'
-import { crashlytics } from 'FIrebaseConfig';
+import { crashlytics } from '../../FirebaseConfig';
+import Toast from 'react-native-toast-message';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 
 
@@ -36,16 +38,24 @@ const RegisterScreen = () => {
     const {width} = useWindowDimensions()
     const { register } = useAuth();
     const theme = useTheme()
+    const {top} = useSafeAreaInsets();
 
-    const handleRegister = async (values:any, {resetForm}:any )=> {
+    const handleRegister = useCallback(async (values:any, {resetForm}:any )=> {
         log(crashlytics,'Register Screen: Handle Register')
         setLoading(true);
         try{
-            let response = await register(values.username, values.email, values.password)
+            const response = await register(values.username, values.email, values.password)
             if(response){
-                navigation.navigate('Onboarding')
                 setLoading(false)
             }
+            Toast.show({
+                type: 'success',
+                text1: 'Welcome to Foundry!',
+                position:'top',
+                autoHide:true,
+                visibilityTime:5000,
+                topOffset:top,
+              });
             resetForm({values:initialValues})
         }catch(error: unknown | any){
             recordError(crashlytics,error)
@@ -53,7 +63,7 @@ const RegisterScreen = () => {
         }finally{
             setLoading(false)
         }
-    }    
+    },[])   
 
     const validationSchema = Yup.object().shape({
         username: Yup.string()

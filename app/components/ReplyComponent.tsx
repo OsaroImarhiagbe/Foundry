@@ -1,5 +1,5 @@
-import React,{useState} from 'react'
-import {View,StyleSheet,TouchableOpacity,TouchableHighlight} from 'react-native'
+import React,{memo, useCallback, useState} from 'react'
+import {View,StyleSheet,TouchableHighlight} from 'react-native'
 import { blurhash } from '../../utils/index'
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import { Image } from 'expo-image';
@@ -7,8 +7,10 @@ import { useAuth } from '../authContext';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import color from '../../config/color';
 import { useSelector } from 'react-redux';
-import firestore from '@react-native-firebase/firestore'
+import { crashlytics, functions } from '../../FirebaseConfig';
+import { httpsCallable } from '@react-native-firebase/functions';
 import { Card,Text,useTheme,Divider } from 'react-native-paper';
+import { recordError } from '@react-native-firebase/crashlytics';
 
 interface ReplyProp{
   name?:string,
@@ -16,58 +18,32 @@ interface ReplyProp{
   post_id?:string,
   comment_id?:string,
   reply_id?:string,
+  date?:string
   count?:number
 }
-const ReplyComponent:React.FC<ReplyProp> = ({name,content,post_id,comment_id,reply_id,count}) => {
+const ReplyComponent:React.FC<ReplyProp> = memo(({name,content,post_id,comment_id,reply_id,count}) => {
 
     const [press,setIsPress] = useState<boolean>(false)
-    const [isloading,setLoading] = useState<boolean>(false)
+    const [isloading,setLoading] = useState<boolean>(true)
     const {user} = useAuth();
     const theme = useTheme()
     const profileImage = useSelector((state:any) => state.user.profileImage)
 
-    const handleLike = async () => {
-      if(isloading) return
-
-      setLoading(true)
+    const LikeButton = useCallback(async () => {
+      const handleLike = httpsCallable(functions,'handleLike')
       try{
-        const docRef = firestore()
-        .collection('posts')
-        .doc(post_id)
-        .collection('comments')
-        .doc(comment_id)
-        .collection('replys')
-        .doc(reply_id);
-        await firestore().runTransaction(async (transaction)=>{
-          const doc = await transaction.get(docRef)
-          if (!doc.exists) throw new Error ('Document doesnt exists');
-
-          const currentLikes = doc?.data()?.like_count || 0
-          const likeBy = doc?.data()?.liked_by || []
-          const hasliked = likeBy.includes(user.userId)
-
-          let newlike
-          let updatedLike
-
-          if(hasliked){
-            newlike = currentLikes - 1
-            updatedLike = likeBy.filter((id:string)=> id != user?.userId)
-          }else{
-            newlike = currentLikes + 1
-            updatedLike = [...likeBy,user.userId]
-          }
-          transaction.update(docRef,{
-            like_count:newlike,
-            liked_by:updatedLike
-          })
-        })
+        await handleLike({
+          post_id:post_id,
+          comment_id:comment_id,
+          reply_id:reply_id
+        }).catch((error) => recordError(crashlytics,error))
       }catch(err){
         console.error('error liking comment:',err)
       }finally{
         setLoading(false)
       }
   
-    }
+    },[post_id,comment_id,reply_id])
 
 return (
     <Card
@@ -103,7 +79,7 @@ return (
       onShowUnderlay={() => setIsPress(true)}
       onHideUnderlay={() => setIsPress(false)}
       underlayColor='#0097b2'
-      onPress={handleLike}
+      onPress={LikeButton}
       style={styles.reactionIcon}
       >
       <View style={{ flexDirection: 'row', alignItems: 'center' }}>
@@ -124,7 +100,7 @@ return (
     </Card.Content>
   </Card>
   )
-}
+})
 
 
 const styles = StyleSheet.create({

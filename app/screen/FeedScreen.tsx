@@ -2,255 +2,228 @@ import React,
 {
   useEffect,
   useState,
-  lazy,
-  Suspense,
   useCallback,
+  useRef
 }from 'react'
 import {
     View,
-    StyleSheet,
-    useWindowDimensions,
-    useColorScheme,
-    Animated} from 'react-native'
-import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
+    } from 'react-native'
 import { useAuth } from '../authContext';
-import { useTheme } from 'react-native-paper';
-import { useNavigation } from '@react-navigation/native';
-import {ActivityIndicator,Divider,Text} from 'react-native-paper';
-import { FirebaseFirestoreTypes, getDocs, limit, onSnapshot, orderBy, query, startAfter, Timestamp } from '@react-native-firebase/firestore';
+import {ActivityIndicator,Divider,Text,useTheme} from 'react-native-paper';
+import {ref,FirebaseDatabaseTypes, orderByChild, startAt, query,onValue, limitToLast, onChildAdded, limitToFirst} from '@react-native-firebase/database';
 import {log,recordError,} from '@react-native-firebase/crashlytics'
-import { MotiView } from 'moti';
 import { FlashList } from '@shopify/flash-list';
-import { Skeleton } from 'moti/skeleton';
-import { crashlytics, PostRef } from 'FIrebaseConfig';
-import { addId } from 'app/features/user/userSlice';
-import { useDispatch } from 'react-redux';
-import perf from '@react-native-firebase/perf';
+import { crashlytics, perf, database,} from '../../FirebaseConfig';
+import PostComponent from '../components/PostComponent';
+import { TimeAgo } from '../../utils/index';
+import Toast from 'react-native-toast-message'
+import {  useSafeAreaInsets } from 'react-native-safe-area-context';
 
-const PostComponent = lazy(() => import('../components/PostComponent'))
 
-const Spacer = ({ height = 16 }) => <View style={{ height }} />;
-const skills = ['Quick Search','hello','hello','hello','hello']
-type NavigationProp = {
-    openDrawer(): undefined;
-    navigate(arg0?: string, arg1?: { screen: string; }): unknown;
-    SecondStack:undefined,
-    Home:undefined,
-    Post:undefined
-}
+
+
+
 
 interface Post{
-    id: string;
-    auth_profile?: string;
-    like_count?: number;
-    imageUrl?: string;
-    post_id?: string;
-    name?: string;
-    content?: string;
-    createdAt?: FirebaseFirestoreTypes.Timestamp
-    comment_count?: number;
-    mount?:boolean
-  };
+  key?:string,
+  id?:string;
+  auth_profile?: string;
+  like_count?: number;
+  imageUrl?: string;
+  post_id?: string;
+  name?: string;
+  content?: string;
+  createdAt?:number;
+  comment_count?: number;
+  mount?:boolean,
+  videoUrl?:string,};
   
 
 const FeedScreen = () => {
-    const navigation = useNavigation();
-    const theme = useTheme()
-    const dispatch = useDispatch()
     const [refreshing, setRefreshing] = useState<boolean>(false);
     const {user} = useAuth()
-    const {height, width} = useWindowDimensions();
     const [post, setPost] = useState<Post[]>([])
-    const [lastVisible, setLastVisible] = useState<FirebaseFirestoreTypes.QueryDocumentSnapshot<FirebaseFirestoreTypes.DocumentData> | null>(null);
+    const [lastVisible, setLastVisible] = useState<Post[]>([]);
     const [loadingMore, setLoadingMore] = useState<boolean>(false);
     const [hasMore, setHasMore] = useState<boolean>(true);
-    const [mount, setMount] = useState<boolean>(false)
-    const scrollY = useState(new Animated.Value(0))[0];
-    const dark_or_light = useColorScheme()
-  
+    const [loading, setLoading] = useState<boolean>(true)
+    const theme = useTheme()
+    const {top} = useSafeAreaInsets()
+    const isMountRef = useRef(false)
+
+
+
+
+
+    useEffect(() => {
+      Toast.show({
+        type: 'success',
+        text1: `Welcome back ${user.username}`,
+        position:'top',
+        autoHide:true,
+        visibilityTime:5000,
+        topOffset:top,
+      })
+    },[])
   
    
-  
-    // const headerOpacity = scrollY.interpolate({
-    //   inputRange: [0, 250],
-    //   outputRange: [1, 0],
-    //   extrapolate: 'clamp',
-    // });
-    // const headerBackgroundColor = scrollY.interpolate({
-    //   inputRange: [0, 250],
-    //   outputRange: ['rgba(0, 0, 0, 0)', 'rgba(0, 0,0,0)'], // Adjust the color
-    //   extrapolate: 'clamp',
-    // });
-  
+ 
     useEffect(() => {
       if (!user?.userId) return;
-      setMount(true)
-      dispatch(addId({currentuserID:user?.userId}))
-      const timer = setTimeout(() => {
-        log(crashlytics,'Grabbing post')
-          try {
-            const docRef = query(PostRef,orderBy('createdAt', 'desc'),limit(10))
-            const subscriber = onSnapshot(docRef,querySnapShot =>{
-                if (!querySnapShot || querySnapShot.empty) {
-                  setPost([]);
-                  return;
-                }
-                let data:Post[] = []; 
-                querySnapShot.forEach(documentSnapShot => {
-                  data.push({ ...documentSnapShot.data(),id:documentSnapShot.id });
-              } )
-              setPost(data);
-              setLastVisible(querySnapShot.docs[querySnapShot.docs.length - 1]);
-              setHasMore(querySnapShot.docs.length > 0);
-            });
-            return () => subscriber()
-          }  catch (error:unknown | any) {
-            recordError(crashlytics,error)
+      log(crashlytics,'Grabbing post')
+        try {
+          const postRef = ref(database,'/posts')
+          const orderedQuery = query(postRef,orderByChild('createdAt'),limitToLast(10))
+          const subscriber = onValue(orderedQuery,(snapshot: FirebaseDatabaseTypes.DataSnapshot) =>{
+              if (!snapshot.exists()) {
+                setPost([]);
+                setLoading(false);
+                return;
+              }
+              
+              const data: Post[] = [];
+              Object.keys(snapshot.val()).forEach((key) => {
+                data.push({ ...snapshot.val()[key], id:key });
+              });
+            setPost(data);
+            setLastVisible([{key: data[data.length - 1].key}]);
+            setHasMore(data.length > 0);
+            setLoading(false);
+          },(error:unknown | any) => {
+            recordError(crashlytics, error);
+            console.error(`Error in snapshot listener Feed Screen: ${error}`);
+            setLoading(false);
+          });
+          return () => subscriber()
+        }catch (error:unknown | any) {
+          recordError(crashlytics,error)
           console.error(`Error post can not be found: ${error}`);
-        }finally{
-          setMount(false)
-        } 
-      },3000)
-        
-      return () => {
-        clearTimeout(timer);
-      };
+          setLoading(false);
+      }finally{
+        setLoading(false)
+      }
     }, []); 
   
-  
-    const onRefresh = useCallback(() => {
+
+    const onRefresh = useCallback(async () => {
       setRefreshing(true);
+      let trace = await perf.startTrace('refreshing_post_feedscreen')
       log(crashlytics,'Post Refresh')
+    
         try {
-          const docRef = query(PostRef,orderBy('createdAt', 'desc'),limit(10))
-          const unsub = onSnapshot(docRef,querySnapShot =>{
-              let data:Post[] = [];
-              querySnapShot.forEach(documentSnapShot => {
-                data.push({ ...documentSnapShot.data(),id:documentSnapShot.id });
-            } )
+          const docRef = ref(database,'/posts')
+          const orderedQuery = query(docRef,orderByChild('createdAt'),limitToLast(5))
+          const subscriber = onValue(orderedQuery,(snapshot:FirebaseDatabaseTypes.DataSnapshot) =>{
+            if(!snapshot.exists()){
+              setPost([])
+              setRefreshing(false)
+              return;
+            }
+            const data:Post[] = []
+            Object.keys(snapshot.val()).forEach((key) => {
+              data.push({...snapshot.val()[key],id:key})
+            })
             setPost(data);
-            setLastVisible(querySnapShot.docs[querySnapShot.docs.length - 1]);
-            setHasMore(querySnapShot.docs.length > 0);
+            setLastVisible([{key: data[data.length - 1].key}]);
+            setHasMore(data.length > 0);
+            trace.putAttribute('post_count', post.length.toString());
+            setRefreshing(false)
           });
-          return () => unsub()
+          return () => subscriber()
         }  catch (error:any) {
           recordError(crashlytics,error)
           console.error(`Error post can not be found: ${error}`);
+          setRefreshing(false)
       }finally{
         setRefreshing(false);
+        trace.stop()
       }
-    }, [post]);
-    const fetchMorePost = async () => {
+    }, []);
+
+    const fetchMorePost = useCallback(async () => {
+      setLoadingMore(true)
       log(crashlytics,'Fetch More Post')
-      if (loadingMore || !hasMore) return;
-      if (!user?.userId) return;
-      if (post.length <= 2) {
-        setHasMore(false);
+      let trace = await perf.startTrace('fetching_more_post_feedscreen')
+      if (!lastVisible || !hasMore || !loadingMore){
+        setHasMore(false)
+        setLoadingMore(false)
         return;
       }
-      setLoadingMore(true);
       try {
-        const docRef = lastVisible ? query(
-          PostRef,
-          orderBy('createdAt','desc'),
-          startAfter(lastVisible), 
-          limit(2)) : 
-          query(
-            PostRef,
-            orderBy('createdAt', 'desc'),
-            limit(2))
-        const snapshot = await getDocs(docRef)
-        const newPosts = snapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
-        setPost(prevPosts => [...prevPosts, ...newPosts]);
-        setLastVisible(snapshot.docs[snapshot.docs.length - 1]);
-        setHasMore(snapshot.docs.length > 0);
+        const docRef = ref(database,'/posts')
+        const orderedQuery = query(docRef,orderByChild('createdAt'),startAt(lastVisible[0].key),limitToFirst(5))
+        const subscriber = onValue(orderedQuery,(snapshot:FirebaseDatabaseTypes.DataSnapshot) => {
+          if(!snapshot.exists()){
+            setHasMore(false)
+            setLoadingMore(false)
+            return;
+          }
+        const data:Post[] = []
+        Object.keys(snapshot.val()).forEach((key) => {
+          data.push({...snapshot.val()[key],id:key})
+          return true
+        })
+        setPost((prev) => [...prev,...data]);
+        setLastVisible([{key: data[data.length - 1].key}]);
+        setHasMore(false);
+        trace.putAttribute('post_count', post.length.toString());
+        setLoadingMore(false);
+        })
+        return () => subscriber()
       } catch (error:any) {
         recordError(crashlytics,error)
         console.error(`Error fetching more posts: ${error}`);
+        setLoadingMore(false);
       } finally {
         setLoadingMore(false);
+        trace.stop()
       }
-    }
+    },[post, lastVisible, hasMore, loadingMore]);
 
   return (
       <View style={{flex:1,backgroundColor:theme.colors.background}}>
-            {
-              mount ?
-              Array.from({length:5}).map((_,index)=> (
-                <MotiView
-                key={index}
-              transition={{
-                delay:300
-              }}
-              style={[styles.container, styles.padded]}
-              animate={{ backgroundColor: dark_or_light ? '#ffffff' : '#000000' }}
-            >
-            <Skeleton colorMode={dark_or_light ? 'light':'dark'} radius="round" height={hp(4.3)}/>
-            <Spacer height={8}/>
-            <Skeleton height={'100%'} colorMode={dark_or_light ? 'light':'dark'} width={'100%'} radius='square'/>
-            </MotiView>
-              )) :  <FlashList
+        {
+          loading ? Array.from({length:5}).map((_,index) => (
+              <PostComponent
+              key={index}
+              mount={loading}
+            />)) : (<FlashList
               contentContainerStyle={{padding:0}}
               data={post}
+              showsVerticalScrollIndicator={false}
               estimatedItemSize={460}
               onRefresh={onRefresh}
-              onScroll={Animated.event(
-                [{ nativeEvent: { contentOffset: { y: scrollY } } }],
-                { useNativeDriver: false }
-              )}
               ListEmptyComponent={(item) => (
                 <View style={{flex:1,alignItems:'center',justifyContent:'center',paddingTop:5}}>
-                  <ActivityIndicator color={theme.colors.background ? '#000' :'#fff'} size='large' animating={mount}/>
+                    <Text>No post at the moment</Text>
                 </View>
               )}
               onEndReached={fetchMorePost}
-              onEndReachedThreshold={0.1}
+              onEndReachedThreshold={0.5}
               refreshing={refreshing}
               ItemSeparatorComponent={()=> (
                 <Divider/>
               )}
               ListFooterComponent={() => (
-                 <ActivityIndicator color='#fff' size='small' animating={loadingMore}/>
+                  <ActivityIndicator color='#fff' size='small' animating={loadingMore}/>
               )}
-              renderItem={({item}) => <Suspense fallback={<ActivityIndicator size='small' color='#000'/>}>
-                <PostComponent
-                auth_profile={item.auth_profile}
-                count={item.like_count}
-                url={item.imageUrl}
-                id={item.post_id}
-                name={item.name}
-                content={item.content}
-                date={item?.createdAt?.toDate().toLocaleString('en-US', {
-                    hour: '2-digit',
-                    minute: '2-digit',
-                    hour12: true})}
-                comment_count={item.comment_count}/>
-                </Suspense>}
-              keyExtractor={(item)=> item?.post_id?.toString() || Math.random().toString()}
-              /> } 
-              </View>
+              keyExtractor={(item) => item?.post_id?.toString() || `default-${item.id}`}
+              renderItem={({item}) =>
+             <PostComponent
+                  auth_profile={item.auth_profile}
+                  like_count={item.like_count}
+                  url={item.imageUrl}
+                  video={item.videoUrl}
+                  post_id={item.post_id}
+                  name={item.name}
+                  content={item.content}
+                  date={TimeAgo(item?.createdAt ?? 0)}
+                  comment_count={item.comment_count}/>}/>
+                )}
+    </View>
   )
 }
 
-
-const styles = StyleSheet.create({
-    logo: {
-        width: 40,
-        height: 40, 
-    },
-    icon:{
-      margin:5
-    },
-    padded: {
-      padding: 16,
-    },
-    container:{
-      flex:1
-    }
-});
 
 export default FeedScreen
 

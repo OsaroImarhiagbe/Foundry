@@ -1,52 +1,110 @@
 import { createDrawerNavigator, DrawerItem,DrawerContentScrollView,DrawerItemList } from '@react-navigation/drawer';
-import { NavigatorScreenParams,useNavigation} from '@react-navigation/native';
-import { lazy,Suspense, useState } from 'react';
-import { ActivityIndicator,TouchableWithoutFeedback,View, } from 'react-native';
-import TestScreen from '../screen/TestScreen';
-import React from 'react';
+import React, { useState,useCallback, useEffect, useRef} from 'react';
+import { TouchableWithoutFeedback,View} from 'react-native';
 import { Image } from 'expo-image';
 import { blurhash } from 'utils';
-import { useAuth } from 'app/authContext';
+import { useAuth } from '../authContext.tsx';
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import { Icon,useTheme,Text} from 'react-native-paper';
-
-
-
-
+import LazyScreenComponent from '../components/LazyScreenComponent.tsx';
+import TabNavigation from '../navigation/TabNavigation.tsx';
+import SplashScreen from '../screen/SplashScreen.tsx';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { recordError } from '@react-native-firebase/crashlytics';
+import { crashlytics } from 'FirebaseConfig.ts';
+const SettingsScreen = React.lazy(() => import('../screen/SettingsScreen.tsx'));
+const OnboardingScreen = React.lazy(() => import('../screen/OnboardingScreen.tsx'));
 const Drawer = createDrawerNavigator();
-const TabNavigation = lazy(() => import('./TabNavigation'))
 
-const TabNavigationWrapper = () =>{
+
+const SettingsScreenWrapper = React.memo(() => {
   return (
-
-    <Suspense fallback={<ActivityIndicator size='small' color='#000' />}>
-    <TabNavigation/>
-  </Suspense>
-
+    <LazyScreenComponent>
+      <SettingsScreen/>
+    </LazyScreenComponent>
   )
+})
+
+interface OnboardingScreenWrapperProps {
+  refreshStatus: () => void;
 }
+
+const OnboardingScreenWrapper: React.FC<OnboardingScreenWrapperProps> = React.memo(({ refreshStatus }) => {
+  return (
+    <LazyScreenComponent>
+      <OnboardingScreen refreshStatus={refreshStatus} />
+    </LazyScreenComponent>
+  );
+});
+
+
 
 const DrawerNavigation = () => {
   const theme = useTheme()
-  const {user,logout} = useAuth()
-  const [loading,setLoading] = useState<boolean>(false)
-  const navigation = useNavigation()
+  const {user,logout,} = useAuth()
+  const [Onboarding,setOnboardingStatus] = useState<string | null>()
+  const [isloading,setLoading] = useState<boolean>(true)
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
 
 
-  const handleLogout = async () => {
+  const refreshOnboardingStatus = () => {
+    setRefreshTrigger(prev => prev + 1);
+  };
+
+
+  const handleLogout = useCallback(async () => {
     setLoading(true)
     try{
       await logout();
-      setTimeout(() => {
-        navigation.navigate('Login' as never)
-      }, 2000);
     }catch(error){
       console.error(` Error failed: ${error}`)
     }finally{
       setLoading(false);
     }
+  },[])
 
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setLoading(false)
+    },500);
+    return () => clearTimeout(timer)
+  },[])
+
+  useEffect(() => {
+    const status = async () => {
+      try{
+        const registered = await AsyncStorage.getItem('justRegistered')
+        if(registered === 'true'){
+          setOnboardingStatus(null)
+          await AsyncStorage.setItem('justRegistered','false')
+        }else{
+          const OnboardingStatus = await AsyncStorage.getItem('onboarded')
+          setOnboardingStatus(OnboardingStatus)
+        }
+      }catch(error:unknown | any){
+        recordError(crashlytics,error)
+        console.error('Error grabbing the Onboarding Status',error)
+      }finally{
+        setLoading(false)
+      }
+    }
+    status();
+  },[refreshTrigger])
+
+  
+  if(isloading){
+    return (
+      <SplashScreen/>
+    )
   }
+
+  if(Onboarding !== '1'){
+    return(
+      <OnboardingScreenWrapper refreshStatus={refreshOnboardingStatus}  />
+    )
+  }
+
+
   return (
 
     <Drawer.Navigator
@@ -54,32 +112,40 @@ const DrawerNavigation = () => {
     drawerContent={props => (
       <DrawerContentScrollView {...props}>
           <View style={{ padding: 10,flexDirection:'row',alignItems:'center',justifyContent:'space-between'}}>
-           <TouchableWithoutFeedback  onPress={() => props.navigation.navigate('Home',{screen:'Account'})}>
-           <Image
-            style={{height:hp(3.3), aspectRatio:1, borderRadius:100,}}
-            source={{uri:user?.profileUrl}}
-            placeholder={{blurhash}}
-            />
+           <TouchableWithoutFeedback  onPress={() =>  props.navigation.navigate('Home',{screen:'You'})}>
+            {
+              user.profileUrl ? 
+              <Image
+              style={{height:hp(3.3), aspectRatio:1, borderRadius:100,}}
+              source={{uri:user?.profileUrl}}
+              placeholder={{blurhash}}
+              /> :   <Image
+              style={{height:hp(3.3), aspectRatio:1, borderRadius:100,}}
+              source={require('../assets/user.png')}
+              placeholder={{blurhash}}
+              />
+            }
             </TouchableWithoutFeedback> 
             <Text>{user?.username}</Text>
           </View>
-          <DrawerItemList {...props} />
+          <DrawerItemList {...props}/>
           <DrawerItem
-              label="Logout"
-              labelStyle={{
-                color:theme.colors.tertiary
-              }}
-              
-              icon={ () => (<Icon
-                source="logout"
-                color={theme.colors.tertiary}
-                size={20}/>)}
-              onPress={handleLogout}
+          label="Logout"
+          labelStyle={{
+            color:theme.colors.tertiary,
+            fontSize:24
+          }}
+          icon={ () => (<Icon
+            source="logout"
+            color={theme.colors.tertiary}
+            size={20}/>)}
+            onPress={handleLogout}
           />
       </DrawerContentScrollView>
     )}
     screenOptions={{
-      drawerType:'back',
+      swipeEnabled:true,
+      drawerType:'front',
       drawerStyle:{
         backgroundColor:theme.colors.background,
         paddingTop:hp(5),
@@ -87,7 +153,7 @@ const DrawerNavigation = () => {
     }}>
       <Drawer.Screen
       name='Home'
-      component={TabNavigationWrapper}
+      component={TabNavigation}
       options={{
         drawerIcon:({focused,color,size}) => (
           <Icon
@@ -96,37 +162,24 @@ const DrawerNavigation = () => {
           size={size}/>
         ),
         drawerLabelStyle:{
-          color:theme.colors.tertiary
+          color:theme.colors.tertiary,
+          fontSize:24
         },
         headerShown:false,
       }}/>
-       <Drawer.Screen
-      name='News'
-      component={TestScreen}
+    <Drawer.Screen
+      name='Settings'
+      component={SettingsScreenWrapper}
       options={{
         drawerIcon:({focused,color,size}) => (
           <Icon
-          source="source-branch"
+          source="cog-outline"
           color={theme.colors.tertiary}
           size={size}/>
         ),
         drawerLabelStyle:{
           color:theme.colors.tertiary,
-        },
-        headerShown:false,
-      }}/>
-       <Drawer.Screen
-      name='Code'
-      component={TestScreen}
-      options={{
-        drawerIcon:({focused,color,size}) => (
-          <Icon
-          source="code-tags"
-          color={theme.colors.tertiary}
-          size={size}/>
-        ),
-        drawerLabelStyle:{
-          color:theme.colors.tertiary
+          fontSize:24
         },
         headerShown:false,
       }}/>

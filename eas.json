@@ -9,11 +9,17 @@
       "autoIncrement": true,
       "distribution": "internal",
       "environment": "development",
-      "ios": {
-        "simulator": true
-      },
       "env": {
         "ENV_FILE": "development"
+      },
+      "channel": "development"
+    },
+    "development-simulator": {
+      "developmentClient": true,
+      "autoIncrement": true,
+      "distribution": "internal",
+      "ios": {
+        "simulator": true
       },
       "channel": "development"
     },

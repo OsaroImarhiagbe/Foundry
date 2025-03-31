@@ -4,18 +4,21 @@ import color from '../../config/color';
 import Entypo from 'react-native-vector-icons/Entypo';
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 import { useNavigation } from '@react-navigation/native';
-import {collection} from '@react-native-firebase/firestore'
+import {collection, getDocs, query, where} from '@react-native-firebase/firestore'
 import { useAuth } from '../authContext';
-import { Image } from 'expo-image';
-import { blurhash } from '../../utils';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import crashlytics from '@react-native-firebase/crashlytics'
-import { db } from 'FIrebaseConfig';
+import  { log, recordError } from '@react-native-firebase/crashlytics'
+import { crashlytics,ProjectRef } from '../../FirebaseConfig';
+import FastImage from '@d11/react-native-fast-image';
+import { useSelector } from 'react-redux';
+import { useTheme } from 'react-native-paper';
+
 interface Project{
     id?:string,
-    skills?:{skill:string}[],
-    image?:string,
-    content?:string
+    Name?:string,
+    Overview?:string,
+    Tech?:string[]
+    image?:string
 }
 type RootStackListProp = {
     ProjectEntryScreen:undefined
@@ -25,39 +28,43 @@ type NavigationProp = NativeStackNavigationProp<RootStackListProp,'ProjectEntryS
 const ProjectScreen = () => {
     const [projects, setProjects] = useState<Project[]>([])
     const {user} = useAuth()
+    const theme = useTheme();
+    const projectId = useSelector((state:any) => state.project.projectid)
 
     const navigation = useNavigation<NavigationProp>()
 
 
     useEffect(() => {
-        crashlytics().log('Project Screen: Grabbing Projects')
+       log(crashlytics,'Project Screen: Grabbing Projects')
+       const getProject = async () => {
         try{
-        const unsub = collection(db,'users')
-        .doc(user?.userId)
-        .collection('projects')
-        .where('project_name', '==', 'projectname')
-        .onSnapshot(documentSnapShot => {
-            const data:Project[] = []
-            documentSnapShot.forEach((doc) => {
-                data.push({...doc.data(),id:doc.id})
-            })
-            setProjects(data)
-        })
-        return () => unsub()
+            const docRef = collection(ProjectRef,user.userId,'projects')
+            const q = query(docRef,where('projectid', 'in', projectId))
+            const querySnapShot = await getDocs(q)
+            const queryDocument = querySnapShot.docs.map((doc) => ({
+                id:doc.id,
+                ...doc.data()
+            }))
+            setProjects(queryDocument)
         }catch(error: unknown | any){
-            crashlytics().recordError(error)
+            recordError(crashlytics,error)
         }
-    },[user])
+       }
+       getProject()
+    },[])
 
     return (
-      <SafeAreaView style={styles.screen}>
+      <SafeAreaView style={[styles.screen,{backgroundColor:theme.colors.background}]}>
         <View style={{padding:20}}>
         <View style={styles.container}>
-            {projects.length > 0 && projects[0].image ?
-              <Image
+            {projects[0].image ?
+              <FastImage
               style={{width:'100%',height:'100%',borderRadius:20}}
-              source={projects[0]?.image}
-              placeholder={{blurhash}}
+              source={{
+                uri:projects[0]?.image,
+                priority:FastImage.priority.normal
+            }}
+              resizeMode={FastImage.resizeMode.cover}
               /> : <View style={{justifyContent:'center',alignItems:'center'}}><Text>Upload Image</Text></View>
             }
         </View>
@@ -73,18 +80,18 @@ const ProjectScreen = () => {
             </View>
             <View style={styles.textcontainer}>
                 {
-                    projects.length > 0 ? <Text style={styles.text}>{projects[0]?.content}
+                    projects.length > 0 ? <Text style={styles.text}>{projects[0]?.Overview}
                 </Text>  : <Text style={styles.text}> Enter Details about your project</Text>
                 }
             </View>
             <View style={{marginTop:20}}>
             <Text style={styles.textHeading}>Tech Used</Text>
             <View style={{padding:10}}>
-            {projects[0]?.skills?.map((project,index)=>{
+            {projects[0]?.Tech?.map((tech,index)=>{
                 return (
                     <View style={{marginTop:5}}  key={index}>
                         <Text style={styles.text}>
-                            <Entypo name='code' size={15}/>{project.skill}</Text>
+                            <Entypo name='code' size={15}/>{tech}</Text>
                         </View>
                 )
             })}
@@ -102,7 +109,6 @@ const ProjectScreen = () => {
 const styles = StyleSheet.create({
     screen:{
         flex:1,
-        backgroundColor:color.backgroundcolor,
     },
     container:{
         justifyContent:'center',

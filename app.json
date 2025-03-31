@@ -3,6 +3,7 @@
     "name": "DevGuiide",
     "slug": "DevGuiide",
     "version": "1.0.0",
+    "runtimeVersion": "1.0.0",
     "orientation": "portrait",
     "icon": "./app/assets/images/icon.png",
     "userInterfaceStyle": "light",
@@ -18,10 +19,12 @@
       "userInterfaceStyle": "automatic",
       "supportsTablet": true,
       "newArchEnabled": true,
+      "runtimeVersion": "1.0.0",
       "icon": "./app/assets/images/icon.png",
       "googleServicesFile": "./GoogleService-Info.plist",
       "bundleIdentifier": "com.devguides.app",
       "infoPlist": {
+        "NSPhotoLibraryUsageDescription": "This app uses the camera to let user upload a picture or video",
         "NSSpeechRecognitionUsageDescription": "This app uses speech recognition to convert your speech to text.",
         "NSCameraUsageDescription": "This app uses the camera to let user put a photo in his profile page.",
         "UIBackgroundModes": [
@@ -61,12 +64,12 @@
         "projectId": "4fa4e2f4-26f7-48b0-96e6-cd88eb8e2c16"
       }
     },
-    "runtimeVersion": "1.0.0",
     "updates": {
       "url": "https://u.expo.dev/3a17d314-84d0-49f9-8373-f3eee01578a5"
     },
     "android": {
       "package": "com.devguides.app"
-    }
+    },
+    "owner": "emmanueli"
   }
 }

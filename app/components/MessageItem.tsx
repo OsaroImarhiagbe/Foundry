@@ -6,28 +6,28 @@ import { Image } from 'expo-image';
 import { blurhash } from 'utils';
 import { useAuth } from 'app/authContext';
 interface Messageitem{
-    message_text?:any,
+    message_text?:string,
     current_User?:any,
-    date?:any,
-    id?:string
+    date?:string,
+    recipient_id?:string
 }
 
-const MessageItem:React.FC<Messageitem> = ({ message_text, current_User,date,id}) => {
+const MessageItem:React.FC<Messageitem> = ({ message_text, current_User,date,recipient_id}) => {
     const theme = useTheme()
     const {user} = useAuth()
     
-    if (current_User?.userId != id) {
+    if (current_User?.userId != recipient_id) {
         return (
             
             <View style={styles.container}>
                 <View style={{width:wp('40%')}}>
                     <View style={[styles.textContainer,{backgroundColor:'rgb(70, 160, 250)'}]}>
                     <Text
-                    variant='bodySmall'
+                    variant='bodyLarge'
                      style={{color:theme.colors.tertiary,textAlign:'auto'}}>{message_text}</Text>
                     </View>
                     <Text
-                     variant='bodySmall'
+                     variant='bodyLarge'
                     style={[styles.time,{color:theme.colors.tertiary}]}>{date}</Text>
                 </View>
             </View>
@@ -38,20 +38,20 @@ const MessageItem:React.FC<Messageitem> = ({ message_text, current_User,date,id}
              <View style={{flexDirection:'column',marginBottom:5}}>
              <Image
                  placeholder={{blurhash}}
-                 source={{uri:user?.profileUrl}}
+                 source={user?.profileUrl ? user.profileUrl : require('../assets/user.png')}
                  style={{height:hp(3.3), aspectRatio:1, borderRadius:100}}
                 />
-                <Text
-                variant='bodySmall'
-                style={[styles.lefttime,{color:theme.colors.tertiary}]}>{date}</Text>
                 </View> 
                 <View style={{width:wp('40%')}}>
-                <View style={[styles.lefttextcontainer, { backgroundColor:'rgb(196, 196, 196)'}]}>  
+                <View style={[styles.lefttextcontainer, { backgroundColor:'rgb(51, 51, 51)'}]}>  
                 <Text
-                    variant='bodySmall'
-                    style={{textAlign:'auto'}}>{message_text}</Text>   
+                    variant='bodyLarge'
+                    style={{textAlign:'center',color:'#fff'}}>{message_text}</Text>   
                 </View>
-                </View> 
+                <Text
+                variant='bodySmall'
+                style={[styles.lefttime,{color:theme.colors.tertiary}]}>{date}</Text> 
+                </View>
             </View>
            
         );
@@ -74,12 +74,13 @@ const styles = StyleSheet.create({
     },
     leftcontainer: {
         marginLeft:1,
-        flexDirection:'row'
+        flexDirection:'row',
     },
     lefttextcontainer: {
         padding:5,
         alignSelf:'flex-start',
         borderRadius:10,
+        marginLeft:10
     },
     time:{
         fontSize:8,

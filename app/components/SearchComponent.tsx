@@ -11,18 +11,24 @@ interface SearchProp{
   setSearchQuery?:(query:string) => void,
   searchQuery?:string | any,
   title?:string,
+  ref?: any
 }
 
-const SearchComponent:React.FC<SearchProp> = ({color,onPress, setSearchQuery,searchQuery,title}) => {
+const SearchComponent:React.FC<SearchProp> = ({color,onPress, setSearchQuery,searchQuery,title,ref}) => {
   const theme = useTheme()
   return (
    <Searchbar
+   ref={ref}
     onIconPress={onPress}
     placeholder={title}
     style={{
-      width:wp('65%'),
+      width:wp('60%'),
+      height:50,
       backgroundColor:theme.colors.onTertiary
     }}
+    inputStyle={{
+      color:theme.colors.tertiary
+      }}
     onChangeText={setSearchQuery}
     value={searchQuery}
     />

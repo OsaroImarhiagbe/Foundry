@@ -32,6 +32,7 @@ const CustomKeyboardView = ({children,inChat = false}: CustomKeyboardProp) => {
    {...kavConfig}
    >
     <ScrollView
+    keyboardShouldPersistTaps='handled'
     style={{flex:1}}
     bounces={false}
     showsVerticalScrollIndicator={false}

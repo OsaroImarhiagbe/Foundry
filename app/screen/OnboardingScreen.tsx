@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useCallback } from 'react'
 import {View,Text,StyleSheet,useWindowDimensions} from 'react-native'
 import Onboarding from 'react-native-onboarding-swiper'
 import LottieView from 'lottie-react-native';
@@ -9,23 +9,24 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useTheme } from 'react-native-paper';
 
 
-
-
+type OnBoardingScreenType = {
+    refreshStatus:() => void
+}
 type NavigationProp ={
     Drawer:{
         screen:string
     }
 }
 type Navigation = NativeStackNavigationProp<NavigationProp>
-const OnboardingScreen = () => {
+const OnboardingScreen:React.FC<OnBoardingScreenType> = ({refreshStatus}) => {
     const navigation = useNavigation<Navigation>()
     const theme = useTheme()
     const {width} = useWindowDimensions()
 
-    const handleDone = async () => {
+    const handleDone = useCallback(async () => {
         await AsyncStorage.setItem('onboarded','1')
-        navigation.navigate('Drawer',{screen:'Home'})
-    }
+        if (refreshStatus) refreshStatus();
+    },[])
   return (
     <View style={styles.screen}>
     <Onboarding
@@ -34,7 +35,7 @@ const OnboardingScreen = () => {
         containerStyles={{paddingHorizontal:15}}
         pages={[
             {
-            backgroundColor: '#00bf63',
+            backgroundColor:theme.colors.background,
             titleStyles:{
                 fontFamily:color.textFont
             },
@@ -46,11 +47,11 @@ const OnboardingScreen = () => {
                }} renderMode={'SOFTWARE'} source={require('../assets/animations/animation1.json')} autoPlay loop />;
                </Text>
             ),
-            title: 'Welcome to DevGuides',
+            title: 'Welcome to Foundry',
             subtitle: 'Your journey to becoming a better developer starts here!'
             },
             {
-                backgroundColor: '#fff',
+                backgroundColor: theme.colors.background,
                 titleStyles:{
                     fontFamily:color.textFont
                 },
@@ -63,10 +64,10 @@ const OnboardingScreen = () => {
                     </Text>
                 ),
                 title: 'Launch Your Next Big Idea',
-                subtitle: 'Turn your side projects into real-world applications with DevGuides'
+                subtitle: 'Turn your side projects into real-world applications with Foundry'
                 },
             {
-            backgroundColor: '#0097b2',
+            backgroundColor:theme.colors.background,
             titleStyles:{
                 fontFamily:color.textFont
             },
@@ -79,10 +80,10 @@ const OnboardingScreen = () => {
                 </Text>
             ),
             title: 'Bring Your Ideas to Life',
-            subtitle: 'From concepts to code, DevGuides is here to help you make it happen'
+            subtitle: 'From concepts to code, Foundry is here to help you make it happen'
             },
             {
-                backgroundColor: color.grey,
+                backgroundColor: theme.colors.background,
                 titleStyles:{
                     fontFamily:color.textFont
                 },
@@ -98,7 +99,7 @@ const OnboardingScreen = () => {
                 subtitle: 'Collaborate with developers from all skill levels and backgrounds'
                 },
             {
-            backgroundColor:"#fff",
+            backgroundColor:theme.colors.background,
             titleStyles:{
                 fontFamily:color.textFont
             },
@@ -111,7 +112,7 @@ const OnboardingScreen = () => {
                 </Text>
                 
             ),
-            title: 'Join the DevGuides Community',
+            title: 'Join the Foundry Community',
             subtitle: 'Meet like-minded developers, build connections, and grow your network'
             },
             

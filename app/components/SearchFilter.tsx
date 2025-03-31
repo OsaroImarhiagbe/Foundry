@@ -52,7 +52,6 @@ const SearchFilter = () => {
                     marginLeft:-30,
                     borderCurve:'continuous',
                     backgroundColor:color.white,
-                    position:'relative'
                 }
             }}
           >

@@ -2,58 +2,63 @@
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { lazy,Suspense } from 'react';
-import { ActivityIndicator, Platform } from 'react-native';
-import { useTheme,} from 'react-native-paper';
+import React, { lazy,Suspense, memo } from 'react';
+import { useTheme,Text} from 'react-native-paper';
 import { Image
  } from 'expo-image';
  import { blurhash } from 'utils';
 import { useAuth } from 'app/authContext';
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
-const NotificationScreen = lazy(() => import('../screen/NotificationScreen'))
-const SearchScreen = lazy(() => import('../screen/SearchScreen'))
-const StackNavigation = lazy(() => import('./StackNavigation'))
-const ProfileScreen = lazy(() => import('../screen/AccountScreen'))
+import LazyScreenComponent from '../components/LazyScreenComponent.tsx';
+import {useNotification} from '../NotificationProvider.tsx'
+const NotificationScreen = React.lazy(() => import('../screen/NotificationScreen.tsx'));
+const SearchScreen = React.lazy(() => import('../screen/SearchScreen.tsx'));
+const StackNavigation = React.lazy(() => import('../navigation/StackNavigation.tsx'));
+const SecondStackNavigation = React.lazy(() => import('../navigation/SecondStackNavigation.tsx'));
 
 
-const StackNavigationwrapper = () =>{
+
+const SearchScreenWrapper = React.memo(() => {
   return (
-    <Suspense fallback={<ActivityIndicator size='small' color='#000'/>}>
-    <StackNavigation/>
-  </Suspense>
-  )}
+    <LazyScreenComponent>
+      <SearchScreen/>
+    </LazyScreenComponent>
+  )
+});
 
-  const ProfileScreenWrapper = () =>{
-    return (
-  
-      <Suspense fallback={<ActivityIndicator size='small' color='#000' />}>
-      <ProfileScreen/>
-    </Suspense>
-  
-    )
-  }
 
-const SearchScreenWrapper = () => {
-  
-    return(
-      <Suspense fallback={<ActivityIndicator size='small' color='#000'/>}>
-        <SearchScreen/>
-      </Suspense>
-    )}
+const NotificationScreenWrapper = React.memo(() => {
+  return (
+    <LazyScreenComponent>
+      <NotificationScreen/>
+    </LazyScreenComponent>
+  )
+});
 
-const NotificationScreenWrapper = () => {
-  
-      return(
-        <Suspense fallback={<ActivityIndicator size='small' color='#000'/>}>
-        <NotificationScreen/>
-      </Suspense>
-      )}
+const StackNavigationWrapper = React.memo(() => {
+  return (
+    <LazyScreenComponent>
+      <StackNavigation/>
+    </LazyScreenComponent>
+  )
+});
+const SecondStackNavigationWrapper = React.memo(() => {
+  return (
+    <LazyScreenComponent>
+      <SecondStackNavigation/>
+    </LazyScreenComponent>
+  )
+});
+
+
 
 
 const TabNavigation = () => {
   const Tab = createBottomTabNavigator()
   const theme = useTheme()
   const {user} = useAuth()
+  const {notificationCount} = useNotification()
+  
 
   return (
  
@@ -61,7 +66,6 @@ const TabNavigation = () => {
   initialRouteName='Welcome'
   screenOptions={{
     headerShown: false,
-    tabBarShowLabel: false,
     tabBarStyle: {
       borderTopWidth: 0.5,
       borderColor:theme.colors.primary,
@@ -69,13 +73,12 @@ const TabNavigation = () => {
       elevation: 0, 
       shadowOpacity: 0, 
     }
-  }}
->
-    <Tab.Screen 
+  }}> 
+  <Tab.Screen 
       name="Welcome"
-     component={StackNavigationwrapper}
+     component={StackNavigationWrapper}
      options={{
-        tabBarLabel:'Welcome',
+        tabBarLabel:'Home',
         tabBarIcon:() => (
         <MaterialCommunityIcons name='home' color={theme.colors.tertiary} size={25}
         />),   
@@ -90,21 +93,28 @@ const TabNavigation = () => {
      }}
     />
     <Tab.Screen 
-        name="Notification"
-        component={NotificationScreenWrapper}
+    name="Notification"
+    component={NotificationScreenWrapper}
      options={{
-        tabBarLabel: 'Notification',
-        tabBarIcon:() => <MaterialIcons name='notifications' color={theme.colors.tertiary} size={25}/>
+      tabBarBadge: notificationCount  ? notificationCount : null,
+      tabBarLabel: 'Notifications',
+      tabBarIcon:() => (<MaterialIcons name='notifications' color={theme.colors.tertiary} size={25}/>)
      }}
      />
      <Tab.Screen 
-        name="Account"
-        component={ProfileScreenWrapper}
+        name="You"
+        component={SecondStackNavigation}
         options={{
+          tabBarLabel:'You',
           tabBarIcon:() => (
+            user?.profileUrl ?
             <Image
-            style={{height:hp(3.3), aspectRatio:1, borderRadius:100,}}
+            style={{height:hp(2.5), aspectRatio:1, borderRadius:100,}}
             source={{uri:user?.profileUrl}}
+            placeholder={{blurhash}}
+            /> :  <Image
+            style={{height:hp(2.5), aspectRatio:1, borderRadius:100,}}
+            source={require('../assets/user.png')}
             placeholder={{blurhash}}
             />
           )}}

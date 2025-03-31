@@ -19,6 +19,8 @@ interface TextInputProp {
   values?: string | undefined;
   onFocus?: () => void;
   right?: any;
+  multiline?:boolean,
+  placeholderColor?:string
 }
 const AppTextInput:React.FC<TextInputProp> = ({
   placeholder,
@@ -33,7 +35,10 @@ const AppTextInput:React.FC<TextInputProp> = ({
   iconcolor,
   values,
   color,
-  onFocus,right}) => {
+  multiline,
+  placeholderColor,
+  onFocus,
+  right}) => {
   return (
     
   
@@ -50,11 +55,12 @@ const AppTextInput:React.FC<TextInputProp> = ({
     maxLength={maxLength}
     style={[styles.Container,{backgroundColor:backgroundColor}]}
     placeholder={placeholder}
-    placeholderTextColor='#8a8a8a'
+    placeholderTextColor={placeholderColor}
     onChangeText={onChangeText}
     onBlur={onBlur}
     onFocus={onFocus}
     right={right}
+    multiline={multiline}
     />  
     </View>
       

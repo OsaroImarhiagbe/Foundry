@@ -1,141 +1,132 @@
-import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { lazy,Suspense } from 'react';
-import { ActivityIndicator } from 'react-native';
-const ReportBugScreen = lazy(() => import('../screen/ReportBugScreen'))
-const ContactUsScreen = lazy(() => import('../screen/ContactUsScreen'))
-const ProjectEntryScreen = lazy(() => import('../screen/ProjectEntryScreen'))
-const SkillsScreen = lazy(() => import('../screen/SkillsScreen'))
-const ChatScreen = lazy(() => import('../screen/ChatScreen'))
-const PostScreen = lazy(() => import('../screen/PostScreen'))
-const ProjectScreen  = lazy(()=>import('../screen/ProjectScreen'))
-const LocationScreen = lazy(()=>import('../screen/LocationScreen'))
-  
-const ReportBugScreenWrapper = () => {
-    
-    return (
-      <Suspense fallback={<ActivityIndicator size='small' color='#fff'/>}>
+import React, { Suspense } from 'react';
+import LazyScreenComponent from '../components/LazyScreenComponent.tsx';
+const ReportBugScreen = React.lazy(() => import('../screen/ReportBugScreen.tsx'));
+const ContactUsScreen = React.lazy(() => import('../screen/ContactUsScreen.tsx'));
+const LocationScreen = React.lazy(() => import('../screen/LocationScreen.tsx'));
+const EditScreen = React.lazy(() => import('../screen/EditScreen.tsx'));
+const ProjectEntryScreen = React.lazy(() => import('../screen/ProjectEntryScreen.tsx'));
+const ProfileScreen = React.lazy(() => import('../screen/AccountScreen.tsx'));
+const SkillsScreen = React.lazy(() => import('../screen/SkillScreen.tsx'));
+const ReportBugScreenWrapper = React.memo(() => {
+  return (
+    <LazyScreenComponent>
       <ReportBugScreen/>
-    </Suspense>
-  
-    )
-  }
-  const ChatScreenWrapper = () => {
-    
-    return (
-      <Suspense fallback={<ActivityIndicator size='small' color='#000'/>}>
-      <ChatScreen />
-    </Suspense>
-    )
-  
-  }
+    </LazyScreenComponent>
+  )
+})
 
-  const ContactUsScreenWrapper = () => {
-    
-    return (
-      <Suspense fallback={<ActivityIndicator size='small' color='#fff'/>}>
+const ContactUsScreenWrapper = React.memo(() => {
+  return (
+    <LazyScreenComponent>
       <ContactUsScreen/>
-    </Suspense>
-  
-    )
-  }
-  const SkillsScreenWrapper = () => {
-    
-    return (
-      <Suspense fallback={<ActivityIndicator size='small' color='#fff'/>}>
-      <SkillsScreen/>
-    </Suspense>
-  
-    )
-  }
-  
-  const ProjectEntryScreenWrapper = () => {
-    
-    return (
-      <Suspense fallback={<ActivityIndicator size='small' color='#fff'/>}>
-      <ProjectEntryScreen/>
-    </Suspense>
-  
-    )
-  }
+    </LazyScreenComponent>
+  )
+})
 
-  const PostScreenWrapper = () => {
-  
-    return (
-      <Suspense fallback={<ActivityIndicator size='small' color='#000'/>}>
-      <PostScreen/>
-    </Suspense>
-  
-    )
-  
-  }
+
+const  ProjectEntryScreenWrapper = React.memo(() => {
+  return (
+    <LazyScreenComponent>
+      <ProjectEntryScreen/>
+    </LazyScreenComponent>
+  )
+});
+
+
+const LocationScreenWrapper = React.memo(() => {
+  return (
+    <LazyScreenComponent>
+      <LocationScreen/>
+    </LazyScreenComponent>
+  )
+})
+const EditScreenWrapper = React.memo(() => {
+  return (
+    <LazyScreenComponent>
+      <EditScreen/>
+    </LazyScreenComponent>
+  )
+
+});
+const ProfileScreenWrapper = React.memo(() => {
+  return (
+    <LazyScreenComponent>
+      <ProfileScreen/>
+    </LazyScreenComponent>
+  )
+});
+const SkillsScreenWrapper = React.memo(() => {
+  return (
+    <LazyScreenComponent>
+      <SkillsScreen/>
+    </LazyScreenComponent>
+  )
+});
+
+
+
+
+
 
 const SecondStackNavigation = () => {
-    const Stack = createNativeStackNavigator();
-
- 
-
+    const Stack = createNativeStackNavigator()
     return (
-      <Stack.Navigator>
-    <Stack.Screen
-      name='Post'
-      component={PostScreenWrapper}
+  <Stack.Navigator
+  initialRouteName='Profile'
+  screenOptions={{
+    gestureEnabled:false,}}>
+  <Stack.Screen
+      name='Profile'
+      component={ProfileScreenWrapper}
       options={{
         headerShown:false,
         gestureEnabled:false,
       }}
       />
     <Stack.Screen
-    name="ProjectScreen"
-    component={ProjectScreen}
-    options={{
+      name='Edit'
+      component={EditScreenWrapper}
+      options={{
         headerShown:false,
-        
-    }}/>
-        <Stack.Screen
+        gestureEnabled:false,
+        presentation:'modal'
+      }}
+      />
+  <Stack.Screen
     name="LocationScreen"
-    component={LocationScreen}
+    component={LocationScreenWrapper}
     options={{
         headerShown:false,
-        
     }}/>
     <Stack.Screen
     name="ReportBugScreen"
     component={ReportBugScreenWrapper}
     options={{
         headerShown:false,
-        
     }}/>
-        <Stack.Screen
+<Stack.Screen
     name="ContactUsScreen"
     component={ContactUsScreenWrapper}
     options={{
         headerShown:false,
-        
     }}/>
-    <Stack.Screen
+  <Stack.Screen
     name="ProjectEntryScreen"
     component={ProjectEntryScreenWrapper}
     options={{
         headerShown:false,
-       
+        presentation:'modal'
     }}/>
-        <Stack.Screen
-    name="SkillsScreen"
+<Stack.Screen
+    name="SkillScreen"
     component={SkillsScreenWrapper}
     options={{
-        headerShown:false,
-       
-    }}/>
-    <Stack.Screen
-      name='Chat'
-      component={ChatScreenWrapper}
-      options={{
       headerShown:false,
-      gestureEnabled:false
-      }}
-        />
-      </Stack.Navigator>
+      gestureEnabled:false,
+      presentation:'modal'
+    }}/>
+</Stack.Navigator>
     );
   }
 export default SecondStackNavigation

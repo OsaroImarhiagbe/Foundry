@@ -1,12 +1,16 @@
 import React from 'react';
-import { render, fireEvent, waitFor } from '@testing-library/react-native';
-import PostComponent from 'app/components/PostComponent';
+import { render, fireEvent, waitFor,screen } from '@testing-library/react-native';
+import PostComponent from '../../app/components/PostComponent';
 import { Alert } from 'react-native';
 import {addDoc, collection, deleteDoc, doc, onSnapshot, orderBy, query, runTransaction} from '@react-native-firebase/firestore';
 import { useAuth } from '../../app/authContext';
 
 
-jest.mock('@react-native-firebase/firestore',() => ({
+jest.mock('../../app/authContext', () => ({
+  useAuth: jest.fn()
+}));
+
+jest.mock('@react-native-firebase/firestore',() => ({ // mocking the react-native-firebase/firestore module
     addDoc: jest.fn(),
     collection: jest.fn(),
     deleteDoc: jest.fn(),
@@ -29,10 +33,7 @@ jest.mock('react-native-responsive-screen', () => ({
 jest.mock('expo-image', () => ({
   Image: 'MockedImage'
 }));
-jest.mock('../../app/authContext', () => ({
-  useAuth: jest.fn()
-}));
-jest.mock('FIrebaseConfig', () => ({
+jest.mock('FirebaseConfig', () => ({
   db: 'mockedDB',
   PostRef: 'mockedPostRef'
 }));
@@ -51,7 +52,11 @@ jest.mock('react-native', () => {
 });
 
 describe('PostComponent', () => {
-  // Setup common props and mocks before each test
+  beforeEach(() => {
+    (useAuth as jest.Mock).mockReturnValue({
+      user: { userId: 'user123', username: 'testuser' },
+    });
+  });
   beforeEach(() => {
     // Reset all mocks
     jest.clearAllMocks();
@@ -101,10 +106,11 @@ describe('PostComponent', () => {
       content: 'This is a test post',
       date: '2023-01-01',
       count: 10,
-      comment_count: 5
+      comment_count: 5,
+      mount: true,
     };
 
-    const { getByText } = render(<PostComponent {...props} />);
+    const {getByText} = render(React.createElement(PostComponent, props));
     
     expect(getByText('@Test User')).toBeTruthy();
     expect(getByText('This is a test post')).toBeTruthy();
@@ -131,12 +137,16 @@ describe('PostComponent', () => {
 
     const props = {
       id: 'test-post-id',
-      count: 10,
+      auth_profile: 'https://example.com/profile.jpg',
       name: 'Test User',
-      content: 'Test content'
+      content: 'This is a test post',
+      date: '2023-01-01',
+      count: 10,
+      comment_count: 5,
+      mount: true,
     };
 
-    const { getByText } = render(<PostComponent {...props} />);
+    const {getByText} = render(React.createElement(PostComponent, props));
     
     // Find and press the like button (it has the count text)
     fireEvent.press(getByText('10'));
@@ -150,12 +160,16 @@ describe('PostComponent', () => {
   it('opens comment modal when comment button is pressed', () => {
     const props = {
       id: 'test-post-id',
-      comment_count: 5,
+      auth_profile: 'https://example.com/profile.jpg',
       name: 'Test User',
-      content: 'Test content'
+      content: 'This is a test post',
+      date: '2023-01-01',
+      count: 10,
+      comment_count: 5,
+      mount: true,
     };
 
-    const { getByText } = render(<PostComponent {...props} />);
+    const {getByText} = render(React.createElement(PostComponent, props));
     
     // Find and press the comment button
     fireEvent.press(getByText('5'));
@@ -166,15 +180,20 @@ describe('PostComponent', () => {
 
   // Test delete functionality
   it('calls handleDelete when delete option is selected', async () => {
-    (deleteDoc as jest.Mock).mockResolvedValue();
+    (deleteDoc as jest.Mock).mockResolvedValue('mockedDocRef');
     
     const props = {
       id: 'test-post-id',
+      auth_profile: 'https://example.com/profile.jpg',
       name: 'Test User',
-      content: 'Test content'
+      content: 'This is a test post',
+      date: '2023-01-01',
+      count: 10,
+      comment_count: 5,
+      mount: true,
     };
 
-    const { getByText } = render(<PostComponent {...props} />);
+    render(React.createElement(PostComponent, props));
     
     // This will depend on how you trigger the menu in tests
     // This is a simplified example and might need adaptation
@@ -193,12 +212,16 @@ describe('PostComponent', () => {
     
     const props = {
       id: 'test-post-id',
+      auth_profile: 'https://example.com/profile.jpg',
       name: 'Test User',
-      content: 'Test content',
-      comment_count: 5
+      content: 'This is a test post',
+      date: '2023-01-01',
+      count: 10,
+      comment_count: 5,
+      mount: true,
     };
 
-    const { getByText, getByPlaceholderText } = render(<PostComponent {...props} />);
+    const { getByText, getByPlaceholderText } = render(React.createElement(PostComponent, props));
     
     // Open comment modal
     fireEvent.press(getByText('5'));

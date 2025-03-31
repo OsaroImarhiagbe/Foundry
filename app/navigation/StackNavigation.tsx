@@ -1,161 +1,109 @@
-import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { lazy,Suspense } from 'react';
-import { ActivityIndicator } from 'react-native';
-import  DashBoardScreen  from '../screen/DashBoardScreen';
-const HomeScreen = lazy(() => import('../screen/HomeScreen'))
-const MessageScreen = lazy(() => import('../screen/MessageScreen'))
-const EditScreen = lazy(() => import('../screen/EditScreen'))
-const OtherUserScreen = lazy(() => import('../screen/OtherUserScreen'))
-const EditInputScreen = lazy(() => import('../screen/EditInputScreen'))
-const EditEmailScreen = lazy(() => import('../screen/EditEmailScreen'))
-const EditPhoneScreen = lazy(() => import('../screen/EditPhoneScreen'))
-const EditJobScreen = lazy(() => import('../screen/EditJobScreen'))
-const SecondStackNavigation = lazy(() => import('../navigation/SecondStackNavigation'))
-
-
-const MessageScreenWrapper = () => {
-  
+import React, { Suspense } from 'react';
+import LazyScreenComponent from '../components/LazyScreenComponent.tsx';
+const MessageScreen = React.lazy(() => import('../screen/MessageScreen.tsx'))
+const OtherUserScreen = React.lazy(() => import('../screen/OtherUserScreen.tsx'));
+const DashBoardScreen = React.lazy(() => import('../screen/DashBoardScreen.tsx'));
+const ChatScreen = React.lazy(() => import('../screen/ChatScreen.tsx'));
+const PostScreen = React.lazy(() => import('../screen/PostScreen.tsx'));
+const ProjectScreen = React.lazy(() => import('../screen/ProjectScreen.tsx'));
+const MessageScreenWrapper = React.memo(() => {
   return (
-    <Suspense fallback={<ActivityIndicator size='small' color='#000'/>}>
-    <MessageScreen/>
-  </Suspense>
-
+    <LazyScreenComponent>
+      <MessageScreen/>
+    </LazyScreenComponent>
   )
 
-}
-const HomeScreenWrapper = () => {
-  
-  return(
-    <Suspense fallback={<ActivityIndicator size='small' color='"#000'/>}>
-    <HomeScreen/>
-  </Suspense>
-  )}
-
-const EditScreenWrapper = () => {
+});
+const OtherUserScreenWrapper = React.memo(() => {
   return (
-    <Suspense fallback={<ActivityIndicator size='small' color='#000'/>}>
-    <EditScreen />
-  </Suspense>
-  )
-}
-
-const OtherUserScreenWrapper = () => {
-  
-  return (
-    <Suspense fallback={<ActivityIndicator size='small' color='#000'/>}>
-    <OtherUserScreen/>
-  </Suspense>
-
+    <LazyScreenComponent>
+      <OtherUserScreen/>
+    </LazyScreenComponent>
   )
 
-}
-const EditInputScreenWrapper = () =>{
-  return (
-      <Suspense fallback={<ActivityIndicator size='small' color='#000'/>}>
-      <EditInputScreen/>
-    </Suspense>
-  )
-}
+})
 
-const EditEmailScreenWrapper = () => {
+const DashBoardScreenWrapper = React.memo(() => {
   return (
-    <Suspense fallback={<ActivityIndicator size='small' color='#000'/>}>
-      <EditEmailScreen/>
-    </Suspense>
+    <LazyScreenComponent>
+      <DashBoardScreen/>
+    </LazyScreenComponent>
   )
-}
 
-const EditPhoneScreenWrapper = () => {
+})
+const ChatScreenWrapper = React.memo(() => {
   return (
-    <Suspense fallback={<ActivityIndicator size='small' color='#000'/>}>
-    <EditPhoneScreen/>
-  </Suspense>
+    <LazyScreenComponent>
+      <ChatScreen/>
+    </LazyScreenComponent>
   )
-}
+});
+const PostScreenWrapper = React.memo(() => {
+  return (
+    <LazyScreenComponent>
+      <PostScreen/>
+    </LazyScreenComponent>
+  )
+});
+const ProjectScreenWrapper = React.memo(() => {
+  return (
+    <LazyScreenComponent>
+      <ProjectScreen/>
+    </LazyScreenComponent>
+  )
+});
 
-const EditJobScreenWrapper = () => {
-  return (
-    <Suspense fallback={<ActivityIndicator size='small' color='#000'/>}>
-    <EditJobScreen/>
-  </Suspense>
-  )
-}
+
 const StackNavigation = () => {
   const Stack = createNativeStackNavigator();
-
- 
-
   return (
-    <Stack.Navigator
-    initialRouteName='Dash'>
-        <Stack.Screen
-        name='Dash'
-        component={DashBoardScreen}
-        options={{
-        headerShown: false, 
-        gestureEnabled:false,
-       }}
-      />
-      <Stack.Screen
-        name='Main'
-        component={HomeScreenWrapper}
-        options={{
-        headerShown: false, 
-        gestureEnabled:false
-        }}
-      />
+    <Stack.Navigator initialRouteName='Dash'>
+    <Stack.Screen
+    name='Dash'
+    component={DashBoardScreenWrapper}
+    options={{
+      headerShown: false, 
+    }}/>
     <Stack.Screen 
      name='Message'
      component={MessageScreenWrapper}
      options={{
       headerShown:false,
-      gestureEnabled:false
-      
+      gestureEnabled:false,
      }}/>
-       <Stack.Screen
-      name='Edit'
-      component={EditScreenWrapper}
-      options={{
-        headerShown:false,
-        gestureEnabled:false
-      }}
-      />
-        <Stack.Screen
+    <Stack.Screen
       name='SearchAccount'
       component={OtherUserScreenWrapper}
       options={{
         headerShown:false,
         gestureEnabled:false
       }}/>
-      <Stack.Screen
-      name='EditUser'
-      component={EditInputScreenWrapper}
+    <Stack.Screen
+      name='Chat'
+      component={ChatScreenWrapper}
+      options={{
+      headerShown:false,
+      gestureEnabled:false,
+      }}/>
+    <Stack.Screen
+      name='Post'
+      component={PostScreenWrapper}
       options={{
         headerShown:false,
         gestureEnabled:false,
-      }}/>
-        <Stack.Screen
-      name='EditEmail'
-      component={EditEmailScreenWrapper}
-      options={{
+        animation:'slide_from_bottom',
+        animationDuration:500
+      }}
+      />
+    <Stack.Screen
+    name="ProjectScreen"
+    component={ProjectScreenWrapper}
+    options={{
         headerShown:false,
         gestureEnabled:false,
-      }}/>
-         <Stack.Screen
-      name='EditPhone'
-      component={EditPhoneScreenWrapper}
-      options={{
-        headerShown:false,
-        gestureEnabled:false,
-      }}/>
-           <Stack.Screen
-      name='EditJob'
-      component={EditJobScreenWrapper}
-      options={{
-        headerShown:false,
-        gestureEnabled:false,
-      }}/>
+        presentation:'fullScreenModal'
+    }}/>
     </Stack.Navigator>
   );
 }

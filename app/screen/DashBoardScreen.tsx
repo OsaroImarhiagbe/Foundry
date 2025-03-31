@@ -1,12 +1,12 @@
 import React,
 {
-  useState,
-  lazy,
+  useCallback,
+  useRef,
 }from 'react'
 import {
     View,
-    StyleSheet,
-    TouchableOpacity} from 'react-native'
+    TouchableOpacity,
+    } from 'react-native'
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import {heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import {Image} from 'expo-image'
@@ -23,21 +23,41 @@ import {
   MenuOptions,
   MenuTrigger,
 } from 'react-native-popup-menu';
-import { MenuItems } from '../components/CustomMenu'
-
-
+import { useDispatch} from 'react-redux';
+import { MenuItems } from '../components/CustomMenu';
+import { addsearchID } from '../features/search/searchSlice';
+import SearchComponent from '../components/SearchComponent';
+import { functions } from '../../FirebaseConfig.ts';
+import LazyScreenComponent from 'app/components/LazyScreenComponent.tsx';
+import { httpsCallable } from '@react-native-firebase/functions'
+import {  useSafeAreaInsets } from 'react-native-safe-area-context';
+const HomeScreen = React.lazy(() => import('../screen/HomeScreen.tsx'));
+const FeedScreen = React.lazy(() => import('../screen/FeedScreen.tsx'));
 type NavigationProp = {
+  toggleDrawer(): undefined;
   openDrawer(): undefined;
   navigate(arg0?: string, arg1?: { screen: string; }): unknown;
-  SecondStack:undefined,
+  News:undefined,
   Home:undefined,
   Post:undefined
 }
 const Tab = createMaterialTopTabNavigator();
-const FeedScreen = lazy(() => import('../screen/FeedScreen'))
-const HomeScreen = lazy(() => import('../screen/HomeScreen'))
 
 
+const HomeScreenWrapper = React.memo(() => {
+  return (
+    <LazyScreenComponent>
+      <HomeScreen/>
+      </LazyScreenComponent>
+  )
+})
+const FeedScreenWrapper = React.memo(() => {
+  return (
+    <LazyScreenComponent>
+      <FeedScreen/>
+    </LazyScreenComponent>
+  )
+})
 
 
 
@@ -45,8 +65,28 @@ const DashBoardScreen = () => {
     const {user} = useAuth()
     const navigation = useNavigation<NavigationProp>()
     const theme = useTheme()
-    const [category,setCategory] = useState<string>('')
+    const {top} = useSafeAreaInsets()
+    const dispatch = useDispatch()
 
+    const handleSearch = useCallback((id:string) => {
+      dispatch(addsearchID(id))
+    },[dispatch])
+    
+ 
+
+  
+
+    const handleMessage = useCallback(() => {
+      navigation.navigate('Message')
+    },[])
+
+    const handleDrawer = useCallback(() => {
+      navigation.toggleDrawer()
+    },[])
+
+    const handlePost = useCallback(() => {
+      navigation.navigate('Post')
+    },[])
 
 
   return (
@@ -55,64 +95,64 @@ const DashBoardScreen = () => {
           alignItems:'center',
           paddingTop:20,
           flexDirection:'row',
-          justifyContent:'space-between',
           padding:10,
-          backgroundColor:'transparent'}}>
-        <TouchableWithoutFeedback onPress={() => navigation.openDrawer()}>
-        <Image
+          justifyContent:'space-between',
+          backgroundColor:theme.colors.background}}>
+        <TouchableWithoutFeedback onPress={handleDrawer}>
+          {user.profile ?   <Image
         style={{height:hp(4.3), aspectRatio:1, borderRadius:100}}
         source={user?.profileUrl}
         placeholder={{blurhash}}
-        cachePolicy='none'/>
+        cachePolicy='memory'/> :   <Image
+        style={{height:hp(4.3), aspectRatio:1, borderRadius:100}}
+        source={require('../assets/user.png')}
+        placeholder={{blurhash}}
+        cachePolicy='memory'/> }
         </TouchableWithoutFeedback >
-        <Image
-        source={require('../assets/images/icon.png')}
-        style={styles.logo}
+        <SearchComponent
+        title='Search....'
         />
        <TouchableOpacity
-         onPress={() => navigation.navigate('Message')}>
-        <View style={styles.icon}>
+         onPress={handleMessage}>
+        <View>
            <Entypo name='new-message' size={20} color={theme.colors.primary}/>
         </View>
         </TouchableOpacity>
         <Menu>
       <MenuTrigger>
-      <View style={{flexDirection:'row',alignItems:'center'}}>
         <Icon
-         source='menu-down'
+         source='dots-horizontal'
          size={25}/>
-      </View>
       </MenuTrigger>
       <MenuOptions
-        customStyles={{
-            optionsContainer:{
-                borderRadius:10,
-                marginTop:40,
-                marginLeft:-30,
-                borderCurve:'continuous',
-                backgroundColor:'#fff',
-                position:'relative'
-            }
-        }}
-      >
-        <MenuItems 
-        text='Anyone'
-        action={()=>setCategory('Anyone')}/>
-        <Divider/>
-         <MenuItems 
-        text='Creativity and Innovation'
-        action={()=>setCategory('Creativity and Innovation')}/>
-      <Divider/>
+    customStyles={{
+          optionsContainer:{
+              borderRadius:10,
+              marginTop:40,
+              marginLeft:-30,
+              borderCurve:'continuous',
+              backgroundColor:'#fff',
+          }
+      }}
+    >
       <MenuItems 
-        text='Collaboration and Community'
-        action={()=>setCategory('Collaboration and Community')}/>
+      text='Anyone'
+      action={()=> handleSearch('Anyone')}/>
       <Divider/>
-      <MenuItems 
-        text='Startup and Busniess'
-        action={()=>setCategory('Statup and Busniess')}/>
-      </MenuOptions>
+       <MenuItems 
+      text='Creativity and Innovation'
+      action={()=> handleSearch('Creativity and Innovation')}/>
+    <Divider/>
+    <MenuItems 
+      text='Collaboration and Community'
+      action={()=> handleSearch('Collaboration and Community')}/>
+    <Divider/>
+    <MenuItems 
+      text='Startup and Busniess'
+      action={()=> handleSearch('Statup and Busniess')}/>
+    </MenuOptions>
     </Menu>
-        </View>
+        </View> 
         <View style={{flex:1}}>
         <Tab.Navigator
         screenOptions={{
@@ -131,12 +171,11 @@ const DashBoardScreen = () => {
     >
         <Tab.Screen
         name='For You'
-        component={FeedScreen}
+        component={FeedScreenWrapper}
         />
         <Tab.Screen
         name='Community'
-        component={HomeScreen}
-        initialParams={{category:category}}
+        component={HomeScreenWrapper}
         />
         </Tab.Navigator>
         <FAB
@@ -146,24 +185,12 @@ const DashBoardScreen = () => {
           mode='elevated'
           color={theme.colors.primary}
           style={{position:'absolute',right:16,top:hp(65),alignItems:'center'}}
-          onPress={() => navigation.navigate('SecondStack',{screen:'Post'})}
+          onPress={handlePost}
         />
         </View>
     </View>
   )
 }
 
-const styles = StyleSheet.create({
-    logo: {
-      width: 40,
-      height: 40, 
-    },
-    icon:{
-      margin:5
-    },
-    container:{
-      flex:1
-    }
-});
 
 export default DashBoardScreen
