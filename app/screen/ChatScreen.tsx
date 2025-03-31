@@ -41,7 +41,6 @@ const ChatScreen = () => {
   const { user } = useAuth();
   const [messageText, setMessageText] = useState('');
   const navigation = useNavigation();
-  const dispatch = useDispatch()
   const flashListRef = useRef<FlashList<any> | null>(null);
   const theme = useTheme()
   const [focus,setFocus] = useState(false)
@@ -58,9 +57,6 @@ const ChatScreen = () => {
   }
   const recipientName = userid ? name  : item.participants.user_1  ? item.participants.username_1 : 'Unknown Recipient'; 
 
-  // const memoMessages = useMemo(() => {
-  //   return [...messages].sort((a,b) => a.id - b.id);
-  // },[messages])
 
   useEffect(() => {
     const timeout = setTimeout(() => {
