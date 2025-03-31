@@ -26,7 +26,7 @@ import {
   MenuTrigger,
 } from 'react-native-popup-menu';
 import { MenuItems } from '../components/CustomMenu'
-import { crashlytics, database, db, PostRef } from 'FirebaseConfig';
+import { crashlytics, database, db, PostRef } from '../../FirebaseConfig.ts';
 import FastImage from "@d11/react-native-fast-image";
 import { perf } from '../../FirebaseConfig';
 import { Skeleton } from 'moti/skeleton';
