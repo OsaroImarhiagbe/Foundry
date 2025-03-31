@@ -1,119 +1,75 @@
-import { View, Text, StyleSheet, TouchableHighlight,TouchableOpacity} from 'react-native'
-import { useState, useEffect } from 'react';
-import { useAuth } from '../authContext';
-import { blurhash } from '../../utils/index';
+import { View, StyleSheet, TouchableHighlight,TouchableOpacity} from 'react-native'
+import { useState, useEffect, useMemo, useCallback } from 'react';
+import { blurhash, TimeAgo } from '../../utils/index';
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import { Image } from 'expo-image';
-import firestore, { FirebaseFirestoreTypes } from '@react-native-firebase/firestore';
-import { getRoomID,formatDate } from '../../utils';
 import Swipeable from 'react-native-gesture-handler/ReanimatedSwipeable';
 import { useDispatch} from 'react-redux';
 import {removeID} from '../features/Message/messageidSlice';
+import { getDatabase, onValue } from '@react-native-firebase/database';
+import { Text,useTheme } from 'react-native-paper';
 
 interface ChatRoomProp{
-  next_item?:any,
+  last_message:string,
+  chat_room_id:string,
+  username_1:string,
+  user_1:string,
+  username_2:string,
+  date:string,
   onPress?:()=>void,
-  User?:any
+  user?:any
 }
 
-interface Message {
-  userId?: string;
-  text?: string;
-  createdAt?: FirebaseFirestoreTypes.Timestamp
-}
 
-const ChatRoom:React.FC<ChatRoomProp> = ({next_item, onPress,User}) => {
 
-  
- 
-
-    const {user } = useAuth();
-    const dispatch = useDispatch()
-    const [lastMessage, setLastMessage] = useState<Message | null>(null);
-    useEffect(() => {
-        const roomId = getRoomID(User?.userId,next_item?.userId)
-        const docRef = firestore().collection('chat-rooms').doc(roomId);
-        const messageRef = docRef.collection('messages').orderBy('createdAt','desc')
-        const unsub = messageRef.onSnapshot((documentSnapshot) => {
-          let allmessage = documentSnapshot.docs.map(doc => {
-            return doc.data()
-          });
-          setLastMessage(allmessage[0] ? allmessage[0]: null)
-      })
-        return () => unsub()
-
-      },[User?.userId, next_item?.userId])
-
-      const renderTime = () => {
-        if(lastMessage?.createdAt){
-            let date = lastMessage?.createdAt
-            return formatDate(new Date(date?.seconds * 1000))
-        }
+const ChatRoom:React.FC<ChatRoomProp> = ({onPress,user,last_message,chat_room_id,username_1,username_2,date,user_1}) => {
+  const theme = useTheme()
+  const renderLastMessage = useCallback(() => {
+    if (typeof last_message === 'undefined') return 'Loading...';
+    if (last_message) {
+      if (user.userId !== user_1) {
+        return 'You: ' + last_message;
       }
-      const renderLastMessage =() => {
-        if(typeof lastMessage == 'undefined') return 'Loading...'
-        if(lastMessage){
-            if(User.userId == lastMessage.userId){
-                return 'You: '+ lastMessage?.text
-            }
-            return lastMessage?.text;
-        }else{
-            return 'Say Hi'
-        }
+      return last_message;
+    } else {
+      return 'Say Hi';
+    }
+  },[last_message]);
+  const handleDelete = useCallback(async () => {
+    try {
+      const messagesRef = getDatabase().ref(`/messages/${chat_room_id}`);
+      await messagesRef.remove();
+      const chatsRef = getDatabase().ref(`/chats/${chat_room_id}`)
+      await chatsRef.remove()
+      }catch(error){
+        console.error('Error deleting document: ', error);
       }
-
-      const handleDelete = async () => {
-        try {
-          const roomId = getRoomID(User?.userId,next_item?.userId)
-          const messagesRef = firestore().collection('chat-rooms').doc(roomId).collection('messages')
-          const messagesSnapshot = await messagesRef.get();
-          const docPromise = messagesSnapshot.docs.map((messageDoc) => {
-               return messageDoc.ref.delete();
-            });
-          await Promise.all(docPromise)
-
-          const roomRef = firestore().collection('chat-rooms').doc(roomId)
-          const sent_message = firestore().collection('sent-message-id').doc(next_item.userId)
-          await roomRef.delete()
-          await sent_message.delete()
-          dispatch(removeID(next_item.userId))
-        } catch (error) {
-          console.error('Error deleting document: ', error);
-
-        }
-      };
-      
-
-      const renderRightActions = () =>{
-        return (
-          <View style={{borderRadius:15,backgroundColor: '#252525', justifyContent: 'center', alignItems: 'center', paddingHorizontal: 20 }}>
-              <TouchableOpacity onPress={handleDelete} >
-            <Text style={{color: 'white',fontWeight: 'bold',}}>Delete</Text>
-          </TouchableOpacity>
-          </View>
-        
-          
-        )
-      }
+    },[chat_room_id]);
+  const renderRightActions = useCallback(() =>{
+    return (
+    <TouchableOpacity onPress={handleDelete} style={{ justifyContent: 'center', alignItems: 'center',}}>
+      <Text variant='bodyMedium' style={{color:theme.colors.tertiary}}>Delete</Text>
+      </TouchableOpacity>
+      )
+    },[handleDelete])
   return (
  
-    <Swipeable renderRightActions={renderRightActions}>
-       <TouchableHighlight
-    underlayColor='#252525'
-    onPress={onPress}>
+    <Swipeable rightThreshold={200} renderRightActions={renderRightActions}>
+      <TouchableHighlight
+      onPress={onPress}>
         <View style={styles.container}>
           <View>
           <Image
-              style={{height:hp(4.3), aspectRatio:1, borderRadius:100}}
+              style={{height:hp(5.3), aspectRatio:1, borderRadius:100}}
               placeholder={{blurhash}}
-              source={next_item?.profileUrl}
+              source={require('../assets/user.png')}
               transition={500}/>
           </View>
          <View style={styles.detailsContainer}>
-             <Text numberOfLines={1} style={styles.title}>{next_item?.name}</Text>
-             <Text  numberOfLines={2} style={styles.subTitle} >{renderLastMessage()}</Text>
+             <Text variant='bodyMedium' numberOfLines={1} >{user.userId === user_1 ? username_2 : username_1}</Text>
+             <Text variant='bodyLarge' numberOfLines={2} style={{color:theme.colors.onTertiary}}>{renderLastMessage()}</Text>
          </View>
-         <Text  numberOfLines={2} style={styles.subTitle} >{renderTime()}</Text>
+         <Text variant='bodySmall' numberOfLines={2}>{date}</Text>
         </View>
     </TouchableHighlight>
     </Swipeable>
@@ -125,11 +81,7 @@ const ChatRoom:React.FC<ChatRoomProp> = ({next_item, onPress,User}) => {
 const styles = StyleSheet.create({
   container:{
       flexDirection:'row',
-      padding: 15,
       alignItems:'center',
-      backgroundColor:'#252525',
-      borderRadius:15
-
   },
   detailsContainer:{
       flex:1,
@@ -139,21 +91,6 @@ const styles = StyleSheet.create({
   iconContainer:{
       borderRadius:50,
   },
-  image:{
-      width:50,
-      height: 50,
-      borderRadius: 50,
-      marginRight:10
-  },
-  title:{
-      fontWeight: 500,
-      marginBottom:5,
-      color:"#000"
-      
-  },
-  subTitle:{
-      color:'#6e6969'
-  }
 })
 
 export default ChatRoom

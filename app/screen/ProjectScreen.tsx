@@ -4,15 +4,14 @@ import color from '../../config/color';
 import Entypo from 'react-native-vector-icons/Entypo';
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 import { useNavigation } from '@react-navigation/native';
-import {collection, getDoc, getDocs, onSnapshot, query, where} from '@react-native-firebase/firestore'
+import {collection, getDocs, query, where} from '@react-native-firebase/firestore'
 import { useAuth } from '../authContext';
-import { Image } from 'expo-image';
-import { blurhash } from '../../utils';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import  { log, recordError } from '@react-native-firebase/crashlytics'
-import { crashlytics, db,ProjectRef } from '../../FirebaseConfig';
+import { crashlytics,ProjectRef } from '../../FirebaseConfig';
 import FastImage from '@d11/react-native-fast-image';
 import { useSelector } from 'react-redux';
+import { useTheme } from 'react-native-paper';
 
 interface Project{
     id?:string,
@@ -29,6 +28,7 @@ type NavigationProp = NativeStackNavigationProp<RootStackListProp,'ProjectEntryS
 const ProjectScreen = () => {
     const [projects, setProjects] = useState<Project[]>([])
     const {user} = useAuth()
+    const theme = useTheme();
     const projectId = useSelector((state:any) => state.project.projectid)
 
     const navigation = useNavigation<NavigationProp>()
@@ -54,7 +54,7 @@ const ProjectScreen = () => {
     },[])
 
     return (
-      <SafeAreaView style={styles.screen}>
+      <SafeAreaView style={[styles.screen,{backgroundColor:theme.colors.background}]}>
         <View style={{padding:20}}>
         <View style={styles.container}>
             {projects[0].image ?
@@ -109,7 +109,6 @@ const ProjectScreen = () => {
 const styles = StyleSheet.create({
     screen:{
         flex:1,
-        backgroundColor:color.backgroundcolor,
     },
     container:{
         justifyContent:'center',

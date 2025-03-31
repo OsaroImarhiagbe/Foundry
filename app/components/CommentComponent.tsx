@@ -1,4 +1,4 @@
-import React,{useState,useEffect,memo} from 'react'
+import React,{useState,useEffect,memo, useCallback} from 'react'
 import {
   View,
   StyleSheet,
@@ -10,11 +10,16 @@ import { Image } from 'expo-image';
 import { useAuth } from '../authContext';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import ReplyComponent from './ReplyComponent';
-import firestore, { FirebaseFirestoreTypes } from '@react-native-firebase/firestore';
 import { useSelector } from 'react-redux';
-import {Text,Card,useTheme} from 'react-native-paper'
+import {Text,Card,useTheme, ActivityIndicator} from 'react-native-paper'
 import { TouchableWithoutFeedback } from 'react-native-gesture-handler';
 import FastImage from '@d11/react-native-fast-image';
+import { crashlytics, database, functions } from '../../FirebaseConfig';
+import {endAt, endBefore, FirebaseDatabaseTypes, limitToLast, onValue, orderByChild, query, ref} from '@react-native-firebase/database'
+import { log, recordError } from '@react-native-firebase/crashlytics';
+import { FlashList } from '@shopify/flash-list';
+import { httpsCallable } from '@react-native-firebase/functions';
+import { TimeAgo } from '../../utils/index';
 
 type CommentProp = {
   content?:string,
@@ -22,19 +27,21 @@ type CommentProp = {
   comment_id?:string | any,
   post_id?:string,
   date?:string,
+  comment_count?: number
   auth_profile?:string,
-  count?:number,
+  like_count?:number,
+  liked_by?: string[]
   onReplyPress: (comment_id: string, name: string) => void;
   url?:string;
 }
 
 interface Reply{
-  id?:string,
+  reply_id?:string,
   auth_profile?:string,
   like_count?:number,
   content?:string,
   name?:string,
-  createdAt?:FirebaseFirestoreTypes.Timestamp
+  createdAt?:number
 
 }
 const CommentComponent:React.FC<CommentProp> = memo(({
@@ -42,14 +49,18 @@ const CommentComponent:React.FC<CommentProp> = memo(({
   name,
   comment_id,
   post_id,
-  count,
+  comment_count,
+  like_count,
   date,
   auth_profile,
   url,
   onReplyPress}) => {
     const [press,setIsPress] = useState(false)
-    const [isloading,setLoading] = useState<boolean>(false)
+    const [isloading,setLoading] = useState<boolean>(true)
     const [showReply,setShowReply] = useState<boolean>(false)
+    const [lastVisible, setLastVisible] = useState<FirebaseDatabaseTypes.DataSnapshot | null>(null);
+    const [loadingMore, setLoadingMore] = useState<boolean>(false);
+    const [hasMore, setHasMore] = useState<boolean>(true);
     const [reply,setReply] = useState<Reply[]>([])
     const {user} = useAuth();
     const profileImage = useSelector((state:any) => state.user.profileImage)
@@ -58,66 +69,97 @@ const CommentComponent:React.FC<CommentProp> = memo(({
 
   
     useEffect(() => {
+      log(crashlytics,'Fetching replies')
       const fetchReply = () => {
         try {
-          const docRef = firestore()
-          .collection('posts')
-          .doc(post_id)
-          .collection('comments')
-          .doc(comment_id)
-          .collection('replys')
-          .orderBy('createdAt', 'desc')
-          const unsub = docRef.onSnapshot((querySnapshot)=>{
-            let data:Reply[] = [];
-            querySnapshot.forEach(documentSnapshot => {
-              data.push({ ...documentSnapshot.data(),id:documentSnapshot.id });
+          const docRef = ref(database,`/replies/${comment_id}`)
+          const queryOrderBy = query(docRef,orderByChild('createdAt'),limitToLast(5))
+          const unsub = onValue(queryOrderBy,(snapshot)=>{
+            if(!snapshot.exists()){
+              setReply([])
+              setLoading(false)
+              return;
+            }
+            const data:Reply[] = [];
+            snapshot.forEach(snapshot => {
+              data.push({ ...snapshot.val(),id:snapshot.key});
+              return true;
             })
             setReply(data);
+            setLastVisible(data.length > 0 ? snapshot.child(data[data.length - 1].createdAt?.toString() || '') : null);
+            setHasMore(data.length === 5)
+            setLoading(false)
           })
           return () => unsub()
-        }  catch (e) {
-        console.error(`Error: ${e}`);
+        }  catch (error: unknown | any) {
+          recordError(crashlytics,error)
+          console.error(`Error: ${error}`);
+      }finally{
+        setLoading(false)
       }
     };
 
     fetchReply()
     },[comment_id,post_id])
 
-    const handleLike = async () => {
 
-      setLoading(true)
-      const docRef = firestore().collection('posts').doc(post_id).collection('comments').doc(comment_id);
+
+    const LoadMoreReplies = useCallback(async () => {
+      setLoadingMore(true)
+      if (!lastVisible || !hasMore) return;
+      const docRef = ref(database,`/replys/${comment_id}`)
+      const queryOrderBy = query(docRef, orderByChild('createdAt'), endAt(lastVisible?.val()?.createdAt), limitToLast(5))
       try{
-        await firestore().runTransaction(async (transaction)=>{
-          const doc = await transaction.get(docRef)
-          if (!doc.exists) throw new Error ('Document doesnt exists');
-
-          const currentLikes = doc?.data()?.like_count || 0
-          const likeBy = doc?.data()?.liked_by || []
-          const hasliked = likeBy.includes(user.userId)
-
-          let newlike
-          let updatedLike
-
-          if(hasliked){
-            newlike = currentLikes - 1
-            updatedLike = likeBy.filter((id:string)=> id != user?.userId)
-          }else{
-            newlike = currentLikes + 1
-            updatedLike = [...likeBy,user.userId]
+        const subscriber = onValue(queryOrderBy,(snapshot) => {
+          if(!snapshot.exists()){
+            setHasMore(false)
+            setLoadingMore(false)
+            return;
           }
-          transaction.update(docRef,{
-            like_count:newlike,
-            liked_by:updatedLike
+          const data:Reply[] = []
+          snapshot.forEach((childSnapshot) => {
+            data.push({...childSnapshot.val(),id:childSnapshot.key});
+            return true
           })
-        })
+          setReply((prev) => [...prev,...data])
+          setLastVisible(data.length > 0 ? snapshot.child(data[data.length - 1].createdAt?.toString() || '') : null);
+          setHasMore(data.length === 5)
+          setLoadingMore(false)
+      })
+          return () => subscriber()
+      }catch(error:unknown | any){
+        recordError(crashlytics,error)
+        setLoadingMore(false)
+      }finally{
+        setLoadingMore(false)
+      }
+  },[comment_id,lastVisible])
+
+    const LikeButton = useCallback(async () => {
+      setLoading(true)
+      const handleLike = httpsCallable(functions,'handleLike')
+      try{
+        await handleLike({
+          post_id:post_id,
+          currentUser:user.userId,
+          comment_id:comment_id
+        }).catch((error) => recordError(crashlytics,error))
       }catch(err){
         console.error('error liking comment:',err)
       }finally{
         setLoading(false)
       }
   
-    }
+    },[post_id,comment_id])
+
+    const handleIsPress = useCallback(() => {
+      setIsPress(prev => !prev)
+    },[press])
+
+    const handleShowReply = useCallback(() => {
+      setShowReply(prev => !prev)
+    },[press])
+
   return (
     <Card
     mode='contained'
@@ -173,7 +215,7 @@ const CommentComponent:React.FC<CommentProp> = memo(({
     </Text>
     </View>
     {
-      reply && <TouchableWithoutFeedback onPress={() => setShowReply(!showReply)} style={{marginLeft:150}}>
+      reply && <TouchableWithoutFeedback onPress={handleShowReply} style={{marginLeft:150}}>
       <Text>View Replies</Text>
     </TouchableWithoutFeedback>
     }
@@ -181,17 +223,17 @@ const CommentComponent:React.FC<CommentProp> = memo(({
     </View>
       <View style={styles.reactionContainer}>
     <TouchableHighlight
-                 onShowUnderlay={() => setIsPress(true)}
-                 onHideUnderlay={() => setIsPress(false)}
+                 onShowUnderlay={handleIsPress}
+                 onHideUnderlay={handleIsPress}
                  underlayColor='#0097b2'
-                 onPress={handleLike}
+                 onPress={LikeButton}
                  style={styles.reactionIcon}
                  >
                  <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                      <MaterialCommunityIcons name="heart" size={15} color={theme.colors.onTertiary}/>
                      <Text
                      variant='bodySmall'
-                     style={styles.reactionText}>{count}</Text>
+                     style={styles.reactionText}>{like_count}</Text>
                  </View>
                  </TouchableHighlight>
         <TouchableOpacity onPress={() => {
@@ -205,16 +247,26 @@ const CommentComponent:React.FC<CommentProp> = memo(({
       </TouchableOpacity>
       </View>
       <View>
-      {showReply && reply.map((replies) => {
-        return <ReplyComponent
-        key={replies.id}
-        reply_id={replies.id}
-        name={replies.name}
-        content={replies.content}
+      {showReply && 
+      <FlashList
+      ListFooterComponent={() => (
+        <ActivityIndicator color='#fff' size='small' animating={loadingMore}/>)}
+      onEndReached={LoadMoreReplies}
+      onEndReachedThreshold={0.5}
+      estimatedItemSize={460}
+      data={reply}
+      renderItem={({item}) => (
+        <ReplyComponent
+        key={item.reply_id}
+        reply_id={item.reply_id}
+        name={item.name}
+        content={item.content}
         post_id={post_id} 
         comment_id={comment_id}
-        count={replies.like_count}/>
-      })}
+        date={TimeAgo(item.createdAt ?? 0)}
+        count={item.like_count}/>
+      )}
+      />}
       </View>
     </Card.Content>
   </Card>
@@ -255,3 +307,4 @@ const styles = StyleSheet.create({
 })
 
 export default CommentComponent
+

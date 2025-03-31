@@ -1,7 +1,7 @@
 import React,
 {
-  Suspense,
   useCallback,
+  useRef,
 }from 'react'
 import {
     View,
@@ -27,22 +27,37 @@ import { useDispatch} from 'react-redux';
 import { MenuItems } from '../components/CustomMenu';
 import { addsearchID } from '../features/search/searchSlice';
 import SearchComponent from '../components/SearchComponent';
-import HomeScreen from '../screen/HomeScreen.tsx'
-import FeedScreen from '../screen/FeedScreen.tsx'
-
-
+import { functions } from '../../FirebaseConfig.ts';
+import LazyScreenComponent from 'app/components/LazyScreenComponent.tsx';
+import { httpsCallable } from '@react-native-firebase/functions'
+import {  useSafeAreaInsets } from 'react-native-safe-area-context';
+const HomeScreen = React.lazy(() => import('../screen/HomeScreen.tsx'));
+const FeedScreen = React.lazy(() => import('../screen/FeedScreen.tsx'));
 type NavigationProp = {
+  toggleDrawer(): undefined;
   openDrawer(): undefined;
   navigate(arg0?: string, arg1?: { screen: string; }): unknown;
-  SecondStack:undefined,
+  News:undefined,
   Home:undefined,
   Post:undefined
 }
 const Tab = createMaterialTopTabNavigator();
 
 
-
-
+const HomeScreenWrapper = React.memo(() => {
+  return (
+    <LazyScreenComponent>
+      <HomeScreen/>
+      </LazyScreenComponent>
+  )
+})
+const FeedScreenWrapper = React.memo(() => {
+  return (
+    <LazyScreenComponent>
+      <FeedScreen/>
+    </LazyScreenComponent>
+  )
+})
 
 
 
@@ -50,6 +65,7 @@ const DashBoardScreen = () => {
     const {user} = useAuth()
     const navigation = useNavigation<NavigationProp>()
     const theme = useTheme()
+    const {top} = useSafeAreaInsets()
     const dispatch = useDispatch()
 
     const handleSearch = useCallback((id:string) => {
@@ -58,7 +74,19 @@ const DashBoardScreen = () => {
     
  
 
-   
+  
+
+    const handleMessage = useCallback(() => {
+      navigation.navigate('Message')
+    },[])
+
+    const handleDrawer = useCallback(() => {
+      navigation.toggleDrawer()
+    },[])
+
+    const handlePost = useCallback(() => {
+      navigation.navigate('Post')
+    },[])
 
 
   return (
@@ -70,7 +98,7 @@ const DashBoardScreen = () => {
           padding:10,
           justifyContent:'space-between',
           backgroundColor:theme.colors.background}}>
-        <TouchableWithoutFeedback onPress={() => navigation.openDrawer()}>
+        <TouchableWithoutFeedback onPress={handleDrawer}>
           {user.profile ?   <Image
         style={{height:hp(4.3), aspectRatio:1, borderRadius:100}}
         source={user?.profileUrl}
@@ -85,7 +113,7 @@ const DashBoardScreen = () => {
         title='Search....'
         />
        <TouchableOpacity
-         onPress={() => navigation.navigate('Message')}>
+         onPress={handleMessage}>
         <View>
            <Entypo name='new-message' size={20} color={theme.colors.primary}/>
         </View>
@@ -143,11 +171,11 @@ const DashBoardScreen = () => {
     >
         <Tab.Screen
         name='For You'
-        component={FeedScreen}
+        component={FeedScreenWrapper}
         />
         <Tab.Screen
         name='Community'
-        component={HomeScreen}
+        component={HomeScreenWrapper}
         />
         </Tab.Navigator>
         <FAB
@@ -157,7 +185,7 @@ const DashBoardScreen = () => {
           mode='elevated'
           color={theme.colors.primary}
           style={{position:'absolute',right:16,top:hp(65),alignItems:'center'}}
-          onPress={() => navigation.navigate('SecondStack',{screen:'Post'})}
+          onPress={handlePost}
         />
         </View>
     </View>

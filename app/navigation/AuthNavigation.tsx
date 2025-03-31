@@ -1,41 +1,29 @@
 import { createStackNavigator } from '@react-navigation/stack';
-import React, { memo, Suspense,} from 'react';
-import {useAuth} from '../authContext.tsx'
-import DrawerNavigation from '../navigation/DrawerNavigation.tsx'
-const SecondStackNavigation = React.lazy(() => import('../navigation/SecondStackNavigation.tsx'));
+import React from 'react';
+import LazyScreenComponent from '../components/LazyScreenComponent.tsx';
+
 const OnboardingScreen = React.lazy(() => import('../screen/OnboardingScreen.tsx'));
 const LoginScreen = React.lazy(() => import('../screen/LoginScreen.tsx'));
 const RegisterScreen = React.lazy(() => import('../screen/RegisterScreen.tsx'));
 
 
-const SecondStackNavigationWrapper = () => {
+
+const LoginScreenWrapper = React.memo(() => {
   return (
-    <Suspense>
-      <SecondStackNavigation/>
-    </Suspense>
-  )
-}
-const OnboardingScreenWrapper = () => {
-  return (
-    <Suspense>
-      <OnboardingScreen/>
-    </Suspense>
-  )
-}
-const LoginScreenWrapper = () => {
-  return (
-    <Suspense>
+    <LazyScreenComponent>
       <LoginScreen/>
-    </Suspense>
+      </LazyScreenComponent>
   )
-}
-const RegisterScreenWrapper = () => {
+})
+const RegisterScreenWrapper = React.memo(() => {
   return (
-    <Suspense>
+    <LazyScreenComponent>
       <RegisterScreen/>
-    </Suspense>
+      </LazyScreenComponent>
   )
-}
+})
+
+
 
 
 
@@ -43,22 +31,14 @@ const RegisterScreenWrapper = () => {
 
 
 const AuthNavigation = () => {
-  const {isAuthenticated} = useAuth()
   const Stack = createStackNavigator()
  
 
 
 
   return (
-        <Stack.Navigator initialRouteName={isAuthenticated ? 'Drawer':'Login'}>
-        <Stack.Screen
-            name='Drawer'
-            component={DrawerNavigation}
-            options={{
-              headerShown:false,
-              gestureEnabled:false,
-            }}/>
-            <Stack.Screen
+        <Stack.Navigator initialRouteName='Login'>
+          <Stack.Screen
             name="Login"
             component={LoginScreenWrapper}
             options={{
@@ -73,20 +53,6 @@ const AuthNavigation = () => {
             headerShown:false,
             gestureEnabled:false,
           }}/>
-          <Stack.Screen
-          name="Onboarding"
-          component={OnboardingScreenWrapper}
-          options={{
-            headerShown:false,
-            gestureEnabled:false,
-          }}/>
-       <Stack.Screen
-        name='SecondStack'
-        component={SecondStackNavigationWrapper}
-        options={{
-          headerShown:false,
-          gestureEnabled:false,
-      }}/>
         </Stack.Navigator>
       )
     }

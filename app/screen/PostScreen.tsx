@@ -12,12 +12,8 @@ import {
 import { blurhash } from '../../utils/index';
 import { useAuth } from '../authContext';
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
-import { useSelector } from 'react-redux';
 import { useNavigation } from '@react-navigation/native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-import {
-  Timestamp}from '@react-native-firebase/firestore'
-import color from '../../config/color';
 import {getDownloadURL,putFile,ref} from '@react-native-firebase/storage'
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useTheme,Icon,Text,Button,Divider } from 'react-native-paper';
@@ -30,13 +26,13 @@ import {
   MenuTrigger,
 } from 'react-native-popup-menu';
 import { MenuItems } from '../components/CustomMenu'
-import {crashlytics, functions, perf } from '../../FirebaseConfig';
-import { storage } from 'FirebaseConfig';
+import {crashlytics, functions, perf,storage } from '../../FirebaseConfig';
 import { httpsCallable } from '@react-native-firebase/functions'
 import FastImage from "@d11/react-native-fast-image";
 import {Image as ImageCompressor,Video as VideoCompressor} from 'react-native-compressor';
 import {launchImageLibrary} from 'react-native-image-picker';
 import Video, {VideoRef} from 'react-native-video';
+import Toast from 'react-native-toast-message'
 
 
 
@@ -63,8 +59,7 @@ const PostScreen = () => {
   const [category, setCategory] = useState<string>('')
   const isMounted = useRef(true)
   const videoRef = useRef<VideoRef>(null);
-  
-{/** TOMORROW GET IMAGE AND VIDEO OPTIMIZE ALSO IN POST AND COMMMENT COMPONENT, THIS WILL TIE INTO WITH PROJECT SCREEN AND MAYBE EDIT SCREEN */}
+
 
 
   useEffect(() => {
@@ -76,7 +71,7 @@ const PostScreen = () => {
   useEffect(() => {
     const timeout = setTimeout(() => {
       textInputRef.current?.focus()
-    }, 1000);
+    }, 100);
 
     return () => clearTimeout(timeout); 
   }, []);
@@ -84,18 +79,25 @@ const PostScreen = () => {
 
   const handlePost = useCallback(async () => {
     if(text.trim() === '') return
+    log(crashlytics,'Handle Post')
     let trace = await perf.startTrace('sending_post_or_image')
     setLoading(true);
     try {
       const addPost = httpsCallable(functions,'addPost')
       let imageUrl = '';
+      let videoUrl = '';
       if(image && filename){
         const imageRef = ref(storage,`/posts/images/${user.userId}/${filename}`)
         await putFile(imageRef,image)
         imageUrl = await getDownloadURL(imageRef)
+      }else if(video && filename){
+        const videoRef = ref(storage,`/posts/videos/${user.userId}/${filename}`)
+        await putFile(videoRef,video)
+        videoUrl = await getDownloadURL(videoRef)
       }
       addPost({
         auth_id:user?.userId,
+        auth_profile:user?.profileUrl,
         name:user?.username,
         content:text,
         like_count: 0,
@@ -103,20 +105,32 @@ const PostScreen = () => {
         liked_by: [],
         category:category,
         image:imageUrl,
+        video:videoUrl,
       }).catch((error) => {
-        console.error('Error sending post:',error)
+        recordError(crashlytics,error)
+        console.error('Error sending post:',error.message)
       })
       setText('');
       setImage(null);
       setCategory('');
       navigation.goBack();
+      Toast.show({
+        type: 'success',
+        text1: 'Your post was sent',
+        position:'top',
+        autoHide:true,
+        visibilityTime:5000,
+        topOffset:top,
+      });
+      setLoading(false)
     } catch (error:unknown | any) {
-      console.error("Error creating room:", error);
+      recordError(crashlytics,error)
+      console.error("Error sending post:", error);
     }finally{
       setLoading(false);
       trace.stop()
     }
-  },[ text, image, filename, user, category]);
+  },[ text, image, filename, user, category,video]);
 
   const handleCancel = useCallback(() => {
     if (hasUnsavedChanges || image || video) {
@@ -178,12 +192,19 @@ const PostScreen = () => {
          size={25}/>
         </TouchableOpacity>
         <View style={{paddingLeft:15}}>
-        <Image
+         {
+          user.profileUrl ?    <Image
           source={user?.profileUrl}
           placeholder={{blurhash}}
           style={{height:hp(3.3), aspectRatio:1, borderRadius:100}}
           transition={500}
+          /> :    <Image
+          source={require('../assets/user.png')}
+          placeholder={{blurhash}}
+          style={{height:hp(3.3), aspectRatio:1, borderRadius:100}}
+          transition={500}
           />
+         } 
         </View>
         </View>
         <View style={{flexDirection:'row',alignItems:'center'}}>
@@ -206,7 +227,7 @@ const PostScreen = () => {
                 marginTop:40,
                 marginLeft:-30,
                 borderCurve:'continuous',
-                backgroundColor:color.white,
+                backgroundColor:'#fff',
                 position:'relative',
                 zIndex:10
             }

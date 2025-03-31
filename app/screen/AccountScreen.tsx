@@ -7,15 +7,16 @@ import {
   ImageBackground,
   Platform,
   RefreshControl,
+  useColorScheme,
   } from 'react-native'
 import { useNavigation } from '@react-navigation/native';
-import {useState, useEffect,useCallback} from 'react';
+import React,{useState, useEffect,useCallback} from 'react';
 import { useAuth } from '../authContext';
 import { Image } from 'expo-image';
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import FollowComponent from '../components/FollowComponent';
-import { collection, query, where,FirebaseFirestoreTypes,doc, orderBy, onSnapshot, getDoc, Unsubscribe} from '@react-native-firebase/firestore';
-import { blurhash } from '../../utils/index';
+import { collection, where,FirebaseFirestoreTypes,doc, orderBy, onSnapshot, getDoc, Unsubscribe} from '@react-native-firebase/firestore';
+import { blurhash, TimeAgo } from '../../utils/index';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { 
@@ -27,20 +28,23 @@ import {
   ActivityIndicator} from 'react-native-paper';
 import EvilIcons from 'react-native-vector-icons/EvilIcons';
 import { FlashList } from '@shopify/flash-list';
-import {PostRef, UsersRef,crashlytics} from '../../FirebaseConfig';
+import { ProjectRef, UsersRef,crashlytics, database} from '../../FirebaseConfig';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { log, recordError, setAttributes, setUserId } from '@react-native-firebase/crashlytics';
-import { useSelector } from 'react-redux';
 import PostComponent from '../components/PostComponent';
 import { Skeleton } from 'moti/skeleton';
 import { MotiView } from 'moti';
+import { equalTo, onValue, orderByChild, ref,query } from '@react-native-firebase/database';
 
 type NavigationProp = {
   ProjectScreen:undefined,
   Welcome:{
-    screen?:string
+    screen?:string,
+    params?:{
+      screen?:string
+    }
   },
-  SecondStack:{
+  News:{
     screen?:string
   },
   Message:undefined,
@@ -75,7 +79,7 @@ type Post = {
   date?: string;
   comment_count?: number;
   mount?: boolean;
-  createdAt?: FirebaseFirestoreTypes.Timestamp
+  createdAt?:number
 }
 type Project = {
   id?:string,
@@ -104,7 +108,7 @@ const AccountScreen = () => {
   const [refreshing, setRefreshing] = useState(false);
   const theme = useTheme()
   const {top} = useSafeAreaInsets()
-
+  const dark_or_light = useColorScheme()
 
   
 
@@ -166,16 +170,17 @@ const AccountScreen = () => {
     setRefreshing(true)
     log(crashlytics,'Account Screen: POST Refresh')
     try{
-      const postRef = query(PostRef,where('auth_id','==',user?.userId) ,orderBy('createdAt','desc'))
-      const unsub = onSnapshot(postRef,async (querySnapshot) => {
-        if (!querySnapshot || querySnapshot.empty) {
+      const postRef = ref(database,'/posts')
+      const orderedQuery = query(postRef,orderByChild('auth_id'),equalTo(user.userId),)
+      const unsub = onValue(orderedQuery,async (snapshot) => {
+        if (!snapshot.exists()) {
           setPosts([]);
           setRefreshing(false);
           return;
         }
-        let data:Post[] = []
-        querySnapshot.forEach(docRef => {
-          data.push({...docRef.data(),id:docRef.id})
+        const data:Post[] = []
+        Object.keys(snapshot.val()).forEach(key => {
+          data.push({...snapshot.val(),id:key})
         })
         setPosts(data)
         setRefreshing(false)
@@ -217,7 +222,7 @@ const AccountScreen = () => {
     log(crashlytics,'Account Screen: Grabbing Users Projects')
     if(projects.length === 0) return;
     try{
-      const collectionRef = collection(UsersRef,user.userId,'projects')
+      const collectionRef = collection(ProjectRef,user.userId,'projects')
        const unsub = onSnapshot(collectionRef,async (docRef) => {
         if (!docRef || docRef.empty) {
           setProjects([]);
@@ -246,16 +251,17 @@ const AccountScreen = () => {
   useEffect(() => {
     log(crashlytics,'Account Screen: Grabbing Users Post')
     try{
-      const postRef = query(PostRef,where('auth_id','==',user?.userId) ,orderBy('createdAt','desc'))
-      const unsub = onSnapshot(postRef,async (querySnapshot) => {
-        if (!querySnapshot || querySnapshot.empty) {
+      const postRef = ref(database,'/posts')
+      const orderedQuery = query(postRef,orderByChild('auth_id'),equalTo(user.userId))
+      const unsub = onValue(orderedQuery,(snapshot) => {
+        if (!snapshot.exists()) {
           setPosts([]);
           setLoading(false);
           return;
         }
-        let data:Post[] = []
-        querySnapshot.forEach(docRef => {
-          data.push({...docRef.data(),id:docRef.id})
+        const data:Post[] = []
+        Object.keys(snapshot.val()).forEach(key => {
+          data.push({...snapshot.val()[key],id:key})
         })
         setPosts(data)
         setLoading(false)
@@ -269,6 +275,8 @@ const AccountScreen = () => {
       recordError(crashlytics,err)
       console.error('error grabbing user post:',err)
       setLoading(false)
+    }finally{
+      setLoading(false)
     }
   },[])
 
@@ -278,12 +286,16 @@ const AccountScreen = () => {
     setAttributes(crashlytics,{
       id:user.userId
     })
-    const userDoc = doc(UsersRef,user.userId)
     try{
-        const unsub = onSnapshot(userDoc,async (docRef) =>{
-          if(docRef.exists){
-            setUsers(docRef.data())
-            setSkills(docRef.data()?.skllls)
+      const userDoc = doc(UsersRef,user.userId)
+        const unsub = onSnapshot(userDoc,(documentSnapshot) =>{
+          if(!documentSnapshot){
+            setUsers(undefined)
+            return;
+          }
+          if(documentSnapshot.exists){
+            setUsers(documentSnapshot.data())
+            setSkills(documentSnapshot.data()?.skllls)
             setLoading(false)
           }else{
             console.error('No such document')
@@ -303,12 +315,18 @@ const AccountScreen = () => {
       }
   },[])
 
+  const handleProjectEntry = useCallback(() => {
+    navigation.navigate('ProjectEntryScreen')
+  },[])
+
+  const handleEdit = useCallback(() => {
+    navigation.navigate('Edit')
+  },[])
 
 
 
 
-
-  const Post = () => (
+  const Post = React.memo(() => (
     <View
      style={{flex:1,backgroundColor:theme.colors.background}}>
       <SafeAreaView style={{flex:1,backgroundColor:theme.colors.background}}>
@@ -319,7 +337,7 @@ const AccountScreen = () => {
           onRefresh={PostRefresh}
           ListEmptyComponent={() => (
             <View style={{flex:1,alignItems:'center',justifyContent:'center',paddingTop:5}}>
-              <Text>No post at the moment</Text>
+              <Text variant='bodyMedium'>No post at the moment</Text>
             </View>
           )}
           onEndReachedThreshold={0.1}
@@ -333,25 +351,23 @@ const AccountScreen = () => {
           renderItem={({item}) => 
             <PostComponent
             auth_profile={item.auth_profile}
-            count={item.like_count}
+            like_count={item.like_count}
             url={item.imageUrl}
-            id={item.post_id}
+            post_id={item.post_id}
             name={item.name}
             content={item.content}
-            date={item?.createdAt?.toDate().toLocaleString('en-US', {
-                hour: '2-digit',
-                minute: '2-digit',
-                hour12: true})}
+            mount={isloading}
+            date={TimeAgo(item?.createdAt ?? 0)}
             comment_count={item.comment_count}/>
            }
-          keyExtractor={(item)=> item?.post_id?.toString() || Math.random().toString()}
+          keyExtractor={(item)=> item?.post_id?.toString() || `defualt-${item.id}`}
               />
     </SafeAreaView>
     </View>
     
-  ); 
+  )); 
   
-  const Projects = () => (
+  const Projects = React.memo(() => (
     <View style={{flex:1,backgroundColor:theme.colors.background}}>
     <SafeAreaView style={{flex:1,backgroundColor:theme.colors.background,padding:50}}>
           <FlashList
@@ -359,11 +375,25 @@ const AccountScreen = () => {
           estimatedItemSize={460}
           data={projects}
           onRefresh={ProjectRefresh}
-          keyExtractor={(item)=> item?.id?.toString() || Math.random().toString()}
+          keyExtractor={(item)=> item?.id?.toString() || `defualt-${item.id}`}
           ListEmptyComponent={(item) => (
             <View style={{flex:1,alignItems:'center',justifyContent:'center',paddingTop:5}}>
-              <TouchableOpacity onPress={()=> navigation.navigate('SecondStack',{screen:'ProjectEntryScreen',})}>
-              <Text>Enter a Project</Text>
+              <TouchableOpacity onPress={handleProjectEntry}>
+              <MotiView
+           transition={{
+            type:'timing'
+           }}
+           style={{
+            width:100,}}
+            >
+              <Skeleton
+                show={isloading}
+                radius='round'
+                colorMode={dark_or_light ? 'dark':'light'}
+                >
+              <Text variant='bodyMedium'>Enter a Project</Text>
+              </Skeleton>
+              </MotiView>
               </TouchableOpacity>
             </View>
           )}
@@ -376,7 +406,7 @@ const AccountScreen = () => {
             <ActivityIndicator color='#fff' size='small' animating={isloading}/>
          )}
           renderItem={({item}) => (
-            <TouchableOpacity onPress={()=>navigation.navigate('ProjectScreen')}>
+            <TouchableOpacity onPress={()=>navigation.navigate('Welcome',{screen:'ProjectScreen'})}>
              <View style={{ backgroundColor: '#252525', borderRadius: 25, padding: 30,marginBottom:10 }}>
             <Text style={{ textAlign: 'center', color: '#fff' }}>{item?.project_name}</Text>
           </View>
@@ -384,9 +414,9 @@ const AccountScreen = () => {
           />
     </SafeAreaView>
     </View>
-  );
+  ));
 
-  const SkillsScreen = () => (
+  const SkillsScreen = React.memo(() => (
     <View style={{flex:1,backgroundColor:theme.colors.background}}>
     <SafeAreaView style={{flex:1,backgroundColor:theme.colors.background,padding:50}}>
       <FlashList
@@ -394,11 +424,25 @@ const AccountScreen = () => {
       contentContainerStyle={{padding:0}}
       estimatedItemSize={460}
       onRefresh={SkillRefresh}
-      keyExtractor={(item)=> item?.id?.toString() || Math.random().toString()}
+      keyExtractor={(item)=> item?.id?.toString() ||  `defualt-${item.id}`}
       ListEmptyComponent={(item) => (
-        <View style={{flex:1,alignItems:'center',justifyContent:'center',paddingTop:5}}>
-           <TouchableOpacity onPress={()=> navigation.navigate('SecondStack',{screen:'SkillScreen',})}>
-              <Text>Enter a Skill</Text>
+      <View style={{flex:1,alignItems:'center',justifyContent:'center',paddingTop:5}}>
+           <TouchableOpacity onPress={()=> navigation.navigate('SkillScreen')}>
+           <MotiView
+           transition={{
+            type:'timing'
+           }}
+           style={{
+            width:100,}}
+            >
+              <Skeleton
+                show={isloading}
+                radius='round'
+                colorMode={dark_or_light ? 'dark':'light'}
+                >
+              <Text variant='bodyMedium'>Enter a Skill</Text>
+              </Skeleton>
+              </MotiView>
               </TouchableOpacity>
         </View>
       )}
@@ -420,7 +464,7 @@ const AccountScreen = () => {
           />
     </SafeAreaView>
     </View>
-  );
+  ));
 
   return (
   
@@ -434,7 +478,22 @@ const AccountScreen = () => {
     >
       {
         users?.headerUrl ? 
-        (<ImageBackground
+        (
+          <MotiView
+          transition={{
+            type: 'timing',
+          }}
+          style={{
+            height:100
+          }}
+          >
+            <Skeleton
+              show={isloading}
+              height={150}
+              radius='square'
+              colorMode={dark_or_light ? 'dark':'light'}
+            >
+            <ImageBackground
         resizeMode='cover'
         imageStyle={{height:150,justifyContent:'flex-end'}}
         style={{
@@ -456,7 +515,25 @@ const AccountScreen = () => {
         <Icon size={hp(3)} source='account-search' color={theme.colors.tertiaryContainer}/>
         </TouchableOpacity>
         </View> 
-      </ImageBackground>) : ( <ImageBackground
+      </ImageBackground>
+            </Skeleton>
+          </MotiView>) : (
+        
+        <MotiView
+        transition={{
+          type: 'timing',
+        }}
+        style={{
+          height:100
+        }}
+        >
+          <Skeleton
+          show={isloading}
+          height={150}
+          radius='square'
+          colorMode={dark_or_light ? 'dark':'light'}
+          >
+          <ImageBackground
         resizeMode='cover'
         imageStyle={{height:150,justifyContent:'flex-end'}}
         style={{
@@ -478,7 +555,8 @@ const AccountScreen = () => {
         <Icon size={hp(3)} source='account-search' color={theme.colors.tertiaryContainer}/>
         </TouchableOpacity>
         </View> 
-      </ImageBackground>)
+      </ImageBackground>
+        </Skeleton></MotiView> )
       }
       <View style={{
         flexDirection:'row',
@@ -495,6 +573,7 @@ const AccountScreen = () => {
           <Skeleton
            show={isloading}
           radius='round'
+          colorMode={dark_or_light ? 'dark':'light'}
           >
           <Image
         style={{height:hp(8), aspectRatio:1, borderRadius:100,borderWidth:2,borderColor:theme.colors.background}}
@@ -511,6 +590,7 @@ const AccountScreen = () => {
           <Skeleton
           show={isloading}
           radius='round'
+          colorMode={dark_or_light ? 'dark':'light'}
           >
           <Image
         style={{
@@ -524,14 +604,24 @@ const AccountScreen = () => {
         cachePolicy='none'/>
           </Skeleton>
         </MotiView>
-       }   
-      <Button 
-        onPress={() => navigation.navigate('Welcome',{screen:'Edit'})}
+       } 
+      <MotiView
+        transition={{
+          type: 'timing',
+        }}
+      >
+        <Skeleton 
+        colorMode={dark_or_light ? 'dark':'light'}
+        show={isloading}>
+        <Button 
+        onPress={handleEdit}
         mode='outlined' style={{
         backgroundColor:'transparent', 
         borderRadius:100,
         borderWidth:1,
         borderColor:theme.colors.tertiary}}>Edit Profile</Button>
+        </Skeleton>
+        </MotiView>   
           </View>
           <View style={{marginTop:5}}>
           <View style={{paddingLeft:10,flexDirection:'column'}}>
@@ -539,8 +629,12 @@ const AccountScreen = () => {
             transition={{
               type:'timing',
             }}
+            style={{
+              marginVertical:2
+            }}
             >
               <Skeleton
+              colorMode={dark_or_light ? 'dark':'light'}
               show={isloading}
               >
               <Text
@@ -554,8 +648,14 @@ const AccountScreen = () => {
             transition={{
               type: 'timing',
             }}
+            style={{
+              width:50,
+              marginVertical:2
+            }}
             >
-              <Skeleton show={isloading}>
+              <Skeleton
+              colorMode={dark_or_light ? 'dark':'light'} 
+              show={isloading}>
               <Text
               variant='bodySmall'
               style={{
@@ -563,8 +663,18 @@ const AccountScreen = () => {
               }}>{users?.jobtitle}</Text>
               </Skeleton>
             </MotiView>
-              <MotiView>
-                <Skeleton show={isloading}>
+              <MotiView
+              transition={{
+                type:'timing',
+              }}
+              style={{
+                width:50,
+                marginVertical:2
+              }}
+              >
+                <Skeleton
+                colorMode={dark_or_light ? 'dark':'light'}
+                show={isloading}>
                 <Text
               variant='bodySmall'
               style={{
@@ -574,7 +684,22 @@ const AccountScreen = () => {
               </MotiView>
               <View style={{flexDirection:'row',marginTop:10}}>
               {follow_items.map((item,index)=>{
-                  return <FollowComponent key={index} count={item.count} content={item.content}/>
+                  return <MotiView
+                  key={index}
+                  transition={{
+                    type:'timing',
+                  }}
+                  style={{
+                    marginHorizontal:2
+                  }}
+                  >
+                    <Skeleton
+                    show={isloading}
+                    colorMode={dark_or_light ? 'dark':'light'}
+                    >
+                    <FollowComponent count={item.count} content={item.content}/>
+                    </Skeleton>
+                    </MotiView>
                 })}
               </View>
             </View>

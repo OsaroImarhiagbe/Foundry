@@ -1,3 +1,6 @@
+import { formatDistanceToNow } from 'date-fns'
+
+
 export const getRoomID = (userdId1:string, userId2:string) => {
     const sortedId = [userdId1, userId2].sort();
 
@@ -19,4 +22,13 @@ export const formatDate = (date:Date) => {
 
     let formattedDate = day+ ' '+ month
     return formattedDate
+}
+
+
+export const TimeAgo = (timestamp:number) => {
+  if(!timestamp) return 'just now'
+  const date = new Date(timestamp)
+
+  return formatDistanceToNow(date,{addSuffix:true})
+
 }

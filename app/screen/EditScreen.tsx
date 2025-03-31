@@ -22,19 +22,33 @@ import {Image as ImageCompressor} from 'react-native-compressor';
 import {launchImageLibrary} from 'react-native-image-picker';
 import { TouchableWithoutFeedback } from 'react-native-gesture-handler';
 import { addHeaderImage, addImage } from '../features/user/userSlice';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 
 
 
 type NavigationProp = {
-    Profile:{user:any},
+    Profile?:{user?:any},
     Message:undefined
-    Welcome:{
+    Welcome?:{
         screen?:string
       },
-    Home:{
+    Home?:{
+        params?:{
+            screen?:string
+        }
         screen?:string
     },
+    Account:undefined,
+    News?:{
+        screen?:string
+    },
+    Drawer:{
+        screen:string,
+        params:{
+            screen:string
+        }
+    }
 }
 
 type Navigation = NativeStackNavigationProp<NavigationProp>
@@ -58,7 +72,7 @@ interface Item {
   
 const EditScreen = () => {
     const navigation = useNavigation<Navigation>();
-    const [filename,setFileName] = useState<string | undefined>(undefined)
+    const [filename,setFileName] = useState<string>('')
     const [image,setImage] = useState<string>('')
     const [headerimage,setHeaderImage] = useState<string>('')
     const dispatch = useDispatch()
@@ -66,6 +80,7 @@ const EditScreen = () => {
     const headerimg = useSelector((state:any) => state.user.addHeaderImage)
     const {user} = useAuth()
     const theme = useTheme()
+    const {top} = useSafeAreaInsets();
     const [form, setForm] = useState<Form>({
         name: '',
         username: '',
@@ -106,14 +121,13 @@ const EditScreen = () => {
         }
         ]
 
-        console.log('header img',headerimg)
       
     
 
     const handleSave = useCallback(async() => {
-        let url;
-        let headerurl;
-        if(image && filename && headerimage){
+        let url = '';
+        let headerurl='';
+        if(image || headerimage){
             const imageRef = ref(storage,`/users/profileImage/${user.userId}/${filename}`)
             const headerRef = ref(storage,`/users/profileHeader/${user.userId}/${filename}`)
             await putFile(imageRef,image)
@@ -130,7 +144,7 @@ const EditScreen = () => {
             navigation.goBack()
         }catch(error:unknown | any){
             recordError(crashlytics,error)
-            console.error(error)
+            console.error('Error Saving:',error.message)
         }
     },[ form, image, filename])
 
@@ -150,7 +164,7 @@ const EditScreen = () => {
                     setImage(uri)
                     dispatch(addImage(uri)) 
                 }
-                setFileName(results?.assets[0]?.fileName)
+                setFileName(results?.assets[0]?.fileName || '')
             }
         }catch(error:any){
             recordError(crashlytics,error)
@@ -161,7 +175,7 @@ const EditScreen = () => {
 
 
   return (
-    <View style={[styles.screen,{backgroundColor:theme.colors.background,paddingTop:10}]}>
+    <View style={[styles.screen,{backgroundColor:theme.colors.background,paddingTop:top}]}>
     <View style={{flexDirection:'row',padding:5,alignItems:'center',justifyContent:'space-between'}}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
             <Icon

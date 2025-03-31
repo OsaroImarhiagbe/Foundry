@@ -1,4 +1,4 @@
-import React,{useState,useEffect,memo, useCallback} from 'react'
+import React,{useState,useEffect,memo, useCallback, useRef} from 'react'
 import {View,StyleSheet,
 TouchableOpacity,
 TouchableHighlight,
@@ -6,23 +6,13 @@ KeyboardAvoidingView,
 Platform,
 Modal,
 Alert,
+useColorScheme
 } from 'react-native'
 import { blurhash } from '../../utils/index'
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import { Image } from 'expo-image';
 import { useAuth } from '../authContext';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import { 
-  addDoc, 
-  collection, 
-  deleteDoc, 
-  doc, 
-  FirebaseFirestoreTypes, 
-  onSnapshot, 
-  orderBy, 
-  query, 
-  runTransaction, 
-  Timestamp } from '@react-native-firebase/firestore';
 import CommentComponent from './CommentComponent';
 import color from '../../config/color';
 import Feather from 'react-native-vector-icons/Feather';
@@ -36,51 +26,62 @@ import {
   MenuTrigger,
 } from 'react-native-popup-menu';
 import { MenuItems } from '../components/CustomMenu'
-import { db, PostRef } from 'FirebaseConfig';
+import { crashlytics, database, db, PostRef } from 'FirebaseConfig';
 import FastImage from "@d11/react-native-fast-image";
 import { perf } from '../../FirebaseConfig';
 import { Skeleton } from 'moti/skeleton';
 import { MotiView } from 'moti';
+import Video, { VideoRef } from 'react-native-video';
+import { functions } from '../../FirebaseConfig.ts';
+import { httpsCallable } from '@react-native-firebase/functions'
+import { recordError } from '@react-native-firebase/crashlytics';
+import {ref,FirebaseDatabaseTypes, orderByChild, query,  onValue, } from '@react-native-firebase/database';
+import { TimeAgo } from '../../utils/index';
+
 
 
 interface PostComponentProps {
   auth_profile?: string;
-  count?: number;
+  like_count?: number;
   url?: string;
-  id?: string;
+  post_id?: string;
   name?: string;
   content?: string;
   date?: string;
   comment_count?: number;
   mount?: boolean;
+  video?:string
 }
 interface Comment{
-  id?:string | any,
+  comment_id?:string | any,
   auth_profile?:string,
   like_count?:number,
+  comment_count?: number
+  liked_by?: string[]
   content?:string,
   name?:string | any,
-  createdAt?:FirebaseFirestoreTypes.Timestamp
+  createdAt?:number,
+  parentId:string
 
 }
 
 const PostComponent: React.FC<PostComponentProps> = memo(({
-  auth_profile,
-  count,
+  like_count,
   url,
-  id,
+  post_id,
   name,
   content,
   date,
   comment_count,
   mount,
+  video
 }) => {
 
  
 
 
     const [press,setIsPress] = useState<boolean>(false)
-    const [isloading,setLoading] = useState<boolean>(false)
+    const [isloading,setLoading] = useState<boolean>(true)
     const [modalVisible, setModalVisible] = useState<boolean>(false);
     const [comments, setComment] = useState<Comment[]>([])
     const [text,setText] = useState('')
@@ -88,56 +89,47 @@ const PostComponent: React.FC<PostComponentProps> = memo(({
     const {user} = useAuth();
     const [replyingTo, setReplyingTo] = useState<string | null>(null);
     const [replyingToUsername, setReplyingToUsername] = useState<string | undefined>(undefined);
-   
+    const videoRef = useRef<VideoRef>(null);
+    const colorScheme = useColorScheme()
+
+    const colorMode = colorScheme ? 'dark' : 'light'
+ 
 
     useEffect(() => {
-      const docRef = doc(PostRef,id)
-      const commentRef = collection(docRef,'comments')
-      const q = query(commentRef, orderBy('createdAt','desc'))
-       const subscriber = onSnapshot(q, (querySnapShot) => {
-              if (!querySnapShot || querySnapShot.empty) {
-                setComment([]);
-                return;
-              }
-              let data:Comment[] = []
-              querySnapShot.forEach(documentSnapshot => {
-                data.push({ ...documentSnapshot.data(),id:documentSnapshot.id });
-              })
-              setComment(data)
-    }) 
-          return () => subscriber()
-    },[id])
+      try{
+        const docRef = ref(database,`/comments/${post_id}`)
+        const q = query(docRef, orderByChild('createdAt'))
+         const subscriber = onValue(q, (snapshot: FirebaseDatabaseTypes.DataSnapshot) => {
+                if (!snapshot.exists()) {
+                  setComment([]);
+                  setLoading(false)
+                  return;
+                }
+                let data:Comment[] = []
+                snapshot.forEach(childSnapshot => {
+                  data.push({ ...childSnapshot.val(),id:childSnapshot.key });
+                  return true;
+                })
+                setComment(data)
+                setLoading(false)
+      }) 
+            return () => subscriber()
+      }catch(error:unknown | any){
+        recordError(crashlytics,error)
+        console.error('Error grabbing comments',error)
+      }
+    },[post_id])
 
 
  
-    const handleLike = useCallback(async () => {
+    const LikeButton = useCallback(async () => {
       let trace = await perf.startTrace('post_like')
-      setLoading(true)
-      const docRef = doc(PostRef,id);
       try{
-        await runTransaction(db,async (transaction)=>{
-          const doc = await transaction.get(docRef)
-          if (!doc.exists) throw new Error ('Document doesnt exists');
-          
-          const currentLikes = doc?.data()?.like_count || 0
-          const likeBy = doc?.data()?.liked_by || []
-          const hasliked = likeBy.includes(user.userId)
-
-          let newlike
-          let updatedLike
-
-          if(hasliked){
-            newlike = currentLikes - 1
-            updatedLike = likeBy.filter((id:string)=> id != user?.userId)
-          }else{
-            newlike = currentLikes + 1
-            updatedLike = [...likeBy,user.userId]
-          }
-          transaction.update(docRef,{
-            like_count:newlike,
-            liked_by:updatedLike
-          })
-        })
+        const handleLike = httpsCallable(functions,"handleLike")
+        await handleLike({
+          post_id:post_id,
+          currentUser: user.userId
+        }).catch((error: unknown | any) => recordError(crashlytics, error))
         setLoading(false)
       }catch(err){
         console.error('error liking comment:',err)
@@ -146,86 +138,57 @@ const PostComponent: React.FC<PostComponentProps> = memo(({
         setLoading(false)
         trace.stop()
       }
-    },[id])
+    },[post_id])
 
-    const handleSend = useCallback(async () => {
+    const SendReplyorComment = useCallback(async () => {
       let trace = await perf.startTrace('post_send')
-      setLoading(true)
-      if(replyingTo){
-        if(!text) return;
-          try{
-            const docRef = doc(PostRef,id)
-            const commetRef = collection(docRef,'comments',replyingTo,'replys')
-            const newDoc = await addDoc(commetRef,{
-              id:user.userId,
-              name: user?.username,
-              content:text,
-              createdAt: Timestamp.fromDate(new Date()),
-              parentId:replyingTo
-            })
-            await newDoc.update({
-              id:newDoc.id
-            })
-            setText('');
-            setReplyingTo(null);
-            setReplyingToUsername(undefined);
-            setLoading(false)
-          } catch (error) {
-            setLoading(false)
-            console.error("Error with reply:", error);
-          }finally{
-            trace.stop()
-            setLoading(false)
-          }
-        }else{
-          if(text.trim() === " ") return;
-          try{
-            const docRef = doc(PostRef,id)
-            const commetRef = collection(docRef,'comments')
-            const newDoc = await addDoc(commetRef,{
-              parentId:null,
-              content:text,
-              auth_profile:auth_profile,
-              name:user?.username,
-              createdAt: Timestamp.fromDate(new Date())
-            })
-            await newDoc.update({
-              id:newDoc.id
-            })
-            const postDocRef = doc(PostRef,id)
-            await runTransaction(db,async (transaction)=>{
-              const doc = await transaction.get(postDocRef)
-              if (!doc.exists) throw new Error('Doc does not exists!!')
-              const commentCount = doc?.data()?.comment_count || 0
-              transaction.update(postDocRef,{
-                comment_count:commentCount + 1
-              })
-            })
-            setText('')
-            setLoading(false)
-          }catch(e){
-            console.error('Error with sending comments:',e)
-            setLoading(false)
-          }finally{
-            trace.stop()
-            setLoading(false)
-          }
-    }
-  },[text,replyingTo,replyingToUsername])
+      const handleSend = httpsCallable(functions,'handleSend')
+      try{
+        await handleSend({
+          post_id:post_id,
+          name:user.username,
+          content:text,
+          auth_profile:user.profileUrl,
+          comment_id: replyingTo,
+          like_count: 0,
+          comment_count: 0,
+          liked_by: [],
+        }).catch((error) => recordError(crashlytics,error))
+        setText('');
+        setReplyingTo(null);
+        setReplyingToUsername(undefined);
+        setLoading(false)
+      }catch(error:unknown | any){
+        recordError(crashlytics,error)
+        setLoading(false)
+      }finally{
+        setLoading(false)
+        trace.stop()
+      }
+  },[text,replyingTo,replyingToUsername,post_id])
 
 
     const handleDelete = useCallback(async () => {
       try {
-        const messagesRef = doc(PostRef,id)
-        await deleteDoc(messagesRef)
+        const messagesRef = ref(database,`/posts/${post_id}`)
+        await messagesRef.remove()
         Alert.alert('Post Deleted!')
       } catch (error) {
         console.error('Error deleting document: ', error);
 
       }
-    },[])
+    },[post_id])
 
 
+    const handleModalVisibility = useCallback(() => {
+      setModalVisible((prev) => !prev)
+    },[modalVisible])
+
+    const handleIsPress = useCallback(() => {
+      setIsPress(prev => !prev)
+    },[press])
+
+ 
 
   return (
   <Card
@@ -237,8 +200,10 @@ const PostComponent: React.FC<PostComponentProps> = memo(({
       <MotiView
          transition={{
           type: 'timing',
-        }}>
+        }}
+        >
       <Skeleton
+      colorMode={colorMode}
         show={mount}
         radius='round'
         >
@@ -259,6 +224,7 @@ const PostComponent: React.FC<PostComponentProps> = memo(({
       }}
       >
       <Skeleton
+      colorMode={colorMode}
       show={mount}
       width={wp('40%')}
       >
@@ -281,6 +247,7 @@ const PostComponent: React.FC<PostComponentProps> = memo(({
      }}
      >
       <Skeleton
+      colorMode={colorMode}
       show={mount}
       width={ url ? wp('80%') : wp('80%')}
       height={url ? 30: 30}
@@ -310,18 +277,34 @@ const PostComponent: React.FC<PostComponentProps> = memo(({
         marginTop: 8,
       }}
       />}
+      {video && <Video 
+            source={{
+              uri: video
+            }}
+            repeat={true}
+            ref={videoRef}
+            controls={true}
+            resizeMode='cover'             
+            style={{
+              width: 370,
+              height: 400,
+              borderRadius: 10,
+              overflow: 'hidden',
+            }}
+          />}
         <MotiView
       transition={{
         type: 'timing',
       }}
       style={{
-        width:50,
+        width:110,
         paddingTop:10,
         alignItems:'center',
         justifyContent:'center'
       }}
       >
         <Skeleton
+        colorMode={colorMode}
         show={mount}
         width={wp('10%')}
         >
@@ -338,25 +321,26 @@ const PostComponent: React.FC<PostComponentProps> = memo(({
     </Card.Content>
     <View style={styles.reactionContainer}>
     <TouchableHighlight
-      onShowUnderlay={() => setIsPress(true)}
-      onHideUnderlay={() => setIsPress(false)}
-      onPress={handleLike}
+      onShowUnderlay={handleIsPress}
+      onHideUnderlay={handleIsPress}
+      onPress={LikeButton}
       style={styles.reactionIcon}
       >
       <MotiView>
         <Skeleton
+        colorMode={colorMode}
         show={mount}
         >
         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
           <MaterialCommunityIcons name="heart" size={17} color={theme.colors.tertiary}/>
           <Text 
           variant='bodySmall'
-          style={{color:theme.colors.tertiary}}> {count}</Text>
+          style={{color:theme.colors.tertiary}}> {like_count}</Text>
         </View>
         </Skeleton>
         </MotiView>  
         </TouchableHighlight>
-        <TouchableOpacity onPress={() => setModalVisible(true)} style={styles.reactionIcon}>
+        <TouchableOpacity onPress={handleModalVisibility} style={styles.reactionIcon}>
           <MotiView
           style={{
             alignItems: 'center',
@@ -364,6 +348,7 @@ const PostComponent: React.FC<PostComponentProps> = memo(({
           }}
           >
             <Skeleton
+            colorMode={colorMode}
             show={mount}
             >
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
@@ -382,6 +367,7 @@ const PostComponent: React.FC<PostComponentProps> = memo(({
           <MenuTrigger>
           <MotiView>
           <Skeleton
+          colorMode={colorMode}
           show={mount}
           >
           <Icon source='dots-horizontal' size={17} color={theme.colors.tertiary}/>
@@ -419,7 +405,8 @@ const PostComponent: React.FC<PostComponentProps> = memo(({
       </View>
     <View style={{flex:1}}>
     <Modal
-    animationType="fade"
+    style={{flex:1}}
+    animationType='slide'
     transparent={true}
     visible={modalVisible}>
     <KeyboardAvoidingView
@@ -427,13 +414,13 @@ const PostComponent: React.FC<PostComponentProps> = memo(({
       keyboardVerticalOffset={0}
       style={styles.centeredView}>
         <View style={styles.commentView}>
-          <View style={[styles.modalView,{backgroundColor:theme.colors.onSecondary}]}>
+          <View style={[styles.modalView,{backgroundColor:theme.colors.onBackground}]}>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between',alignItems:'center' }}>
               <Text
               variant='titleMedium'
-              onPress={() => setModalVisible(!modalVisible)}
+              onPress={handleModalVisibility}
               style={{ fontFamily:color.textFont}}>Comments</Text>
-              <TouchableOpacity onPress={handleSend}>
+              <TouchableOpacity onPress={SendReplyorComment}>
                 <View style={styles.sendButton}>
                   <Feather name="send" size={hp(2.0)} color="#000" />
                 </View>
@@ -449,19 +436,18 @@ const PostComponent: React.FC<PostComponentProps> = memo(({
             <FlashList
             data={comments}
             estimatedItemSize={500}
-            keyExtractor={(item) => item?.id?.toString() || Math.random().toString()}
+            keyExtractor={(item,index) => item?.comment_id?.toString() || `default-${index}`}
             renderItem={({item}) => (
               <CommentComponent
                     auth_profile={item.auth_profile}
-                    count={item.like_count}
+                    like_count={item.like_count}
+                    liked_by={item.liked_by}
+                    comment_count={item.comment_count}
                     content={item.content}
                     name={item.name}
-                    comment_id={item.id}
-                    post_id={id}
-                    date={item?.createdAt?.toDate().toLocaleString('en-US', {
-                  hour: '2-digit',
-                  minute: '2-digit',
-                  hour12: true})}
+                    comment_id={item.comment_id}
+                    post_id={item.parentId}
+                    date={TimeAgo(item?.createdAt ?? 0)}
                     onReplyPress={(id,name) => {
                       setReplyingTo(id);
                       setReplyingToUsername(name);
@@ -473,9 +459,9 @@ const PostComponent: React.FC<PostComponentProps> = memo(({
                 outlineStyle={{borderRadius:30}}
                 value={replyingTo ? replyingToUsername : text}
                 onChangeText={(text) => setText(text)}
-                style={styles.textinput}
+                style={[styles.textinput,{backgroundColor:'transparent'}]}
                 placeholder="Write a comment..."
-                placeholderTextColor="#000"
+                placeholderTextColor={theme.colors.onTertiary}
                 />
               </View>
           </View>
@@ -498,7 +484,6 @@ const styles = StyleSheet.create({
       justifyContent: 'space-between',
       paddingTop: 12,
       paddingBottom: 8,
-      borderTopWidth: 0.5,
     },
     reactionIcon:{
       padding:5,
@@ -516,6 +501,8 @@ const styles = StyleSheet.create({
       paddingTop: 20,
       width:wp('100%'),
       height:hp('55%'),
+      borderWidth: 2,
+      borderColor:'#000'
     },
     centeredView: {
       flex: 1,
@@ -527,8 +514,7 @@ const styles = StyleSheet.create({
       fontSize: hp(2),
       color: '#000',
       flexDirection: 'row',
-      paddingHorizontal: 10,
-      backgroundColor: '#fff',    
+      paddingHorizontal: 10,  
     },
     sendButton: {
       padding: 10,

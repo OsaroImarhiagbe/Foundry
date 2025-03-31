@@ -6,19 +6,21 @@ import {
   View,
 } from 'react-native'
 import { useAuth } from 'app/authContext';
-import { FirebaseFirestoreTypes,onSnapshot,doc,orderBy,query, limit,getDocs, startAfter,where } from '@react-native-firebase/firestore';
+import { FirebaseFirestoreTypes,onSnapshot,doc,orderBy,limit,getDocs, startAfter,where } from '@react-native-firebase/firestore';
 import { useSelector} from 'react-redux';
 import { FlashList } from "@shopify/flash-list";
 import {ActivityIndicator,Text,Divider,useTheme} from 'react-native-paper'
 import {log,recordError} from '@react-native-firebase/crashlytics'
-import { PostRef,crashlytics,perf} from '../../FirebaseConfig';
+import { crashlytics,perf,database} from '../../FirebaseConfig';
+import {ref,FirebaseDatabaseTypes, orderByChild, limitToFirst, startAt, query, equalTo, onValue, limitToLast, } from '@react-native-firebase/database';
 import PostComponent from '../components/PostComponent';
+import { TimeAgo } from '../../utils/index';
 
 
 
 
 type Post = {
-
+  key?:string,
   id?: string;
   auth_profile?: string;
   like_count?: number;
@@ -27,7 +29,7 @@ type Post = {
   name?: string;
   content?: string;
   category?:string;
-  createdAt?: FirebaseFirestoreTypes.Timestamp
+  createdAt?: number;
   comment_count?: number;
 };
 
@@ -37,7 +39,7 @@ const HomeScreen= () => {
   const [refreshing, setRefreshing] = useState<boolean>(false);
   const {user} = useAuth()
   const [post, setPost] = useState<Post[]>([])
-  const [lastVisible, setLastVisible] = useState<FirebaseFirestoreTypes.QueryDocumentSnapshot<FirebaseFirestoreTypes.DocumentData> | null>(null);
+  const [lastVisible, setLastVisible] = useState<Post[]>([]);
   const [loadingMore, setLoadingMore] = useState<boolean>(false);
   const [hasMore, setHasMore] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(true)
@@ -53,20 +55,21 @@ const HomeScreen= () => {
     const grabPost = async () => {
     const trace = await perf.startTrace('HomeScreen')
       try {
-        const docRef = query(PostRef,where('category','==',category),orderBy('createdAt', 'desc'),limit(10))
-        const subscriber = onSnapshot(docRef,(querySnapShot) =>{
-          if (!querySnapShot || querySnapShot.empty) {
+        const docRef = ref(database,'/posts')
+        const orderedQuery = query(docRef,orderByChild('createdAt'),equalTo(category),limitToLast(5))
+        const subscriber = onValue(orderedQuery,(snapshot:FirebaseDatabaseTypes.DataSnapshot) =>{
+          if (!snapshot.exists()) {
             setPost([]);
             setLoading(false);
             return;
           }
-          let data:Post[] = []; 
-          querySnapShot.forEach(documentSnapShot => {
-            data.push({ ...documentSnapShot.data(),id:documentSnapShot.id });
+          const data:Post[] = []; 
+          Object.keys(snapshot).forEach(key => {
+            data.push({ ...snapshot.val()[key],id:key });
           })
           setPost(data);
-          setLastVisible(querySnapShot.docs[querySnapShot.docs.length - 1]);
-          setHasMore(querySnapShot.docs.length > 0);
+          setLastVisible([{key: data[data.length - 1].key}]);
+          setHasMore(data.length > 0);
           setLoading(false);
         });
           return () => subscriber()
@@ -89,17 +92,25 @@ const HomeScreen= () => {
     log(crashlytics,'Post Refresh')
     const trace = await perf.startTrace('Refreshing_community_posts_HomeScreen')
     try {
-      const docRef = query(PostRef,where('category','==',category),orderBy('createdAt', 'desc'),limit(10))
-      const documentSnapShot = await getDocs(docRef)
-        let data:Post[] = documentSnapShot.docs.map((doc) => ({
-          ...doc.data(),
-          id:doc.id,
-        }))
-        setPost(data);
-        setLastVisible(documentSnapShot.docs[documentSnapShot.docs.length - 1]);
-        setHasMore(documentSnapShot.docs.length > 0);
+      const docRef = ref(database,'/posts')
+      const orderedQuery = query(docRef,orderByChild('createdAt'),equalTo(category),limitToLast(5))
+      const subscriber = onValue(orderedQuery,(snapshot: FirebaseDatabaseTypes.DataSnapshot) => {
+        if(!snapshot.exists()){
+          setPost([])
+          setRefreshing(false)
+          return;
+        }
+        const data:Post[] = []
+        Object.keys(snapshot).forEach((key) => {
+          data.push({...snapshot.val()[key],id:key})
+        })
+        setPost((prev) => [...prev,...data]);
+        setLastVisible([{key: data[data.length - 1].key}]);
+        setHasMore(data.length > 0);
         trace.putAttribute('post_count', post.length.toString());
         setRefreshing(false)
+      })
+      return () => subscriber()
       }  catch (error:any) {
         recordError(crashlytics,error)
         console.error(`Error post can not be found: ${error}`);
@@ -116,29 +127,27 @@ const fetchMorePost = useCallback(async () => {
   setLoadingMore(true);
   log(crashlytics,'Fetch More Post')
   let trace = await perf.startTrace('fetch_more_community_posts')
-  if (!hasMore) return;
-  if (post.length <= 2) {
-    setHasMore(false);
-    setLoadingMore(false);
-    return;
-  }
+  if (!lastVisible || !hasMore) return;
   try {
-    const docRef = query(
-      PostRef,
-      where('category','==',category),
-      orderBy('createdAt','desc'),
-      startAfter(lastVisible), 
-      limit(2));
-    const snapshot = await getDocs(docRef);
-    const newPosts = snapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data(),
-    }));
-    setPost(prevPosts => [...prevPosts, ...newPosts]);
-    setLastVisible(snapshot.docs[snapshot.docs.length - 1]);
-    setHasMore(snapshot.docs.length > 0);
+    const docRef = ref(database,'/posts')
+    const orderedQuery = query(docRef,orderByChild('createdAt'),equalTo(category),startAt(lastVisible[0].key),limitToFirst(5))
+    const subscriber = onValue(orderedQuery,(snapshot: FirebaseDatabaseTypes.DataSnapshot) => {
+      if(!snapshot.exists()){
+        setPost([])
+        setLoadingMore(false)
+        return;
+      }
+      const morePost:Post[] = []
+      Object.keys(snapshot).forEach((key) => {
+        morePost.push({...snapshot.val()[key],id:key})
+      })
+    setPost(prev => [...prev, ...morePost]);
+    setLastVisible([{key: morePost[morePost.length - 1].key}]);
+    setHasMore(morePost.length > 0 );
     trace.putAttribute('post_count', post.length.toString());
     setLoadingMore(false);
+    })
+    return () => subscriber()
   } catch (error:any) {
     recordError(crashlytics,error)
     console.error(`Error fetching more posts: ${error}`);
@@ -179,18 +188,15 @@ const fetchMorePost = useCallback(async () => {
         renderItem={({item}) => 
         <PostComponent
           auth_profile={item.auth_profile}
-          count={item.like_count}
+          like_count={item.like_count}
           url={item.imageUrl}
-          id={item.post_id}
+          post_id={item.post_id}
           name={item.name}
           content={item.content}
-          date={item?.createdAt?.toDate().toLocaleString('en-US', {
-              hour: '2-digit',
-              minute: '2-digit',
-              hour12: true})}
+          date={TimeAgo(item?.createdAt ?? 0)}
           comment_count={item.comment_count}/>
          }
-        keyExtractor={(item)=> item?.post_id?.toString() || Math.random().toString()}
+        keyExtractor={(item,index)=> item?.post_id?.toString() || `default-${index}`}
         />
       )
     }

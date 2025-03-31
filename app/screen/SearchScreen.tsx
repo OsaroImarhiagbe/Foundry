@@ -3,7 +3,6 @@ import {
   View,
   Text,
   StyleSheet,
-  FlatList,
   TouchableOpacity,
   ActivityIndicator,
   Platform,
@@ -12,8 +11,7 @@ import {
 import SearchComponent from '../components/SearchComponent';
 import color from '../../config/color';
 import { useNavigation } from '@react-navigation/native';
-import { useDispatch,useSelector } from 'react-redux';
-import { addsearchID } from '../features/search/searchSlice';
+import {useSelector } from 'react-redux';
 import { getDocs, query, where}from '@react-native-firebase/firestore';
 import useDebounce from '../hooks/useDebounce';
 import SearchFilter from '../components/SearchFilter';
@@ -25,6 +23,7 @@ import { useAuth } from 'app/authContext';
 import { crashlytics, UsersRef } from '../../FirebaseConfig';
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import {log, recordError} from '@react-native-firebase/crashlytics'
+import { FlashList } from '@shopify/flash-list';
 
 
 interface Results{
@@ -56,24 +55,22 @@ const SearchScreen = () => {
   const theme = useTheme()
   const {user} = useAuth()
 
-  const debouncedsearch = useDebounce(searchQuery,5000)
-  const dispatch = useDispatch()
+  const debouncedsearch = useDebounce(searchQuery,300)
 
   useEffect(() => {
     if (debouncedsearch) {
-        setLoading(true);
-        handleSearch();
+        handleSearch(debouncedsearch);
     } else {
       setResults([]);
     }
 }, [debouncedsearch]);
 
-  const handleSearch = useCallback(async () => {
+  const handleSearch = useCallback(async (search:string) => {
     log(crashlytics,'Search Screen: Handle Search')
     setLoading(true)
-    if(searchQuery.trim() === '') return;
+    if(search.trim() === '') return;
     try{
-      let queryRef = query(UsersRef, where('username', '>=', searchQuery),where('username', '<=', searchQuery + '\uf8ff'))
+      let queryRef = query(UsersRef, where('username', '>=', search),where('username', '<=', search + '\uf8ff'))
       if(skills_array.length > 0){
         queryRef = query(queryRef,where('skills','array-contains-any',skills_array))
       }
@@ -81,17 +78,15 @@ const SearchScreen = () => {
       let user:Results[]= []
       querySnapShot.docs.forEach(documentSnapShot => {
         user.push({...documentSnapShot.data(),id:documentSnapShot.id})
-        dispatch(addsearchID({searchID:documentSnapShot.id}))
-      })
+      });
       setResults(user);
-      setSearchQuery('')
     }catch(error:unknown | any){
       recordError(crashlytics,error)
       console.error(`Cant find user: ${error}`)
     }finally{
       setLoading(false)
     }
-  },[debouncedsearch,skills_array])
+  },[skills_array])
 
   return (
     <View style={[styles.screen,{backgroundColor:theme.colors.background}]}>
@@ -106,24 +101,28 @@ const SearchScreen = () => {
           setSearchQuery={setSearchQuery} 
           backgroundColor={color.grey}
           color='#00bf63'
-          onPress={handleSearch}
+          onPress={() => handleSearch(searchQuery)}
           searchQuery={searchQuery}/>
           <SearchFilter/>
         </View>
         {isloading ? <ActivityIndicator size='small' color='#fff'/> :
-               <FlatList
+               <FlashList
                data={results}
-               keyExtractor={(item) => item?.userId?.toString() || Math.random().toString()}
+               estimatedItemSize={460}
+               keyExtractor={(item,index) => item.id?.toString() || index.toString()}
                renderItem={({item}) =>
-                 <TouchableOpacity onPress={() => navigation.navigate('Welcome',{screen:'SearchAccount',params:{userId:item?.userId}})}>
-                     <View style={{padding:10}}> 
-                   <View style={styles.userContainer}>
+                 <TouchableOpacity onPress={() => 
+                  navigation.navigate('Welcome',
+                 {screen:'SearchAccount',
+                 params:{userId:item.userId}})}>
+                  <View style={{padding:5}}> 
+                   <View style={[styles.userContainer,{backgroundColor:theme.colors.onTertiary}]}>
                  <Image
                  style={styles.image}
-                 source={{uri:item?.profileUrl ? item?.profileUrl : require('../assets/user.png') }}/>
+                 source={item.profileUrl ? item.profileUrl : require('../assets/user.png')}/>
                <Text style={styles.text}>{item.username}</Text>
-             </View>
-             </View>
+                    </View>
+                  </View>
                  </TouchableOpacity>
                
                }
@@ -146,9 +145,7 @@ const styles = StyleSheet.create({
   userContainer:{
     padding:10,
     flexDirection:'row',
-    backgroundColor:'#00bf63',
     borderRadius:20
-
   },
   text:{
     marginLeft:10,

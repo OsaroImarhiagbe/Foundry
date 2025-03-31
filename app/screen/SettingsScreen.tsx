@@ -4,8 +4,7 @@ import {
   View,
   TouchableOpacity, 
   StyleSheet, 
-  Switch, 
-  SafeAreaView, 
+  Switch,
   ScrollView} from 'react-native'
 import { Avatar, Icon, Text,useTheme } from 'react-native-paper';
 import Feather from 'react-native-vector-icons/Feather';
@@ -25,7 +24,7 @@ const Sections = [
       items:[
           {
               id:1,
-              icon:'globe', 
+              icon:'earth', 
               color:'orange',
               label:'Language', 
               type:'link',
@@ -36,31 +35,15 @@ const Sections = [
               icon:'navigation',
               color:'green',
               label:'Location', 
-              type:'link',},
+              type:'toggle',},
           {
-              id:3,
-              tag:'showusers',
-              icon:'users',
-              color:'green',
-              label:'Show',
-              type:'toggle'
-          },
-          {
-            id:4,
-            tag:'darkmode',
+            id:3,
+            tag:'Use sevice settings',
             icon:'theme-light-dark',
             color:'green',
-            label:'DarkMode',
+            label:'Use device settings',
             type:'toggle'
-        },
-          {
-              id:5,
-              tag:'accessmode',
-              icon:'airplay',
-              color:'#fd2d54',
-              label:'Access',
-              type:'toggle'
-          }, 
+        }, 
       ],
   },
   {

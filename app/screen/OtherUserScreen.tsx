@@ -7,8 +7,9 @@ import {
   RefreshControl,
   Platform,
   ImageBackground,
-  SafeAreaView} from 'react-native'
-import {lazy,Suspense} from 'react'
+  SafeAreaView,
+  useColorScheme} from 'react-native'
+import React,{lazy,Suspense} from 'react'
 import { useNavigation } from '@react-navigation/native';
 import {useState, useEffect,useCallback} from 'react';
 import { Image } from 'expo-image';
@@ -18,15 +19,9 @@ import FollowComponent from '../components/FollowComponent';
 import {
   collection,
   doc, 
-  FirebaseFirestoreTypes, 
   getDoc, 
-  onSnapshot, 
-  orderBy, 
-  query, 
-  runTransaction,
-  where} from '@react-native-firebase/firestore'
-import { blurhash } from '../../utils/index';
-import { useSelector } from 'react-redux';
+  onSnapshot} from '@react-native-firebase/firestore'
+import { blurhash, TimeAgo } from '../../utils/index';
 import { useAuth } from '../authContext';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import { FlashList } from '@shopify/flash-list';
@@ -36,9 +31,12 @@ import EvilIcons from 'react-native-vector-icons/EvilIcons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { NavigatorScreenParams } from '@react-navigation/native';
 import {log,recordError, setAttributes, setUserId} from '@react-native-firebase/crashlytics'
-import { UsersRef,PostRef,db, crashlytics} from '../../FirebaseConfig'
-
-const PostComponent = lazy(() => import('../components/PostComponent'))
+import { UsersRef,db, crashlytics, database, functions} from '../../FirebaseConfig'
+import { MotiView } from 'moti';
+import { Skeleton } from 'moti/skeleton';
+import PostComponent from '../components/PostComponent';
+import { equalTo, orderByChild, ref, query as databaseQuery, onValue } from '@react-native-firebase/database';
+import { httpsCallable } from '@react-native-firebase/functions';
 
 
 
@@ -60,7 +58,11 @@ type RootStackParamList = {
   Welcome?: {
     screen?: string;
   };
-  SecondStack?: NavigatorScreenParams<SecondStackParamList>;
+  Chat?:{
+      userid?:string,
+      name?:string
+  }
+  News?: NavigatorScreenParams<SecondStackParamList>;
 }
 
 type Navigation = NativeStackNavigationProp<RootStackParamList>;
@@ -74,7 +76,8 @@ type User = {
   follow_state?:boolean,
   connection?:string,
   jobtitle?:string,
-  location?:string
+  location?:string,
+  headerUrl?:string
 
 }
 type Post ={
@@ -88,7 +91,7 @@ type Post ={
   date?: string;
   comment_count?: number;
   mount?: boolean;
-  createdAt?: FirebaseFirestoreTypes.Timestamp
+  createdAt?: number
 }
 interface Project{
   id?:string,
@@ -100,152 +103,232 @@ type Skill = {
 }
 const OtherUserScreen = () => {
   const [users, setUsers] = useState<User | undefined>(undefined)
-  const [isloading,setLoading] = useState(false)
+  const [isloading,setLoading] = useState(true)
   const navigation = useNavigation<Navigation>();
-  const [isPress,setPress] = useState(false)
   const [projects,setProjects] = useState<Project[]>([])
   const [posts,setPosts] = useState<Post[]>([])
   const [skills,setSkills] = useState<Skill[]>([])
   let route = useRoute()
   const {user} = useAuth()
   const {userId} = route?.params as {userId:string}
-  const other_user_id = useSelector((state:any)=>state.search.searchID)
   const [refreshing, setRefreshing] = useState(false);
   const theme = useTheme()
   const {top} = useSafeAreaInsets()
-  const headerimg = useSelector((state:any) => state.user.addImage)
+  const dark_or_light = useColorScheme()
+  //const headerimg = useSelector((state:any) => state.user.addImage)
+  const follow_items = [{count:users?.projects,content:'projects'},{count:users?.connection,content:'  connection   '},{count:posts.length,content:' posts'}]
 
 
-    const follow_items = [{count:users?.projects,content:'projects'},{count:users?.connection,content:'  connection   '},{count:posts.length,content:' posts'}]
-
-
-    const onRefresh = useCallback(async () => {
-      log(crashlytics,'Account Screen: On Refresh')
-      setRefreshing(true);
+  const UserRefresh = useCallback(async () => {
+      setRefreshing(true)
+      log(crashlytics,'Account Screen: User Refresh')
       const userDoc = doc(UsersRef,user.userId)
       const docRef = await getDoc(userDoc)
       try{
           if(docRef.exists){
             setUsers(docRef.data())
-            setSkills(docRef.data()?.skllls)
-            setProjects(docRef.data()?.projects)
-            setPosts(docRef.data()?.posts)
-            setLoading(false)
+            setRefreshing(false)
           }else{
             console.error('No such document')
+            setRefreshing(false)
           }
         }catch(error:unknown | any){
           recordError(crashlytics,error)
-          setLoading(false)
+          setRefreshing(false)
         }finally{
-          setRefreshing(false);
-          setLoading(false)
+          setRefreshing(false)
         }
-    }, [users]);
-
-
-
-    useEffect(() => {
-      log(crashlytics,'Other User Screen: Grabbing Projects')
-      setLoading(true)
-      if(projects.length === 0) return;
+    }, []);
+  const ProjectRefresh = useCallback(async () => {
+      setRefreshing(true)
+      log(crashlytics,'Account Screen: On Refresh')
       try{
-        const collectionRef = collection(UsersRef,user.userId,'projects')
-        const unsub = onSnapshot(collectionRef,(docRef) => {
-          if (!docRef || docRef.empty) {
+        const collectionRef = collection(db,'projects',userId,'projects')
+         const unsub = onSnapshot(collectionRef,(querySnapshot) => {
+          if (!querySnapshot || querySnapshot.empty) {
             setProjects([]);
-            setLoading(false);
+            setRefreshing(false);
             return;
           }
-          let data:Project[] = []
-          docRef.forEach(doc => {
+          let data:Project[] =[]
+          querySnapshot.forEach(doc => {
             data.push({...doc.data(),id:doc.id})
           })
           setProjects(data)
-          setLoading(false)
+          setRefreshing(false)
+        },(error:unknown | any) => {
+          recordError(crashlytics,error)
+          console.error(`Error in snapshot listener: ${error.message}`)
+          setRefreshing(false)
         })
         return () => unsub()
-      }catch(error:unknown | any){
-        recordError(crashlytics,error)
-        console.error('error grabbing user projects:',error.message)
-        setLoading(false)
+      }catch(err:unknown | any){
+        recordError(crashlytics,err)
+        console.error('error grabbing user projects:',err.message)
+        setRefreshing(false)
       }finally{
-        setLoading(false)
+        setRefreshing(false)
       }
-    },[other_user_id])
-
-
-    useEffect(() => {
-      log(crashlytics,'Other User Screen: Grabbing Posts')
-      setLoading(true)
-      if (!users || !users.username) return;  
+    }, []);
+  const PostRefresh = useCallback(async () => {
+      setRefreshing(true)
+      log(crashlytics,'Account Screen: POST Refresh')
       try{
-        const docRef = query(PostRef, where('name','==',users.username),orderBy('createdAt','desc'))
-        const unsub = onSnapshot(docRef,(documentSnapshot) => {
-          let data:Post[] = []
-          documentSnapshot.forEach(doc => {
-            data.push({...doc.data(),id:doc.id})
+        const postRef = ref(database,'/posts')
+        const orderedQuery = databaseQuery(postRef, orderByChild('auth_id'), equalTo(userId));
+        const unsub = onValue(orderedQuery,async (snapshot) => {
+          if (!snapshot.exists()) {
+            setPosts([]);
+            setRefreshing(false);
+            return;
+          }
+          const data:Post[] = []
+          Object.keys(snapshot.val()).forEach(key => {
+            data.push({...snapshot.val()[key],id:key})
           })
           setPosts(data)
-          setLoading(false)
+          setRefreshing(false)
+        },(error:unknown | any) => {
+          recordError(crashlytics,error)
+          console.error(`Error in snapshot listener: ${error}`)
+          setRefreshing(false)
         })
         return () => unsub()
-      }catch(error:unknown | any){
-        recordError(crashlytics,error)
-        console.error('error grabbing user post:',error.message)
-        setLoading(false)
+      }catch(err:any){
+        recordError(crashlytics,err)
+        console.error('error grabbing user post:',err)
+        setRefreshing(false)
       }finally{
-        setLoading(false)
+        setRefreshing(false)
       }
-    },[other_user_id])
-
-
-    useEffect(() => {
-      log(crashlytics,'Other User Screen: Grabbing User')
-      setLoading(true) 
-      setUserId(crashlytics,other_user_id),
-      setAttributes(crashlytics,{
-        id:other_user_id
-      })
+    }, []);
+  
+  const SkillRefresh = useCallback(async () => {
+      setRefreshing(true)
+      log(crashlytics,'Account Screen: On Refresh')
+      const userDoc = doc(UsersRef,user.userId)
+      const docRef = await getDoc(userDoc)
       try{
-        const docRef = doc(UsersRef,other_user_id)
-        const unsub = onSnapshot(docRef,
-        (documentSnapshot) => {
-          if (documentSnapshot.exists) {
-            setUsers(documentSnapshot.data());
-            setSkills(documentSnapshot.data()?.skills)
-            setLoading(false)
-          } else {
-            console.error('No such document exists!');
+          if(docRef.exists){
+            setUsers(docRef.data())
+            setRefreshing(false)
+          }else{
+            console.error('No such document')
+            setRefreshing(false)
           }
-        },
-        (error) => {
+        }catch(error:unknown | any){
           recordError(crashlytics,error)
-          console.error(`Error fetching document: ${error}`);
-          setLoading(false)
+          setRefreshing(false)
+        }finally{
+          setRefreshing(false)
         }
-      );
-      return () => unsub()
-      }catch(error: unknown | any){
-        recordError(crashlytics,error)
-        setLoading(false)
-      }finally{
-        setLoading(false)
-      }
-    
-  },[other_user_id])
+    }, []);
 
-  const Post = () => (
+
+  useEffect(() => {
+    log(crashlytics,'Other User Screen: Grabbing Projects')
+    try{
+      const collectionRef = collection(db,'projects',userId,'projects')
+      const unsub = onSnapshot(collectionRef,(querySnapshot) => {
+        if (!querySnapshot || querySnapshot.empty) {
+          setProjects([]);
+          setLoading(false);
+          return;
+        }
+        let data:Project[] = []
+        querySnapshot.forEach(doc => {
+          data.push({...doc.data(),id:doc.id})
+        })
+        setProjects(data)
+        setLoading(false)
+      })
+      return () => unsub()
+    }catch(error:unknown | any){
+      recordError(crashlytics,error)
+      console.error('error grabbing user projects:',error.message)
+      setLoading(false)
+    }finally{
+      setLoading(false)
+    }
+  },[userId])
+  useEffect(() => {
+    log(crashlytics,'Other User Screen: Grabbing Posts')
+    try{
+      const postRef = ref(database,'/posts')
+      const orderedQuery = databaseQuery(postRef,orderByChild('auth_id'),equalTo(userId))
+      const unsub = onValue(orderedQuery,(snapshot) => {
+        if(!snapshot.exists()){
+          setPosts([])
+          setLoading(false)
+          return;
+        }
+        const data:Post[] = []
+        Object.keys(snapshot.val()).forEach(key => {
+          data.push({...snapshot.val()[key],id:key})
+        })
+        setPosts(data)
+        setLoading(false)
+      })
+      return () => unsub()
+    }catch(error:unknown | any){
+      recordError(crashlytics,error)
+      console.error('error grabbing user post:',error.message)
+      setLoading(false)
+    }finally{
+      setLoading(false)
+    }
+  },[userId])
+  useEffect(() => {
+    log(crashlytics,'Other User Screen: Grabbing User')
+    setUserId(crashlytics,userId)
+    setAttributes(crashlytics,{
+      id:userId
+    });
+    const docRef = doc(UsersRef,userId)
+    try{
+      const unsub = onSnapshot(docRef,(documentSnapshot) => {
+        if(!documentSnapshot){
+          setUsers(undefined)
+          setLoading(false)
+          return;
+        }
+        if (documentSnapshot.exists) {
+          setUsers(documentSnapshot.data());
+          setLoading(false)
+        }else{
+          console.error('No such document exists!');
+        }
+      },(error) => {
+        recordError(crashlytics,error)
+        console.error(`Error fetching document: ${error}`);
+        setLoading(false)
+      });
+      return () => unsub()
+    }catch(error: unknown | any){
+      recordError(crashlytics,error)
+      setLoading(false)
+    }finally{
+      setLoading(false)
+    }
+  },[userId])
+
+  const Post = React.memo(() => (
     <View
      style={{flex:1,backgroundColor:theme.colors.background}}>
       <SafeAreaView style={{flex:1,backgroundColor:theme.colors.background}}>
         <FlashList
-          ListEmptyComponent={(item) => (
+         ListEmptyComponent={() => (
           <View style={{flex:1,alignItems:'center',justifyContent:'center',paddingTop:5}}>
-            <ActivityIndicator color={theme.colors.background ? '#000' :'#fff'} size='large' animating={isloading}/>
-             </View>
-             )}
+            <Text variant='bodyMedium'>No post at the moment</Text>
+          </View>
+        )}
           data={posts}
+          onRefresh={PostRefresh}
+          onEndReachedThreshold={0.1}
+          refreshing={refreshing}
+          ListFooterComponent={() => (
+            <ActivityIndicator color='#fff' size='small' animating={isloading}/>
+        )}
           ItemSeparatorComponent={() => <Divider/>}
           keyExtractor={item => item?.post_id?.toString() || Math.random().toString()}
           estimatedItemSize={460}
@@ -253,15 +336,12 @@ const OtherUserScreen = () => {
             <Suspense key={item.post_id} fallback={<ActivityIndicator size="small" color="#000" />}>
                 <View style={{padding: 10 }}>
                   <PostComponent auth_profile={item.auth_profile}
-                  count={item.like_count}
+                  like_count={item.like_count}
                   url={item.imageUrl}
-                  id={item.post_id}
+                  post_id={item.post_id}
                   name={item.name}
                   content={item.content}
-                  date={item?.createdAt?.toDate().toLocaleString('en-US', {
-                  hour: '2-digit',
-                  minute: '2-digit',
-                  hour12: true})}
+                  date={TimeAgo(item?.createdAt ?? 0)}
                   comment_count={item.comment_count} />
                 </View>
               </Suspense>
@@ -270,21 +350,33 @@ const OtherUserScreen = () => {
     </SafeAreaView>
     </View>
     
-  ); 
+  )); 
   
-  const Projects = () => (
+  const Projects = React.memo(() => (
     <View style={{flex:1,backgroundColor:theme.colors.background}}>
     <SafeAreaView style={{flex:1,backgroundColor:theme.colors.background,padding:50}}>
       <FlashList
       data={projects}
       estimatedItemSize={460}
       contentContainerStyle={{padding:0}}
-      onRefresh={onRefresh}
       ListEmptyComponent={(item) => (
         <View style={{flex:1,alignItems:'center',justifyContent:'center',paddingTop:5}}>
-          <ActivityIndicator color={theme.colors.background ? '#000' :'#fff'} size='large' animating={isloading}/>
+          <MotiView
+          transition={{
+            type:'timing'
+          }}
+        >
+          <Skeleton
+            show={isloading}
+            radius='round'
+            colorMode={dark_or_light ? 'dark':'light'}
+            >
+          <Text variant='bodyMedium'>No Project displayed</Text>
+          </Skeleton>
+          </MotiView>
         </View>
       )}
+      onRefresh={ProjectRefresh}
       onEndReachedThreshold={0.1}
       refreshing={refreshing}
       ItemSeparatorComponent={()=> (
@@ -303,21 +395,21 @@ const OtherUserScreen = () => {
       />
     </SafeAreaView>
     </View>
-  );
+  ));
 
-  const SkillsScreen = () => (
+  const SkillsScreen = React.memo(() => (
     <View style={{flex:1,backgroundColor:theme.colors.background}}>
     <SafeAreaView style={{flex:1,backgroundColor:theme.colors.background,padding:50}}>
       <FlashList
       data={skills}
       estimatedItemSize={460}
       contentContainerStyle={{padding:0}}
-      onRefresh={onRefresh}
+      onRefresh={SkillRefresh}
       ListEmptyComponent={(item) => (
         <View style={{flex:1,alignItems:'center',justifyContent:'center',paddingTop:5}}>
-          <ActivityIndicator color={theme.colors.background ? '#000' :'#fff'} size='large' animating={isloading}/>
-        </View>
-      )}
+                <Text variant='bodyMedium'>No skill displayed</Text>
+          </View>
+        )}
       onEndReachedThreshold={0.1}
       refreshing={refreshing}
       ItemSeparatorComponent={()=> (
@@ -336,224 +428,310 @@ const OtherUserScreen = () => {
       />
     </SafeAreaView>
     </View>
-  );
+  ));
 
-  const handlePress = async () =>{
+  const handlePress = useCallback(async () =>{
+    const handleFollow = httpsCallable(functions,'handleFollow');
     try{
-      const docRef = doc(UsersRef,other_user_id)
-      await runTransaction(db, async(transaction)=>{
-        const doc = await transaction.get(docRef)
-        if(!doc.exists) throw new Error("Doc doesn't exists!")
-        
-        const currentConnectCount = doc?.data()?.connection || 0
-        const follow_by = doc?.data()?.follow_by || []
-        const hasFollowed = follow_by.includes(user.userId)
-
-        let newFollowed;
-        let updateFollow;
-        let newState;
-
-        if(hasFollowed){
-          newFollowed = currentConnectCount - 1
-          updateFollow = follow_by.filter((id:string)=> id != user.userId)
-          newState = false
-          setPress(newState)
-        }else{
-          newFollowed = currentConnectCount + 1
-          updateFollow = [...follow_by,user.userId]
-          newState = true
-          setPress(newState)
-        }
-        transaction.update(docRef,{
-          connection: newFollowed,
-          follow_by:updateFollow,
-          follow_state:newState
-        })
-        
-      })
+      await handleFollow({
+        other_user_id:userId,
+        currentUser:user.userId,
+      }).then((results) => results.data).catch(error => recordError(crashlytics,error))
     }catch(error:unknown | any){
       recordError(crashlytics,error)
       console.error(error)
-
     }
-  }
+  },[userId,user.userId])
   
   if(isloading) return null
   
     return (
-        <SafeAreaView style={[styles.screen,{backgroundColor:theme.colors.background,paddingTop:Platform.OS === 'ios' ? top: 0}]}>
-          <ScrollView
-            scrollEnabled={true}
-            showsVerticalScrollIndicator={false}
-            style={styles.screen}
-            contentContainerStyle={{flexGrow:1}}
-            refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh}/>}
-            >
-              {headerimg ? (
-                  <ImageBackground
-                  resizeMode="cover"
-                  imageStyle={{height:150,justifyContent:'flex-end'}}
-                  style={{
-                  height:100,
-                  bottom:0,
-                  justifyContent:'flex-end',
-                }}
-                source={headerimg}
-                >
-                 <View style={{flexDirection:'row',justifyContent:'space-between',alignItems:'center',bottom:40}}>
-                 <TouchableOpacity onPress={() => navigation.navigate('Welcome',{screen:'Dash'})} style={{padding:10}}>
-                  <Icon
-                  source='arrow-left-circle'
-                  size={hp(3)}
-                  />
-                </TouchableOpacity>
-                
-                 
-                   <TouchableOpacity style={{alignItems:'flex-end',padding:5}} onPress={() => console.log('button pressed')}>
-                   <Icon size={hp(3)} source='pencil' color={theme.colors.tertiary}/>
-                   </TouchableOpacity>
-                
-                  </View> 
-                </ImageBackground>
-              ) : (
-                <ImageBackground
-                resizeMode="cover"
-                imageStyle={{height:150,justifyContent:'flex-end'}}
-                style={{
-                height:100,
-                bottom:0,
-                justifyContent:'flex-end',
-              }}
-              source={require('../assets/images/header.png')}
-              >
-               <View style={{flexDirection:'row',justifyContent:'space-between',alignItems:'center',bottom:40}}>
-               <TouchableOpacity onPress={() => navigation.navigate('Welcome',{screen:'Dash'})} style={{padding:10}}>
-                <Icon
-                source='arrow-left-circle'
-                size={hp(3)}
-                />
-              </TouchableOpacity>
-              
-               
-                 <TouchableOpacity style={{alignItems:'flex-end',padding:5}} onPress={() => console.log('button pressed')}>
-                 <Icon size={hp(3)} source='account-search' color={theme.colors.tertiary}/>
-                 </TouchableOpacity>
-              
-                </View> 
-              </ImageBackground>
-              )
-            }
-          <View style={{
-             flexDirection:'row',
-             paddingLeft:10,
-             justifyContent:'space-between',
-             padding:5,}}>
-           {
-                users?.profileUrl ? 
-                <Image
-                style={{height:hp(8), aspectRatio:1, borderRadius:100,borderWidth:2,borderColor:theme.colors.background}}
-                source={users?.profileUrl}
-                placeholder={{blurhash}}
-                cachePolicy='none'/> :   <Image
-                style={{height:hp(8), aspectRatio:1, borderRadius:100,borderWidth:2,borderColor:theme.colors.background}}
-                source={require('../assets/user.png')}
-                placeholder={{blurhash}}
-                cachePolicy='none'/>
-       }
-          <Button 
-            onPress={() => navigation.navigate('SecondStack',{
-              screen:'Chat',
-              params:{
-                userid:userId,
-                name:users?.username
-              }
-            })}
-            mode='outlined' style={{
+    <SafeAreaView style={[styles.screen,{backgroundColor:theme.colors.background,paddingTop:Platform.OS === 'ios' ? top: 0}]}>
+      <ScrollView
+        scrollEnabled={true}
+        showsVerticalScrollIndicator={false}
+        style={styles.screen}
+        contentContainerStyle={{flexGrow:1}}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={UserRefresh}/>}
+        >
+      {
+    users?.headerUrl ? 
+    (
+      <MotiView
+      transition={{
+        type: 'timing',
+      }}
+      style={{
+        height:100
+      }}
+      >
+        <Skeleton
+          show={isloading}
+          height={150}
+          radius='square'
+          colorMode={dark_or_light ? 'dark':'light'}
+        >
+        <ImageBackground
+    resizeMode='cover'
+    imageStyle={{height:150,justifyContent:'flex-end'}}
+    style={{
+    height:100,
+    bottom:0,
+    justifyContent:'flex-end',
+  }}
+  source={{uri:users?.headerUrl}}
+  >
+    <View style={{flexDirection:'row',justifyContent:'space-between',alignItems:'center',bottom:40}}>
+    <TouchableOpacity onPress={() => navigation.goBack()} style={{padding:10}}>
+    <Icon
+    source='arrow-left-circle'
+    size={hp(3)}
+    color={theme.colors.background}
+    />
+  </TouchableOpacity>
+    <TouchableOpacity style={{alignItems:'flex-end',padding:5}} onPress={() => console.log('button pressed')}>
+    <Icon size={hp(3)} source='account-search' color={theme.colors.tertiaryContainer}/>
+    </TouchableOpacity>
+    </View> 
+  </ImageBackground>
+        </Skeleton>
+      </MotiView>) : (
+    
+    <MotiView
+    transition={{
+      type: 'timing',
+    }}
+    style={{
+      height:100
+    }}
+    >
+      <Skeleton
+      show={isloading}
+      height={150}
+      radius='square'
+      colorMode={dark_or_light ? 'dark':'light'}
+      >
+      <ImageBackground
+    resizeMode='cover'
+    imageStyle={{height:150,justifyContent:'flex-end'}}
+    style={{
+    height:100,
+    bottom:0,
+    justifyContent:'flex-end',
+  }}
+  source={require('../assets/images/header.png')}
+  >
+    <View style={{flexDirection:'row',justifyContent:'space-between',alignItems:'center',bottom:40}}>
+    <TouchableOpacity onPress={() => navigation.navigate('Welcome',{screen:'Dash'})} style={{padding:10}}>
+    <Icon
+    source='arrow-left-circle'
+    size={hp(3)}
+    color={theme.colors.background}
+    />
+  </TouchableOpacity>
+    <TouchableOpacity style={{alignItems:'flex-end',padding:5}} onPress={() => console.log('button pressed')}>
+    <Icon size={hp(3)} source='account-search' color={theme.colors.tertiaryContainer}/>
+    </TouchableOpacity>
+    </View> 
+  </ImageBackground>
+    </Skeleton></MotiView> )
+  }
+  <View
+  style={{
+    flexDirection:'row',
+    paddingLeft:10,
+    justifyContent:'space-between',
+    padding:5,}}>
+      {
+      users?.profileUrl ?
+      <MotiView
+      transition={{
+        type: 'timing',
+      }}>
+        <Skeleton
+        show={isloading}
+        radius='round'
+        colorMode={dark_or_light ? 'dark':'light'}>
+          <Image
+          style={{
+    height:hp(8),
+    aspectRatio:1,
+    borderRadius:100,
+    borderWidth:2,
+    borderColor:theme.colors.background}}
+    source={users?.profileUrl}
+    placeholder={{blurhash}}
+    cachePolicy='none'/>
+    </Skeleton></MotiView>  :  
+<MotiView
+transition={{
+type: 'timing',}}>
+  <Skeleton
+  show={isloading}
+  radius='round'
+  colorMode={dark_or_light ? 'dark':'light'}>
+    <Image
+style={{
+  height:hp(8), 
+  aspectRatio:1, 
+  borderRadius:100,
+  borderWidth:2,
+  borderColor:theme.colors.background}}
+  source={require('../assets/user.png')}
+  placeholder={{blurhash}}
+  cachePolicy='none'/>
+  </Skeleton></MotiView>} 
+  <MotiView
+  transition={{
+    type: 'timing',}}>
+      <Skeleton 
+      colorMode={dark_or_light ? 'dark':'light'}
+      show={isloading}>
+        <Button
+        onPress={() => navigation.navigate('Chat',{
+          userid:userId,
+          name:users?.username})}
+          mode='outlined'
+          style={{
             backgroundColor:'transparent', 
             borderRadius:100,
             borderWidth:1,
-            borderColor:theme.colors.tertiary}}>Message</Button>
+            borderColor:theme.colors.tertiary}}>Messgae
+            </Button>
+            </Skeleton>
+            </MotiView>  
+            </View>
+            <View style={{marginTop:5}}>
+  <View style={{paddingLeft:10,flexDirection:'column'}}>
+    <MotiView
+    transition={{
+      type:'timing',}}
+      style={{
+        marginVertical:2
+        }}>
+          <Skeleton
+          colorMode={dark_or_light ? 'dark':'light'}
+          show={isloading}>
+            <Text
+            variant='bodySmall'
+            style={{
+              color:theme.colors.onTertiary}}>@{users?.username}</Text>
+              </Skeleton>
+              </MotiView>
+              <MotiView
+              transition={{
+                type: 'timing',
+              }}
+              style={{
+                width:50,
+                marginVertical:2}}>
+          <Skeleton
+          colorMode={dark_or_light ? 'dark':'light'} 
+          show={isloading}>
+          <Text
+          variant='bodySmall'
+          style={{
+            color:theme.colors.onTertiary
+          }}>{users?.jobtitle}</Text>
+          </Skeleton>
+        </MotiView>
+        <MotiView
+          transition={{
+            type:'timing',
+          }}
+          style={{
+            width:50,
+            marginVertical:2
+          }}
+          >
+            <Skeleton
+            colorMode={dark_or_light ? 'dark':'light'}
+            show={isloading}>
+            <Text
+          variant='bodySmall'
+          style={{
+            color:theme.colors.onTertiary
+          }}><EvilIcons name='location' size={15} color={theme.colors.onTertiary}/>{users?.location}</Text>
+            </Skeleton>
+        </MotiView>
+          <View style={{flexDirection:'row',marginTop:10,justifyContent:'space-around',alignItems:'center'}}>
+          {follow_items.map((item,index)=>{
+          return (<MotiView
+          key={index}
+          transition={{
+            type:'timing',
+          }}
+          style={{
+            marginHorizontal:2
+          }}
+          >
+            <Skeleton
+            show={isloading}
+            colorMode={dark_or_light ? 'dark':'light'}
+            >
+            <FollowComponent count={item.count} content={item.content}/>
+            </Skeleton>
+            </MotiView>)
+          })}
+            <View style={{marginLeft:50}}>
+            <Button
+            onPress={handlePress}
+              mode='outlined' style={{
+              backgroundColor:'transparent', 
+              borderRadius:100,
+              borderWidth:1,
+              borderColor:theme.colors.tertiary}}>Connection</Button></View>
               </View>
-              <View style={{marginTop:5}}>
-              <View style={{paddingLeft:20,flexDirection:'column',paddingRight:20}}>
-              <Text
-              variant='bodySmall'
-                style={{
-                  color:theme.colors.onTertiary
-                }}>@{users?.username}</Text>
-            {users?.jobtitle && <Text
-            variant='bodySmall'
-            style={{
-              color:theme.colors.onTertiary
-            }}>{users?.jobtitle}</Text>}
-            {users?.location &&    <Text
-            variant='bodySmall'
-            style={{
-              color:theme.colors.onTertiary
-            }}><EvilIcons name='location' size={15} color={theme.colors.onTertiary}/>{users?.location}</Text>}
-              <View style={{flexDirection:'row',marginTop:10,justifyContent:'space-around',alignItems:'center'}}>
-              {follow_items.map((item,index)=>{
-                return <FollowComponent key={index} count={item.count} content={item.content}/>
-                })}
-                <View style={{marginLeft:50}}>
-                <Button
-                onPress={handlePress}
-                  mode='outlined' style={{
-                  backgroundColor:'transparent', 
-                  borderRadius:100,
-                  borderWidth:1,
-                  borderColor:theme.colors.tertiary}}>Connection</Button></View>
-                  </View>
-                  </View>
-                  </View>
-              <View style={{flex: 1}}>
-              <Tab.Navigator
-                screenOptions={{
-                  swipeEnabled:true,
-                  tabBarIndicatorStyle:{
-                    backgroundColor:theme.colors.primary
-                  },
-                  tabBarStyle:{
-                    backgroundColor:theme.colors.background,
-                  },
-                }}
-                ><Tab.Screen
-                name='Posts'
-                component={Post}
-                options={{
-                  tabBarLabelStyle:{
-                    fontSize:20,
-                    color:'#000'
-                  }
-                }}
-                />
-                <Tab.Screen
-                name='Projects'
-                component={Projects}
-                options={{
-                  tabBarLabelStyle:{
-                    fontSize:20,
-                    color:theme.colors.tertiary
-                  }
-                }}
-                />
-              <Tab.Screen
-                name='Skills'
-                component={SkillsScreen}
-                options={{
-                  tabBarLabelStyle:{
-                    fontSize:20,
-                    color:theme.colors.tertiary
-                  }
-                }}
-                />
-                  </Tab.Navigator>
-                </View> 
-            </ScrollView> 
-        </SafeAreaView>
-       
-      )
-    }
+              </View>
+              </View>
+          <View style={{flex: 1}}>
+          <Tab.Navigator
+            screenOptions={{
+              swipeEnabled:true,
+              tabBarIndicatorStyle:{
+                backgroundColor:theme.colors.primary
+              },
+              tabBarStyle:{
+                backgroundColor:theme.colors.background,
+              },
+            }}
+            ><Tab.Screen
+            name='Posts'
+            component={Post}
+            options={{
+              tabBarLabelStyle:{
+                fontSize:20,
+                color:'#000'
+              }
+            }}
+            />
+            <Tab.Screen
+            name='Projects'
+            component={Projects}
+            options={{
+              tabBarLabelStyle:{
+                fontSize:20,
+                color:theme.colors.tertiary
+              }
+            }}
+            />
+          <Tab.Screen
+            name='Skills'
+            component={SkillsScreen}
+            options={{
+              tabBarLabelStyle:{
+                fontSize:20,
+                color:theme.colors.tertiary
+              }
+            }}
+            />
+          </Tab.Navigator>
+            </View> 
+        </ScrollView> 
+    </SafeAreaView>
+    
+  )
+}
     
 const styles = StyleSheet.create({
       screen:{
