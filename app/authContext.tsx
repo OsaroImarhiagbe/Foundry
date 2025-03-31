@@ -7,7 +7,7 @@ import {
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {GoogleSignin,statusCodes,} from '@react-native-google-signin/google-signin';
 import {log,recordError,setAttributes,setUserId} from '@react-native-firebase/crashlytics'
-import { db,auth,functions, crashlytics, messaging, UsersRef } from '../FirebaseConfig'
+import { db,auth,functions, crashlytics, messaging, UsersRef } from './FirebaseConfig'
 import {httpsCallable} from '@react-native-firebase/functions'
 import notifee from '@notifee/react-native'
 import { createUserWithEmailAndPassword, onAuthStateChanged, sendPasswordResetEmail, signInWithEmailAndPassword, signOut, } from '@react-native-firebase/auth';

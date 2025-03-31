@@ -20,7 +20,7 @@ import {
   where,
 } from '@react-native-firebase/firestore'
 import { log,recordError } from '@react-native-firebase/crashlytics'
-import { crashlytics, ProjectRef} from '../../FirebaseConfig';
+import { crashlytics, ProjectRef} from '../FirebaseConfig';
 import { useTheme } from 'react-native-paper';
 import { useNavigation,} from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -30,7 +30,7 @@ import {Image as ImageCompressor} from 'react-native-compressor';
 import {launchImageLibrary} from 'react-native-image-picker';
 import { useDispatch,useSelector } from 'react-redux';
 import { addprojectId,currentProjectId } from 'app/features/projects/projectSlice';
-import { storage,functions } from '../../FirebaseConfig';
+import { storage,functions } from '../FirebaseConfig';
 import {getDownloadURL, putFile, ref} from '@react-native-firebase/storage';
 import { httpsCallable } from '@react-native-firebase/functions';
 import { Text } from 'react-native-paper';

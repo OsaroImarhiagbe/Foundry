@@ -14,7 +14,7 @@ import { FlashList } from '@shopify/flash-list';
 import { ActivityIndicator,Text,useTheme,Icon } from 'react-native-paper';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import {log,recordError} from '@react-native-firebase/crashlytics'
-import { crashlytics, database} from '../../FirebaseConfig';
+import { crashlytics, database} from '../FirebaseConfig';
 import SearchComponent from 'app/components/SearchComponent';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Skeleton } from 'moti/skeleton';

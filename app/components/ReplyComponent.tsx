@@ -7,7 +7,7 @@ import { useAuth } from '../authContext';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import color from '../../config/color';
 import { useSelector } from 'react-redux';
-import { crashlytics, functions } from '../../FirebaseConfig';
+import { crashlytics, functions } from '../FirebaseConfig';
 import { httpsCallable } from '@react-native-firebase/functions';
 import { Card,Text,useTheme,Divider } from 'react-native-paper';
 import { recordError } from '@react-native-firebase/crashlytics';

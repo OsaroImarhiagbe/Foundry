@@ -11,7 +11,7 @@ import { useSelector} from 'react-redux';
 import { FlashList } from "@shopify/flash-list";
 import {ActivityIndicator,Text,Divider,useTheme} from 'react-native-paper'
 import {log,recordError} from '@react-native-firebase/crashlytics'
-import { crashlytics,perf,database} from '../../FirebaseConfig';
+import { crashlytics,perf,database} from '../FirebaseConfig';
 import {ref,FirebaseDatabaseTypes, orderByChild, limitToFirst, startAt, query, equalTo, onValue, limitToLast, } from '@react-native-firebase/database';
 import PostComponent from '../components/PostComponent';
 import { TimeAgo } from '../../utils/index';

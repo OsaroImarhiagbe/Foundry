@@ -19,7 +19,7 @@ import MessageItem from '../components/MessageItem';
 import { FlashList } from '@shopify/flash-list';
 import { TextInput,useTheme,Text } from 'react-native-paper';
 import { log,recordError} from '@react-native-firebase/crashlytics'
-import { functions, crashlytics, perf, database,} from '../../FirebaseConfig';
+import { functions, crashlytics, perf, database,} from '../FirebaseConfig';
 import { httpsCallable } from '@react-native-firebase/functions'
 import { limitToLast, onValue, orderByChild, ref,query, get} from '@react-native-firebase/database';
 

@@ -8,7 +8,7 @@ import {collection, getDocs, query, where} from '@react-native-firebase/firestor
 import { useAuth } from '../authContext';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import  { log, recordError } from '@react-native-firebase/crashlytics'
-import { crashlytics,ProjectRef } from '../../FirebaseConfig';
+import { crashlytics,ProjectRef } from '../FirebaseConfig';
 import FastImage from '@d11/react-native-fast-image';
 import { useSelector } from 'react-redux';
 import { useTheme } from 'react-native-paper';
