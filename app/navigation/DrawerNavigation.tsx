@@ -11,7 +11,7 @@ import TabNavigation from '../navigation/TabNavigation.tsx';
 import SplashScreen from '../screen/SplashScreen.tsx';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { recordError } from '@react-native-firebase/crashlytics';
-import { crashlytics } from 'FirebaseConfig.ts';
+import { crashlytics } from '../../FirebaseConfig.ts';
 const SettingsScreen = React.lazy(() => import('../screen/SettingsScreen.tsx'));
 const OnboardingScreen = React.lazy(() => import('../screen/OnboardingScreen.tsx'));
 const Drawer = createDrawerNavigator();
