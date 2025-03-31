@@ -13,7 +13,7 @@ import {ActivityIndicator,Divider,Text,useTheme} from 'react-native-paper';
 import {ref,FirebaseDatabaseTypes, orderByChild, startAt, query,onValue, limitToLast, onChildAdded, limitToFirst} from '@react-native-firebase/database';
 import {log,recordError,} from '@react-native-firebase/crashlytics'
 import { FlashList } from '@shopify/flash-list';
-import { crashlytics, perf, database,} from '../../FirebaseConfig';
+import { crashlytics, perf, database,} from '../FirebaseConfig';
 import PostComponent from '../components/PostComponent';
 import { TimeAgo } from '../../utils/index';
 import Toast from 'react-native-toast-message'

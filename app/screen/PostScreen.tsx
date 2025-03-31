@@ -26,7 +26,7 @@ import {
   MenuTrigger,
 } from 'react-native-popup-menu';
 import { MenuItems } from '../components/CustomMenu'
-import {crashlytics, functions, perf,storage } from '../../FirebaseConfig';
+import {crashlytics, functions, perf,storage } from '../FirebaseConfig';
 import { httpsCallable } from '@react-native-firebase/functions'
 import FastImage from "@d11/react-native-fast-image";
 import {Image as ImageCompressor,Video as VideoCompressor} from 'react-native-compressor';

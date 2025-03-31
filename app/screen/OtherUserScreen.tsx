@@ -31,7 +31,7 @@ import EvilIcons from 'react-native-vector-icons/EvilIcons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { NavigatorScreenParams } from '@react-navigation/native';
 import {log,recordError, setAttributes, setUserId} from '@react-native-firebase/crashlytics'
-import { UsersRef,db, crashlytics, database, functions} from '../../FirebaseConfig'
+import { UsersRef,db, crashlytics, database, functions} from '../FirebaseConfig'
 import { MotiView } from 'moti';
 import { Skeleton } from 'moti/skeleton';
 import PostComponent from '../components/PostComponent';

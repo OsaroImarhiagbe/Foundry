@@ -3,7 +3,7 @@ import notifee, { EventType } from '@notifee/react-native'
 import { useNavigation } from '@react-navigation/native';
 import { FirebaseMessagingTypes } from '@react-native-firebase/messaging';
 import { useAuth } from './authContext';
-import {crashlytics, messaging, database } from '../FirebaseConfig';
+import {crashlytics, messaging, database } from './FirebaseConfig';
 import {log,recordError} from '@react-native-firebase/crashlytics'
 import { TimeAgo} from '../utils/index';
 import { get, ref } from '@react-native-firebase/database';

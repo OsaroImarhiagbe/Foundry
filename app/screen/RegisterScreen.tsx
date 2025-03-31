@@ -19,7 +19,7 @@ import { TouchableWithoutFeedback } from 'react-native-gesture-handler';
 import { Button,useTheme } from 'react-native-paper';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import {log,recordError} from '@react-native-firebase/crashlytics'
-import { crashlytics } from '../../FirebaseConfig';
+import { crashlytics } from '../FirebaseConfig';
 import Toast from 'react-native-toast-message';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
