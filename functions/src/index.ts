@@ -15,7 +15,7 @@ import {onValueWritten} from "firebase-functions/v2/database";
 import {initializeApp} from "firebase-admin/app";
 import {getFirestore, FieldValue} from "firebase-admin/firestore";
 import {getMessaging} from "firebase-admin/messaging";
-import {getDatabase, ServerValue} from "firebase-admin/database";
+import {getDatabase} from "firebase-admin/database";
 initializeApp();
 // Create and deploy your first functions
 // https://firebase.google.com/docs/functions/get-started
@@ -95,19 +95,18 @@ exports.addMessage = onCall(async (request) => {
       recipientName: recipientName,
       content: content,
       status: status,
-      createdAt: ServerValue.TIMESTAMP,
+      createdAt: Date.now(),
     });
     const chatRef = getDatabase().ref(`/chats/${roomId}`);
     await chatRef.update({
       lastMessage: {
         senderId: senderId,
         recipientId: recipientId,
-        roomId: roomId,
         senderName: senderName,
         status: status,
         recipientName: recipientName,
         content: content,
-        createdAt: ServerValue.TIMESTAMP,
+        createdAt: Date.now(),
       },
     });
   } catch (error) {
@@ -127,13 +126,13 @@ exports.newChatRooomMessage = onValueWritten("/messages/{roomId}", async (event)
       logger.warn(`Room ${roomId} not found`);
       return {success: false, error: "Room not found"};
     }
-    const senderId = chatRef.val().participants.senderId;
-    const room = chatRef.val();
-    const participantId = room?.participants.recipientId.find((id:string) => id !== senderId);
+    const senderId = chatRef.val().lastMessage.senderId;
+    const Chatroom = chatRef.val();
+    const participantId = Chatroom?.lastMessage.recipientId.find((id:string) => id !== senderId);
     if (participantId) {
       await sendNotification(participantId, {
         title: "New Message",
-        body: `You have a new message from ${room?.participants.senderName}`,
+        body: `You have a new message from ${Chatroom?.lastMessage.senderName}`,
         data: {
           roomId,
           messageId: snapshot.after.key,

@@ -92,7 +92,7 @@ const PostComponent: React.FC<PostComponentProps> = memo(({
     const videoRef = useRef<VideoRef>(null);
     const colorScheme = useColorScheme()
 
-    const colorMode = colorScheme ? 'light' : 'dark'
+    const colorMode = colorScheme ? 'dark' : 'light'
  
 
     useEffect(() => {

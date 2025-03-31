@@ -10,6 +10,8 @@ import LazyScreenComponent from '../components/LazyScreenComponent.tsx';
 import TabNavigation from '../navigation/TabNavigation.tsx';
 import SplashScreen from '../screen/SplashScreen.tsx';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { recordError } from '@react-native-firebase/crashlytics';
+import { crashlytics } from 'FirebaseConfig.ts';
 const SettingsScreen = React.lazy(() => import('../screen/SettingsScreen.tsx'));
 const OnboardingScreen = React.lazy(() => import('../screen/OnboardingScreen.tsx'));
 const Drawer = createDrawerNavigator();
@@ -23,13 +25,17 @@ const SettingsScreenWrapper = React.memo(() => {
   )
 })
 
-const OnboardingScreenWrapper = React.memo(() => {
+interface OnboardingScreenWrapperProps {
+  refreshStatus: () => void;
+}
+
+const OnboardingScreenWrapper: React.FC<OnboardingScreenWrapperProps> = React.memo(({ refreshStatus }) => {
   return (
     <LazyScreenComponent>
-      <OnboardingScreen/>
-      </LazyScreenComponent>
-  )
-})
+      <OnboardingScreen refreshStatus={refreshStatus} />
+    </LazyScreenComponent>
+  );
+});
 
 
 
@@ -38,6 +44,12 @@ const DrawerNavigation = () => {
   const {user,logout,} = useAuth()
   const [Onboarding,setOnboardingStatus] = useState<string | null>()
   const [isloading,setLoading] = useState<boolean>(true)
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
+
+
+  const refreshOnboardingStatus = () => {
+    setRefreshTrigger(prev => prev + 1);
+  };
 
 
   const handleLogout = useCallback(async () => {
@@ -60,22 +72,37 @@ const DrawerNavigation = () => {
 
   useEffect(() => {
     const status = async () => {
-      const OnboardStatus = await AsyncStorage.getItem('onboarded')
-      if(isloading && OnboardStatus === '1'){
-        return (
-          <SplashScreen/>
-        )
-      }else{
-        return(
-          <OnboardingScreenWrapper/>
-        )
+      try{
+        const registered = await AsyncStorage.getItem('justRegistered')
+        if(registered === 'true'){
+          setOnboardingStatus(null)
+          await AsyncStorage.setItem('justRegistered','false')
+        }else{
+          const OnboardingStatus = await AsyncStorage.getItem('onboarded')
+          setOnboardingStatus(OnboardingStatus)
+        }
+      }catch(error:unknown | any){
+        recordError(crashlytics,error)
+        console.error('Error grabbing the Onboarding Status',error)
+      }finally{
+        setLoading(false)
       }
     }
     status();
-  },[])
+  },[refreshTrigger])
 
   
+  if(isloading){
+    return (
+      <SplashScreen/>
+    )
+  }
 
+  if(Onboarding !== '1'){
+    return(
+      <OnboardingScreenWrapper refreshStatus={refreshOnboardingStatus}  />
+    )
+  }
 
 
   return (
@@ -85,7 +112,7 @@ const DrawerNavigation = () => {
     drawerContent={props => (
       <DrawerContentScrollView {...props}>
           <View style={{ padding: 10,flexDirection:'row',alignItems:'center',justifyContent:'space-between'}}>
-           <TouchableWithoutFeedback  onPress={() => props.navigation.navigate('Home',{screen:'You'})}>
+           <TouchableWithoutFeedback  onPress={() =>  props.navigation.navigate('Home',{screen:'You'})}>
             {
               user.profileUrl ? 
               <Image

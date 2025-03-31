@@ -19,15 +19,9 @@ import FollowComponent from '../components/FollowComponent';
 import {
   collection,
   doc, 
-  FirebaseFirestoreTypes, 
   getDoc, 
-  onSnapshot, 
-  orderBy,
-  query as firestoreQuery,  
-  runTransaction,
-  where} from '@react-native-firebase/firestore'
-import { blurhash } from '../../utils/index';
-import { useSelector } from 'react-redux';
+  onSnapshot} from '@react-native-firebase/firestore'
+import { blurhash, TimeAgo } from '../../utils/index';
 import { useAuth } from '../authContext';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import { FlashList } from '@shopify/flash-list';
@@ -37,7 +31,7 @@ import EvilIcons from 'react-native-vector-icons/EvilIcons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { NavigatorScreenParams } from '@react-navigation/native';
 import {log,recordError, setAttributes, setUserId} from '@react-native-firebase/crashlytics'
-import { UsersRef,PostRef,db, crashlytics, ProjectRef, database, functions} from '../../FirebaseConfig'
+import { UsersRef,db, crashlytics, database, functions} from '../../FirebaseConfig'
 import { MotiView } from 'moti';
 import { Skeleton } from 'moti/skeleton';
 import PostComponent from '../components/PostComponent';
@@ -64,6 +58,10 @@ type RootStackParamList = {
   Welcome?: {
     screen?: string;
   };
+  Chat?:{
+      userid?:string,
+      name?:string
+  }
   News?: NavigatorScreenParams<SecondStackParamList>;
 }
 
@@ -93,7 +91,7 @@ type Post ={
   date?: string;
   comment_count?: number;
   mount?: boolean;
-  createdAt?: FirebaseFirestoreTypes.Timestamp
+  createdAt?: number
 }
 interface Project{
   id?:string,
@@ -107,25 +105,21 @@ const OtherUserScreen = () => {
   const [users, setUsers] = useState<User | undefined>(undefined)
   const [isloading,setLoading] = useState(true)
   const navigation = useNavigation<Navigation>();
-  const [isPress,setPress] = useState(false)
   const [projects,setProjects] = useState<Project[]>([])
   const [posts,setPosts] = useState<Post[]>([])
   const [skills,setSkills] = useState<Skill[]>([])
   let route = useRoute()
   const {user} = useAuth()
   const {userId} = route?.params as {userId:string}
-  const other_user_id = useSelector((state:any)=>state.search.searchID)
   const [refreshing, setRefreshing] = useState(false);
   const theme = useTheme()
   const {top} = useSafeAreaInsets()
   const dark_or_light = useColorScheme()
   //const headerimg = useSelector((state:any) => state.user.addImage)
+  const follow_items = [{count:users?.projects,content:'projects'},{count:users?.connection,content:'  connection   '},{count:posts.length,content:' posts'}]
 
 
-    const follow_items = [{count:users?.projects,content:'projects'},{count:users?.connection,content:'  connection   '},{count:posts.length,content:' posts'}]
-
-
-    const UserRefresh = useCallback(async () => {
+  const UserRefresh = useCallback(async () => {
       setRefreshing(true)
       log(crashlytics,'Account Screen: User Refresh')
       const userDoc = doc(UsersRef,user.userId)
@@ -145,12 +139,12 @@ const OtherUserScreen = () => {
           setRefreshing(false)
         }
     }, []);
-    const ProjectRefresh = useCallback(async () => {
+  const ProjectRefresh = useCallback(async () => {
       setRefreshing(true)
       log(crashlytics,'Account Screen: On Refresh')
       try{
-        const collectionRef = collection(UsersRef,user.userId,'projects')
-         const unsub = onSnapshot(collectionRef,async (querySnapshot) => {
+        const collectionRef = collection(db,'projects',userId,'projects')
+         const unsub = onSnapshot(collectionRef,(querySnapshot) => {
           if (!querySnapshot || querySnapshot.empty) {
             setProjects([]);
             setRefreshing(false);
@@ -172,14 +166,16 @@ const OtherUserScreen = () => {
         recordError(crashlytics,err)
         console.error('error grabbing user projects:',err.message)
         setRefreshing(false)
+      }finally{
+        setRefreshing(false)
       }
     }, []);
-    const PostRefresh = useCallback(async () => {
+  const PostRefresh = useCallback(async () => {
       setRefreshing(true)
       log(crashlytics,'Account Screen: POST Refresh')
       try{
         const postRef = ref(database,'/posts')
-        const orderedQuery = databaseQuery(postRef, orderByChild('auth_id'), equalTo(other_user_id));
+        const orderedQuery = databaseQuery(postRef, orderByChild('auth_id'), equalTo(userId));
         const unsub = onValue(orderedQuery,async (snapshot) => {
           if (!snapshot.exists()) {
             setPosts([]);
@@ -187,9 +183,8 @@ const OtherUserScreen = () => {
             return;
           }
           const data:Post[] = []
-          snapshot.forEach(childSnapshot => {
-            data.push({...childSnapshot.val(),id:childSnapshot.key})
-            return true
+          Object.keys(snapshot.val()).forEach(key => {
+            data.push({...snapshot.val()[key],id:key})
           })
           setPosts(data)
           setRefreshing(false)
@@ -203,10 +198,12 @@ const OtherUserScreen = () => {
         recordError(crashlytics,err)
         console.error('error grabbing user post:',err)
         setRefreshing(false)
+      }finally{
+        setRefreshing(false)
       }
     }, []);
   
-    const SkillRefresh = useCallback(async () => {
+  const SkillRefresh = useCallback(async () => {
       setRefreshing(true)
       log(crashlytics,'Account Screen: On Refresh')
       const userDoc = doc(UsersRef,user.userId)
@@ -228,103 +225,92 @@ const OtherUserScreen = () => {
     }, []);
 
 
-    useEffect(() => {
-      log(crashlytics,'Other User Screen: Grabbing Projects')
-      if(!users?.userId) return;
-      try{
-        const collectionRef = collection(ProjectRef,users.userId,'projects')
-        const unsub = onSnapshot(collectionRef,(querySnapshot) => {
-          if (!querySnapshot || querySnapshot.empty) {
-            setProjects([]);
-            setLoading(false);
-            return;
-          }
-          let data:Project[] = []
-          querySnapshot.forEach(doc => {
-            data.push({...doc.data(),id:doc.id})
-          })
-          setProjects(data)
-          setLoading(false)
-        })
-        return () => unsub()
-      }catch(error:unknown | any){
-        recordError(crashlytics,error)
-        console.error('error grabbing user projects:',error.message)
-        setLoading(false)
-      }finally{
-        setLoading(false)
-      }
-    },[other_user_id])
-
-
-    useEffect(() => {
-      log(crashlytics,'Other User Screen: Grabbing Posts')
-      if (!users?.username) return;  
-      try{
-        const postRef = ref(database,'/posts')
-        const orderedQuery = databaseQuery(postRef,orderByChild('auth_id'),equalTo(other_user_id),)
-        const unsub = onValue(orderedQuery,(snapshot) => {
-          if(!snapshot.exists()){
-            setPosts([])
-            setLoading(false)
-            return;
-          }
-          const data:Post[] = []
-          snapshot.forEach(childSnapshot => {
-            data.push({...childSnapshot.val(),id:childSnapshot.key})
-            return true
-          })
-          setPosts(data)
-          setLoading(false)
-        })
-        return () => unsub()
-      }catch(error:unknown | any){
-        recordError(crashlytics,error)
-        console.error('error grabbing user post:',error.message)
-        setLoading(false)
-      }finally{
-        setLoading(false)
-      }
-    },[other_user_id])
-
-
-    useEffect(() => {
-      log(crashlytics,'Other User Screen: Grabbing User')
-      setUserId(crashlytics,other_user_id),
-      setAttributes(crashlytics,{
-        id:other_user_id
-      })
-      const docRef = doc(UsersRef,other_user_id)
-      try{
-        const unsub = onSnapshot(docRef,(documentSnapshot) => {
-          if(!documentSnapshot){
-            setUsers(undefined)
-            setLoading(false)
-            return;
-          }
-          if (documentSnapshot.exists) {
-            setUsers(documentSnapshot.data());
-            setSkills(documentSnapshot.data()?.skills)
-            setLoading(false)
-          } else {
-            console.error('No such document exists!');
-          }
-        },
-        (error) => {
-          recordError(crashlytics,error)
-          console.error(`Error fetching document: ${error}`);
-          setLoading(false)
+  useEffect(() => {
+    log(crashlytics,'Other User Screen: Grabbing Projects')
+    try{
+      const collectionRef = collection(db,'projects',userId,'projects')
+      const unsub = onSnapshot(collectionRef,(querySnapshot) => {
+        if (!querySnapshot || querySnapshot.empty) {
+          setProjects([]);
+          setLoading(false);
+          return;
         }
-      );
+        let data:Project[] = []
+        querySnapshot.forEach(doc => {
+          data.push({...doc.data(),id:doc.id})
+        })
+        setProjects(data)
+        setLoading(false)
+      })
       return () => unsub()
-      }catch(error: unknown | any){
+    }catch(error:unknown | any){
+      recordError(crashlytics,error)
+      console.error('error grabbing user projects:',error.message)
+      setLoading(false)
+    }finally{
+      setLoading(false)
+    }
+  },[userId])
+  useEffect(() => {
+    log(crashlytics,'Other User Screen: Grabbing Posts')
+    try{
+      const postRef = ref(database,'/posts')
+      const orderedQuery = databaseQuery(postRef,orderByChild('auth_id'),equalTo(userId))
+      const unsub = onValue(orderedQuery,(snapshot) => {
+        if(!snapshot.exists()){
+          setPosts([])
+          setLoading(false)
+          return;
+        }
+        const data:Post[] = []
+        Object.keys(snapshot.val()).forEach(key => {
+          data.push({...snapshot.val()[key],id:key})
+        })
+        setPosts(data)
+        setLoading(false)
+      })
+      return () => unsub()
+    }catch(error:unknown | any){
+      recordError(crashlytics,error)
+      console.error('error grabbing user post:',error.message)
+      setLoading(false)
+    }finally{
+      setLoading(false)
+    }
+  },[userId])
+  useEffect(() => {
+    log(crashlytics,'Other User Screen: Grabbing User')
+    setUserId(crashlytics,userId)
+    setAttributes(crashlytics,{
+      id:userId
+    });
+    const docRef = doc(UsersRef,userId)
+    try{
+      const unsub = onSnapshot(docRef,(documentSnapshot) => {
+        if(!documentSnapshot){
+          setUsers(undefined)
+          setLoading(false)
+          return;
+        }
+        if (documentSnapshot.exists) {
+          setUsers(documentSnapshot.data());
+          setLoading(false)
+        }else{
+          console.error('No such document exists!');
+        }
+      },(error) => {
         recordError(crashlytics,error)
+        console.error(`Error fetching document: ${error}`);
         setLoading(false)
-      }finally{
-        setLoading(false)
-      }
-    
-  },[other_user_id])
+      });
+      return () => unsub()
+    }catch(error: unknown | any){
+      recordError(crashlytics,error)
+      setLoading(false)
+    }finally{
+      setLoading(false)
+    }
+  },[userId])
 
   const Post = React.memo(() => (
     <View
@@ -333,21 +319,7 @@ const OtherUserScreen = () => {
         <FlashList
          ListEmptyComponent={() => (
           <View style={{flex:1,alignItems:'center',justifyContent:'center',paddingTop:5}}>
-            <MotiView
-         transition={{
-          type:'timing'
-         }}
-         style={{
-          width:100,}}
-          >
-            <Skeleton
-              show={isloading}
-              radius='round'
-              colorMode={dark_or_light ? 'dark':'light'}
-              >
             <Text variant='bodyMedium'>No post at the moment</Text>
-            </Skeleton>
-            </MotiView>
           </View>
         )}
           data={posts}
@@ -369,10 +341,7 @@ const OtherUserScreen = () => {
                   post_id={item.post_id}
                   name={item.name}
                   content={item.content}
-                  date={item?.createdAt?.toDate().toLocaleString('en-US', {
-                  hour: '2-digit',
-                  minute: '2-digit',
-                  hour12: true})}
+                  date={TimeAgo(item?.createdAt ?? 0)}
                   comment_count={item.comment_count} />
                 </View>
               </Suspense>
@@ -396,8 +365,6 @@ const OtherUserScreen = () => {
           transition={{
             type:'timing'
           }}
-          style={{
-            width:100,}}
         >
           <Skeleton
             show={isloading}
@@ -467,14 +434,14 @@ const OtherUserScreen = () => {
     const handleFollow = httpsCallable(functions,'handleFollow');
     try{
       await handleFollow({
-        other_user_id:other_user_id,
+        other_user_id:userId,
         currentUser:user.userId,
       }).then((results) => results.data).catch(error => recordError(crashlytics,error))
     }catch(error:unknown | any){
       recordError(crashlytics,error)
       console.error(error)
     }
-  },[other_user_id,user.userId])
+  },[userId,user.userId])
   
   if(isloading) return null
   
@@ -515,7 +482,7 @@ const OtherUserScreen = () => {
   source={{uri:users?.headerUrl}}
   >
     <View style={{flexDirection:'row',justifyContent:'space-between',alignItems:'center',bottom:40}}>
-    <TouchableOpacity onPress={() => navigation.navigate('Welcome',{screen:'Dash'})} style={{padding:10}}>
+    <TouchableOpacity onPress={() => navigation.goBack()} style={{padding:10}}>
     <Icon
     source='arrow-left-circle'
     size={hp(3)}
@@ -621,12 +588,9 @@ style={{
       colorMode={dark_or_light ? 'dark':'light'}
       show={isloading}>
         <Button
-        onPress={() => navigation.navigate('News',{
-          screen:'Chat',
-          params:{
-            userid:userId,
-            name:users?.username
-          }})}
+        onPress={() => navigation.navigate('Chat',{
+          userid:userId,
+          name:users?.username})}
           mode='outlined'
           style={{
             backgroundColor:'transparent', 
@@ -643,7 +607,6 @@ style={{
     transition={{
       type:'timing',}}
       style={{
-        width:50,
         marginVertical:2
         }}>
           <Skeleton
@@ -656,13 +619,12 @@ style={{
               </Skeleton>
               </MotiView>
               <MotiView
-    transition={{
-              type: 'timing',
-            }}
-            style={{
-              width:50,
-              marginVertical:2
-            }}>
+              transition={{
+                type: 'timing',
+              }}
+              style={{
+                width:50,
+                marginVertical:2}}>
           <Skeleton
           colorMode={dark_or_light ? 'dark':'light'} 
           show={isloading}>

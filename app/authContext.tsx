@@ -157,13 +157,11 @@ export const AuthContextProvider = ({children}:AuthContextProviderProps) => {
             }).catch(error => {
                 console.error(error)
             })
-            await Promise.all(
-                [
-                setUserId(crashlytics,response.user.uid),
-                setAttributes(crashlytics,{
-                    user_id:response.user.uid,
-                })
-            ])
+            setUserId(crashlytics,response.user.uid),
+            setAttributes(crashlytics,{
+                user_id:response.user.uid,
+            })
+            await AsyncStorage.setItem('jusRegistered','true')
             return {success:true, data: response?.user}
         }catch(error:unknown | any){
             recordError(crashlytics,error)

@@ -6,7 +6,7 @@ import { useAuth } from './authContext';
 import {crashlytics, messaging, database } from '../FirebaseConfig';
 import {log,recordError} from '@react-native-firebase/crashlytics'
 import { TimeAgo} from '../utils/index';
-import { onValue, ref } from '@react-native-firebase/database';
+import { get, ref } from '@react-native-firebase/database';
 const NotificationContext = createContext<any>(null);
 
 
@@ -41,56 +41,45 @@ export const NotificationProvider = ({ children }:NotificationProp) => {
             title: title,
             body:message,
             ios: {
-              attachments: [
-                {
-                  thumbnailHidden:false,
-                  url: image || ''
-                }
-              ],
-                foregroundPresentationOptions: {
-                    badge: true,
-                    sound: true,
-                    banner: true,
-                    list: true,
-                  },
-                sound:'default'
+              foregroundPresentationOptions: {
+                badge: true,
+                sound: true,
+                banner: true,
+                list: true,
+              },
+              sound:'default'
             },
-        });
-        if(user && user.userId){
-          const notificationRef = ref(database,`/notifications/${user.userId}`)
-          const newNotification = notificationRef.push()
-          await newNotification.set({
-            title: title,
-            message: message,
-            timestamp:TimeAgo(Date.now()),
-            data:data,
-            isRead:false
-          })
-        }else{
-          console.error('Error adding notification')
+          });
+          if(user && user.userId){
+            const notificationRef = ref(database,`/notifications/${user.userId}`)
+            const newNotification = notificationRef.push()
+            await newNotification.set({
+              title: title,
+              message: message,
+              timestamp:TimeAgo(Date.now()),
+              data:data,
+              isRead:false
+            })
+          }else{
+            console.error('Error adding notification')
+          }
+          setNotification({ title, message,data });
+          setVisible(true)
+        }catch(error:unknown | any){
+          recordError(crashlytics,error)
+          console.error('Error with notification permission:',error.message)
         }
-        setNotification({ title, message,data });
-        setVisible(true)
-    }catch(error:unknown | any){
-        recordError(crashlytics,error)
-        console.error('Error with notification permission:',error.message)
-    }
-  }, [user, user.userId]);
+      }, [user, user.userId]);
 
   const getNotificationCount = useCallback(async () => {
     const collectionRef = ref(database,`/notifications/${user.userId}`)
-    let count:number = 0;
     try{
-      const unsub = onValue(collectionRef,(snapshot) => {
-        if(snapshot.exists()){
-          count = snapshot.numChildren();
-        }
-        return () => unsub()
-      })
+      const countRef = await get(collectionRef)
+      return countRef.exists() ? countRef.numChildren() : 0
     }catch(error:unknown| any){
       recordError(crashlytics,error)
     }
-    return count
+    return 0
   },[user.userId])
 
   useEffect(() => {

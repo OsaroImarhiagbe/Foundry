@@ -58,7 +58,7 @@ const FeedScreen = () => {
     useEffect(() => {
       Toast.show({
         type: 'success',
-        text1: `Welcome Back ${user.username}`,
+        text1: `Welcome back ${user.username}`,
         position:'top',
         autoHide:true,
         visibilityTime:5000,

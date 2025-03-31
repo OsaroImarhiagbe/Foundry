@@ -24,7 +24,7 @@ import { limitToFirst, onValue, orderByChild, ref, startAt, query } from '@react
 const ChatList = React.lazy(() => import('../../List/ChatList'))
 
 
-interface User{
+interface Chats{
   key:string,
 }
 
@@ -36,7 +36,7 @@ type Navigation = NativeStackNavigationProp<NavigationProp>
 const MessageScreen = () => {
 
 
-  const [users, setUsers] = useState<User[]>([]);
+  const [chats, setChats] = useState<Chats[]>([]);
   const {top} = useSafeAreaInsets()
   const navigation = useNavigation<Navigation>();
   const { user} = useAuth();
@@ -44,26 +44,22 @@ const MessageScreen = () => {
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(false);
   const [loading,setLoading] = useState<boolean>(true)
-  const [lastVisible, setLastVisible] = useState<User[]>([]);
+  const [lastVisible, setLastVisible] = useState<Chats[]>([]);
   const theme = useTheme()
+
 
   const onRefresh = useCallback(() => {
     setRefreshing(true);
+    log(crashlytics,'Grabbing Users Message')
     try{
-        log(crashlytics,'Grabbing Users Message')
-        if (!users) {
-          setUsers([]);
-          setRefreshing(false)
-          return;
-        }
         const chatRef = ref(database,`/chats`)
         const unsub = onValue(chatRef,(snapshot) =>{
-          const data:User[] = []
+          const data:Chats[] = []
           Object.keys(snapshot.val()).forEach(key => {
             data.push({...snapshot.val()[key], id: key})
           }) 
-          setUsers(data)
-          setLastVisible([{key: users[users.length - 1].key}])
+          setChats(data)
+          setLastVisible([{key: data[data.length - 1].key}])
           setHasMore(data.length > 0)
           setRefreshing(false)
         })
@@ -74,7 +70,7 @@ const MessageScreen = () => {
     }finally{
       setRefreshing(false); 
     }
-  }, [users]);
+  }, []);
 
   useEffect(() => {
     log(crashlytics,'Grabbing Users Message')
@@ -82,15 +78,15 @@ const MessageScreen = () => {
       const chatsRef = ref(database,`/chats`)
       const unsub = onValue(chatsRef,(snapshot) =>{
         if(!snapshot.exists()){
-          setUsers([])
+          setChats([])
           setLoading(false)
           return;
         }
-        const data:User[] = []
+        const data:Chats[] = []
         Object.keys(snapshot.val()).forEach(key => {
           data.push({...snapshot.val()[key],id:key})
         })
-        setUsers(data)
+        setChats(data)
         setLastVisible([{ key: data[data.length - 1].key }])
         setHasMore(data.length > 0)
         setLoading(false)
@@ -112,7 +108,7 @@ const MessageScreen = () => {
   const fetchMoreMessage = async () => {
     setLoadingMore(true);
     log(crashlytics,'Fetch more Message')
-    if (users.length <= 2) {
+    if (!hasMore) {
       setHasMore(false);
       setLoadingMore(false)
       return;
@@ -122,16 +118,16 @@ const MessageScreen = () => {
       const chatQuery = query(chatsRef,orderByChild('createdAt'),startAt(lastVisible[0].key),limitToFirst(5))
       const unsub = onValue(chatQuery,(snapshot) => {
         if(!snapshot.exists()){
-          setUsers([])
+          setChats([])
           setHasMore(false)
           setLoadingMore(false)
           return;
         }
-        const morePost:User[] = []
+        const morePost:Chats[] = []
         Object.keys(snapshot.val()).forEach((key) => {
           morePost.push({...snapshot.val()[key],id:key})
         })
-        setUsers(prev => [...prev, ...morePost]);
+        setChats(prev => [...prev, ...morePost]);
         setLastVisible([{key: morePost[morePost.length - 1].key}])
         setHasMore(false);
         setLoadingMore(false)
@@ -161,7 +157,7 @@ const MessageScreen = () => {
       <FlashList
       estimatedItemSize={460}
       onRefresh={onRefresh}
-      data={users}
+      data={chats}
       refreshing={refreshing}
       onEndReached={fetchMoreMessage}
       onEndReachedThreshold={0.5}
@@ -177,7 +173,7 @@ const MessageScreen = () => {
         <LazyScreenComponent>
           <MotiView>
             <Skeleton>
-            <ChatList currentUser={user} otherusers={users}/>
+            <ChatList currentUser={user} otherusers={chats}/>
             </Skeleton>
           </MotiView>
         </LazyScreenComponent>

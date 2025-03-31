@@ -38,7 +38,7 @@ const AuthNavigation = () => {
 
   return (
         <Stack.Navigator initialRouteName='Login'>
-            <Stack.Screen
+          <Stack.Screen
             name="Login"
             component={LoginScreenWrapper}
             options={{

@@ -85,7 +85,6 @@ const StackNavigation = () => {
       options={{
       headerShown:false,
       gestureEnabled:false,
-      presentation:'fullScreenModal'
       }}/>
     <Stack.Screen
       name='Post'

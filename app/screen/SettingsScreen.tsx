@@ -4,8 +4,7 @@ import {
   View,
   TouchableOpacity, 
   StyleSheet, 
-  Switch, 
-  SafeAreaView, 
+  Switch,
   ScrollView} from 'react-native'
 import { Avatar, Icon, Text,useTheme } from 'react-native-paper';
 import Feather from 'react-native-vector-icons/Feather';
@@ -36,13 +35,13 @@ const Sections = [
               icon:'navigation',
               color:'green',
               label:'Location', 
-              type:'link',},
+              type:'toggle',},
           {
             id:3,
-            tag:'darkmode',
+            tag:'Use sevice settings',
             icon:'theme-light-dark',
             color:'green',
-            label:'DarkMode',
+            label:'Use device settings',
             type:'toggle'
         }, 
       ],
@@ -116,7 +115,7 @@ const SettingsScreen = () => {
                             <Text variant='bodyLarge' style={{color:theme.colors.tertiary,paddingLeft:10,fontSize:20}}>{label}</Text>
                             <View style={{flex:1}}/>
                             {type === 'toggle' && 
-                            <Switch value={false}
+                            <Switch value={true}
                             onValueChange={value => setForm({...form,[id]: value})}/>}
                             {label !=='Version' && type === 'link' ? 
                             <View style={{ backgroundColor: '#3b3b3b', borderRadius: 5, width: 30, padding: 5 }}>

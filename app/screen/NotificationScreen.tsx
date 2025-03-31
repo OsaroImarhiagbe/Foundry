@@ -43,7 +43,7 @@ const NotificationScreen = () => {
     log(crashlytics,'Notification Screen: On Refresh')
     setRefreshing(true);
     try{
-      const notificationRef = ref(database,`/notfications/${user.userId}`)
+      const notificationRef = ref(database,`/notifications/${user.userId}`)
         const unsub = onValue(notificationRef,(snapshot)=>{
           if(!snapshot.exists()){
             setMessageNotifications([])
@@ -53,14 +53,14 @@ const NotificationScreen = () => {
           }
         const messageOnly:Notification[] = []
         const all:Notification[] = []
-        snapshot.forEach((childSnapshot)=>{
-          all.push({...childSnapshot.val(),id:childSnapshot.key})
-          update(ref(database, `/notfications/${user.userId}/${childSnapshot.key}`), { isRead: true })
+        Object.keys(snapshot.val()).forEach((key)=>{
+          all.push({...snapshot.val()[key],id:key})
+          update(ref(database, `/notifications/${user.userId}/${key}`), { isRead: true })
           setNotificationCount(null)
-          if (childSnapshot.val().data.type == 'message'){
-            update(ref(database, `/notfications/${user.userId}/${childSnapshot.key}`), { isRead: true })
+          if (snapshot.val().type == 'message'){
+            update(ref(database, `/notifications/${user.userId}/${key}`), { isRead: true })
             setNotificationCount(null)
-            messageOnly.push({...childSnapshot.val()})
+            messageOnly.push({...snapshot.val()[key]})
           }
           return true;
         })
@@ -82,7 +82,7 @@ const NotificationScreen = () => {
 
   useEffect(() => {
     try{
-        const notificationRef = ref(database,`/notfications/${user.userId}`)
+        const notificationRef = ref(database,`/notifications/${user.userId}`)
         const unsub = onValue(notificationRef,(snapshot)=>{
           if(!snapshot.exists()){
             setMessageNotifications([])
@@ -92,14 +92,12 @@ const NotificationScreen = () => {
           }
         const messageOnly:Notification[] = []
         const all:Notification[] = []
-        snapshot.forEach((childSnapshot)=>{
-          all.push({...childSnapshot.val(),id:childSnapshot.key})
-          update(ref(database, `/notfications/${user.userId}/${childSnapshot.key}`), { isRead: true })
+        Object.keys(snapshot.val()).forEach((key)=>{
+          all.push({...snapshot.val()[key],id:key})
+          update(ref(database, `/notifications/${user.userId}/${key}`), { isRead: true })
           setNotificationCount(null)
-          if (childSnapshot.val().data.type == 'message'){
-            update(ref(database, `/notfications/${user.userId}/${childSnapshot.key}`), { isRead: true })
-            setNotificationCount(null)
-            messageOnly.push({...childSnapshot.val()})
+          if (snapshot.val()[key].data.type == 'message'){
+            messageOnly.push({...snapshot.val()[key]})
           }
           return true
         })
@@ -124,9 +122,7 @@ const NotificationScreen = () => {
      style={{flex:1,backgroundColor:theme.colors.background}}>
       <SafeAreaView style={{flex:1,backgroundColor:theme.colors.background}}>
         <FlashList
-        onRefresh={onRefresh}
         estimatedItemSize={460}
-        refreshing={refreshing}
         keyExtractor={(item) => item.id?.toString() || Math.random().toString() }
         data={messageNotifications}
         ListEmptyComponent={() => <View style={{paddingTop:20}}><Text
@@ -157,7 +153,7 @@ const NotificationScreen = () => {
     
   )); 
   
-  const Notifcations = React.memo(() => (
+  const Notifications = React.memo(() => (
     <View
      style={{flex:1,backgroundColor:theme.colors.background}}>
       <SafeAreaView style={{flex:1,backgroundColor:theme.colors.background}}>
@@ -262,10 +258,10 @@ const NotificationScreen = () => {
   }}
   >
     <Tab.Screen
-      name='Messages'
-      component={MessagesNotifications}
+      name='Notifications'
+      component={Notifications}
       options={{
-        tabBarLabel:'Messages',
+        tabBarLabel:'All',
         tabBarLabelStyle:{
           color:theme.colors.tertiary,
           fontSize:20
@@ -273,10 +269,10 @@ const NotificationScreen = () => {
       }}
       />
       <Tab.Screen
-      name='Notications'
-      component={Notifcations}
+      name='Messages'
+      component={MessagesNotifications}
       options={{
-        tabBarLabel:'All',
+        tabBarLabel:'Messages',
         tabBarLabelStyle:{
           color:theme.colors.tertiary,
           fontSize:20

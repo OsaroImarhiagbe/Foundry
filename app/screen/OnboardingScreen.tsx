@@ -9,21 +9,23 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useTheme } from 'react-native-paper';
 
 
-
-
+type OnBoardingScreenType = {
+    refreshStatus:() => void
+}
 type NavigationProp ={
     Drawer:{
         screen:string
     }
 }
 type Navigation = NativeStackNavigationProp<NavigationProp>
-const OnboardingScreen = () => {
+const OnboardingScreen:React.FC<OnBoardingScreenType> = ({refreshStatus}) => {
     const navigation = useNavigation<Navigation>()
     const theme = useTheme()
     const {width} = useWindowDimensions()
 
     const handleDone = useCallback(async () => {
         await AsyncStorage.setItem('onboarded','1')
+        if (refreshStatus) refreshStatus();
     },[])
   return (
     <View style={styles.screen}>
