@@ -19,7 +19,7 @@ import DrawerNavigation from './app/navigation/DrawerNavigation.tsx';
 import { DefaultTheme as Defaulttheme, DarkTheme as Darktheme } from '@react-navigation/native';
 import notifee from '@notifee/react-native'
 import { recordError } from '@react-native-firebase/crashlytics';
-import { crashlytics } from './FirebaseConfig';
+
 import Toast from 'react-native-toast-message'
 import { useAuth } from '././app/authContext.tsx';
 
@@ -47,7 +47,7 @@ export default function App() {
 
 
   useEffect(() => {
-    notifee.setBadgeCount(0).catch((error:unknown | any) => recordError(crashlytics,error))
+    notifee.setBadgeCount(0).catch((error:unknown | any) => console.error(error))
   },[])
  
   return (
