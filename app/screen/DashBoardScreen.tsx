@@ -27,9 +27,7 @@ import { useDispatch} from 'react-redux';
 import { MenuItems } from '../components/CustomMenu';
 import { addsearchID } from '../features/search/searchSlice';
 import SearchComponent from '../components/SearchComponent';
-import { functions } from '../../FirebaseConfig.ts';
 import LazyScreenComponent from 'app/components/LazyScreenComponent.tsx';
-import { httpsCallable } from '@react-native-firebase/functions'
 import {  useSafeAreaInsets } from 'react-native-safe-area-context';
 const HomeScreen = React.lazy(() => import('../screen/HomeScreen.tsx'));
 const FeedScreen = React.lazy(() => import('../screen/FeedScreen.tsx'));

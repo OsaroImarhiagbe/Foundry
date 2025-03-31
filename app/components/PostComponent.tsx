@@ -26,13 +26,12 @@ import {
   MenuTrigger,
 } from 'react-native-popup-menu';
 import { MenuItems } from '../components/CustomMenu'
-import { crashlytics, database, db, PostRef } from '../../FirebaseConfig.ts';
+import { crashlytics, database,functions} from '../../FirebaseConfig';
 import FastImage from "@d11/react-native-fast-image";
 import { perf } from '../../FirebaseConfig';
 import { Skeleton } from 'moti/skeleton';
 import { MotiView } from 'moti';
 import Video, { VideoRef } from 'react-native-video';
-import { functions } from '../../FirebaseConfig.ts';
 import { httpsCallable } from '@react-native-firebase/functions'
 import { recordError } from '@react-native-firebase/crashlytics';
 import {ref,FirebaseDatabaseTypes, orderByChild, query,  onValue, } from '@react-native-firebase/database';
