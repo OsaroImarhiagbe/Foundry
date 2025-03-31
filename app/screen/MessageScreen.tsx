@@ -17,8 +17,6 @@ import {log,recordError} from '@react-native-firebase/crashlytics'
 import { crashlytics, database} from '../FirebaseConfig';
 import SearchComponent from 'app/components/SearchComponent';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Skeleton } from 'moti/skeleton';
-import { MotiView } from 'moti';
 import LazyScreenComponent from '../components/LazyScreenComponent';
 import { limitToFirst, onValue, orderByChild, ref, startAt, query } from '@react-native-firebase/database';
 const ChatList = React.lazy(() => import('../../List/ChatList'))
@@ -171,11 +169,7 @@ const MessageScreen = () => {
         </View>)}
       renderItem={({item}) => (
         <LazyScreenComponent>
-          <MotiView>
-            <Skeleton>
             <ChatList currentUser={user} otherusers={chats}/>
-            </Skeleton>
-          </MotiView>
         </LazyScreenComponent>
       )}
       />
