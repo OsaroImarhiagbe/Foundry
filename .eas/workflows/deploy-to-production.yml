@@ -4,7 +4,7 @@ on:
   pull_request_labeled:
     branches: ['main']
     labels:
-      - production
+      - Production
 
 jobs:
   fingerprint:
