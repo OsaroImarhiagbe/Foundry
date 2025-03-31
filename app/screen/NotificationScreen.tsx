@@ -13,8 +13,6 @@ import { crashlytics, database,} from '../FirebaseConfig';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { log,recordError } from '@react-native-firebase/crashlytics'
 import { FlashList } from '@shopify/flash-list';
-import { MotiView } from 'moti';
-import { Skeleton } from 'moti/skeleton';
 import { onValue, ref, update } from '@react-native-firebase/database';
 import { useNotification } from '../NotificationProvider';
 
@@ -129,12 +127,6 @@ const NotificationScreen = () => {
           variant='bodySmall'
         style={{ color: '#fff', textAlign: 'center',fontSize:16}}>No Notifications Available</Text></View>}
         renderItem={({item}) =>  
-          <MotiView
-          transition={{
-            type:'timing'
-          }}
-          style={{padding: 10}}>
-            <Skeleton>
             <View style={{padding:20,borderRadius:20}}>
             <Text
             variant='bodyMedium'
@@ -145,9 +137,7 @@ const NotificationScreen = () => {
              style={{
               color:theme.colors.tertiary
             }}>{item.message}</Text>
-            </View>
-            </Skeleton>
-          </MotiView>}/>
+            </View>}/>
     </SafeAreaView>
     </View>
     
@@ -170,12 +160,6 @@ const NotificationScreen = () => {
           variant='bodySmall'
         style={{ color: '#fff', textAlign: 'center',fontSize:16}}>No Notifications Available</Text></View>}
         renderItem={({item}) =>  
-          <MotiView
-        transition={{
-          type:'timing'
-        }}
-        style={{padding: 10}}>
-        <Skeleton>
         <View style={{padding:20,borderRadius:20}}>
         <Text
         variant='bodyMedium'
@@ -190,9 +174,7 @@ const NotificationScreen = () => {
          style={{
           color:theme.colors.tertiary
         }}>{item.timestamp}</Text>
-        </View>
-        </Skeleton>
-      </MotiView>}/>
+        </View>}/>
     </SafeAreaView>
     </View>
     
@@ -211,12 +193,6 @@ const NotificationScreen = () => {
           variant='bodySmall'
         style={{ color: '#fff', textAlign: 'center',fontSize:16}}>No Notifications Available</Text></View>}
         renderItem={({item}) =>  
-          <MotiView
-        transition={{
-          type:'timing'
-        }}
-        style={{padding: 10}}>
-            <Skeleton>
             <View style={{padding:20,borderRadius:20}}>
             <Text
             variant='bodyMedium'
@@ -227,9 +203,7 @@ const NotificationScreen = () => {
              style={{
               color:theme.colors.tertiary
             }}>{item.message}</Text>
-            </View>
-            </Skeleton>
-          </MotiView>}/>
+            </View>}/>
     </SafeAreaView>
     </View>
     

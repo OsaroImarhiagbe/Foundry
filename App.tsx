@@ -18,8 +18,6 @@ import AuthNavigation from './app/navigation/AuthNavigation.tsx'
 import DrawerNavigation from './app/navigation/DrawerNavigation.tsx';
 import { DefaultTheme as Defaulttheme, DarkTheme as Darktheme } from '@react-navigation/native';
 import notifee from '@notifee/react-native'
-import { recordError } from '@react-native-firebase/crashlytics';
-
 import Toast from 'react-native-toast-message'
 import { useAuth } from '././app/authContext.tsx';
 
