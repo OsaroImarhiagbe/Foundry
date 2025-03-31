@@ -27,7 +27,7 @@ import { useNavigation } from '@react-navigation/native';
 import { Image } from 'expo-image';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {log,recordError} from '@react-native-firebase/crashlytics'
-import { crashlytics } from '../../FirebaseConfig';
+import { crashlytics } from '../FirebaseConfig';
 
 
 

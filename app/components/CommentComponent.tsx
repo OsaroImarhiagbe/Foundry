@@ -14,7 +14,7 @@ import { useSelector } from 'react-redux';
 import {Text,Card,useTheme, ActivityIndicator} from 'react-native-paper'
 import { TouchableWithoutFeedback } from 'react-native-gesture-handler';
 import FastImage from '@d11/react-native-fast-image';
-import { crashlytics, database, functions } from '../../FirebaseConfig';
+import { crashlytics, database, functions } from '../FirebaseConfig';
 import {endAt, endBefore, FirebaseDatabaseTypes, limitToLast, onValue, orderByChild, query, ref} from '@react-native-firebase/database'
 import { log, recordError } from '@react-native-firebase/crashlytics';
 import { FlashList } from '@shopify/flash-list';

@@ -9,7 +9,7 @@ import {
 import { useAuth } from '../authContext';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import { useTheme,Text, Divider } from 'react-native-paper';
-import { crashlytics, database,} from '../../FirebaseConfig';
+import { crashlytics, database,} from '../FirebaseConfig';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { log,recordError } from '@react-native-firebase/crashlytics'
 import { FlashList } from '@shopify/flash-list';

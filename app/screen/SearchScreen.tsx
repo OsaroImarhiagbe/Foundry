@@ -20,7 +20,7 @@ import { useTheme } from 'react-native-paper';
 import { Image } from 'expo-image';
 import { blurhash } from 'utils';
 import { useAuth } from 'app/authContext';
-import { crashlytics, UsersRef } from '../../FirebaseConfig';
+import { crashlytics, UsersRef } from '../FirebaseConfig';
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import {log, recordError} from '@react-native-firebase/crashlytics'
 import { FlashList } from '@shopify/flash-list';
