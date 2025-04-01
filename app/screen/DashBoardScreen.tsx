@@ -67,7 +67,7 @@ const DashBoardScreen = () => {
     const dispatch = useDispatch()
 
     const handleSearch = useCallback((id:string) => {
-      dispatch(addsearchID(id))
+      dispatch(addsearchID({id:id}))
     },[dispatch])
     
  
@@ -133,10 +133,6 @@ const DashBoardScreen = () => {
           }
       }}
     >
-      <MenuItems 
-      text='Anyone'
-      action={()=> handleSearch('Anyone')}/>
-      <Divider/>
        <MenuItems 
       text='Creativity and Innovation'
       action={()=> handleSearch('Creativity and Innovation')}/>

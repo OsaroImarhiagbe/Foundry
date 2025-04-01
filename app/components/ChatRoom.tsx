@@ -27,7 +27,7 @@ const ChatRoom:React.FC<ChatRoomProp> = ({onPress,user,last_message,chat_room_id
   const renderLastMessage = useCallback(() => {
     if (typeof last_message === 'undefined') return 'Loading...';
     if (last_message) {
-      if (user.userId !== user_1) {
+      if (user.userId === user_1) {
         return 'You: ' + last_message;
       }
       return last_message;

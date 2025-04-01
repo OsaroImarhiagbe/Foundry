@@ -46,7 +46,16 @@ const ChatScreen = () => {
   const [focus,setFocus] = useState(false)
   const inputRef = useRef<any>(null)
 
-  const roomId = userid ? getRoomID(user?.userId, userid) : item.participants.user_1 ? getRoomID(item.participants.user_2, item.participants.user_1) : null; 
+
+  let roomId:string;
+  if (userid) {
+    roomId = getRoomID(user?.userId, userid);
+  } else if (item.participants?.user_1) {
+    roomId = getRoomID(item.participants.user_2, item.participants.user_1);
+  }else{
+    roomId='';
+  }
+
   let recipient_id:string;
   if(userid){
     recipient_id = userid
@@ -55,9 +64,20 @@ const ChatScreen = () => {
   }else{
     recipient_id = '';
   }
-  const recipientName = userid ? name  : item.participants.user_1  ? item.participants.username_1 : 'Unknown Recipient'; 
+  let recipientName:string;
+  if(userid){
+    recipientName = name
+  }else if(item?.participants){
+    recipientName = user.userId === item?.participants?.user_1 ? item.participants.username_2 : item.participants.username_1
+  }else{
+    recipientName = 'Unknown Recipient'
+  }
 
 
+
+  const memoMessages = useMemo(() => {
+    return messages.sort((a,b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+  },[messages])
   useEffect(() => {
     const timeout = setTimeout(() => {
       inputRef.current?.focus();
@@ -84,7 +104,6 @@ const ChatScreen = () => {
     };
     if (roomId && recipient_id) {
       createRoom(roomId,recipient_id);
-      //dispatch(addID(userid));
       loadMessages(roomId);
     }
   
@@ -161,29 +180,21 @@ const ChatScreen = () => {
     inChat={true}
     >
       <View style={{flex:1}}>
-        { user.userId === item.participants.user_1 ? (
-           <ChatRoomHeader 
-           title={recipientName ? item.participants.username_2 : recipientName}
+    <ChatRoomHeader 
+           title={recipientName}
            backgroundColor='transparent'
            icon='keyboard-backspace'
            iconColor='#00bf63'
            icon2='camera'
            icon3='phone'
-           onPress={() => navigation.goBack()}/>) :  (<ChatRoomHeader 
-           title={item.participants.username_1}
-           backgroundColor='transparent'
-           icon='keyboard-backspace'
-           iconColor='#00bf63'
-           icon2='camera'
-           icon3='phone'
-           onPress={() => navigation.goBack()}/>)}
+           onPress={() => navigation.goBack()}/>
       <View style={styles.messagesContainer}>
       <FlashList
         ref={flashListRef}
         inverted
         keyboardShouldPersistTaps='handled'
         contentContainerStyle={{padding:10}}
-        data={messages}
+        data={memoMessages}
         keyExtractor={item => item?.id?.toString()}
         estimatedItemSize={360}
         renderItem={({item}) => (

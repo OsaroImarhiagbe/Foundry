@@ -10,7 +10,7 @@ import {
   useColorScheme,
   } from 'react-native'
 import { useNavigation } from '@react-navigation/native';
-import React,{useState, useEffect,useCallback} from 'react';
+import React,{useState, useEffect,useCallback, useMemo} from 'react';
 import { useAuth } from '../authContext';
 import { Image } from 'expo-image';
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
@@ -114,7 +114,9 @@ const AccountScreen = () => {
   
   const follow_items = [{count:users?.projects,content:' projects'},{count:users?.connection,content:' connection  '},{count:posts?.length,content:' posts'}]
 
-
+  const memoPost = useMemo(() => {
+    return posts.sort((a,b) => new Date(b.createdAt ?? 0).getTime() - new Date(a.createdAt ?? 0).getTime())
+  },[posts])
   const UserRefresh = useCallback(async () => {
     setRefreshing(true)
     log(crashlytics,'Account Screen: User Refresh')
@@ -169,7 +171,7 @@ const AccountScreen = () => {
     log(crashlytics,'Account Screen: POST Refresh')
     try{
       const postRef = ref(database,'/posts')
-      const orderedQuery = query(postRef,orderByChild('auth_id'),equalTo(user.userId),)
+      const orderedQuery = query(postRef,orderByChild('auth_id'),equalTo(user.userId))
       const unsub = onValue(orderedQuery,async (snapshot) => {
         if (!snapshot.exists()) {
           setPosts([]);
@@ -178,7 +180,7 @@ const AccountScreen = () => {
         }
         const data:Post[] = []
         Object.keys(snapshot.val()).forEach(key => {
-          data.push({...snapshot.val(),id:key})
+          data.push({...snapshot.val()[key],id:key})
         })
         setPosts(data)
         setRefreshing(false)
@@ -330,7 +332,7 @@ const AccountScreen = () => {
       <SafeAreaView style={{flex:1,backgroundColor:theme.colors.background}}>
         <FlashList
           contentContainerStyle={{padding:0}}
-          data={posts}
+          data={memoPost}
           estimatedItemSize={460}
           onRefresh={PostRefresh}
           ListEmptyComponent={() => (
@@ -546,7 +548,7 @@ const AccountScreen = () => {
               <View style={{flexDirection:'row',marginTop:10}}>
               {follow_items.map((item,index)=>{
                   return (
-                    <FollowComponent count={item.count} content={item.content}/>)
+                    <FollowComponent key={index} count={item.count} content={item.content}/>)
                 })}
               </View>
             </View>

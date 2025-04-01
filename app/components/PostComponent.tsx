@@ -190,7 +190,7 @@ const PostComponent: React.FC<PostComponentProps> = memo(({
   return (
   <Card
   elevation={2}
-  style={{backgroundColor:'transparent',marginVertical:8,marginHorizontal:10}}
+  style={{backgroundColor:'transparent'}}
   >
   <Card.Content>
     <View style={{flexDirection:'row'}}>
@@ -223,7 +223,7 @@ const PostComponent: React.FC<PostComponentProps> = memo(({
       }}
       resizeMode={FastImage.resizeMode.cover}
       style={{
-        aspectRatio: 1,
+        aspectRatio: 0.8,
         width:370,
         height:370,
         borderRadius: 10,
@@ -249,6 +249,7 @@ const PostComponent: React.FC<PostComponentProps> = memo(({
        variant="bodySmall"
        style={{
         fontSize:10,
+        paddingTop:10,
         color:theme.colors.tertiary
        }}>{date}</Text>
     </View>

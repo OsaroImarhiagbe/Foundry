@@ -1,12 +1,12 @@
 import React,{
   useState,
   useEffect,
-  useCallback,} from 'react'
+  useCallback,
+  useMemo,} from 'react'
 import {
   View,
 } from 'react-native'
 import { useAuth } from 'app/authContext';
-import { FirebaseFirestoreTypes,onSnapshot,doc,orderBy,limit,getDocs, startAfter,where } from '@react-native-firebase/firestore';
 import { useSelector} from 'react-redux';
 import { FlashList } from "@shopify/flash-list";
 import {ActivityIndicator,Text,Divider,useTheme} from 'react-native-paper'
@@ -31,6 +31,8 @@ type Post = {
   category?:string;
   createdAt?: number;
   comment_count?: number;
+  mount?:boolean,
+  videoUrl?:string,
 };
 
 
@@ -43,20 +45,21 @@ const HomeScreen= () => {
   const [loadingMore, setLoadingMore] = useState<boolean>(false);
   const [hasMore, setHasMore] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(true)
-  const category = useSelector((state:string | any)=> state.search.searchID)
+  const category = useSelector((state: { search: { searchID: string } }) => state.search.searchID)
 
-  
+  const memoPost = useMemo(() => {
+    return post.sort((a, b) => new Date(b.createdAt ?? 0).getTime() - new Date(a.createdAt ?? 0).getTime())
+  },[post])
   useEffect(() => {
-    if (!user?.userId){
-      setLoading(false)
+    log(crashlytics,'Grabbing post')
+    if (!category) {
+      setPost([]);
+      setLoading(false);
       return;
     }
-    log(crashlytics,'Grabbing post')
-    const grabPost = async () => {
-    const trace = await perf.startTrace('HomeScreen')
       try {
         const docRef = ref(database,'/posts')
-        const orderedQuery = query(docRef,orderByChild('createdAt'),equalTo(category),limitToLast(5))
+        const orderedQuery = query(docRef,orderByChild('category'),equalTo(category),limitToLast(10))
         const subscriber = onValue(orderedQuery,(snapshot:FirebaseDatabaseTypes.DataSnapshot) =>{
           if (!snapshot.exists()) {
             setPost([]);
@@ -64,11 +67,11 @@ const HomeScreen= () => {
             return;
           }
           const data:Post[] = []; 
-          Object.keys(snapshot).forEach(key => {
+          Object.keys(snapshot.val()).forEach(key => {
             data.push({ ...snapshot.val()[key],id:key });
+            setLastVisible([{key: data[data.length - 1].key}]);
           })
           setPost(data);
-          setLastVisible([{key: data[data.length - 1].key}]);
           setHasMore(data.length > 0);
           setLoading(false);
         });
@@ -79,13 +82,8 @@ const HomeScreen= () => {
           setLoading(false);
         }finally{
           setLoading(false)
-          trace.stop()
         }
-      }
-      grabPost()
   }, [category]); 
-
-
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
@@ -130,7 +128,7 @@ const fetchMorePost = useCallback(async () => {
   if (!lastVisible || !hasMore) return;
   try {
     const docRef = ref(database,'/posts')
-    const orderedQuery = query(docRef,orderByChild('createdAt'),equalTo(category),startAt(lastVisible[0].key),limitToFirst(5))
+    const orderedQuery = query(docRef,orderByChild('category'),equalTo(category),startAt(lastVisible[0].key),limitToFirst(5))
     const subscriber = onValue(orderedQuery,(snapshot: FirebaseDatabaseTypes.DataSnapshot) => {
       if(!snapshot.exists()){
         setPost([])
@@ -162,13 +160,9 @@ const fetchMorePost = useCallback(async () => {
     <View
     style={{flex:1,backgroundColor:theme.colors.background}}
     >
-      { loading ? Array.from({length:5}).map((_,index) => (
-          <PostComponent
-          key={index}
-          mount={loading}
-        /> )): (<FlashList
+     <FlashList
         contentContainerStyle={{padding:0}}
-        data={post}
+        data={memoPost}
         estimatedItemSize={460}
         onRefresh={onRefresh}
         ListEmptyComponent={(item) => (
@@ -191,6 +185,7 @@ const fetchMorePost = useCallback(async () => {
           like_count={item.like_count}
           url={item.imageUrl}
           post_id={item.post_id}
+          video={item.videoUrl}
           name={item.name}
           content={item.content}
           date={TimeAgo(item?.createdAt ?? 0)}
@@ -198,8 +193,6 @@ const fetchMorePost = useCallback(async () => {
          }
         keyExtractor={(item,index)=> item?.post_id?.toString() || `default-${index}`}
         />
-      )
-    }
     </View>
   )
 }
