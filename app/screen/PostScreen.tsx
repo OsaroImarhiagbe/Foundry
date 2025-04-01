@@ -57,16 +57,10 @@ const PostScreen = () => {
   const navigation = useNavigation<Navigation>();
   const textInputRef = useRef<TextInput>(null);
   const [category, setCategory] = useState<string>('')
-  const isMounted = useRef(true)
+
   const videoRef = useRef<VideoRef>(null);
 
 
-
-  useEffect(() => {
-    isMounted.current = true;
-    return () => {
-      isMounted.current = false}
-  },[])
 
   useEffect(() => {
     const timeout = setTimeout(() => {
@@ -75,7 +69,6 @@ const PostScreen = () => {
 
     return () => clearTimeout(timeout); 
   }, []);
-
 
   const handlePost = useCallback(async () => {
     if(text.trim() === '') return
@@ -152,7 +145,6 @@ const PostScreen = () => {
   },[ hasUnsavedChanges, image,video]);
   const pickImage = useCallback(async () => {
     log( crashlytics,'Post Screen: Picking Images')
-    setLoading(true)
     try{
       const results = await launchImageLibrary({
         mediaType: 'mixed',
@@ -161,27 +153,30 @@ const PostScreen = () => {
         presentationStyle:'popover',
         videoQuality:'high',
       })
+      let imageuri='';
+      let videouri='';
       if(!results.didCancel && results.assets?.length && results?.assets[0]?.uri && results?.assets[0]?.fileSize){
-        const uri = await ImageCompressor.compress(results.assets[0].uri)
-        const videouri = await VideoCompressor.compress(results.assets[0].uri,{
+        if(results.assets[0].type === 'image/jpg'){
+           imageuri = await ImageCompressor.compress(results.assets[0].uri)
+        }else if(results.assets[0].type === 'video/mp4'){
+          videouri = await VideoCompressor.compress(results.assets[0].uri,{
             compressionMethod: 'auto',
             maxSize:640
         })
-        if(isMounted.current){
-          setImage(uri)
-          setVideo(videouri)
-          setFileName(results?.assets[0]?.fileName)
         }
+        setImage(imageuri)
+        setVideo(videouri)
+        setFileName(results?.assets[0]?.fileName)
       }
+      setLoading(false)
     }catch(error:unknown | any){
       recordError(crashlytics,error)
       console.error(error)
+      setLoading(false)
     }finally{
-      if(isMounted.current){
-        setLoading(false)
-      }
+      setLoading(false)
     }
-  },[setImage,setFileName])
+  },[])
   return (
       <View style={[styles.screen,{backgroundColor:theme.colors.background,paddingTop:Platform.OS === 'ios' ? top : 0}]}>
       <View style={styles.container}>
@@ -288,11 +283,14 @@ const PostScreen = () => {
             source={{
               uri:image,
               priority: FastImage.priority.normal}}
-            resizeMode={FastImage.resizeMode.contain}
+            resizeMode={FastImage.resizeMode.cover}
             style={{
-              width:'100%',
-              alignSelf: 'center',
-              height:300,
+              aspectRatio: 0.8,
+              width:370,
+              height:380,
+              alignSelf:'center',
+              borderRadius: 10,
+              overflow: 'hidden',
             }}
           />}
          {video && <Video 
@@ -302,10 +300,14 @@ const PostScreen = () => {
             repeat={true}
             ref={videoRef}
             controls={true}
-            resizeMode='contain'             
+            resizeMode='cover'             
             style={{
-              width:'100%',
-              height:250,
+              width: 400,
+              height: 350,
+              borderRadius: 10,
+              overflow: 'hidden',
+              alignSelf:'center',
+              bottom:10
             }}
           />}
       </View>

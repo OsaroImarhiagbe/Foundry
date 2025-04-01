@@ -93,7 +93,7 @@ const SearchScreen = () => {
         <View style={{padding:10, marginTop:50,flexDirection:'row',justifyContent:'space-between',alignItems:'center'}}>
           <Image
           style={{height:hp(4.3), aspectRatio:1, borderRadius:100,}}
-          source={{uri:user.profileUrl}}
+          source={user.profileUrl ? user.profileUrl : require('../assets/user.png')}
           placeholder={{blurhash}}
           />
           <SearchComponent

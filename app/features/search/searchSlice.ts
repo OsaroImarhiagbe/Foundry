@@ -7,7 +7,8 @@ export const searchSlice = createSlice({
     },
     reducers:{
         addsearchID:(state,action) =>{
-            state.searchID = action.payload.searchID
+            const {id} = action.payload;
+            state.searchID = id
         }
     }
 })

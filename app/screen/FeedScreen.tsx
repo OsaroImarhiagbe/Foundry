@@ -3,7 +3,8 @@ import React,
   useEffect,
   useState,
   useCallback,
-  useRef
+  useRef,
+  useMemo
 }from 'react'
 import {
     View,
@@ -54,6 +55,9 @@ const FeedScreen = () => {
 
 
 
+    const memoPost = useMemo(() => {
+      return post.sort((a, b) => new Date(b.createdAt ?? 0).getTime() - new Date(a.createdAt ?? 0).getTime())
+    },[post])
 
     useEffect(() => {
       Toast.show({
@@ -65,28 +69,23 @@ const FeedScreen = () => {
         topOffset:top,
       })
     },[])
-  
-   
- 
     useEffect(() => {
-      if (!user?.userId) return;
       log(crashlytics,'Grabbing post')
         try {
           const postRef = ref(database,'/posts')
-          const orderedQuery = query(postRef,orderByChild('createdAt'),limitToLast(10))
+          const orderedQuery = query(postRef,orderByChild('createdAt'),limitToLast(5))
           const subscriber = onValue(orderedQuery,(snapshot: FirebaseDatabaseTypes.DataSnapshot) =>{
               if (!snapshot.exists()) {
                 setPost([]);
                 setLoading(false);
                 return;
               }
-              
               const data: Post[] = [];
               Object.keys(snapshot.val()).forEach((key) => {
                 data.push({ ...snapshot.val()[key], id:key });
+                setLastVisible([{key: data[data.length - 1].key}]);
               });
             setPost(data);
-            setLastVisible([{key: data[data.length - 1].key}]);
             setHasMore(data.length > 0);
             setLoading(false);
           },(error:unknown | any) => {
@@ -182,44 +181,38 @@ const FeedScreen = () => {
 
   return (
       <View style={{flex:1,backgroundColor:theme.colors.background}}>
-        {
-          loading ? Array.from({length:5}).map((_,index) => (
-              <PostComponent
-              key={index}
-              mount={loading}
-            />)) : (<FlashList
-              contentContainerStyle={{padding:0}}
-              data={post}
-              showsVerticalScrollIndicator={false}
-              estimatedItemSize={460}
-              onRefresh={onRefresh}
-              ListEmptyComponent={(item) => (
-                <View style={{flex:1,alignItems:'center',justifyContent:'center',paddingTop:5}}>
-                    <Text>No post at the moment</Text>
-                </View>
-              )}
-              onEndReached={fetchMorePost}
-              onEndReachedThreshold={0.5}
-              refreshing={refreshing}
-              ItemSeparatorComponent={()=> (
-                <Divider/>
-              )}
-              ListFooterComponent={() => (
-                  <ActivityIndicator color='#fff' size='small' animating={loadingMore}/>
-              )}
-              keyExtractor={(item) => item?.post_id?.toString() || `default-${item.id}`}
-              renderItem={({item}) =>
-             <PostComponent
-                  auth_profile={item.auth_profile}
-                  like_count={item.like_count}
-                  url={item.imageUrl}
-                  video={item.videoUrl}
-                  post_id={item.post_id}
-                  name={item.name}
-                  content={item.content}
-                  date={TimeAgo(item?.createdAt ?? 0)}
-                  comment_count={item.comment_count}/>}/>
-                )}
+      <FlashList
+          contentContainerStyle={{padding:0}}
+          data={memoPost}
+          showsVerticalScrollIndicator={false}
+          estimatedItemSize={460}
+          onRefresh={onRefresh}
+          ListEmptyComponent={(item) => (
+            <View style={{flex:1,alignItems:'center',justifyContent:'center',paddingTop:5}}>
+                <Text>No post at the moment</Text>
+            </View>
+          )}
+          onEndReached={fetchMorePost}
+          onEndReachedThreshold={0.5}
+          refreshing={refreshing}
+          ItemSeparatorComponent={()=> (
+            <Divider/>
+          )}
+          ListFooterComponent={() => (
+              <ActivityIndicator color='#fff' size='small' animating={loadingMore}/>
+          )}
+          keyExtractor={(item) => item?.post_id?.toString() || `default-${item.id}`}
+          renderItem={({item}) =>
+          <PostComponent
+              auth_profile={item.auth_profile}
+              like_count={item.like_count}
+              url={item.imageUrl}
+              video={item.videoUrl}
+              post_id={item.post_id}
+              name={item.name}
+              content={item.content}
+              date={TimeAgo(item?.createdAt ?? 0)}
+              comment_count={item.comment_count}/>}/>
     </View>
   )
 }
