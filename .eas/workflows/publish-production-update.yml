@@ -10,5 +10,4 @@ jobs:
     name: Update
     type: update
     params:
-      branch: ${{ github.ref_name }}
       channel: production
