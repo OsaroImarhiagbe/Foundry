@@ -10,12 +10,12 @@ import {
   useColorScheme,
   } from 'react-native'
 import { useNavigation } from '@react-navigation/native';
-import React,{useState, useEffect,useCallback} from 'react';
+import React,{useState, useEffect,useCallback, useMemo} from 'react';
 import { useAuth } from '../authContext';
 import { Image } from 'expo-image';
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import FollowComponent from '../components/FollowComponent';
-import { collection, where,FirebaseFirestoreTypes,doc, orderBy, onSnapshot, getDoc, Unsubscribe} from '@react-native-firebase/firestore';
+import { collection, doc,  onSnapshot, getDoc, } from '@react-native-firebase/firestore';
 import { blurhash, TimeAgo } from '../../utils/index';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -32,8 +32,6 @@ import { ProjectRef, UsersRef,crashlytics, database} from '../FirebaseConfig';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { log, recordError, setAttributes, setUserId } from '@react-native-firebase/crashlytics';
 import PostComponent from '../components/PostComponent';
-import { Skeleton } from 'moti/skeleton';
-import { MotiView } from 'moti';
 import { equalTo, onValue, orderByChild, ref,query } from '@react-native-firebase/database';
 
 type NavigationProp = {
@@ -116,7 +114,9 @@ const AccountScreen = () => {
   
   const follow_items = [{count:users?.projects,content:' projects'},{count:users?.connection,content:' connection  '},{count:posts?.length,content:' posts'}]
 
-
+  const memoPost = useMemo(() => {
+    return posts.sort((a,b) => new Date(b.createdAt ?? 0).getTime() - new Date(a.createdAt ?? 0).getTime())
+  },[posts])
   const UserRefresh = useCallback(async () => {
     setRefreshing(true)
     log(crashlytics,'Account Screen: User Refresh')
@@ -171,7 +171,7 @@ const AccountScreen = () => {
     log(crashlytics,'Account Screen: POST Refresh')
     try{
       const postRef = ref(database,'/posts')
-      const orderedQuery = query(postRef,orderByChild('auth_id'),equalTo(user.userId),)
+      const orderedQuery = query(postRef,orderByChild('auth_id'),equalTo(user.userId))
       const unsub = onValue(orderedQuery,async (snapshot) => {
         if (!snapshot.exists()) {
           setPosts([]);
@@ -180,7 +180,7 @@ const AccountScreen = () => {
         }
         const data:Post[] = []
         Object.keys(snapshot.val()).forEach(key => {
-          data.push({...snapshot.val(),id:key})
+          data.push({...snapshot.val()[key],id:key})
         })
         setPosts(data)
         setRefreshing(false)
@@ -332,7 +332,7 @@ const AccountScreen = () => {
       <SafeAreaView style={{flex:1,backgroundColor:theme.colors.background}}>
         <FlashList
           contentContainerStyle={{padding:0}}
-          data={posts}
+          data={memoPost}
           estimatedItemSize={460}
           onRefresh={PostRefresh}
           ListEmptyComponent={() => (
@@ -379,21 +379,7 @@ const AccountScreen = () => {
           ListEmptyComponent={(item) => (
             <View style={{flex:1,alignItems:'center',justifyContent:'center',paddingTop:5}}>
               <TouchableOpacity onPress={handleProjectEntry}>
-              <MotiView
-           transition={{
-            type:'timing'
-           }}
-           style={{
-            width:100,}}
-            >
-              <Skeleton
-                show={isloading}
-                radius='round'
-                colorMode={dark_or_light ? 'dark':'light'}
-                >
               <Text variant='bodyMedium'>Enter a Project</Text>
-              </Skeleton>
-              </MotiView>
               </TouchableOpacity>
             </View>
           )}
@@ -428,21 +414,7 @@ const AccountScreen = () => {
       ListEmptyComponent={(item) => (
       <View style={{flex:1,alignItems:'center',justifyContent:'center',paddingTop:5}}>
            <TouchableOpacity onPress={()=> navigation.navigate('SkillScreen')}>
-           <MotiView
-           transition={{
-            type:'timing'
-           }}
-           style={{
-            width:100,}}
-            >
-              <Skeleton
-                show={isloading}
-                radius='round'
-                colorMode={dark_or_light ? 'dark':'light'}
-                >
               <Text variant='bodyMedium'>Enter a Skill</Text>
-              </Skeleton>
-              </MotiView>
               </TouchableOpacity>
         </View>
       )}
@@ -479,20 +451,6 @@ const AccountScreen = () => {
       {
         users?.headerUrl ? 
         (
-          <MotiView
-          transition={{
-            type: 'timing',
-          }}
-          style={{
-            height:100
-          }}
-          >
-            <Skeleton
-              show={isloading}
-              height={150}
-              radius='square'
-              colorMode={dark_or_light ? 'dark':'light'}
-            >
             <ImageBackground
         resizeMode='cover'
         imageStyle={{height:150,justifyContent:'flex-end'}}
@@ -515,25 +473,7 @@ const AccountScreen = () => {
         <Icon size={hp(3)} source='account-search' color={theme.colors.tertiaryContainer}/>
         </TouchableOpacity>
         </View> 
-      </ImageBackground>
-            </Skeleton>
-          </MotiView>) : (
-        
-        <MotiView
-        transition={{
-          type: 'timing',
-        }}
-        style={{
-          height:100
-        }}
-        >
-          <Skeleton
-          show={isloading}
-          height={150}
-          radius='square'
-          colorMode={dark_or_light ? 'dark':'light'}
-          >
-          <ImageBackground
+      </ImageBackground>) : (<ImageBackground
         resizeMode='cover'
         imageStyle={{height:150,justifyContent:'flex-end'}}
         style={{
@@ -555,8 +495,7 @@ const AccountScreen = () => {
         <Icon size={hp(3)} source='account-search' color={theme.colors.tertiaryContainer}/>
         </TouchableOpacity>
         </View> 
-      </ImageBackground>
-        </Skeleton></MotiView> )
+      </ImageBackground>)
       }
       <View style={{
         flexDirection:'row',
@@ -565,33 +504,11 @@ const AccountScreen = () => {
         padding:5,}}>
        {
         users?.profileUrl ?
-        <MotiView
-        transition={{
-          type: 'timing',
-        }}
-        >
-          <Skeleton
-           show={isloading}
-          radius='round'
-          colorMode={dark_or_light ? 'dark':'light'}
-          >
-          <Image
+         ( <Image
         style={{height:hp(8), aspectRatio:1, borderRadius:100,borderWidth:2,borderColor:theme.colors.background}}
         source={users?.profileUrl}
         placeholder={{blurhash}}
-        cachePolicy='none'/>
-          </Skeleton>
-        </MotiView>  :  
-        <MotiView
-        transition={{
-          type: 'timing',
-        }}
-        >
-          <Skeleton
-          show={isloading}
-          radius='round'
-          colorMode={dark_or_light ? 'dark':'light'}
-          >
+        cachePolicy='none'/>) : (
           <Image
         style={{
           height:hp(8), 
@@ -601,105 +518,37 @@ const AccountScreen = () => {
           borderColor:theme.colors.background}}
         source={require('../assets/user.png')}
         placeholder={{blurhash}}
-        cachePolicy='none'/>
-          </Skeleton>
-        </MotiView>
+        cachePolicy='none'/>)
        } 
-      <MotiView
-        transition={{
-          type: 'timing',
-        }}
-      >
-        <Skeleton 
-        colorMode={dark_or_light ? 'dark':'light'}
-        show={isloading}>
         <Button 
         onPress={handleEdit}
         mode='outlined' style={{
         backgroundColor:'transparent', 
         borderRadius:100,
         borderWidth:1,
-        borderColor:theme.colors.tertiary}}>Edit Profile</Button>
-        </Skeleton>
-        </MotiView>   
+        borderColor:theme.colors.tertiary}}>Edit Profile</Button>   
           </View>
           <View style={{marginTop:5}}>
           <View style={{paddingLeft:10,flexDirection:'column'}}>
-            <MotiView
-            transition={{
-              type:'timing',
-            }}
-            style={{
-              marginVertical:2
-            }}
-            >
-              <Skeleton
-              colorMode={dark_or_light ? 'dark':'light'}
-              show={isloading}
-              >
               <Text
               variant='bodySmall'
               style={{
                 color:theme.colors.onTertiary
             }}>@{users?.username}</Text>
-              </Skeleton>
-            </MotiView>
-            <MotiView
-            transition={{
-              type: 'timing',
-            }}
-            style={{
-              width:50,
-              marginVertical:2
-            }}
-            >
-              <Skeleton
-              colorMode={dark_or_light ? 'dark':'light'} 
-              show={isloading}>
               <Text
               variant='bodySmall'
               style={{
                 color:theme.colors.onTertiary
               }}>{users?.jobtitle}</Text>
-              </Skeleton>
-            </MotiView>
-              <MotiView
-              transition={{
-                type:'timing',
-              }}
-              style={{
-                width:50,
-                marginVertical:2
-              }}
-              >
-                <Skeleton
-                colorMode={dark_or_light ? 'dark':'light'}
-                show={isloading}>
                 <Text
               variant='bodySmall'
               style={{
                 color:theme.colors.onTertiary
               }}><EvilIcons name='location' size={15} color={theme.colors.onTertiary}/>{users?.location}</Text>
-                </Skeleton>
-              </MotiView>
               <View style={{flexDirection:'row',marginTop:10}}>
               {follow_items.map((item,index)=>{
-                  return <MotiView
-                  key={index}
-                  transition={{
-                    type:'timing',
-                  }}
-                  style={{
-                    marginHorizontal:2
-                  }}
-                  >
-                    <Skeleton
-                    show={isloading}
-                    colorMode={dark_or_light ? 'dark':'light'}
-                    >
-                    <FollowComponent count={item.count} content={item.content}/>
-                    </Skeleton>
-                    </MotiView>
+                  return (
+                    <FollowComponent key={index} count={item.count} content={item.content}/>)
                 })}
               </View>
             </View>

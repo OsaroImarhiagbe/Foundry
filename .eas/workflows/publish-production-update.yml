@@ -1,0 +1,13 @@
+name: Publish update
+
+on:
+  pull_request_labeled:
+    branches: ['main']
+    labels:
+      - Production-Update
+jobs:
+  update:
+    name: Update
+    type: update
+    params:
+      branch: ${{ github.ref_name }}

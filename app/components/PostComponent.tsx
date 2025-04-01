@@ -29,8 +29,6 @@ import { MenuItems } from '../components/CustomMenu'
 import { crashlytics, database,functions} from '../FirebaseConfig';
 import FastImage from "@d11/react-native-fast-image";
 import { perf } from '../FirebaseConfig';
-import { Skeleton } from 'moti/skeleton';
-import { MotiView } from 'moti';
 import Video, { VideoRef } from 'react-native-video';
 import { httpsCallable } from '@react-native-firebase/functions'
 import { recordError } from '@react-native-firebase/crashlytics';
@@ -192,41 +190,16 @@ const PostComponent: React.FC<PostComponentProps> = memo(({
   return (
   <Card
   elevation={2}
-  style={{backgroundColor:'transparent',marginVertical:8,marginHorizontal:10}}
+  style={{backgroundColor:'transparent'}}
   >
   <Card.Content>
     <View style={{flexDirection:'row'}}>
-      <MotiView
-         transition={{
-          type: 'timing',
-        }}
-        >
-      <Skeleton
-      colorMode={colorMode}
-        show={mount}
-        radius='round'
-        >
       <Image
         style={{height:hp(3.3), aspectRatio:1, borderRadius:100}}
         source={require('../assets/user.png') || user.profileUrl}
         placeholder={{blurhash}}
         cachePolicy='none'/>
-        </Skeleton>
-      </MotiView>
       <View style={{flexDirection:'column'}}>
-      <MotiView
-      transition={{
-          type: 'timing',
-        }}
-      style={{
-        paddingLeft:10
-      }}
-      >
-      <Skeleton
-      colorMode={colorMode}
-      show={mount}
-      width={wp('40%')}
-      >
       <Text
     variant="bodySmall"
     style={{
@@ -234,23 +207,6 @@ const PostComponent: React.FC<PostComponentProps> = memo(({
       color:theme.colors.tertiary
     }}
     >@{name}</Text>
-      </Skeleton>
-      </MotiView>
-      <MotiView
-      transition={{
-        type: 'timing',
-      }}
-     style={{
-      paddingTop:5,
-      paddingLeft:5,
-     }}
-     >
-      <Skeleton
-      colorMode={colorMode}
-      show={mount}
-      width={ url ? wp('80%') : wp('80%')}
-      height={url ? 30: 30}
-      >
     <Text
     variant="bodyMedium"
     style={{
@@ -259,8 +215,6 @@ const PostComponent: React.FC<PostComponentProps> = memo(({
     color:theme.colors.tertiary
     }}
     >{content}</Text>
-    </Skeleton>
-    </MotiView>
       {url && 
       <FastImage
       source={{
@@ -269,7 +223,7 @@ const PostComponent: React.FC<PostComponentProps> = memo(({
       }}
       resizeMode={FastImage.resizeMode.cover}
       style={{
-        aspectRatio: 1,
+        aspectRatio: 0.8,
         width:370,
         height:370,
         borderRadius: 10,
@@ -291,30 +245,13 @@ const PostComponent: React.FC<PostComponentProps> = memo(({
               overflow: 'hidden',
             }}
           />}
-        <MotiView
-      transition={{
-        type: 'timing',
-      }}
-      style={{
-        width:110,
-        paddingTop:10,
-        alignItems:'center',
-        justifyContent:'center'
-      }}
-      >
-        <Skeleton
-        colorMode={colorMode}
-        show={mount}
-        width={wp('10%')}
-        >
         <Text
        variant="bodySmall"
        style={{
         fontSize:10,
+        paddingTop:10,
         color:theme.colors.tertiary
        }}>{date}</Text>
-        </Skeleton>
-      </MotiView>
     </View>
     </View>
     </Card.Content>
@@ -325,31 +262,15 @@ const PostComponent: React.FC<PostComponentProps> = memo(({
       onPress={LikeButton}
       style={styles.reactionIcon}
       >
-      <MotiView>
-        <Skeleton
-        colorMode={colorMode}
-        show={mount}
-        >
         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
           <MaterialCommunityIcons name="heart" size={17} color={theme.colors.tertiary}/>
           <Text 
           variant='bodySmall'
           style={{color:theme.colors.tertiary}}> {like_count}</Text>
         </View>
-        </Skeleton>
-        </MotiView>  
+ 
         </TouchableHighlight>
         <TouchableOpacity onPress={handleModalVisibility} style={styles.reactionIcon}>
-          <MotiView
-          style={{
-            alignItems: 'center',
-            justifyContent:'center'
-          }}
-          >
-            <Skeleton
-            colorMode={colorMode}
-            show={mount}
-            >
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
             <MaterialCommunityIcons name="comment-outline" size={15} color={theme.colors.tertiary}/>
             <Text
@@ -359,19 +280,10 @@ const PostComponent: React.FC<PostComponentProps> = memo(({
               color:theme.colors.tertiary,
             }}>{comment_count}</Text>
           </View>
-          </Skeleton>
-          </MotiView>
         </TouchableOpacity>
         <Menu style={styles.reactionIcon}>
           <MenuTrigger>
-          <MotiView>
-          <Skeleton
-          colorMode={colorMode}
-          show={mount}
-          >
           <Icon source='dots-horizontal' size={17} color={theme.colors.tertiary}/>
-          </Skeleton>
-          </MotiView>
       </MenuTrigger>  
       <MenuOptions
         customStyles={{
