@@ -29,6 +29,8 @@
         "NSCameraUsageDescription": "This app uses the camera to let user put a photo in his profile page.",
         "UIBackgroundModes": [
           "remote-notification",
+          "fetch",
+          "remote-notification",
           "fetch"
         ]
       }
@@ -65,7 +67,7 @@
       }
     },
     "updates": {
-      "url": "https://u.expo.dev/3a17d314-84d0-49f9-8373-f3eee01578a5"
+      "url": "https://u.expo.dev/4fa4e2f4-26f7-48b0-96e6-cd88eb8e2c16"
     },
     "android": {
       "package": "com.devguides.app"
