@@ -1,9 +1,10 @@
 import React from 'react';
-import { render, fireEvent, waitFor,screen } from '@testing-library/react-native';
-import PostComponent from '../../app/components/PostComponent';
+import { render, fireEvent, waitFor,} from '@testing-library/react-native';
+import PostComponent from '../../app/components/FeedComponents/PostComponent';
 import { Alert } from 'react-native';
 import {addDoc, collection, deleteDoc, doc, onSnapshot, orderBy, query, runTransaction} from '@react-native-firebase/firestore';
-import { useAuth } from '../../app/authContext';
+import { useAuth } from '../../app/Context/authContext';
+
 
 
 jest.mock('../../app/authContext', () => ({
@@ -33,7 +34,7 @@ jest.mock('react-native-responsive-screen', () => ({
 jest.mock('expo-image', () => ({
   Image: 'MockedImage'
 }));
-jest.mock('FirebaseConfig', () => ({
+jest.mock('../../app/FirebaseConfig', () => ({
   db: 'mockedDB',
   PostRef: 'mockedPostRef'
 }));

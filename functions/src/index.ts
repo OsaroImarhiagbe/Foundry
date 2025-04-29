@@ -1,3 +1,4 @@
+/* eslint-disable no-dupe-else-if */
 /* eslint-disable max-len */
 /* eslint-disable camelcase */
 /**
@@ -152,7 +153,7 @@ exports.addPost = onCall(async (request) => {
       "unauthenticated", "This endpoint requires authentication");
   }
   try {
-    const {auth_id, auth_profile, name, content, like_count, comment_count, liked_by, category, image, video} = request.data;
+    const {auth_id, auth_profile, name, content, category, image, video} = request.data;
     const postRef = getDatabase().ref("/posts");
     const newPost = postRef.push();
     await newPost.set({
@@ -160,9 +161,8 @@ exports.addPost = onCall(async (request) => {
       auth_profile: auth_profile,
       name: name,
       content: content,
-      like_count: like_count,
-      comment_count: comment_count,
-      liked_by: liked_by,
+      like_count: 0,
+      comment_count: 0,
       category: category,
       createdAt: Date.now(),
       imageUrl: image,
@@ -182,80 +182,29 @@ exports.handleLike = onCall( async (request) => {
     throw new HttpsError("unauthenticated", "This endpoint requires authentication");
   }
   try {
-    const {post_id, currentUser, comment_id, reply_id} = request.data;
+    const {post_id, comment_id, reply_id, currentUser} = request.data;
+    let path:string;
     if (post_id) {
-      const docRef = getDatabase().ref(`/posts/${post_id}`);
-      await docRef.transaction((currentData) => {
-        if (!currentData) {
-          throw new HttpsError("not-found", "Document doesn't exist");
-        }
-        const currentLikes = currentData?.data()?.like_count || 0;
-        const likeBy = currentData?.liked_by || [];
-        const hasliked = likeBy.includes(currentUser);
-        let newlike;
-        let updatedLike;
-        if (hasliked) {
-          newlike = currentLikes - 1;
-          updatedLike = likeBy.filter((id:string)=> id != currentUser);
-        } else {
-          newlike = currentLikes + 1;
-          updatedLike = [...likeBy, currentUser];
-        }
-        return {
-          ...currentData,
-          like_count: newlike,
-          liked_by: updatedLike,
-        };
-      });
-    } else if (comment_id) {
-      const docRef = getDatabase().ref(`/comments/${post_id}/${comment_id}`);
-      await docRef.transaction((currentData) => {
-        if (!currentData) {
-          throw new HttpsError("not-found", "Document doesn't exist");
-        }
-        const currentLikes = currentData?.data()?.like_count || 0;
-        const likeBy = currentData?.liked_by || [];
-        const hasliked = likeBy.includes(currentUser);
-        let newlike;
-        let updatedLike;
-        if (hasliked) {
-          newlike = currentLikes - 1;
-          updatedLike = likeBy.filter((id:string)=> id != currentUser);
-        } else {
-          newlike = currentLikes + 1;
-          updatedLike = [...likeBy, currentUser];
-        }
-        return {
-          ...currentData,
-          like_count: newlike,
-          liked_by: updatedLike,
-        };
-      });
+      path = `/posts/${post_id}`;
+    } else if (comment_id && post_id) {
+      path = `/comments/${post_id}/${comment_id}`;
+    } else if (reply_id && comment_id) {
+      path = `/replies/${comment_id}/${reply_id}`;
     } else {
-      const docRef = getDatabase().ref(`/replys/${comment_id}/${reply_id}`);
-      await docRef.transaction((currentData) => {
-        if (!currentData) {
-          throw new HttpsError("not-found", "Document doesn't exist");
-        }
-        const currentLikes = currentData?.data()?.like_count || 0;
-        const likeBy = currentData?.liked_by || [];
-        const hasliked = likeBy.includes(currentUser);
-        let newlike;
-        let updatedLike;
-        if (hasliked) {
-          newlike = currentLikes - 1;
-          updatedLike = likeBy.filter((id:string)=> id != currentUser);
-        } else {
-          newlike = currentLikes + 1;
-          updatedLike = [...likeBy, currentUser];
-        }
-        return {
-          ...currentData,
-          like_count: newlike,
-          liked_by: updatedLike,
-        };
-      });
+      throw new HttpsError("internal", "invalid parameters");
     }
+    const LikeRef = getDatabase().ref(`${path}/liked_by/${currentUser}`);
+    const like_CountRef = getDatabase().ref(`${path}/like_count`);
+    const userLiked = await LikeRef.once("value");
+    if (userLiked.exists()) {
+      LikeRef.remove();
+    } else {
+      LikeRef.set(true);
+    }
+    await like_CountRef.transaction((currentCount) => {
+      return (currentCount || 0) + (userLiked ? -1 : 1);
+    });
+    return {success: true};
   } catch (error) {
     logger.error("Error handling like", error);
     throw new HttpsError("internal", "Failed to Like");
@@ -267,24 +216,19 @@ exports.handleFollow = onCall(async (request) => {
   }
   const {other_user_id, currentUser} = request.data;
   try {
-    const UserRef = getDatabase().ref(`/users/${other_user_id}`);
-    const results = await UserRef.transaction((currentData)=>{
-      const currentConnectCount = currentData?.connection || 0;
-      const follow_by = currentData?.follow_by || [];
-      const hasFollowed = follow_by.includes(currentUser);
+    const connectionRef = getDatabase().ref(`/users/${other_user_id}/connection`);
+    const followRef = getDatabase().ref(`/users/${other_user_id}/follow_by/${currentUser}`);
 
-
-      const newFollowed = hasFollowed ? currentConnectCount - 1 : currentConnectCount + 1;
-      const updateFollow = hasFollowed ? follow_by.filter((id:string)=> id != currentUser) :[...follow_by, currentUser];
-      return {
-        connection: newFollowed,
-        follow_by: updateFollow,
-        follow_state: newState,
-      };
+    const followValue = await followRef.once("value");
+    if (followValue.exists()) {
+      followRef.remove();
+    } else {
+      followRef.set(true);
+    }
+    await connectionRef.transaction((currentFollow) => {
+      return (currentFollow || 0) + (followValue ? -1 : 1);
     });
-
-    const newState = results?.snapshot.val().follow_by.includes(currentUser);
-    return {sucess: true, followState: newState};
+    return {sucess: true, followState: !followValue};
   } catch (error:unknown | any) {
     logger.error("Error handling follow", error);
     throw new HttpsError("internal", "Error handling Follow");
@@ -294,43 +238,54 @@ exports.handleSend = onCall(async (request) => {
   if (!request.auth) {
     throw new HttpsError("unauthenticated", "This endpoint requires authentication");
   }
-  const {post_id, name, content, auth_profile, comment_id, like_count, comment_count, liked_by} = request.data;
+  const {post_id, name, content, auth_profile, comment_id, auth_id} = request.data;
+  let path:string;
   if (comment_id) {
-    const docRef = getDatabase().ref(`/replies/${comment_id}`);
-    const newReply = docRef.push();
+    path = `/replies/${comment_id}`;
+  } else if (post_id) {
+    path = `/comments/${post_id}`;
+  } else {
+    path = "";
+  }
+  if (comment_id) {
+    const ReplyRef = getDatabase().ref(path);
+    const newReply = ReplyRef.push();
     await newReply.set({
+      auth_id: auth_id,
       name: name,
       content: content,
       auth_profile: auth_profile,
       parentId: comment_id,
       createdAt: Date.now(),
+      like_count: 0,
+      comment_count: 0,
     });
     await newReply.update({
       reply_id: newReply.key,
     });
   } else {
     try {
-      const docRef = getDatabase().ref(`/comments/${post_id}`);
-      const newComment = docRef.push();
+      const commentRef = getDatabase().ref(path);
+      const newComment = commentRef.push();
       await newComment.set({
+        auth_id: auth_id,
         parentId: post_id,
         content: content,
         auth_profile: auth_profile,
         name: name,
         createdAt: Date.now(),
-        like_count: like_count,
-        comment_count: comment_count,
-        liked_by: liked_by,
+        like_count: 0,
+        comment_count: 0,
       });
       await newComment.update({
         comment_id: newComment.key,
       });
-      const postRef = getDatabase().ref(`/posts/${post_id}`);
+      const postRef = getDatabase().ref(`/posts/${post_id}/comment_count`);
       await postRef.transaction((currentData) => {
-        const commentCount = currentData.comment_count || 0;
+        const commentCount = currentData || 0;
 
         return {
-          commentCount: commentCount +1,
+          commentCount: commentCount + 1,
         };
       });
     } catch (error) {

@@ -1,10 +1,9 @@
 import { createStackNavigator } from '@react-navigation/stack';
 import React from 'react';
-import LazyScreenComponent from '../components/LazyScreenComponent.tsx';
+import LazyScreenComponent from '../components/BasicComponents/LazyScreenComponent.tsx';
 
-const OnboardingScreen = React.lazy(() => import('../screen/OnboardingScreen.tsx'));
-const LoginScreen = React.lazy(() => import('../screen/LoginScreen.tsx'));
-const RegisterScreen = React.lazy(() => import('../screen/RegisterScreen.tsx'));
+const LoginScreen = React.lazy(() => import('../screen/AuthScreens/LoginScreen.tsx'));
+const RegisterScreen = React.lazy(() => import('../screen/AuthScreens/RegisterScreen.tsx'));
 
 
 
@@ -32,10 +31,7 @@ const RegisterScreenWrapper = React.memo(() => {
 
 const AuthNavigation = () => {
   const Stack = createStackNavigator()
- 
-
-
-
+  
   return (
         <Stack.Navigator initialRouteName='Login'>
           <Stack.Screen

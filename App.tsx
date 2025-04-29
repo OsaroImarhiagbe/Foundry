@@ -10,11 +10,11 @@ import { I18nextProvider } from 'react-i18next';
 import i18n from './app/Language/i18n';
 import { darkTheme,lightTheme } from 'config/color.ts';
 import { useColorScheme,} from 'react-native';
-import { NotificationProvider } from './app/NotificationProvider';
+import { NotificationProvider } from './app/Context/NotificationProvider.tsx';
 import 'react-native-reanimated'
 import { PaperProvider,} from 'react-native-paper';
 import 'react-native-gesture-handler'
-import AuthNavigation from './app/navigation/AuthNavigation.tsx'
+import AuthNavigation from './app/navigation/AuthNavigation/AuthNavigation.tsx'
 import DrawerNavigation from './app/navigation/DrawerNavigation.tsx';
 import { DefaultTheme as Defaulttheme, DarkTheme as Darktheme } from '@react-navigation/native';
 import notifee from '@notifee/react-native'

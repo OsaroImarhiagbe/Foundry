@@ -3,17 +3,17 @@ import React, { useState,useCallback, useEffect, useRef} from 'react';
 import { TouchableWithoutFeedback,View} from 'react-native';
 import { Image } from 'expo-image';
 import { blurhash } from 'utils';
-import { useAuth } from '../authContext.tsx';
+import { useAuth } from '../Context/authContext.tsx';
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import { Icon,useTheme,Text} from 'react-native-paper';
-import LazyScreenComponent from '../components/LazyScreenComponent.tsx';
+import LazyScreenComponent from '../components/BasicComponents/LazyScreenComponent.tsx';
 import TabNavigation from '../navigation/TabNavigation.tsx';
-import SplashScreen from '../screen/SplashScreen.tsx';
+import SplashScreen from '../screen/MiscellaneousScreens/SplashScreen.tsx';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { recordError } from '@react-native-firebase/crashlytics';
 import { crashlytics } from '../FirebaseConfig.ts';
-const SettingsScreen = React.lazy(() => import('../screen/SettingsScreen.tsx'));
-const OnboardingScreen = React.lazy(() => import('../screen/OnboardingScreen.tsx'));
+const SettingsScreen = React.lazy(() => import('../screen/MiscellaneousScreens/SettingsScreen.tsx'));
+const OnboardingScreen = React.lazy(() => import('../screen/MiscellaneousScreens/OnboardingScreen.tsx'));
 const Drawer = createDrawerNavigator();
 
 

@@ -1,13 +1,15 @@
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import React, { Suspense } from 'react';
-import LazyScreenComponent from '../components/LazyScreenComponent.tsx';
-const ReportBugScreen = React.lazy(() => import('../screen/ReportBugScreen.tsx'));
-const ContactUsScreen = React.lazy(() => import('../screen/ContactUsScreen.tsx'));
-const LocationScreen = React.lazy(() => import('../screen/LocationScreen.tsx'));
-const EditScreen = React.lazy(() => import('../screen/EditScreen.tsx'));
-const ProjectEntryScreen = React.lazy(() => import('../screen/ProjectEntryScreen.tsx'));
-const ProfileScreen = React.lazy(() => import('../screen/AccountScreen.tsx'));
-const SkillsScreen = React.lazy(() => import('../screen/SkillScreen.tsx'));
+import LazyScreenComponent from '../components/BasicComponents/LazyScreenComponent.tsx';
+const ReportBugScreen = React.lazy(() => import('../screen/MainStackScreens-1/ReportBugScreen.tsx'));
+const ContactUsScreen = React.lazy(() => import('../screen/MainStackScreens-1/ContactUsScreen.tsx'));
+const LocationScreen = React.lazy(() => import('../screen/MainStackScreens-1/LocationScreen.tsx'));
+const EditScreen = React.lazy(() => import('../screen/MainStackScreens-1/EditScreen.tsx'));
+const ProjectEntryScreen = React.lazy(() => import('../screen/MainStackScreens-1/ProjectEntryScreen.tsx'));
+const ProfileScreen = React.lazy(() => import('../screen/MainStackScreens-1/AccountScreen.tsx'));
+const SkillsScreen = React.lazy(() => import('../screen/MainStackScreens-1/SkillScreen.tsx'));
+
+
 const ReportBugScreenWrapper = React.memo(() => {
   return (
     <LazyScreenComponent>

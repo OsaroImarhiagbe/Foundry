@@ -1,12 +1,12 @@
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import React, { Suspense } from 'react';
-import LazyScreenComponent from '../components/LazyScreenComponent.tsx';
-const MessageScreen = React.lazy(() => import('../screen/MessageScreen.tsx'))
-const OtherUserScreen = React.lazy(() => import('../screen/OtherUserScreen.tsx'));
-const DashBoardScreen = React.lazy(() => import('../screen/DashBoardScreen.tsx'));
-const ChatScreen = React.lazy(() => import('../screen/ChatScreen.tsx'));
-const PostScreen = React.lazy(() => import('../screen/PostScreen.tsx'));
-const ProjectScreen = React.lazy(() => import('../screen/ProjectScreen.tsx'));
+import LazyScreenComponent from '../components/BasicComponents/LazyScreenComponent.tsx';
+const MessageScreen = React.lazy(() => import('../screen/MainStackScreens/MessageScreen.tsx'))
+const OtherUserScreen = React.lazy(() => import('../screen/MainStackScreens/OtherUserScreen.tsx'));
+const DashBoardScreen = React.lazy(() => import('../screen/MainStackScreens/DashBoardScreen.tsx'));
+const ChatScreen = React.lazy(() => import('../screen/MainStackScreens/ChatScreen.tsx'));
+const PostScreen = React.lazy(() => import('../screen/MainStackScreens/PostScreen.tsx'));
+const ProjectScreen = React.lazy(() => import('../screen//MainStackScreens/ProjectScreen.tsx'));
 const MessageScreenWrapper = React.memo(() => {
   return (
     <LazyScreenComponent>

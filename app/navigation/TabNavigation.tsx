@@ -7,12 +7,12 @@ import { useTheme,Text} from 'react-native-paper';
 import { Image
  } from 'expo-image';
  import { blurhash } from 'utils';
-import { useAuth } from 'app/authContext';
+import { useAuth } from '../Context/authContext.tsx';
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
-import LazyScreenComponent from '../components/LazyScreenComponent.tsx';
-import {useNotification} from '../NotificationProvider.tsx'
-const NotificationScreen = React.lazy(() => import('../screen/NotificationScreen.tsx'));
-const SearchScreen = React.lazy(() => import('../screen/SearchScreen.tsx'));
+import LazyScreenComponent from '../components/BasicComponents/LazyScreenComponent.tsx';
+import {useNotification} from '../Context/NotificationProvider.tsx'
+const NotificationScreen = React.lazy(() => import('../screen/MainTabScreens/NotificationScreen.tsx'));
+const SearchScreen = React.lazy(() => import('../screen/MainTabScreens/SearchScreen.tsx'));
 const StackNavigation = React.lazy(() => import('../navigation/StackNavigation.tsx'));
 const SecondStackNavigation = React.lazy(() => import('../navigation/SecondStackNavigation.tsx'));
 

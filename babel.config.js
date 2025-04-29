@@ -3,7 +3,7 @@ module.exports = function (api) {
   const environment = process.env.APP_ENV || 'development';
 
   return {
-    presets: ['babel-preset-expo'],
+    presets: ['babel-preset-expo', '@babel/preset-typescript',],
     plugins: [
       'react-native-paper/babel',
       'react-native-reanimated/plugin',
